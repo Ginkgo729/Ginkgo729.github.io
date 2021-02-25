@@ -1,0 +1,661 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Editorial by HTML5 UP
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport"/>
+  <link href="../assets/css/main.css" rel="stylesheet"/>
+ </head>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <div class="inner">
+     <!-- Header -->
+     <header id="header">
+      <a class="logo" href="../index.html">
+       <strong>
+        每天进步一点点
+       </strong>
+      </a>
+      <ul class="icons">
+       <li>
+        <a class="icon brands fa-twitter" href="#">
+         <span class="label">
+          Twitter
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-facebook-f" href="#">
+         <span class="label">
+          Facebook
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-snapchat-ghost" href="#">
+         <span class="label">
+          Snapchat
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-instagram" href="#">
+         <span class="label">
+          Instagram
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-medium-m" href="#">
+         <span class="label">
+          Medium
+         </span>
+        </a>
+       </li>
+      </ul>
+     </header>
+     <!-- Banner -->
+     <section id="banner">
+      <!-- <div class="content"> -->
+      <article id="article">
+       <h1>
+        Windows10 Kafka Docker 集群搭建
+       </h1>
+       <hr/>
+       <h2>
+        简介
+       </h2>
+       <p>
+        使用 Windows Docker Desktop 搭建 Kafka 集群
+       </p>
+       <h3>
+        运行 Zookeeper
+       </h3>
+       <p>
+        这里使用但 zk，使用docker启动即可
+       </p>
+       <p>
+        ```shell script
+       </p>
+       <h1>
+        第一次启动
+       </h1>
+       <p>
+        docker run -dit --name zk -p 2181:2181 zookeeper
+       </p>
+       <h1>
+        重启
+       </h1>
+       <p>
+        docker restart zk
+       </p>
+       <h1>
+        查看日志
+       </h1>
+       <p>
+        docker logs -f zk
+```
+       </p>
+       <h3>
+        运行 Kafka
+       </h3>
+       <p>
+        启动的命令如下，注意将下面的 192.168.101.104 换成自己的宿主机IP，运行后查看日志正常即可
+       </p>
+       <p>
+        ```shell script
+       </p>
+       <h1>
+        第一次启动
+       </h1>
+       <p>
+        docker run -dit --name kafka0 -p 9092:9092 -e KAFKA_BROKER_ID=0 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9092 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 -t wurstmeister/kafka
+       </p>
+       <p>
+        docker run -dit --name kafka1 -p 9093:9093 -e KAFKA_BROKER_ID=1 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9093 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9093 -t wurstmeister/kafka
+       </p>
+       <p>
+        docker run -dit --name kafka2 -p 9094:9094 -e KAFKA_BROKER_ID=2 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9094 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9094 -t wurstmeister/kafka
+       </p>
+       <h1>
+        重启
+       </h1>
+       <p>
+        docker restart kafka0
+docker restart kafka1
+docker restart kafka2
+       </p>
+       <h1>
+        查看日志
+       </h1>
+       <p>
+        docker logs -f kafka0
+       </p>
+       <h1>
+        删除kafka
+       </h1>
+       <p>
+        docker rm -f kafka0
+docker rm -f kafka1
+docker rm -f kafka2
+```
+       </p>
+       <h3>
+        测试
+       </h3>
+       <p>
+        测试建立3的副本和5的partition，查看是否配置成功。然后在1和2上启动消费者，0生产消息
+       </p>
+       <p>
+        ```shell script
+       </p>
+       <h1>
+        建立副本和partition
+       </h1>
+       <p>
+        docker exec -ti kafka0 kafka-topics.sh --create --zookeeper 192.168.101.104:2181 --replication-factor 3 --partitions 5 --topic TestTopic
+       </p>
+       <h1>
+        查看信息
+       </h1>
+       <p>
+        docker exec -ti kafka0 kafka-topics.sh --describe --zookeeper 192.168.101.104:2181 --topic TestTopic
+docker exec -ti kafka1 kafka-topics.sh --describe --zookeeper 192.168.101.104:2181 --topic TestTopic
+docker exec -ti kafka2 kafka-topics.sh --describe --zookeeper 192.168.101.104:2181 --topic TestTopic
+       </p>
+       <h1>
+        消费和生产，最后一个kafka0输出后在其他两个能看到
+       </h1>
+       <p>
+        docker exec -ti kafka1 kafka-console-consumer.sh --bootstrap-server 192.168.101.104:9093 --topic TestTopic --from-beginning
+docker exec -ti kafka2 kafka-console-consumer.sh --bootstrap-server 192.168.101.104:9094 --topic TestTopic --from-beginning
+docker exec -ti kafka0 kafka-console-producer.sh --broker-list 192.168.101.104:9092 --topic TestTopic
+       </p>
+       <h1>
+        性能测试
+       </h1>
+       <p>
+        docker exec -ti kafka0 kafka-producer-perf-test.sh --topic TestTopic --num-records 100000 --record-size 1000 --throughput 2000 --producer-props bootstrap.servers=192.168.101.104:9092
+docker exec -ti kafka0 kafka-consumer-perf-test.sh --bootstrap-server 192.168.101.104:9092 --topic TestTopic --fetch-size 1048576 --messages 100000 --threads 1
+```
+       </p>
+       <h3>
+        kafka manage
+       </h3>
+       <p>
+        使用docker启动后，访问: http://localhost:9000/ , 点击添加cluster，输入前两个（名称和zk地址），保存即可
+       </p>
+       <p>
+        ```shell script
+docker run -dit -p 9000:9000 -e ZK_HOSTS="192.168.101.104:2181" hlebalbau/kafka-manager:stable
+       </p>
+       <p>
+        http://localhost:9000/
+```
+       </p>
+       <h2>
+        参考链接
+       </h2>
+       <ul>
+        <li>
+         <a href="https://blog.csdn.net/noaman_wgs/article/details/103757791">
+          【Kafka精进系列003】Docker环境下搭建Kafka集群
+         </a>
+        </li>
+        <li>
+         <a href="https://blog.csdn.net/belalds/article/details/80575751">
+          kafka如何彻底删除topic及数据
+         </a>
+        </li>
+       </ul>
+      </article>
+      <!-- </div> -->
+     </section>
+    </div>
+   </div>
+   <!-- Sidebar -->
+   <div id="sidebar">
+    <div class="inner">
+     <!-- Menu -->
+     <nav id="menu">
+      <header class="major">
+       <h2>
+        目录
+       </h2>
+      </header>
+      <ul>
+       <li>
+        <span class="opener">
+         linux
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           centos.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           iptables端口转发与映射.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Java安装.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           linux-时间校准.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Linux服务编写及服务开机启动.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           shadowsocks.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           ssh隧道.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           supervisor使用.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           yapi.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           zsh.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         software
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           docker
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Java程序镜像制作.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           jetbranins
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Pycharm使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           kafka
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             kafkaDocker集群搭建.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MongoDB
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Python-MongoDB.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MySQL
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             MySQL使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nagios
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nagios添加主机和服务监控说明.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           neo4j
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             neo4j使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nginx
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nginx负载均衡.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           Redis
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Redis知识总览.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           snort
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Snort调研.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           sublimeText
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ubuntu16.04_install.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vim
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Ctenos7-vim8安装.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           virsual_studio
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             插件安装篇.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vscode
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             vscode使用配置记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         windows
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           superbenchmarker.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           windows10.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           winSh中使用vim.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         C++
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           windows环境配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         git
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           gitlab-CI.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         GoLang
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Go设置使用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         java
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           shardingsphere
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ShardingSphereProxy分库分表.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           spring
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             SpringBoot-Mybatis-MySQL主从分离读写.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         openCV
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           轮廓检测.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         python
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Python3常用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         SFML
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           SFML与VS2015配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         人工智能
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           机器学习
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             朴素贝叶斯分类器.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         前端
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           vue打包直接访问.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         开源
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           soul
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             soul源码解析9-插件配置加载初探.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </nav>
+    </div>
+   </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

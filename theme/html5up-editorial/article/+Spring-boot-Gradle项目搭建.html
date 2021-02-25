@@ -1,0 +1,799 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Editorial by HTML5 UP
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport"/>
+  <link href="../assets/css/main.css" rel="stylesheet"/>
+ </head>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <div class="inner">
+     <!-- Header -->
+     <header id="header">
+      <a class="logo" href="../index.html">
+       <strong>
+        每天进步一点点
+       </strong>
+      </a>
+      <ul class="icons">
+       <li>
+        <a class="icon brands fa-twitter" href="#">
+         <span class="label">
+          Twitter
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-facebook-f" href="#">
+         <span class="label">
+          Facebook
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-snapchat-ghost" href="#">
+         <span class="label">
+          Snapchat
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-instagram" href="#">
+         <span class="label">
+          Instagram
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-medium-m" href="#">
+         <span class="label">
+          Medium
+         </span>
+        </a>
+       </li>
+      </ul>
+     </header>
+     <!-- Banner -->
+     <section id="banner">
+      <!-- <div class="content"> -->
+      <article id="article">
+       <h1>
+        Spring boot Gradle项目搭建
+       </h1>
+       <hr/>
+       <h3>
+        使用IDEA创建Gradle工程
+       </h3>
+       <p>
+        操作大致为：File-&gt;new-&gt;Project-&gt;Gradle(在左侧选项栏中)
+       </p>
+       <p>
+        创建常规以后生成的工程目录如下：
+       </p>
+       <ul>
+        <li>
+         build
+        </li>
+        <li>
+         gradle
+         <ul>
+          <li>
+           wrapper
+           <ul>
+            <li>
+             gradle-wrapper.jar
+            </li>
+            <li>
+             gradle-wrapper.properties
+            </li>
+           </ul>
+          </li>
+         </ul>
+        </li>
+        <li>
+         src
+         <ul>
+          <li>
+           java
+          </li>
+          <li>
+           resources
+          </li>
+         </ul>
+        </li>
+        <li>
+         test
+         <ul>
+          <li>
+           java
+          </li>
+          <li>
+           resources
+          </li>
+         </ul>
+        </li>
+        <li>
+         build.gradle
+        </li>
+        <li>
+         gradlew
+        </li>
+        <li>
+         gradlew.bat
+        </li>
+        <li>
+         settings.gradle
+        </li>
+       </ul>
+       <h3>
+        配置Spring boot
+       </h3>
+       <p>
+        下面需要对两个文件进行编辑：
+       </p>
+       <p>
+        build.gradle文件修改后的内容如下,依赖一般是前面是groupId，中间是artifactId，第三个一般是版本。在repositories配置使用阿里云的仓库，避免下载过慢。
+       </p>
+       <p>
+        ```bash
+plugins {
+    id 'java'
+    id 'com.gradle.build-scan' version '2.0.2'
+    id 'org.springframework.boot' version '2.0.5.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.7.RELEASE'
+}
+       </p>
+       <p>
+        group 'seckill'
+version '1.0-SNAPSHOT'
+       </p>
+       <p>
+        sourceCompatibility = 1.8
+       </p>
+       <p>
+        repositories {
+    maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+    mavenCentral()
+}
+       </p>
+       <p>
+        dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+       </p>
+       <pre><pre>implementation 'org.springframework.boot:spring-boot-dependencies:2.0.5.RELEASE'
+implementation 'org.springframework.boot:spring-boot-starter-web'
+
+testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+components {
+    withModule('org.springframework:spring-beans') {
+        allVariants {
+            withDependencyConstraints {
+                // Need to patch constraints because snakeyaml is an optional dependency
+                it.findAll { it.name == 'snakeyaml' }.each { it.version { strictly '1.19' } }
+            }
+        }
+    }
+}
+</pre></pre>
+       <p>
+        }
+       </p>
+       <p>
+        buildScan {
+       </p>
+       <pre><pre>// always accept the terms of service
+termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+termsOfServiceAgree = 'yes'
+
+// always publish a build scan
+publishAlways()
+</pre></pre>
+       <p>
+        }
+```
+       </p>
+       <p>
+        setting.gradle文件修改后的内容如下：
+       </p>
+       <p>
+        <pre>bash
+rootProject.name = 'seckill'
+enableFeaturePreview('IMPROVED_POM_SUPPORT')</pre>
+       </p>
+       <h3>
+        编写类
+       </h3>
+       <p>
+        首先在src/java下生成源码目录com.seckill.spring(相当于com/seckill/spring)
+       </p>
+       <p>
+        在src/java下创建程序入口类Application.java,其内容如下：
+       </p>
+       <p>
+        ```java
+package com.seckill.spring;
+       </p>
+       <p>
+        import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+       </p>
+       <p>
+        @SpringBootApplication
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+```
+       </p>
+       <p>
+        在src/java/com.seckill.spring下创建目录controllers，并在controllers目录创建类：HelloWorld，在其中定义根路由并返回Hello World，其代码如下：
+       </p>
+       <p>
+        ```java
+package com.seckill.spring.controllers;
+       </p>
+       <p>
+        import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+       </p>
+       <p>
+        import java.util.HashMap;
+import java.util.Map;
+       </p>
+       <p>
+        @RestController
+public class HelloWorld {
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public Map helloWorld() {
+        Map
+        <string, object="">
+         ret = new HashMap&lt;&gt;();
+        ret.put("ret", "Hello World");
+        return ret;
+    }
+}
+```
+        </string,>
+       </p>
+       <h3>
+        单元测试
+       </h3>
+       <p>
+        使用spring boot mockMVC测试非常方便
+       </p>
+       <p>
+        ```java
+package pre.controllers;
+       </p>
+       <p>
+        import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+       </p>
+       <p>
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+       </p>
+       <p>
+        @RunWith(SpringRunner.class)
+@WebMvcTest
+public class HelloWorldTest {
+    @Autowired
+    private MockMvc mockMvc;
+       </p>
+       <pre><pre>@Test
+public void helloWorld() throws Exception {
+    this.mockMvc.perform(get("/"))
+            .andExpect(status().isOk())
+            .andExpect(content().json("{'ret': 'Hello World'}"));
+}
+</pre></pre>
+       <p>
+        }
+```
+       </p>
+       <h3>
+        运行访问
+       </h3>
+       <ul>
+        <li>
+         运行Application类，可以在控制台看到起默认监听在8080端口
+        </li>
+        <li>
+         浏览器访问:localhost:8080,可以看到返回字符串Hello World
+        </li>
+       </ul>
+       <h2>
+        参考链接
+       </h2>
+       <ul>
+        <li>
+         <a href="https://guides.gradle.org/building-spring-boot-2-projects-with-gradle/">
+          1.Building Spring Boot 2 Applications with Gradle
+         </a>
+        </li>
+        <li>
+         <a href="https://www.baeldung.com/spring-boot">
+          2.Learn Spring Boot
+         </a>
+        </li>
+        <li>
+         <a href="https://spring.io/guides/gs/rest-service/">
+          3.Building a RESTful Web Service
+         </a>
+        </li>
+        <li>
+         <a href="https://blog.csdn.net/ZZY1078689276/article/details/80364726">
+          Gradle配置阿里云Maven镜像仓库地址
+         </a>
+        </li>
+        <li>
+         <a href="https://howtodoinjava.com/spring-boot2/spring-boot-mockmvc-example/">
+          Spring boot MockMVC example
+         </a>
+        </li>
+        <li>
+         <a href="https://www.cnblogs.com/xiaoqi/p/6955288.html">
+          Spring Boot配置文件放在jar外部
+         </a>
+        </li>
+       </ul>
+      </article>
+      <!-- </div> -->
+     </section>
+    </div>
+   </div>
+   <!-- Sidebar -->
+   <div id="sidebar">
+    <div class="inner">
+     <!-- Menu -->
+     <nav id="menu">
+      <header class="major">
+       <h2>
+        目录
+       </h2>
+      </header>
+      <ul>
+       <li>
+        <span class="opener">
+         linux
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           centos.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           iptables端口转发与映射.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Java安装.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           linux-时间校准.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Linux服务编写及服务开机启动.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           shadowsocks.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           ssh隧道.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           supervisor使用.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           yapi.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           zsh.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         software
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           docker
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Java程序镜像制作.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           jetbranins
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Pycharm使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           kafka
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             kafkaDocker集群搭建.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MongoDB
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Python-MongoDB.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MySQL
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             MySQL使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nagios
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nagios添加主机和服务监控说明.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           neo4j
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             neo4j使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nginx
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nginx负载均衡.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           Redis
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Redis知识总览.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           snort
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Snort调研.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           sublimeText
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ubuntu16.04_install.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vim
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Ctenos7-vim8安装.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           virsual_studio
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             插件安装篇.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vscode
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             vscode使用配置记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         windows
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           superbenchmarker.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           windows10.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           winSh中使用vim.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         C++
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           windows环境配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         git
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           gitlab-CI.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         GoLang
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Go设置使用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         java
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           shardingsphere
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ShardingSphereProxy分库分表.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           spring
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             SpringBoot-Mybatis-MySQL主从分离读写.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         openCV
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           轮廓检测.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         python
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Python3常用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         SFML
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           SFML与VS2015配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         人工智能
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           机器学习
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             朴素贝叶斯分类器.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         前端
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           vue打包直接访问.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         开源
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           soul
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             soul源码解析9-插件配置加载初探.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </nav>
+    </div>
+   </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

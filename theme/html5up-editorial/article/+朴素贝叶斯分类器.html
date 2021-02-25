@@ -1,0 +1,563 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Editorial by HTML5 UP
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport"/>
+  <link href="../assets/css/main.css" rel="stylesheet"/>
+ </head>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <div class="inner">
+     <!-- Header -->
+     <header id="header">
+      <a class="logo" href="../index.html">
+       <strong>
+        每天进步一点点
+       </strong>
+      </a>
+      <ul class="icons">
+       <li>
+        <a class="icon brands fa-twitter" href="#">
+         <span class="label">
+          Twitter
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-facebook-f" href="#">
+         <span class="label">
+          Facebook
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-snapchat-ghost" href="#">
+         <span class="label">
+          Snapchat
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-instagram" href="#">
+         <span class="label">
+          Instagram
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-medium-m" href="#">
+         <span class="label">
+          Medium
+         </span>
+        </a>
+       </li>
+      </ul>
+     </header>
+     <!-- Banner -->
+     <section id="banner">
+      <!-- <div class="content"> -->
+      <article id="article">
+       <h1>
+        朴素贝叶斯分类器
+       </h1>
+       <hr/>
+       <h2>
+        相关概念介绍
+       </h2>
+       <p>
+        这里设定一些数据：假设这里有10个白色棋子和10个黑色棋子，分别放入一个白盒和一个黑盒中。白盒放入4个白色棋子和6个黑色棋子，黑盒放入6个白色棋子和4个黑色棋子。
+       </p>
+       <h3>
+        先验概率
+       </h3>
+       <p>
+        通过经验来判断事情发送的概率，比如上面的随机从任意盒子取棋子，白色棋子的概率是1/2，黑色棋子的概率也是1/2，这就是先验概率。
+       </p>
+       <h3>
+        后验概率
+       </h3>
+       <p>
+        后验概率就是发生结果后，推测原因的概率。比如取出了一个白色棋子，白色棋子是从白盒中取出的概率和从黑盒中取出的概率，就是后验概率。
+       </p>
+       <h3>
+        条件概率
+       </h3>
+       <p>
+        事件A在另一个事件B已经发生的情况下的发生概率。比如从白盒中取出白色棋子的概率和从黑盒中取出白色棋子的概率就是条件概率。
+       </p>
+       <h3>
+        极大似然估计
+       </h3>
+       <p>
+        这个是一般是用于连续值的条件概率计算时使用的。下面是参照资料上一些定义。
+       </p>
+       <p>
+        估计类条件概率的一种常用策略是先假定其具有某种确定的概率分布形式，再基于训练样本对条件概率分布的参数进行估计。
+       </p>
+       <p>
+        概率模型的训练过程就是参数估计过程。
+       </p>
+       <h3>
+        朴素贝叶斯分类器
+       </h3>
+       <p>
+        它是一种简单但极为强大的预测建模算法，之所以称为朴素贝叶斯，是因为它假设每个输入变量是独立的，这是一个强硬的假设。但有趣的是，朴素贝叶斯在很多情形下都能获得相当好的性能，但大部分情况下是够用了的。
+       </p>
+       <p>
+        朴素贝叶斯分类器就是用来估计后验概率的，比如知道取出白色棋子的结果下，估计是来自白盒和黑盒的概率。对应的分类预测就是，判断取出的棋子是属于白盒还是黑盒。
+       </p>
+       <h2>
+        算法描述
+       </h2>
+      </article>
+      <!-- </div> -->
+     </section>
+    </div>
+   </div>
+   <!-- Sidebar -->
+   <div id="sidebar">
+    <div class="inner">
+     <!-- Menu -->
+     <nav id="menu">
+      <header class="major">
+       <h2>
+        目录
+       </h2>
+      </header>
+      <ul>
+       <li>
+        <span class="opener">
+         linux
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           centos.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           iptables端口转发与映射.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Java安装.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           linux-时间校准.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Linux服务编写及服务开机启动.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           shadowsocks.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           ssh隧道.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           supervisor使用.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           yapi.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           zsh.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         software
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           docker
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Java程序镜像制作.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           jetbranins
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Pycharm使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           kafka
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             kafkaDocker集群搭建.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MongoDB
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Python-MongoDB.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MySQL
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             MySQL使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nagios
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nagios添加主机和服务监控说明.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           neo4j
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             neo4j使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nginx
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nginx负载均衡.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           Redis
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Redis知识总览.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           snort
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Snort调研.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           sublimeText
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ubuntu16.04_install.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vim
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Ctenos7-vim8安装.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           virsual_studio
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             插件安装篇.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vscode
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             vscode使用配置记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         windows
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           superbenchmarker.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           windows10.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           winSh中使用vim.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         C++
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           windows环境配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         git
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           gitlab-CI.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         GoLang
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Go设置使用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         java
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           shardingsphere
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ShardingSphereProxy分库分表.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           spring
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             SpringBoot-Mybatis-MySQL主从分离读写.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         openCV
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           轮廓检测.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         python
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Python3常用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         SFML
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           SFML与VS2015配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         人工智能
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           机器学习
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             朴素贝叶斯分类器.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         前端
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           vue打包直接访问.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         开源
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           soul
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             soul源码解析9-插件配置加载初探.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </nav>
+    </div>
+   </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

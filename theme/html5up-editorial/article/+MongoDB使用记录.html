@@ -1,0 +1,754 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Editorial by HTML5 UP
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport"/>
+  <link href="../assets/css/main.css" rel="stylesheet"/>
+ </head>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <div class="inner">
+     <!-- Header -->
+     <header id="header">
+      <a class="logo" href="../index.html">
+       <strong>
+        每天进步一点点
+       </strong>
+      </a>
+      <ul class="icons">
+       <li>
+        <a class="icon brands fa-twitter" href="#">
+         <span class="label">
+          Twitter
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-facebook-f" href="#">
+         <span class="label">
+          Facebook
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-snapchat-ghost" href="#">
+         <span class="label">
+          Snapchat
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-instagram" href="#">
+         <span class="label">
+          Instagram
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-medium-m" href="#">
+         <span class="label">
+          Medium
+         </span>
+        </a>
+       </li>
+      </ul>
+     </header>
+     <!-- Banner -->
+     <section id="banner">
+      <!-- <div class="content"> -->
+      <article id="article">
+       <h1>
+        MongoDB 使用记录
+       </h1>
+       <hr/>
+       <h2>
+        安装配置
+       </h2>
+       <p>
+        ```sh
+vim /etc/yum.repos.d/mongodb-org-4.0.repo
+       </p>
+       <p>
+        [mongodb-org-4.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
+       </p>
+       <p>
+        yum install -y mongodb-org
+       </p>
+       <p>
+        service mongod start
+       </p>
+       <h1>
+        修改能被外界访问
+       </h1>
+       <p>
+        vim /etc/mongodb.conf
+       </p>
+       <h1>
+        启动和开机启动设置
+       </h1>
+       <p>
+        systemctl start mongod
+systemctl enable mongod
+```
+       </p>
+       <h2>
+        操作
+       </h2>
+       <h3>
+        删除collection
+       </h3>
+       <p>
+        ```sh
+mongo
+       </p>
+       <blockquote>
+        <p>
+         use test
+switched to db test
+show collections
+mycol
+mycollection
+newcollection
+db.mycollection.drop()
+db.users.find().count()
+db.col.createIndex({"description":-1})
+true
+```
+        </p>
+       </blockquote>
+       <h3>
+        排序
+       </h3>
+       <h3>
+        索引
+       </h3>
+       <p>
+        ```sh
+       </p>
+       <h1>
+        语法中 Key 值为你要创建的索引字段，1 为指定按升序创建索引，如果你想按降序来创建索引指定为 -1 即可。
+       </h1>
+       <p>
+        db.collection.createIndex(keys, options)
+       </p>
+       <h1>
+        查看集合索引
+       </h1>
+       <p>
+        db.col.getIndexes()
+       </p>
+       <h1>
+        查看集合索引大小
+       </h1>
+       <p>
+        db.col.totalIndexSize()
+       </p>
+       <h1>
+        删除集合所有索引
+       </h1>
+       <p>
+        db.col.dropIndexes()
+       </p>
+       <h1>
+        删除集合指定索引
+       </h1>
+       <p>
+        db.col.dropIndex("索引名称")
+```
+       </p>
+       <h3>
+        去重统计
+       </h3>
+       <p>
+        ```sh
+db.collection_name.distinct(field,query,options)
+db.collection_name.distinct(field,query,options).length
+       </p>
+       <p>
+        field -----指定要返回的字段(string)
+query-----条件查询(document)
+```
+       </p>
+       <h3>
+        不同数据库之间表复制
+       </h3>
+       <p>
+        <pre>sh
+db.threat.find({'unit_id': '90000001'}).forEach(function(d){ db.getSiblingDB('test_center')['threat'].insert(d); });
+db.comprehensiveIndexTest.find().forEach(function(d){ db.getSiblingDB('my_visual')['comprehensiveIndex'].insert(d); });
+db.basedIndexTest.find().forEach(function(d){ db.getSiblingDB('my_visual')['basedIndex'].insert(d); });
+db.fragileIndexTest.find().forEach(function(d){ db.getSiblingDB('my_visual')['fragileIndex'].insert(d); });
+db.threadIndexTest.find().forEach(function(d){ db.getSiblingDB('my_visual')['threadIndex'].insert(d); });</pre>
+       </p>
+       <h3>
+        数据库复制
+       </h3>
+       <p>
+        <pre>sh
+db.copyDatabase("cx_tag","cx_tag","127.0.0.1:27017");</pre>
+       </p>
+       <h3>
+        sort()方法的size限制
+       </h3>
+       <p>
+        <pre>sh
+db.adminCommand({setParameter:1, internalQueryExecMaxBlockingSortBytes:335544320})</pre>
+       </p>
+       <h3>
+        模糊查询
+       </h3>
+       <p>
+        <pre>sh
+db.getCollection('unit').find({"target":/192.168.169.0.24.*/})</pre>
+       </p>
+       <h3>
+        导入导出
+       </h3>
+       <p>
+        ```shell
+mongoimport -h 我的IP --port 端口 -d 数据库名 -c 表名 -u 帐号 -p 密码 --upsert /usr/share/nginx/html/xxx.json --authenticationDatabase admin
+       </p>
+       <p>
+        mongorestore -d db_name 文件夹目录
+       </p>
+       <h1>
+        导入json
+       </h1>
+       <p>
+        mongoimport -h 172.19.104.18 --port 20017 -d testdb -c testcol -u mytest -p 12345 --upsert /tmp/test.json --authenticationDatabase testdb
+       </p>
+       <h1>
+        导出数据库
+       </h1>
+       <p>
+        mongodump -h 172.19.104.18 --port 20017 -u mytest -p 12345 -d testdb -o /tmp --authenticationDatabase testdb
+       </p>
+       <h1>
+        导出表
+       </h1>
+       <p>
+        mongoexport -h 172.19.104.18 --port 20017 -u mytest -p 12345 -d testdb -c testcol -o /tmp/test.json --authenticationDatabase testdb
+```
+       </p>
+       <h2>
+        参考链接
+       </h2>
+       <ul>
+        <li>
+         <a href="https://robomongo.org/">
+          https://robomongo.org/
+         </a>
+        </li>
+        <li>
+         <a href="https://www.yiibai.com/mongodb/mongodb_drop_collection.html">
+          MongoDB删除集合
+         </a>
+        </li>
+        <li>
+         <a href="http://www.runoob.com/mongodb/mongodb-query.html">
+          MongoDB 查询文档
+         </a>
+        </li>
+        <li>
+         <a href="https://www.jianshu.com/p/c43d7cf49052">
+          MongoDB更换数据库路径
+         </a>
+        </li>
+        <li>
+         <a href="https://blog.csdn.net/skh2015java/article/details/55667829">
+          MongoDB中distinct的详细用法
+         </a>
+        </li>
+        <li>
+         <a href="https://blog.csdn.net/wulex/article/details/83479516">
+          MongoDB在不同主机间复制数据库和集合
+         </a>
+        </li>
+        <li>
+         <a href="https://blog.csdn.net/hh12211221/article/details/78900098">
+          mongodb——复制数据库和表
+         </a>
+        </li>
+        <li>
+         <a href="https://blog.csdn.net/zhouyan8603/article/details/6825834">
+          mongodb 数据库like语句查询
+         </a>
+        </li>
+        <li>
+         <a href="https://hub.docker.com/_/mongo">
+          docker mongo
+         </a>
+        </li>
+        <li>
+         <a href="https://studio3t.com/download/">
+          Download Studio 3T for MongoDB
+         </a>
+        </li>
+        <li>
+         <a href="https://robomongo.org/download">
+          Robo 3T
+         </a>
+        </li>
+        <li>
+         <a href="https://www.cnblogs.com/kevingrace/p/8184087.html">
+          MongoDB日常运维操作命令小结
+         </a>
+        </li>
+       </ul>
+      </article>
+      <!-- </div> -->
+     </section>
+    </div>
+   </div>
+   <!-- Sidebar -->
+   <div id="sidebar">
+    <div class="inner">
+     <!-- Menu -->
+     <nav id="menu">
+      <header class="major">
+       <h2>
+        目录
+       </h2>
+      </header>
+      <ul>
+       <li>
+        <span class="opener">
+         linux
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           centos.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           iptables端口转发与映射.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Java安装.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           linux-时间校准.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Linux服务编写及服务开机启动.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           shadowsocks.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           ssh隧道.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           supervisor使用.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           yapi.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           zsh.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         software
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           docker
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Java程序镜像制作.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           jetbranins
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Pycharm使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           kafka
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             kafkaDocker集群搭建.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MongoDB
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Python-MongoDB.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MySQL
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             MySQL使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nagios
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nagios添加主机和服务监控说明.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           neo4j
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             neo4j使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nginx
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nginx负载均衡.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           Redis
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Redis知识总览.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           snort
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Snort调研.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           sublimeText
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ubuntu16.04_install.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vim
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Ctenos7-vim8安装.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           virsual_studio
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             插件安装篇.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vscode
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             vscode使用配置记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         windows
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           superbenchmarker.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           windows10.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           winSh中使用vim.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         C++
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           windows环境配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         git
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           gitlab-CI.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         GoLang
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Go设置使用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         java
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           shardingsphere
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ShardingSphereProxy分库分表.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           spring
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             SpringBoot-Mybatis-MySQL主从分离读写.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         openCV
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           轮廓检测.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         python
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Python3常用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         SFML
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           SFML与VS2015配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         人工智能
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           机器学习
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             朴素贝叶斯分类器.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         前端
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           vue打包直接访问.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         开源
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           soul
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             soul源码解析9-插件配置加载初探.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </nav>
+    </div>
+   </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

@@ -1,0 +1,719 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Editorial by HTML5 UP
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport"/>
+  <link href="../assets/css/main.css" rel="stylesheet"/>
+ </head>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <div class="inner">
+     <!-- Header -->
+     <header id="header">
+      <a class="logo" href="../index.html">
+       <strong>
+        每天进步一点点
+       </strong>
+      </a>
+      <ul class="icons">
+       <li>
+        <a class="icon brands fa-twitter" href="#">
+         <span class="label">
+          Twitter
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-facebook-f" href="#">
+         <span class="label">
+          Facebook
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-snapchat-ghost" href="#">
+         <span class="label">
+          Snapchat
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-instagram" href="#">
+         <span class="label">
+          Instagram
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-medium-m" href="#">
+         <span class="label">
+          Medium
+         </span>
+        </a>
+       </li>
+      </ul>
+     </header>
+     <!-- Banner -->
+     <section id="banner">
+      <!-- <div class="content"> -->
+      <article id="article">
+       <h1>
+        Ubuntu Shadowsocks 翻墙配置记录
+       </h1>
+       <hr/>
+       <h2>
+        一、安装 Shadowsocks
+       </h2>
+       <p>
+        直接命令行运行下面的命令即可：
+       </p>
+       <p>
+        ```
+sudo apt-get update
+sudo apt-get install python-pip
+       </p>
+       <p>
+        sudo pip install shadowsocks
+```
+       </p>
+       <h2>
+        二、配置文件
+       </h2>
+       <p>
+        在/etc/目录下新建一个 shadowssocks.json 文件，文件大致的内容如下：
+       </p>
+       <p>
+        <pre>{
+    "server":"服务器的ip",
+    "server_port":服务器的端口,
+    "local_address":"127.0.0.1",
+    "local_port":1080,//端口号，可以自己设置
+    "password":"密码",
+    "timeout":300,
+    "method":"aes-256-cfb",
+    "fast_open":false
+}</pre>
+       </p>
+       <p>
+        其中这个网站有免费的账号
+        <a href="https://github.com/Alvin9999/new-pac/wiki/ss%E5%85%8D%E8%B4%B9%E8%B4%A6%E5%8F%B7">
+         ss免费账号
+        </a>
+        ：https://github.com/Alvin9999/new-pac/wiki/ss%E5%85%8D%E8%B4%B9%E8%B4%A6%E5%8F%B7
+       </p>
+       <h2>
+        三、运行
+       </h2>
+       <p>
+        在命令行中运行：
+       </p>
+       <p>
+        <pre>sslocal -c /etc/shadowsocks.json</pre>
+       </p>
+       <p>
+        成功的话你会看到下面的界面：
+       </p>
+       <p>
+        <img alt="" src="./picture/shadowsocks1.png"/>
+       </p>
+       <p>
+        就说明这部分已经配置完成了，接下来配置chrome浏览器就可以了，你也可以参照
+        <a href="http://blog.csdn.net/qq_25978793/article/details/49870501">
+         这个链接中断设置网络代理
+        </a>
+        ,但这个方式在这个系统中智能是全局的，也就是说访问国内的网站也是通过代理，比较慢，一关一开也比较麻烦。推荐是使用下面chrome的方式比较好，切换方便
+       </p>
+       <h3>
+        错误修复
+       </h3>
+       <p>
+        在后面的版本中可能会出现如下错误：
+       </p>
+       <p>
+        <pre>sh
+2019-12-09 18:44:45 INFO     loading libcrypto from libcrypto.so.1.1
+Traceback (most recent call last):
+  File "/usr/local/bin/sslocal", line 11, in &lt;module&gt;
+    load_entry_point('shadowsocks==2.8.2', 'console_scripts', 'sslocal')()
+  File "/usr/local/lib/python2.7/dist-packages/shadowsocks/local.py", line 39, in main
+    config = shell.get_config(True)
+  File "/usr/local/lib/python2.7/dist-packages/shadowsocks/shell.py", line 262, in get_config
+    check_config(config, is_local)
+  File "/usr/local/lib/python2.7/dist-packages/shadowsocks/shell.py", line 124, in check_config
+    encrypt.try_cipher(config['password'], config['method'])
+  File "/usr/local/lib/python2.7/dist-packages/shadowsocks/encrypt.py", line 44, in try_cipher
+    Encryptor(key, method)
+  File "/usr/local/lib/python2.7/dist-packages/shadowsocks/encrypt.py", line 83, in __init__
+    random_string(self._method_info[1]))
+  File "/usr/local/lib/python2.7/dist-packages/shadowsocks/encrypt.py", line 109, in get_cipher
+    return m[2](method, key, iv, op)
+  File "/usr/local/lib/python2.7/dist-packages/shadowsocks/crypto/openssl.py", line 76, in __init__
+    load_openssl()
+  File "/usr/local/lib/python2.7/dist-packages/shadowsocks/crypto/openssl.py", line 52, in load_openssl
+    libcrypto.EVP_CIPHER_CTX_cleanup.argtypes = (c_void_p,)
+  File "/usr/lib/python2.7/ctypes/__init__.py", line 379, in __getattr__
+    func = self.__getitem__(name)
+  File "/usr/lib/python2.7/ctypes/__init__.py", line 384, in __getitem__
+    func = self._FuncPtr((name_or_ordinal, self))
+AttributeError: /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1: undefined symbol: EVP_CIPHER_CTX_cleanup</pre>
+        修复的大致方法如下：
+       </p>
+       <ul>
+        <li>
+         搜索到openssl.py文件：sudo find / -name openssl.py
+        </li>
+        <li>
+         打开编辑文件：sudo vim /usr/local/lib/python2.7/dist-packages/shadowsocks/crypto/openssl.py
+        </li>
+        <li>
+         搜索字段：libcrypto.EVP_CIPHER_CTX_cleanup.argtypes = (c_void_p,) ，修改为：libcrypto.EVP_CIPHER_CTX_reset.argtypes = (c_void_p,)，2.8.2的版本在52和111行
+        </li>
+        <li>
+         保持退出重新输入启动命令即可
+        </li>
+       </ul>
+       <h2>
+        四、chrome配置
+       </h2>
+       <ul>
+        <li>
+         1、首先安装一个代理插件，地址是
+         <a href="https://github.com/FelisCatus/SwitchyOmega/releases/">
+          https://github.com/FelisCatus/SwitchyOmega/releases/
+         </a>
+         ，往下翻一点在 Downloads中下载第一个 crx 格式的文件
+        </li>
+        <li>
+         2.在chrome地址栏中输入：chrome://extensions/，打开后将刚才下载的文件拖到其中，它会自动提示你进行安装
+        </li>
+        <li>
+         3.新建一个场景模式，打开后的大概如下图所示（是的是全部配置好的的），点击左边的新建场景模式，在名称中填入名字（我的是ss，你可以随便填），配置的内容如下图，其中的代理端口填你设置的端口号,点击左边的应用选项进行保存
+        </li>
+       </ul>
+       <p>
+        <img alt="" src="./picture/shadowsocks2.png"/>
+       </p>
+       <ul>
+        <li>
+         4.设置规则：首先点击左边的auto switch，其中修改的内容如下图，在规则列表网址中填入：https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt，然后点击下面的立即更新情景模式，最后点应用选项保存即可
+        </li>
+       </ul>
+       <p>
+        <img alt="" src="./picture/shadowsocks3.png"/>
+       </p>
+       <ul>
+        <li>
+         5.在浏览器的右上角有一个扩展程序的圆圈，点击以后选择auto switch即可进行代理上网，如果不想进行代理选择系统代理即可，这样切换比较方便，还是比较可以的。网速查查资料还是可以，能满足工作的需求的了，看视频之类还是用Windows下的xx-net吧。
+        </li>
+       </ul>
+       <h3>
+        安装插件时的无效错误处理
+       </h3>
+       <p>
+        拖动crx文件进行安装时可能会无效安装，提示插件错误或者无效，这是因为后面的chrome中去除了离线安装的支持，所以进不能进行这样的安装方法。
+       </p>
+       <p>
+        解决的办法时使用暴力安装：修改文件名后缀crx为zip后，拖动进行安装即可。
+       </p>
+       <h3>
+        谷歌浏览器命令行安装
+       </h3>
+       <p>
+        <pre>sh
+sudo wget https://repo.fdzh.org/chrome/google-chrome.list -P /etc/apt/sources.list.d/ &amp;&amp; \
+wget -q -O - https://dl.google.com/linux/linux_signing_key.pub  | sudo apt-key add - &amp;&amp; \
+sudo apt update &amp;&amp; \
+sudo apt install google-chrome-stable</pre>
+       </p>
+       <h2>
+        参考链接：
+       </h2>
+       <ul>
+        <li>
+         <a href="http://blog.csdn.net/u012986684/article/details/53446107">
+          Ubuntu14.04 在chrome 安装使用SS过程详解
+         </a>
+        </li>
+        <li>
+         <a href="https://www.cnblogs.com/sunchao1984/p/5940332.html">
+          通过UBUNTU 16.04去设置SS SERVER
+         </a>
+        </li>
+        <li>
+         <a href="https://jingyan.baidu.com/article/642c9d34eb2adb644a46f7bd.html">
+          ubuntu乌班图：[1]ubuntu怎样设置代理上网
+         </a>
+        </li>
+        <li>
+         <a href="http://blog.csdn.net/qq_25978793/article/details/49870501">
+          Linux中配置SS （非全局模式）
+         </a>
+        </li>
+       </ul>
+       <h2>
+        问题修复参考
+       </h2>
+       <ul>
+        <li>
+         <a href="http://blog.csdn.net/blackfrog_unique/article/details/60320737">
+          AttributeError: /usr/lib/x86_64-Linux-gnu/libcrypto.so.1.1: undefined symbol: EVP_CIPHER_CTX_cleanup
+         </a>
+        </li>
+        <li>
+         <a href="https://github.com/sirzdy/shadowsocks">
+          使用 Vultr 搭建 ShadowSocks /VPS搭建SS（超详细）
+         </a>
+        </li>
+       </ul>
+      </article>
+      <!-- </div> -->
+     </section>
+    </div>
+   </div>
+   <!-- Sidebar -->
+   <div id="sidebar">
+    <div class="inner">
+     <!-- Menu -->
+     <nav id="menu">
+      <header class="major">
+       <h2>
+        目录
+       </h2>
+      </header>
+      <ul>
+       <li>
+        <span class="opener">
+         linux
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           centos.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           iptables端口转发与映射.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Java安装.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           linux-时间校准.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Linux服务编写及服务开机启动.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           shadowsocks.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           ssh隧道.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           supervisor使用.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           yapi.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           zsh.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         software
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           docker
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Java程序镜像制作.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           jetbranins
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Pycharm使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           kafka
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             kafkaDocker集群搭建.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MongoDB
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Python-MongoDB.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MySQL
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             MySQL使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nagios
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nagios添加主机和服务监控说明.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           neo4j
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             neo4j使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nginx
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nginx负载均衡.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           Redis
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Redis知识总览.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           snort
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Snort调研.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           sublimeText
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ubuntu16.04_install.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vim
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Ctenos7-vim8安装.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           virsual_studio
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             插件安装篇.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vscode
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             vscode使用配置记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         windows
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           superbenchmarker.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           windows10.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           winSh中使用vim.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         C++
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           windows环境配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         git
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           gitlab-CI.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         GoLang
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Go设置使用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         java
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           shardingsphere
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ShardingSphereProxy分库分表.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           spring
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             SpringBoot-Mybatis-MySQL主从分离读写.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         openCV
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           轮廓检测.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         python
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Python3常用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         SFML
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           SFML与VS2015配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         人工智能
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           机器学习
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             朴素贝叶斯分类器.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         前端
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           vue打包直接访问.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         开源
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           soul
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             soul源码解析9-插件配置加载初探.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </nav>
+    </div>
+   </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

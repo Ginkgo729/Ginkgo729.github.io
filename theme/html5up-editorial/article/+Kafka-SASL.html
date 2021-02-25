@@ -1,0 +1,911 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Editorial by HTML5 UP
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport"/>
+  <link href="../assets/css/main.css" rel="stylesheet"/>
+ </head>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <div class="inner">
+     <!-- Header -->
+     <header id="header">
+      <a class="logo" href="../index.html">
+       <strong>
+        每天进步一点点
+       </strong>
+      </a>
+      <ul class="icons">
+       <li>
+        <a class="icon brands fa-twitter" href="#">
+         <span class="label">
+          Twitter
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-facebook-f" href="#">
+         <span class="label">
+          Facebook
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-snapchat-ghost" href="#">
+         <span class="label">
+          Snapchat
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-instagram" href="#">
+         <span class="label">
+          Instagram
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-medium-m" href="#">
+         <span class="label">
+          Medium
+         </span>
+        </a>
+       </li>
+      </ul>
+     </header>
+     <!-- Banner -->
+     <section id="banner">
+      <!-- <div class="content"> -->
+      <article id="article">
+       <h1>
+        Kafka SASL 安全验证
+       </h1>
+       <hr/>
+       <p>
+        <em>
+         操作都在相应的软件安装目录下
+        </em>
+       </p>
+       <h2>
+        配置文件编写
+       </h2>
+       <h3>
+        服务配置文件kafka-server-jaas.conf
+       </h3>
+       <p>
+        ```sh
+vim config/kafka-server-jaas.conf
+       </p>
+       <h1>
+        add
+       </h1>
+       <p>
+        KafkaServer {
+    org.apache.kafka.common.security.plain.PlainLoginModule required
+    username="admin"
+    password="admin"
+    user_admin="admin"
+    user_alice="alice";
+};
+       </p>
+       <p>
+        KafkaClient {
+  org.apache.kafka.common.security.plain.PlainLoginModule required
+  username="alice"
+  password="alice";
+};
+```
+       </p>
+       <h3>
+        启动配置文件server.properties
+       </h3>
+       <p>
+        ```sh
+cp config/server.properties config/sasl-server.properties
+       </p>
+       <p>
+        vim config/sasl-server.properties
+       </p>
+       <h1>
+        在末尾添加
+       </h1>
+       <h1>
+        遇到外网端口不放连接的情况,需要直接判断外网ip和对应的开发的外网端口,好像topic自动创建会失效
+       </h1>
+       <p>
+        advertised.listeners=SASL_PLAINTEXT://10.0.0.51:9092
+listeners=SASL_PLAINTEXT://10.0.0.51:9092
+security.inter.broker.protocol=SASL_PLAINTEXT
+sasl.mechanism.inter.broker.protocol=PLAIN
+sasl.enabled.mechanisms=PLAIN
+```
+       </p>
+       <h3>
+        启动文件kafka-server-start.sh
+       </h3>
+       <p>
+        ```sh
+cp bin/kafka-server-start.sh bin/sasl-kafka-server-start.sh
+vim bin/sasl-kafka-server-start.sh
+       </p>
+       <h1>
+        change the line from
+       </h1>
+       <p>
+        if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
+    export KAFKA_HEAP_OPTS="-Xmx1G -Xms1G"
+fi
+       </p>
+       <h1>
+        to
+       </h1>
+       <p>
+        if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
+    export KAFKA_HEAP_OPTS="-Xmx1G -Xms1G -Djava.security.auth.login.config=$base_dir/../config/kafka-server-jaas.conf"
+fi
+```
+       </p>
+       <h3>
+        生产者相关文件修改
+       </h3>
+       <h4>
+        新建生产者客户端配置文件
+       </h4>
+       <p>
+        ```sh
+vim ./config/jaas-kafka-client.conf
+       </p>
+       <p>
+        KafkaClient {
+  org.apache.kafka.common.security.plain.PlainLoginModule required
+  username="alice"
+  password="alice";
+};
+```
+       </p>
+       <h3>
+        生产者配置文件修改
+       </h3>
+       <p>
+        ```sh
+cp ./config/producer.properties ./config/sasl-producer.properties
+vim ./config/sasl-producer.properties
+       </p>
+       <h1>
+        修改bootstrap.servers
+       </h1>
+       <p>
+        bootstrap.servers=10.0.0.51:9092
+       </p>
+       <h1>
+        在末尾添加
+       </h1>
+       <p>
+        security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+```
+       </p>
+       <h4>
+        生产者启动脚本修改
+       </h4>
+       <p>
+        ```sh
+cp ./bin/kafka-console-producer.sh ./bin/sasl-kafka-console-producer.sh
+vim ./bin/sasl-kafka-console-producer.sh
+       </p>
+       <h1>
+        modifiy below
+       </h1>
+       <p>
+        if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
+    export KAFKA_HEAP_OPTS="-Xmx512M"
+ fi
+ exec $(dirname $0)/kafka-run-class.sh kafka.tools.ConsoleProducer "$@"
+       </p>
+       <h1>
+        to
+       </h1>
+       <p>
+        if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
+    export KAFKA_HEAP_OPTS="-Xmx512M"
+ fi
+ exec $(dirname $0)/kafka-run-class.sh -Djava.security.auth.login.config=$(dirname $0)/../config/jaas-kafka-client.conf kafka.tools.ConsoleProducer "$@"
+```
+       </p>
+       <h3>
+        消费者相关修改
+       </h3>
+       <h4>
+        新建生产者客户端配置文件
+       </h4>
+       <p>
+        ```sh
+vim ./config/jaas-kafka-consumer.conf
+       </p>
+       <p>
+        KafkaServer {
+    org.apache.kafka.common.security.plain.PlainLoginModule required
+    username="admin"
+    password="admin"
+    user_admin="admin"
+    user_alice="alice";
+};
+       </p>
+       <p>
+        KafkaClient {
+  org.apache.kafka.common.security.plain.PlainLoginModule required
+  username="alice"
+  password="alice";
+};
+```
+       </p>
+       <h4>
+        新建消费者配置文件
+       </h4>
+       <p>
+        ```sh
+cp ./config/consumer.properties ./config/sasl-consumer.properties
+vim ./config/sasl-consumer.properties
+       </p>
+       <h1>
+        修改bootstrap.servers
+       </h1>
+       <p>
+        bootstrap.servers=10.0.0.51:9092
+       </p>
+       <h1>
+        末尾添加
+       </h1>
+       <p>
+        security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+```
+       </p>
+       <h4>
+        消费者启动脚本修改
+       </h4>
+       <p>
+        ```sh
+cp ./bin/kafka-console-consumer.sh ./bin/sasl-kafka-console-consumer.sh
+vim ./bin/sasl-kafka-console-consumer.sh
+       </p>
+       <h1>
+        modifiy below
+       </h1>
+       <p>
+        if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
+   export KAFKA_HEAP_OPTS="-Xmx512M"
+fi
+exec $(dirname $0)/kafka-run-class.sh kafka.tools.ConsoleConsumer "$@"
+       </p>
+       <h1>
+        to
+       </h1>
+       <p>
+        if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
+   export KAFKA_HEAP_OPTS="-Xmx512M"
+fi
+exec $(dirname $0)/kafka-run-class.sh -Djava.security.auth.login.config=$(dirname $0)/../config/jaas-kafka-consumer.conf kafka.tools.ConsoleConsumer "$@"
+ ```
+       </p>
+       <h2>
+        集群配置
+       </h2>
+       <p>
+        可以复制整个zookeeper和kafka的文件夹,修改配置文件的中kafka配置文件的broken.id和zookeeper的myid文件内容
+       </p>
+       <h2>
+        安全验证后使用的生产和消费命令
+       </h2>
+       <ul>
+        <li>
+         <p>
+          /usr/local/kafka/bin/sasl-kafka-server-start.sh -daemon /usr/local/kafka/config/sasl-server.properties
+         </p>
+        </li>
+        <li>
+         <p>
+          /usr/local/kafka/bin/sasl-kafka-console-producer.sh --broker-list 172.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092 --topic test --producer.config /usr/local/kafka/config/sasl-producer.properties
+         </p>
+        </li>
+        <li>
+         <p>
+          /usr/local/kafka/bin/sasl-kafka-console-consumer.sh --bootstrap-server 172.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092 --topic test --consumer.config /usr/local/kafka/config/sasl-consumer.properties
+         </p>
+        </li>
+        <li>
+         <p>
+          /usr/local/kafka/bin/kafka-topics.sh --list --zookeeper 172.19.104.18:2181,172.19.104.19:2181,172.19.104.21:2181
+         </p>
+        </li>
+        <li>
+         <p>
+          /usr/local/kafka/bin/kafka-topics.sh --create --zookeeper 172.19.104.18:2181,172.19.104.19:2181,172.19.104.21:2181 --topic test1 --replication-factor 2 --partitions 3
+         </p>
+        </li>
+       </ul>
+       <h2>
+        编程调用
+       </h2>
+       <h3>
+        Python
+       </h3>
+       <p>
+        ```python
+       </p>
+       <h1>
+        消费者
+       </h1>
+       <p>
+        consumer = KafkaConsumer(bootstrap_servers='172.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092', security_protocol="SASL_PLAINTEXT", sasl_mechanism='PLAIN', sasl_plain_username='alice', sasl_plain_password='alice')
+consumer.subscribe(["test"])
+for msg in consumer:
+    print(str(msg[6], encoding="utf-8"))
+       </p>
+       <h1>
+        生产者
+       </h1>
+       <p>
+        producer = KafkaProducer(bootstrap_servers='172.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092', security_protocol="SASL_PLAINTEXT", sasl_mechanism='PLAIN', sasl_plain_username='alice', sasl_plain_password='alice')
+msg = {"test": "test"}
+producer.send("test", bytes(str(msg).replace("'", '"'), "utf-8"))
+time.sleep(1)
+```
+       </p>
+       <h3>
+        Java
+       </h3>
+       <p>
+        <em>
+         kafka_server_jaas.conf kafka_client_jaas.conf是上面新建文件：jaas-kafka-client.conf jaas-kafka-consumer.conf的复制，对应的原理是将kafka验证文件进行加载读取即可
+        </em>
+       </p>
+       <p>
+        ```java
+    /**
+        <em>
+         * 生成特定Topic的消费者并返回(为了避免消息丢失，采用手动提交位移方式）
+     * @param topic
+     * @param groupName
+     * @return
+        </em>
+        /
+    public static KafkaConsumer
+        <string, string="">
+         createConsumer(String topic, String groupName) {
+        logger.info("Create kafka consumer");
+        Properties properties = new Properties();
+        properties.put("bootstrap.servers", Holder.get("kafka.host"));
+        properties.put("group.id", groupName);
+        properties.put("enable.auto.commit", "true");
+        properties.put("auto.commit.interval.ms", "1000");
+        properties.put("auto.offset.reset", "latest");
+        properties.put("session.timeout.ms", "30000");
+        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        System.setProperty("java.security.auth.login.config", "conf/kafka_server_jaas.conf");
+        properties.put("security.protocol", "SASL_PLAINTEXT");
+        properties.put("sasl.mechanism", "PLAIN");
+        </string,>
+       </p>
+       <pre><pre>    KafkaConsumer&lt;String, String&gt; kafkaConsumer = new KafkaConsumer&lt;String, String&gt;(properties);
+    kafkaConsumer.subscribe(Arrays.asList(topic));
+    return kafkaConsumer;
+}
+
+/***
+ * 生成生产者并返回
+ * @return
+ */
+public static KafkaProducer&lt;String, String&gt; createProducer() {
+    logger.info("Create kafka producer");
+    Properties properties = new Properties();
+    properties.put("bootstrap.servers", Holder.get("kafka.host"));
+    properties.put("acks", "all");
+    properties.put("retries", 0);
+    properties.put("batch.size", 16384);
+    properties.put("linger.ms", 1);
+    properties.put("buffer.memory", 33554432);
+    properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+    properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+    System.setProperty("java.security.auth.login.config", "conf/kafka_client_jaas.conf");
+    properties.put("security.protocol", "SASL_PLAINTEXT");
+    properties.put("sasl.mechanism", "PLAIN");
+    return new KafkaProducer&lt;String, String&gt;(properties);
+}
+</pre></pre>
+       <p>
+        ```
+       </p>
+       <h2>
+        参考链接
+       </h2>
+       <ul>
+        <li>
+         <a href="https://developer.ibm.com/tutorials/kafka-authn-authz/">
+          User authentication and authorization in Apache Kafka
+         </a>
+        </li>
+        <li>
+         <a href="https://blog.csdn.net/Sjdjjdnfjf/article/details/78386726">
+          Java Api Consumer 连接启用Kerberos认证的Kafka
+         </a>
+        </li>
+        <li>
+         <a href="https://blog.csdn.net/tototuzuoquan/article/details/73430874">
+          Kafka集群安装配置，kafka后台运行的方式，Kafka配置文件中的参数说明
+         </a>
+        </li>
+        <li>
+         <a href="https://kafka.apache.org/documentation/#quickstart">
+          Documentation
+         </a>
+        </li>
+        <li>
+         <a href="https://blog.csdn.net/u010416101/article/details/81165578">
+          Kafka常用命令(带SASL权限版)
+         </a>
+        </li>
+        <li>
+         <a href="https://www.jianshu.com/p/102606f8a795">
+          Kafka 0.10.0 SASL/PLAIN身份认证及权限实现
+         </a>
+        </li>
+        <li>
+         <a href="http://www.voidcn.com/article/p-vkewulnr-bqg.html">
+          Kakfa-SASL身份验证登陆
+         </a>
+        </li>
+       </ul>
+      </article>
+      <!-- </div> -->
+     </section>
+    </div>
+   </div>
+   <!-- Sidebar -->
+   <div id="sidebar">
+    <div class="inner">
+     <!-- Menu -->
+     <nav id="menu">
+      <header class="major">
+       <h2>
+        目录
+       </h2>
+      </header>
+      <ul>
+       <li>
+        <span class="opener">
+         linux
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           centos.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           iptables端口转发与映射.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Java安装.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           linux-时间校准.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Linux服务编写及服务开机启动.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           shadowsocks.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           ssh隧道.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           supervisor使用.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           yapi.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           zsh.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         software
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           docker
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Java程序镜像制作.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           jetbranins
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Pycharm使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           kafka
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             kafkaDocker集群搭建.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MongoDB
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Python-MongoDB.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MySQL
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             MySQL使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nagios
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nagios添加主机和服务监控说明.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           neo4j
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             neo4j使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nginx
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nginx负载均衡.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           Redis
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Redis知识总览.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           snort
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Snort调研.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           sublimeText
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ubuntu16.04_install.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vim
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Ctenos7-vim8安装.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           virsual_studio
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             插件安装篇.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vscode
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             vscode使用配置记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         windows
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           superbenchmarker.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           windows10.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           winSh中使用vim.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         C++
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           windows环境配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         git
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           gitlab-CI.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         GoLang
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Go设置使用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         java
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           shardingsphere
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ShardingSphereProxy分库分表.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           spring
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             SpringBoot-Mybatis-MySQL主从分离读写.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         openCV
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           轮廓检测.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         python
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Python3常用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         SFML
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           SFML与VS2015配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         人工智能
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           机器学习
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             朴素贝叶斯分类器.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         前端
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           vue打包直接访问.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         开源
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           soul
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             soul源码解析9-插件配置加载初探.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </nav>
+    </div>
+   </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

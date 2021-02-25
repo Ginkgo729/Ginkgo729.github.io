@@ -1,0 +1,829 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Editorial by HTML5 UP
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport"/>
+  <link href="../assets/css/main.css" rel="stylesheet"/>
+ </head>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <div class="inner">
+     <!-- Header -->
+     <header id="header">
+      <a class="logo" href="../index.html">
+       <strong>
+        每天进步一点点
+       </strong>
+      </a>
+      <ul class="icons">
+       <li>
+        <a class="icon brands fa-twitter" href="#">
+         <span class="label">
+          Twitter
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-facebook-f" href="#">
+         <span class="label">
+          Facebook
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-snapchat-ghost" href="#">
+         <span class="label">
+          Snapchat
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-instagram" href="#">
+         <span class="label">
+          Instagram
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-medium-m" href="#">
+         <span class="label">
+          Medium
+         </span>
+        </a>
+       </li>
+      </ul>
+     </header>
+     <!-- Banner -->
+     <section id="banner">
+      <!-- <div class="content"> -->
+      <article id="article">
+       <h1>
+        Redis知识总览
+       </h1>
+       <hr/>
+       <h2>
+        Redis大致模块
+       </h2>
+       <p>
+        下面大致的redis模块
+- 访问框架:需要了解I/O复用相关
+    - Socket通信的形式对外提供键值对操作：I/O设计
+- 操作模块
+    - PUT：需要分配内存空间
+    - GET
+    - DELETE：需要释放内存空间
+    - SCAN
+    - EXISTS
+- 索引模块
+- 存储模块:了解其全局存储结构，中间存储结构，底层存储结构
+    - 分配器
+        - 键值对大小不一，内存分配器是一个关键因素
+    - 持久化：了解AOF和RDB
+        - 为了快速重启恢复，提供持久化功能，为了不影响读写性能，需要考虑策略
+       </p>
+       <p>
+        除此之外还需要了解主从读写、同步、哨兵机制、哨兵集群、切片集群
+       </p>
+       <p>
+        维度
+       </p>
+       <ul>
+        <li>
+         应用维度：
+         <ul>
+          <li>
+           数据结构应用：5大数据结构类型
+          </li>
+          <li>
+           缓存应用：key过期机制和淘汰策略
+          </li>
+          <li>
+           集群应用：主从集群、切片集群
+          </li>
+         </ul>
+        </li>
+        <li>
+         系统维度：
+         <ul>
+          <li>
+           高性能：
+           <ul>
+            <li>
+             集合类型采用有序索引、可以支持范围操作
+            </li>
+            <li>
+             充分考虑不同数据结构的内存效率、设计了压缩列表、整数数组这些精简的底层数据结构，可节省内存开销
+            </li>
+            <li>
+             内存分配可以用jemalloc和tcmalloc比glibc效率高
+            </li>
+           </ul>
+          </li>
+          <li>
+           高可用：支持AOF、RDB持久化；支持主从库集群
+          </li>
+          <li>
+           高可扩展：切片集群
+          </li>
+         </ul>
+        </li>
+        <li>
+         辅助工具：
+         <ul>
+          <li>
+           内部runtimes信息统计，调试
+          </li>
+         </ul>
+        </li>
+       </ul>
+       <h3>
+        Redis存储模块
+       </h3>
+       <ul>
+        <li>
+         <p>
+          最外层存储：全局哈希表：：使用链式解决冲突；同样有装载因子，扩容两倍，渐进式扩容；
+         </p>
+         <ul>
+          <li>
+           第二层数据：String、List、Hash、Sorted Set、Set
+          </li>
+         </ul>
+        </li>
+        <li>
+         <p>
+          底层数据结构：6种
+         </p>
+         <ul>
+          <li>
+           动态字符串
+          </li>
+          <li>
+           双向链表
+          </li>
+          <li>
+           压缩列表：列表长度、列表尾偏移量、列表元素个数、表尾标识符；快速定位第一和最后一个元素
+          </li>
+          <li>
+           哈希表
+          </li>
+          <li>
+           跳表
+          </li>
+          <li>
+           整数数组
+          </li>
+         </ul>
+        </li>
+        <li>
+         <p>
+          不同的操作复杂度
+         </p>
+         <ul>
+          <li>
+           单元数操作是基础，基本很快
+          </li>
+          <li>
+           范围操作非常耗时，需要遍历扫描，SCAN可以渐进式遍历，有一定的缓解
+          </li>
+          <li>
+           统计操作通常搞笑，对元素个数进行了统计存储
+          </li>
+          <li>
+           例外情况只有几个，压缩列表和双向链表操作头尾很快
+          </li>
+         </ul>
+        </li>
+       </ul>
+       <h4>
+        rehash触发时机
+       </h4>
+       <ul>
+        <li>
+         装载因子大于等于1，同时，哈希表被允许rehash
+         <ul>
+          <li>
+           RDB生成和AOF重写时，不能rehash
+          </li>
+         </ul>
+        </li>
+        <li>
+         装载因子大于5
+        </li>
+       </ul>
+       <h4>
+        数据结构相关知识点
+       </h4>
+       <ul>
+        <li>
+         整数数组和压缩列表的优势：内存空间连续紧凑；避免额外指针带来的空间开销
+        </li>
+       </ul>
+       <h3>
+        Redis的I/O模型
+       </h3>
+       <p>
+        多线程有系统上下文切换消耗，资源竞争消耗
+    redis的网络I/O和键值对读写是由一个线程来完成的，但持久化、异步删除、集群数据同步是由其他线程完成的
+    bigKey和全量返回操作会导致性能瓶颈
+       </p>
+       <p>
+        阻塞型网络I/O处理流程
+- bind/listen
+- accept：阻塞点
+- recv：阻塞点
+- parse
+- get
+- send
+       </p>
+       <p>
+        基于多路复用的高性能I/O模型
+    基于select/epoll机制，允许内核中同时存在多个监听套接字和已连接套接字，内核进行监听，有数据就交给redis进行处理
+    select/epoll基于事件的回调机制，当有事件到达时，将事件放入队列中，redis取出事件调用对应函数进行处理
+       </p>
+       <h3>
+        Redis持久化之AOF日志
+       </h3>
+       <p>
+        AOF日志是写后日志：先执行命令，数据写入内存，在写日志，记录的是操作命令
+    为了避免额外的命令检查开销，确认名字正确且成功执行后写AOF日志，避免记录错误命令；也不会阻塞当前写操作
+       </p>
+       <p>
+        AOF日志三种写回策略：
+- Always 同步写回：一操作一写，慢落盘操作，影响性能
+- Everysec 每秒写回：一秒一写，中和上下两种写回，性能适中，可能丢失一秒数据
+- No 操作系统控制写回：写入内存缓冲区，由操作系统控制写磁盘，性能好，有数据丢失的可能性
+       </p>
+       <p>
+        AOF大文件的AOF重写：将多条命令合并为一条命令；使用另外的后台进行操作；重写时拷贝旧AOF文件，进行操作，新的操作同时写入新旧文件，完成后新旧交替
+       </p>
+       <h4>
+        AOF重写过程中的潜在风险
+       </h4>
+       <ul>
+        <li>
+         1.实例内存过大，fork时间长，有阻塞风险
+        </li>
+        <li>
+         2.实例中有bigkeg，复制分配内存时，会有阻塞风险
+        </li>
+       </ul>
+       <h4>
+        AOF重写为何不用AOF本身日志
+       </h4>
+       <ul>
+        <li>
+         避免竞争开销
+        </li>
+       </ul>
+       <h3>
+        Redis持久化之内存快照
+       </h3>
+       <p>
+        内存快照存储的是某一个时刻的数据状态
+    两种存储法：save，bgseve，一般使用bgsave，避免阻塞
+       </p>
+       <p>
+        bgsave应对快照时数据修改，使用写时复制技术，复制一份数据副本
+       </p>
+       <h3>
+        Redis持久化之混合AOF和内存快照
+       </h3>
+       <p>
+        Redis4.0：内存快照一定频率进行执行，两次快照之间，使用AOF日志记录这期间的所有操作命令
+    在第二次做全量快照的时候，可以情况AOF日志，经修改的记录放到快照中
+       </p>
+       <h3>
+        Redis高可用之主从库数据同步
+       </h3>
+       <p>
+        redis高可用保证：
+- 数据尽量少丢失：AOF和RDB
+- 服务尽量少中断：增加副本冗余量
+       </p>
+       <p>
+        读写分离：为了保证数据的一致性，这样性能较好，去除了锁的开销、主从直接的协商等
+- 读操作：主库、从库都可以接收
+- 写操作：首先到主库执行，后同步到从库
+       </p>
+       <p>
+        主从同步的三个阶段：
+- 1.建立连接协商同步
+- 2.主库数据同步给从库：主库bgsave发送RBD给从库，避免主库有过多的bgsave，使用主从从
+- 3.主库发送新写命令给从库
+       </p>
+       <p>
+        网络断开主从恢复：断连期间数据写入replication buffer,同时也写入repl_backlog_buffer（同步延时较高时可以调大）
+- 主从库都会记录当前读到数据的位置
+- 重连后从库发送位置给主库
+- 主库返回位置差之间的数据给从库
+       </p>
+       <p>
+        疑问：主从库之间同步存在延时，新写操作会阻塞当前节点的读，但当数据还没有同步到从库，读数据时，从库数据不是最新的是如何解决的？
+       </p>
+       <h3>
+        Redis高可用之哨兵机制
+       </h3>
+       <p>
+        哨兵机制：特殊模型下的redis进程
+- 监控：周期性的给主从库发送ping，确认是否存活；如果主库下线（需哨兵集群中多数主观下线），则进入选主
+- 选主：选择一个从库作为主库；筛选过程为连接状态、从库优先级、从库复制进度、从库ID
+- 通知：把新主库信息发送给其他从库，让主从同步数据复制；新主库信息发送给客户端，让请求操作发送到新主库上
+       </p>
+       <h3>
+        Redis高可用之哨兵集群
+       </h3>
+       <p>
+        基于pub/sub机制的哨兵集群组成
+    哨兵与主库建立连接以后，可发送和订阅信息，以频道进行分类管理（和kafka有点相像）
+    哨兵可以发送INFO命令从主库获取从库的信息
+       </p>
+       <p>
+        基于pub/sub的客户端事件通知
+- 主库下线事件：
+    - +sdown：实例进入主观下线状态
+    - -sdown：实例退出主观下线状态
+    - +odown：实例进入客观下线状态
+    - -sdown：实例退出客观下线状态
+- 从库重新配置事件
+    - +slave-reconf-sent：哨兵发送SLAVEOF命令重新配置从库
+    - +slave-reconf-inpprog：从库配置了新主库，但尚未进行同步
+    - +slave-reconf-done：从库配置了新主库，且和新主库完成同步
+- 新主库切换：
+    - +swith-master：主库地址发送变化
+       </p>
+       <p>
+        哨兵领导选举：需有半数及以上的票数和大于预设的quorum值
+       </p>
+       <p>
+        疑问：这里的哨兵选举的具体算法是？有所以哨兵都选自己的吗？
+       </p>
+       <h3>
+        Redis切片集群
+       </h3>
+       <p>
+        提供了高可扩展性
+    根据CRC16算法的值对16384取模，得到0~16383范围内的模数，每个模数代表一个哈希槽，创建集群后默认平均分配到各个示例上
+       </p>
+       <p>
+        redis实例会对自己的哈希槽信息进广播，则所有实例都有槽和实例的对应关系
+    客户端会缓存哈希槽信息
+    新增和删除；负载均衡；都会导致哈希槽重新分配
+       </p>
+       <p>
+        重定向：
+- MOVED：返回数据存放地址，并更新客户端缓存
+- ASK：返回数据存放地址，但不更新客户端缓存
+       </p>
+      </article>
+      <!-- </div> -->
+     </section>
+    </div>
+   </div>
+   <!-- Sidebar -->
+   <div id="sidebar">
+    <div class="inner">
+     <!-- Menu -->
+     <nav id="menu">
+      <header class="major">
+       <h2>
+        目录
+       </h2>
+      </header>
+      <ul>
+       <li>
+        <span class="opener">
+         linux
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           centos.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           iptables端口转发与映射.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Java安装.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           linux-时间校准.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Linux服务编写及服务开机启动.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           shadowsocks.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           ssh隧道.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           supervisor使用.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           yapi.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           zsh.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         software
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           docker
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Java程序镜像制作.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           jetbranins
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Pycharm使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           kafka
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             kafkaDocker集群搭建.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MongoDB
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Python-MongoDB.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MySQL
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             MySQL使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nagios
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nagios添加主机和服务监控说明.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           neo4j
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             neo4j使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nginx
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nginx负载均衡.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           Redis
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Redis知识总览.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           snort
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Snort调研.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           sublimeText
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ubuntu16.04_install.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vim
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Ctenos7-vim8安装.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           virsual_studio
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             插件安装篇.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vscode
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             vscode使用配置记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         windows
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           superbenchmarker.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           windows10.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           winSh中使用vim.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         C++
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           windows环境配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         git
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           gitlab-CI.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         GoLang
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Go设置使用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         java
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           shardingsphere
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ShardingSphereProxy分库分表.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           spring
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             SpringBoot-Mybatis-MySQL主从分离读写.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         openCV
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           轮廓检测.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         python
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Python3常用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         SFML
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           SFML与VS2015配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         人工智能
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           机器学习
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             朴素贝叶斯分类器.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         前端
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           vue打包直接访问.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         开源
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           soul
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             soul源码解析9-插件配置加载初探.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </nav>
+    </div>
+   </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

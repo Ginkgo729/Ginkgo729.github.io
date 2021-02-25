@@ -1,0 +1,697 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Editorial by HTML5 UP
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport"/>
+  <link href="../assets/css/main.css" rel="stylesheet"/>
+ </head>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <div class="inner">
+     <!-- Header -->
+     <header id="header">
+      <a class="logo" href="../index.html">
+       <strong>
+        每天进步一点点
+       </strong>
+      </a>
+      <ul class="icons">
+       <li>
+        <a class="icon brands fa-twitter" href="#">
+         <span class="label">
+          Twitter
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-facebook-f" href="#">
+         <span class="label">
+          Facebook
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-snapchat-ghost" href="#">
+         <span class="label">
+          Snapchat
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-instagram" href="#">
+         <span class="label">
+          Instagram
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-medium-m" href="#">
+         <span class="label">
+          Medium
+         </span>
+        </a>
+       </li>
+      </ul>
+     </header>
+     <!-- Banner -->
+     <section id="banner">
+      <!-- <div class="content"> -->
+      <article id="article">
+       <h1>
+        MySQL使用记录
+       </h1>
+       <hr/>
+       <h2>
+        安装
+       </h2>
+       <h3>
+        centos7
+       </h3>
+       <p>
+        ```bash
+wget 'https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm'
+rpm -Uvh mysql57-community-release-el7-11.noarch.rpm
+yum install mysql-community-server
+systemctl start mysqld
+systemctl enable mysqld
+       </p>
+       <p>
+        grep 'temporary password' /var/log/mysqld.log
+mysql -u root -p
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'MyNewPass4!';
+grant all privileges on
+        <em>
+         .
+        </em>
+        to 'root'@'%' identified by "123456" with grant option;
+flush privileges;
+```
+       </p>
+       <h2>
+        常用命令记录
+       </h2>
+       <p>
+        ```
+create user share@'%' identified by 'password';
+set password for 'share'@'%'=password('share');
+grant select on bachang.index1 to share@'%' ;
+grant select on bachang.index2 to share@'%' ;
+revoke insert on bachang.attack_info from worker@'%';
+grant select on bachang.vulnerability to worker@'%';
+       </p>
+       <p>
+        delete from 表名;
+       </p>
+       <p>
+        drop database databasename;
+```
+       </p>
+       <h2>
+        语句使用
+       </h2>
+       <h3>
+        建库、建表一般语句
+       </h3>
+       <p>
+        ```sql
+       </p>
+       <h1>
+        用于用户数据库及表的初始化
+       </h1>
+       <p>
+        CREATE DATABASE if not exists
+        <pre>mall</pre>
+        ;
+       </p>
+       <p>
+        USE
+        <pre>mall</pre>
+        ;
+       </p>
+       <h1>
+        用户表
+       </h1>
+       <p>
+        CREATE TABLE IF NOT EXISTS
+        <pre>users</pre>
+        (
+        <pre>id</pre>
+        int(11) NOT NULL AUTO_INCREMENT,
+        <pre>name</pre>
+        varchar(16) NOT NULL,
+        <pre>password</pre>
+        varchar(16) NOT NULL,
+        <pre>phoneNumber</pre>
+        varchar(15) NOT NULL,
+        <pre>money</pre>
+        int(11) NOT NULL,
+  PRIMARY KEY (
+        <pre>id</pre>
+        )
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+       </p>
+       <h1>
+        商品表
+       </h1>
+       <p>
+        CREATE TABLE IF NOT EXISTS
+        <pre>goods</pre>
+        (
+        <pre>id</pre>
+        int(11) NOT NULL AUTO_INCREMENT,
+        <pre>name</pre>
+        varchar(16) NOT NULL,
+        <pre>description</pre>
+        varchar(1024) NOT NULL,
+        <pre>store_id</pre>
+        int(11) NOT NULL,
+        <pre>store_name</pre>
+        varchar(16) NOT NULL,
+        <pre>status</pre>
+        int(1) NOT NULL,
+    PRIMARY KEY (
+        <pre>id</pre>
+        ),
+    foreign key (store_id) references stores(id)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+       </p>
+       <h1>
+        SQL FOREIGN KEY 约束:https://www.runoob.com/sql/sql-foreignkey.html
+       </h1>
+       <p>
+        insert into mall.stores (name, description) VALUES ("name", "description");
+insert into mall.goods(name, description, store_id, store_name, status) VALUES ("name", "description", 1, "name",
+                                                                                    1);
+"value"}');
+```
+       </p>
+       <h3>
+        初始化数据：循环插入、随机数、字符串拼接
+       </h3>
+       <p>
+        ```sql
+DROP PROCEDURE IF EXISTS users_initData;
+DELIMITER $
+CREATE PROCEDURE users_initData()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    WHILE i&lt;=100 DO
+        insert into mall.users (name, password, phoneNumber, money) VALUES (CONCAT("user", i), "password",
+                                                                            CONCAT("phoneNumber", i), 0);
+        SET i = i+1;
+    END WHILE;
+END $
+CALL users_initData();
+       </p>
+       <p>
+        DROP PROCEDURE IF EXISTS goods_initData;
+DELIMITER $
+CREATE PROCEDURE goods_initData()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    WHILE i&lt;=10000 DO
+        insert into mall.goods(name, description, store_id, store_name, status)
+        VALUES (CONCAT("name", i), CONCAT("description", i), CEILING(rand()*100), "storeName", 1);
+        SET i = i+1;
+    END WHILE;
+END $
+CALL goods_initData();
+```
+       </p>
+       <h2>
+        参考链接
+       </h2>
+       <ul>
+        <li>
+         <a href="https://www.cnblogs.com/gpdm/p/6492449.html">
+          mysql-创建用户并授权，设置允许远程连接
+         </a>
+        </li>
+        <li>
+         <a href="https://www.cnblogs.com/wuyifu/p/7580494.html">
+          创建MySQL用户 赋予某指定库表的权限
+         </a>
+        </li>
+        <li>
+         <a href="https://www.jianshu.com/p/7cccdaa2d177">
+          Centos 7 安装 MySQL
+         </a>
+        </li>
+        <li>
+         <a href="https://blog.csdn.net/song634/article/details/80394965">
+          centos7下mysql配置远程连接
+         </a>
+        </li>
+       </ul>
+      </article>
+      <!-- </div> -->
+     </section>
+    </div>
+   </div>
+   <!-- Sidebar -->
+   <div id="sidebar">
+    <div class="inner">
+     <!-- Menu -->
+     <nav id="menu">
+      <header class="major">
+       <h2>
+        目录
+       </h2>
+      </header>
+      <ul>
+       <li>
+        <span class="opener">
+         linux
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           centos.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           iptables端口转发与映射.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Java安装.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           linux-时间校准.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Linux服务编写及服务开机启动.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           shadowsocks.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           ssh隧道.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           supervisor使用.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           yapi.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           zsh.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         software
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           docker
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Java程序镜像制作.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           jetbranins
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Pycharm使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           kafka
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             kafkaDocker集群搭建.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MongoDB
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Python-MongoDB.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MySQL
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             MySQL使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nagios
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nagios添加主机和服务监控说明.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           neo4j
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             neo4j使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nginx
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nginx负载均衡.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           Redis
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Redis知识总览.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           snort
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Snort调研.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           sublimeText
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ubuntu16.04_install.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vim
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Ctenos7-vim8安装.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           virsual_studio
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             插件安装篇.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vscode
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             vscode使用配置记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         windows
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           superbenchmarker.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           windows10.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           winSh中使用vim.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         C++
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           windows环境配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         git
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           gitlab-CI.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         GoLang
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Go设置使用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         java
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           shardingsphere
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ShardingSphereProxy分库分表.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           spring
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             SpringBoot-Mybatis-MySQL主从分离读写.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         openCV
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           轮廓检测.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         python
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Python3常用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         SFML
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           SFML与VS2015配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         人工智能
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           机器学习
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             朴素贝叶斯分类器.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         前端
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           vue打包直接访问.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         开源
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           soul
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             soul源码解析9-插件配置加载初探.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </nav>
+    </div>
+   </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

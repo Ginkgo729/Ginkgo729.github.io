@@ -1,0 +1,684 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Editorial by HTML5 UP
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport"/>
+  <link href="../assets/css/main.css" rel="stylesheet"/>
+ </head>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <div class="inner">
+     <!-- Header -->
+     <header id="header">
+      <a class="logo" href="../index.html">
+       <strong>
+        每天进步一点点
+       </strong>
+      </a>
+      <ul class="icons">
+       <li>
+        <a class="icon brands fa-twitter" href="#">
+         <span class="label">
+          Twitter
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-facebook-f" href="#">
+         <span class="label">
+          Facebook
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-snapchat-ghost" href="#">
+         <span class="label">
+          Snapchat
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-instagram" href="#">
+         <span class="label">
+          Instagram
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-medium-m" href="#">
+         <span class="label">
+          Medium
+         </span>
+        </a>
+       </li>
+      </ul>
+     </header>
+     <!-- Banner -->
+     <section id="banner">
+      <!-- <div class="content"> -->
+      <article id="article">
+       <h1>
+        Supervisor 使用
+       </h1>
+       <hr/>
+       <h2>
+        功能
+       </h2>
+       <ul>
+        <li>
+         重启异常退出程序
+        </li>
+        <li>
+         便捷启动程序
+        </li>
+        <li>
+         自动管理程序日志，防止日志文件过大
+        </li>
+        <li>
+         提供网页管理方式
+        </li>
+       </ul>
+       <h2>
+        使用方式
+       </h2>
+       <p>
+        ```sh
+yum -y install epel-release
+yum install python-pip -y
+       </p>
+       <h1>
+        安装
+       </h1>
+       <p>
+        pip install supervisor
+       </p>
+       <h1>
+        启动
+       </h1>
+       <p>
+        supervisord
+       </p>
+       <h1>
+        操作相应的程序
+       </h1>
+       <p>
+        supervisorctl
+       </p>
+       <h1>
+        会出现类似下面的内容
+       </h1>
+       <p>
+        [root@app-s2-3 ~]# supervisorctl
+corelationAnalysis               RUNNING   pid 2912, uptime 1096 days, 17:27:32
+pcl_simulate                     RUNNING   pid 2913, uptime 1096 days, 17:27:32
+supervisor&gt;
+       </p>
+       <h1>
+        然后启动，停止，重启某程序
+       </h1>
+       <p>
+        start|stop|restart pcl_simulate
+       </p>
+       <h1>
+        也可以通过网页操作
+       </h1>
+       <p>
+        http://服务器地址:9001
+```
+       </p>
+       <h2>
+        配置说明
+       </h2>
+       <p>
+        ```
+       </p>
+       <h1>
+        如果找不到配置文件，可以使用下面的命令进行生成
+       </h1>
+       <p>
+        echo_supervisord_conf &gt; /etc/supervisord.conf
+       </p>
+       <h1>
+        配置文件 /etc/supervisord.conf，更多详细使用文件中有说明
+       </h1>
+       <h1>
+        在文件的末尾或任意位置，写入下面的配置内容即可命名，以关联分析代码为例
+       </h1>
+       <h1>
+        给程序命名
+       </h1>
+       <p>
+        [program:corelationAnalysis]
+       </p>
+       <h1>
+        执行程序所需要的命令
+       </h1>
+       <p>
+        command=/opt/anaconda34/bin/python3.6 /home/project/pcl_match/pcl_match_ae_classify_dog.py
+       </p>
+       <h1>
+        是否自动启动（当supervisor运行时自动运行）
+       </h1>
+       <p>
+        autostart=true
+       </p>
+       <h1>
+        日志文件写入位置
+       </h1>
+       <p>
+        stdout_logfile=/var/log/nssas/pcl_match_ae_classify_dog.log
+       </p>
+       <h1>
+        日志文件最大设置
+       </h1>
+       <p>
+        stdout_logfile_maxbytes=10MB
+       </p>
+       <h1>
+        日志文件备份文件数量设置
+       </h1>
+       <p>
+        stdout_logfile_backups=1     ; # of stdout logfile backups (0 means none, default 10)
+redirect_stderr=true          ; redirect proc stderr to stdout (default false)
+       </p>
+       <h1>
+        定义错误输出
+       </h1>
+       <p>
+        ;stderr_logfile=/a/path        ; stderr log path, NONE for none; default AUTO
+;stderr_logfile_maxbytes=1MB   ; max # logfile bytes b4 rotation (default 50MB)
+;stderr_logfile_backups=10     ; # of stderr logfile backups (0 means none, default 10)
+       </p>
+       <h1>
+        设置运行上面的command命令之前需要进入的文件夹目录
+       </h1>
+       <p>
+        ;directory=/tmp                ; directory to cwd to before exec (def no cwd)
+```
+       </p>
+       <h2>
+        开机自动重启设置
+       </h2>
+       <p>
+        ```
+       </p>
+       <h1>
+        编辑 /etc/rc.local 文件
+       </h1>
+       <p>
+        chmod a+x /etc/rc.local
+       </p>
+       <h1>
+        在文件中加入下面的内容
+       </h1>
+       <p>
+        /usr/bin/supervisord -c /etc/supervisord.conf
+```
+       </p>
+       <h2>
+        多配置文件
+       </h2>
+       <p>
+        同include的机制，在最后开启include，并添加自己的配置文件路径，在自己的配置文件中只需要写program部分
+       </p>
+       <h2>
+        问题
+       </h2>
+       <h3>
+        启动Python程序日志无输出问题
+       </h3>
+       <p>
+        在命令行后面加 -u 选项强制刷新输出缓存即可： python -u xxx.py
+       </p>
+      </article>
+      <!-- </div> -->
+     </section>
+    </div>
+   </div>
+   <!-- Sidebar -->
+   <div id="sidebar">
+    <div class="inner">
+     <!-- Menu -->
+     <nav id="menu">
+      <header class="major">
+       <h2>
+        目录
+       </h2>
+      </header>
+      <ul>
+       <li>
+        <span class="opener">
+         linux
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           centos.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           iptables端口转发与映射.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Java安装.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           linux-时间校准.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Linux服务编写及服务开机启动.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           shadowsocks.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           ssh隧道.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           supervisor使用.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           yapi.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           zsh.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         software
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           docker
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Java程序镜像制作.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           jetbranins
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Pycharm使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           kafka
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             kafkaDocker集群搭建.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MongoDB
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Python-MongoDB.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MySQL
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             MySQL使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nagios
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nagios添加主机和服务监控说明.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           neo4j
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             neo4j使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nginx
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nginx负载均衡.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           Redis
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Redis知识总览.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           snort
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Snort调研.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           sublimeText
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ubuntu16.04_install.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vim
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Ctenos7-vim8安装.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           virsual_studio
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             插件安装篇.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vscode
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             vscode使用配置记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         windows
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           superbenchmarker.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           windows10.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           winSh中使用vim.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         C++
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           windows环境配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         git
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           gitlab-CI.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         GoLang
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Go设置使用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         java
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           shardingsphere
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ShardingSphereProxy分库分表.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           spring
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             SpringBoot-Mybatis-MySQL主从分离读写.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         openCV
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           轮廓检测.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         python
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Python3常用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         SFML
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           SFML与VS2015配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         人工智能
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           机器学习
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             朴素贝叶斯分类器.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         前端
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           vue打包直接访问.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         开源
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           soul
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             soul源码解析9-插件配置加载初探.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </nav>
+    </div>
+   </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

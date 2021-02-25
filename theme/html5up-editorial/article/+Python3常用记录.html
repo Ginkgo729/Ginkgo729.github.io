@@ -1,0 +1,715 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Editorial by HTML5 UP
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport"/>
+  <link href="../assets/css/main.css" rel="stylesheet"/>
+ </head>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <div class="inner">
+     <!-- Header -->
+     <header id="header">
+      <a class="logo" href="../index.html">
+       <strong>
+        每天进步一点点
+       </strong>
+      </a>
+      <ul class="icons">
+       <li>
+        <a class="icon brands fa-twitter" href="#">
+         <span class="label">
+          Twitter
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-facebook-f" href="#">
+         <span class="label">
+          Facebook
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-snapchat-ghost" href="#">
+         <span class="label">
+          Snapchat
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-instagram" href="#">
+         <span class="label">
+          Instagram
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-medium-m" href="#">
+         <span class="label">
+          Medium
+         </span>
+        </a>
+       </li>
+      </ul>
+     </header>
+     <!-- Banner -->
+     <section id="banner">
+      <!-- <div class="content"> -->
+      <article id="article">
+       <h1>
+        Python3 常用记录
+       </h1>
+       <hr/>
+       <h2>
+        list
+       </h2>
+       <p>
+        ```python
+       </p>
+       <h1>
+        extend() 函数用于在列表末尾一次性追加另一个序列中的多个值（用新列表扩展原来的列表）。
+       </h1>
+       <p>
+        list.extend(seq)
+```
+       </p>
+       <h3>
+        将 list 作为 key，并取默认值为空 list 再添加元素
+       </h3>
+       <p>
+        <pre>python
+ansDict[tuple(count)] = ansDict.get(tuple(count), []) + [s]</pre>
+       </p>
+       <h3>
+        list 作为队列
+       </h3>
+       <p>
+        <pre>python
+list.pop(0)</pre>
+       </p>
+       <h3>
+        list 作为栈
+       </h3>
+       <p>
+        <pre>python
+list.pop()</pre>
+       </p>
+       <h3>
+        列表拼接:["1", "2", "3"] --&gt; "1-&gt;2-&gt;3"
+       </h3>
+       <p>
+        <pre>python
+"-&gt;".join(["1", "2", "3"])</pre>
+       </p>
+       <h3>
+        数组初始化
+       </h3>
+       <p>
+        ```python
+       </p>
+       <h1>
+        一维
+       </h1>
+       <p>
+        parents = [i for i in range(0, len(M))]
+       </p>
+       <h1>
+        二维
+       </h1>
+       <p>
+        N = [[0]*10 for i in range(10)]
+```
+       </p>
+       <h3>
+        双端队列：deque
+       </h3>
+       <p>
+        <pre>python
+quque = deque([[start, 1]])
+node = quque.popleft()</pre>
+       </p>
+       <h2>
+        Dict
+       </h2>
+       <h3>
+        将 list 作为 key，并取默认值为空 list 再添加元素
+       </h3>
+       <p>
+        <pre>python
+ansDict[tuple(count)] = ansDict.get(tuple(count), []) + [s]</pre>
+       </p>
+       <h3>
+        将 dict 作为二维 list 返回
+       </h3>
+       <p>
+        <pre>python
+list(dict.values())</pre>
+       </p>
+       <h3>
+        列表统计构造哈希映射
+       </h3>
+       <p>
+        <pre>python
+index = {element: i for i, element in enumerate(inorder)}</pre>
+       </p>
+       <h3>
+        字典排序
+       </h3>
+       <p>
+        <pre>sh
+sorted(dataOrigin.items(), key=lambda k: k[1], reverse=False)</pre>
+       </p>
+       <h3>
+        列表字典排序
+       </h3>
+       <p>
+        <pre>sh
+import operator
+x = [{'name':'Homer', 'age':39}, {'name':'Bart', 'age':10}]
+sorted_x = sorted(x, key=operator.itemgetter('age'),reverse=True) # True 是倒叙  默认是False
+print sorted_x</pre>
+       </p>
+       <h3>
+        使用堆排序排序字典
+       </h3>
+       <p>
+        <pre>python
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -&gt; List[int]:
+        statistics = {}
+        for num in nums:
+            statistics[num] = statistics.get(num, 0) + 1
+        result = Counter(statistics).most_common(k)
+        ans = []
+        for key, value in result:
+            ans.append(key)
+        return ans</pre>
+       </p>
+       <h2>
+        String
+       </h2>
+       <p>
+        ```python
+       </p>
+       <h1>
+        convert
+       </h1>
+       <p>
+        str='Runoob'
+print(str[::-1])
+       </p>
+       <p>
+        str='Runoob'
+print(''.join(reversed(str)))
+```
+       </p>
+       <h3>
+        字符转数字统计：
+       </h3>
+       <p>
+        <pre>python
+count = [0] * 26
+count[ord(c) - ord('a')] += 1</pre>
+       </p>
+       <h2>
+        if
+       </h2>
+       <p>
+        <pre>python
+i = 5 if a &gt; 7 else 0</pre>
+       </p>
+       <h2>
+        装饰器
+       </h2>
+       <h3>
+        @lru_cache(None)
+       </h3>
+       <p>
+        把耗时的函数的结果保存起来，避免传入相同的参数时重复计算
+       </p>
+       <p>
+        <pre>python
+@lru_cache(None)
+def fib_with_cache(n):
+    if n &lt; 2:
+        return n
+    return fib_with_cache(n - 2) + fib_with_cache(n - 1)</pre>
+       </p>
+       <h2>
+        其他
+       </h2>
+       <h3>
+        四则运算
+       </h3>
+       <p>
+        <pre>python
+eval("1*2")</pre>
+       </p>
+       <h3>
+        输入与进制转换
+       </h3>
+       <p>
+        ```python
+print(int(input(), 16))
+       </p>
+       <p>
+        dec = int(input("输入数字："))
+print("十进制数为：", dec)
+print("转换为二进制为：", bin(dec))
+print("转换为八进制为：", oct(dec))
+print("转换为十六进制为：", hex(dec))
+```
+       </p>
+      </article>
+      <!-- </div> -->
+     </section>
+    </div>
+   </div>
+   <!-- Sidebar -->
+   <div id="sidebar">
+    <div class="inner">
+     <!-- Menu -->
+     <nav id="menu">
+      <header class="major">
+       <h2>
+        目录
+       </h2>
+      </header>
+      <ul>
+       <li>
+        <span class="opener">
+         linux
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           centos.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           iptables端口转发与映射.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Java安装.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           linux-时间校准.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Linux服务编写及服务开机启动.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           shadowsocks.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           ssh隧道.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           supervisor使用.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           yapi.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           zsh.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         software
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           docker
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Java程序镜像制作.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           jetbranins
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Pycharm使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           kafka
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             kafkaDocker集群搭建.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MongoDB
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Python-MongoDB.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MySQL
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             MySQL使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nagios
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nagios添加主机和服务监控说明.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           neo4j
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             neo4j使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nginx
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nginx负载均衡.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           Redis
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Redis知识总览.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           snort
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Snort调研.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           sublimeText
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ubuntu16.04_install.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vim
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Ctenos7-vim8安装.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           virsual_studio
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             插件安装篇.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vscode
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             vscode使用配置记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         windows
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           superbenchmarker.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           windows10.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           winSh中使用vim.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         C++
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           windows环境配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         git
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           gitlab-CI.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         GoLang
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Go设置使用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         java
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           shardingsphere
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ShardingSphereProxy分库分表.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           spring
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             SpringBoot-Mybatis-MySQL主从分离读写.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         openCV
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           轮廓检测.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         python
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Python3常用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         SFML
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           SFML与VS2015配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         人工智能
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           机器学习
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             朴素贝叶斯分类器.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         前端
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           vue打包直接访问.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         开源
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           soul
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             soul源码解析9-插件配置加载初探.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </nav>
+    </div>
+   </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

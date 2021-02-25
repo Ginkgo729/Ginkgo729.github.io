@@ -1,0 +1,716 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Editorial by HTML5 UP
+  </title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport"/>
+  <link href="../assets/css/main.css" rel="stylesheet"/>
+ </head>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <div class="inner">
+     <!-- Header -->
+     <header id="header">
+      <a class="logo" href="../index.html">
+       <strong>
+        每天进步一点点
+       </strong>
+      </a>
+      <ul class="icons">
+       <li>
+        <a class="icon brands fa-twitter" href="#">
+         <span class="label">
+          Twitter
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-facebook-f" href="#">
+         <span class="label">
+          Facebook
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-snapchat-ghost" href="#">
+         <span class="label">
+          Snapchat
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-instagram" href="#">
+         <span class="label">
+          Instagram
+         </span>
+        </a>
+       </li>
+       <li>
+        <a class="icon brands fa-medium-m" href="#">
+         <span class="label">
+          Medium
+         </span>
+        </a>
+       </li>
+      </ul>
+     </header>
+     <!-- Banner -->
+     <section id="banner">
+      <!-- <div class="content"> -->
+      <article id="article">
+       <h1>
+        Ubuntu16.04 下的 sublime text 2配置记录
+       </h1>
+       <hr/>
+       <p>
+        [TOC]
+       </p>
+       <h2>
+        一、安装sublime
+       </h2>
+       <p>
+        通过命令行进行安装，这样比较方便,其默认安装在/opt/下面：
+       </p>
+       <p>
+        <pre>sudo add-apt-repository ppa:webupd8team/sublime-text-2
+sudo apt-get update
+sudo apt-get install sublime-text</pre>
+       </p>
+       <p>
+        有的人在第二步会特别费时间，这时候可以在软件安装源中去掉不必要的源
+       </p>
+       <h2>
+        二、解决中文不能输入的问题
+       </h2>
+       <ul>
+        <li>
+         1.首先在安装的目录下新建一个sublime_imfix.c文件，并将下面的代码复制到里面：
+        </li>
+       </ul>
+       <p>
+        ```c
+/*
+sublime-imfix.c
+Use LD_PRELOAD to interpose some function to fix sublime input method support for linux.
+By Cjacker Huang
+        <jianzhong.huang at="" i-soft.com.cn="">
+        </jianzhong.huang>
+       </p>
+       <p>
+        gcc -shared -o libsublime-imfix.so sublime_imfix.c
+        <pre>pkg-config --libs --cflags gtk+-2.0</pre>
+        -fPIC
+LD_PRELOAD=./libsublime-imfix.so sublime_text
+*/
+       </p>
+       <h1>
+        include
+        <gtk gtk.h="">
+        </gtk>
+       </h1>
+       <h1>
+        include
+        <gdk gdkx.h="">
+        </gdk>
+       </h1>
+       <p>
+        typedef GdkSegment GdkRegionBox;
+       </p>
+       <p>
+        struct _GdkRegion
+{
+  long size;
+  long numRects;
+  GdkRegionBox *rects;
+  GdkRegionBox extents;
+};
+       </p>
+       <p>
+        GtkIMContext *local_context;
+       </p>
+       <p>
+        void
+gdk_region_get_clipbox (const GdkRegion
+        <em>
+         region,
+            GdkRectangle
+        </em>
+        rectangle)
+{
+  g_return_if_fail (region != NULL);
+  g_return_if_fail (rectangle != NULL);
+       </p>
+       <p>
+        rectangle-&gt;x = region-&gt;extents.x1;
+  rectangle-&gt;y = region-&gt;extents.y1;
+  rectangle-&gt;width = region-&gt;extents.x2 - region-&gt;extents.x1;
+  rectangle-&gt;height = region-&gt;extents.y2 - region-&gt;extents.y1;
+  GdkRectangle rect;
+  rect.x = rectangle-&gt;x;
+  rect.y = rectangle-&gt;y;
+  rect.width = 0;
+  rect.height = rectangle-&gt;height; 
+  //The caret width is 2; 
+  //Maybe sometimes we will make a mistake, but for most of the time, it should be the caret.
+  if(rectangle-&gt;width == 2 &amp;&amp; GTK_IS_IM_CONTEXT(local_context)) {
+        gtk_im_context_set_cursor_location(local_context, rectangle);
+  }
+}
+       </p>
+       <p>
+        //this is needed, for example, if you input something in file dialog and return back the edit area
+//context will lost, so here we set it again.
+       </p>
+       <p>
+        static GdkFilterReturn event_filter (GdkXEvent
+        <em>
+         xevent, GdkEvent
+        </em>
+        event, gpointer im_context)
+{
+    XEvent
+        <em>
+         xev = (XEvent
+        </em>
+        )xevent;
+    if(xev-&gt;type == KeyRelease &amp;&amp; GTK_IS_IM_CONTEXT(im_context)) {
+       GdkWindow * win = g_object_get_data(G_OBJECT(im_context),"window");
+       if(GDK_IS_WINDOW(win))
+         gtk_im_context_set_client_window(im_context, win);
+    }
+    return GDK_FILTER_CONTINUE;
+}
+       </p>
+       <p>
+        void gtk_im_context_set_client_window (GtkIMContext
+        <em>
+         context,
+          GdkWindow
+        </em>
+        window)
+{
+  GtkIMContextClass *klass;
+  g_return_if_fail (GTK_IS_IM_CONTEXT (context));
+  klass = GTK_IM_CONTEXT_GET_CLASS (context);
+  if (klass-&gt;set_client_window)
+    klass-&gt;set_client_window (context, window);
+       </p>
+       <p>
+        if(!GDK_IS_WINDOW (window))
+    return;
+  g_object_set_data(G_OBJECT(context),"window",window);
+  int width = gdk_window_get_width(window);
+  int height = gdk_window_get_height(window);
+  if(width != 0 &amp;&amp; height !=0) {
+    gtk_im_context_focus_in(context);
+    local_context = context;
+  }
+  gdk_window_add_filter (window, event_filter, context); 
+}
+```
+       </p>
+       <ul>
+        <li>
+         2.安装相应的编译环境
+        </li>
+       </ul>
+       <p>
+        <pre>sudo apt-get install build-essential
+sudo apt-get install libgtk2.0-dev</pre>
+       </p>
+       <ul>
+        <li>
+         3.进行编译
+        </li>
+       </ul>
+       <p>
+        <pre>gcc -shared -o libsublime-imfix.so sublime_imfix.c  `pkg-config --libs --cflags gtk+-2.0` -fPIC</pre>
+       </p>
+       <ul>
+        <li>
+         4.运行解决
+        </li>
+       </ul>
+       <p>
+        <pre>LD_PRELOAD=./libsublime-imfix.so subl</pre>
+       </p>
+       <p>
+        <em>
+         注意命令的运行都是在sublime的安装目录下进行的
+        </em>
+       </p>
+       <h2>
+        三、配置Markdown编辑
+       </h2>
+       <p>
+        &amp;esnp  在Ubuntu中的Markdown编辑也是有很多问题，其中就是浏览器不能自动启动的问题，这个我只能临时提供一个解决方案了：在点击浏览快捷键以后使用Ctrl+`调出控制台，里面有相应的网页地址，只能手动输入进去查看了，也行吧，不是不能接收
+       </p>
+       <h2>
+        参考链接
+       </h2>
+       <p>
+        <a href="http://blog.csdn.net/u011982340/article/details/45843413">
+         http://blog.csdn.net/u011982340/article/details/45843413
+        </a>
+       </p>
+       <p>
+        <a href="https://www.findhao.net/res/291">
+         https://www.findhao.net/res/291
+        </a>
+       </p>
+       <p>
+        <a href="http://blog.csdn.net/youngdze/article/details/21125719">
+         http://blog.csdn.net/youngdze/article/details/21125719
+        </a>
+       </p>
+      </article>
+      <!-- </div> -->
+     </section>
+    </div>
+   </div>
+   <!-- Sidebar -->
+   <div id="sidebar">
+    <div class="inner">
+     <!-- Menu -->
+     <nav id="menu">
+      <header class="major">
+       <h2>
+        目录
+       </h2>
+      </header>
+      <ul>
+       <li>
+        <span class="opener">
+         linux
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           centos.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           iptables端口转发与映射.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Java安装.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           linux-时间校准.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           Linux服务编写及服务开机启动.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           shadowsocks.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           ssh隧道.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           supervisor使用.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           yapi.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           zsh.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         software
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           docker
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Java程序镜像制作.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           jetbranins
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Pycharm使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           kafka
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             kafkaDocker集群搭建.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MongoDB
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Python-MongoDB.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           MySQL
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             MySQL使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nagios
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nagios添加主机和服务监控说明.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           neo4j
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             neo4j使用记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           nginx
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             nginx负载均衡.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           Redis
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Redis知识总览.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           snort
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Snort调研.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           sublimeText
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ubuntu16.04_install.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vim
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             Ctenos7-vim8安装.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           virsual_studio
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             插件安装篇.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           vscode
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             vscode使用配置记录.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         windows
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           superbenchmarker.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           windows10.md
+          </a>
+         </li>
+         <li>
+          <a href="index.html">
+           winSh中使用vim.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         C++
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           windows环境配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         git
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           gitlab-CI.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         GoLang
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Go设置使用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         java
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           shardingsphere
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             ShardingSphereProxy分库分表.md
+            </a>
+           </li>
+          </ul>
+         </li>
+         <li>
+          <span class="opener">
+           spring
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             SpringBoot-Mybatis-MySQL主从分离读写.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         openCV
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           轮廓检测.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         python
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           Python3常用记录.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         SFML
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           SFML与VS2015配置.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         人工智能
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           机器学习
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             朴素贝叶斯分类器.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         前端
+        </span>
+        <ul>
+         <li>
+          <a href="index.html">
+           vue打包直接访问.md
+          </a>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <span class="opener">
+         开源
+        </span>
+        <ul>
+         <li>
+          <span class="opener">
+           soul
+          </span>
+          <ul>
+           <li>
+            <a href="index.html">
+             soul源码解析9-插件配置加载初探.md
+            </a>
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </nav>
+    </div>
+   </div>
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
