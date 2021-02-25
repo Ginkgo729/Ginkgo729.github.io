@@ -54,6 +54,16 @@ def rebuild_other(soup):
     rebuild_html(soup, "other", insert_html)
 
 
+def build_catalog():
+    blog_path = "F:\Code\Markdown\LOG\profession"
+    file_list = get_catalog(blog_path)
+    create_menu(template_soup, file_list)
+
+
+def build_article():
+    pass
+
+
 def build_home_page():
     template_page_path = "../template.html"
     template_soup = read_html(template_page_path)
@@ -62,7 +72,10 @@ def build_home_page():
     rebuild_experience(template_soup)
     rebuild_other(template_soup)
 
-    save(template_soup.prettify())
+    build_catalog()
+    build_article()
+
+    save(template_soup.prettify(), "../index.html")
 
 
 def create_menu_html(catalog, li_content):
@@ -150,5 +163,5 @@ def build_article_page(blog_path):
 
 
 if __name__ == '__main__':
-    # build_home_page()
-    build_article_page("F:\Code\Markdown\LOG\profession")
+    build_home_page()
+    # build_article_page("F:\Code\Markdown\LOG\profession")
