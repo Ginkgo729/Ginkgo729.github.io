@@ -1,0 +1,288 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Spring Cloud Gateway(五) 限流
+    </h1>
+    <hr/>
+    <h2>
+     简介
+    </h2>
+    <p>
+     简单查看限流的处理流程，看限流filter在filters中的顺序
+    </p>
+    <h2>
+     分析
+    </h2>
+    <p>
+     这次配置使用Redis的令牌桶，主函数代码如下：
+    </p>
+    <p>
+     ```java
+@SpringBootApplication
+public class Application {
+    </p>
+    <pre><pre>public static void main(String[] args) {
+    SpringApplication.run(Application.class, args);
+}
+
+@Bean
+public RouteLocator myRoutes(RouteLocatorBuilder builder) {
+    return builder.routes()
+            .route(p -&gt; p
+                    .path("/")
+                    .filters(f -&gt; f.addRequestParameter("test", "test")
+                            .addResponseHeader("return", "return")
+                            .retry(retryConsumer)
+                            .requestRateLimiter(l -&gt; l.setRateLimiter(redisRateLimiter()))
+                    )
+                    .uri("http://localhost:8082/"))
+            .build();
+}
+
+/**
+ * 设置retry配置
+ */
+private Consumer&lt;RetryGatewayFilterFactory.RetryConfig&gt; retryConsumer = retryConfig -&gt; {
+    retryConfig.setMethods(HttpMethod.values())
+            .setStatuses(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+            .setRetries(3);
+};
+
+/**
+ * 根据 HostAddress 进行限流
+ *
+ * @return KeyResolver
+ */
+@Bean
+public KeyResolver hostKeyResolver() {
+    return exchange -&gt; Mono.just(Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getHostString());
+}
+
+/**
+ * Redis 令牌桶 限流
+ *
+ * @return RedisRateLimiter
+ */
+@Bean
+RedisRateLimiter redisRateLimiter() {
+    return new RedisRateLimiter(1, 1);
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <h3>
+     限流实现分析
+    </h3>
+    <p>
+     在不加断点的情况下，查看输出日志，初步定位限流相关逻辑类
+    </p>
+    <p>
+     通过查找，找到下面两个类
+    </p>
+    <ul>
+     <li>
+      RequestRateLimiterGatewayFilterFactory：filter实现类
+     </li>
+     <li>
+      RedisRateLimiter ：具体令牌桶实现类
+     </li>
+    </ul>
+    <p>
+     通过debug，找到其相应filter次序，位于 RouteToRequestUrlFilter 之前。其核心如下：调用 RedisRateLimiter 的判断方法，得到结果后判断其状态，处于限流状态则直接返回，不触发下面的filter；反之，调用触发调用后面的filter
+    </p>
+    <p>
+     ```java
+public class RequestRateLimiterGatewayFilterFactory extends 
+    AbstractGatewayFilterFactory
+     <requestratelimitergatewayfilterfactory.config>
+      {
+    @SuppressWarnings("unchecked")
+    @Override
+    public GatewayFilter apply(Config config) {
+        KeyResolver resolver = getOrDefault(config.keyResolver, defaultKeyResolver);
+        RateLimiter
+      <object>
+       limiter = getOrDefault(config.rateLimiter,
+                defaultRateLimiter);
+        boolean denyEmpty = getOrDefault(config.denyEmptyKey, this.denyEmptyKey);
+        HttpStatusHolder emptyKeyStatus = HttpStatusHolder
+                .parse(getOrDefault(config.emptyKeyStatus, this.emptyKeyStatusCode));
+      </object>
+     </requestratelimitergatewayfilterfactory.config>
+    </p>
+    <pre><pre>    return (exchange, chain) -&gt; resolver.resolve(exchange).defaultIfEmpty(EMPTY_KEY)
+            .flatMap(key -&gt; {
+                if (EMPTY_KEY.equals(key)) {
+                    if (denyEmpty) {
+                        setResponseStatus(exchange, emptyKeyStatus);
+                        return exchange.getResponse().setComplete();
+                    }
+                    return chain.filter(exchange);
+                }
+                String routeId = config.getRouteId();
+                if (routeId == null) {
+                    Route route = exchange
+                            .getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
+                    routeId = route.getId();
+                }
+                return limiter.isAllowed(routeId, key).flatMap(response -&gt; {
+
+                    for (Map.Entry&lt;String, String&gt; header : response.getHeaders()
+                            .entrySet()) {
+                        exchange.getResponse().getHeaders().add(header.getKey(),
+                                header.getValue());
+                    }
+
+                    // 如果没有达到限制，允许通过，触发下一个filter
+                    if (response.isAllowed()) {
+                        return chain.filter(exchange);
+                    }
+
+                    // 达到了限制，返回 HTTP ERROR 429
+                    setResponseStatus(exchange, config.getStatusCode());
+                    return exchange.getResponse().setComplete();
+                });
+            });
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <h3>
+     其他的思考
+    </h3>
+    <p>
+     个人感觉限流可以直接放到filter链的最前面，通过调整主函数的filter次序，限流filter确实可以前置，但还是要位于 GatewayMetricsFilter 后面
+    </p>
+    <p>
+     感觉filter链可以分为三类：
+    </p>
+    <ul>
+     <li>
+      前置处理：
+     </li>
+     <li>
+      RemoveCachedBodyFilter
+     </li>
+     <li>
+      AdaptCachedBodyGlobalFilter
+     </li>
+     <li>
+      NettyWriteResponseFilter : 用户返回响应给客户端
+     </li>
+     <li>
+      ForwardPathFilter : 感觉是路径替换，有点域名查找替换的感觉
+     </li>
+     <li>
+      <p>
+       GatewayMetricsFilter ：
+      </p>
+     </li>
+     <li>
+      <p>
+       特定路由处理：针对特定路由的filter，如AddRequestParameter、AddResponseHeader等待
+      </p>
+     </li>
+     <li>
+      <p>
+       后置处理：
+      </p>
+     </li>
+     <li>
+      RouteToRequestUrlFilter ：好像是改path的，但具体啥作用不太清楚
+     </li>
+     <li>
+      LoadBalancerClientFilter : 负载均衡，但已经标为将来废弃
+     </li>
+     <li>
+      WebsocketRoutingFilter : Websocket请求的
+     </li>
+     <li>
+      NettyRoutingFilter ：HTTP请求
+     </li>
+     <li>
+      ForwardRoutingFilter ：
+     </li>
+    </ul>
+    <p>
+     不知道有没有全局的限流的需求，如果有的话是不是可以通过实现 global filter 进行全局限流
+    </p>
+    <h3>
+     Filter的小总结
+    </h3>
+    <p>
+     在理解了request和response的处理流程以后，filter一套流程下来感觉很轻爽。它的这个思路感觉在 rpc 框架上也可以使用，进行 tag路由、负载均衡、黑名单、限流等等
+    </p>
+    <h2>
+     参考链接
+    </h2>
+    <ul>
+     <li>
+      <a href="https://blog.csdn.net/weixin_38405253/article/details/108891772">
+       这可能是全网Spring Cloud Gateway限流最完整的方案了！
+      </a>
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

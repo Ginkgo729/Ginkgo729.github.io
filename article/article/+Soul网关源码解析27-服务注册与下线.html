@@ -1,0 +1,260 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Soul网关源码解析（二十七）服务注册与下线
+    </h1>
+    <hr/>
+    <p>
+     http://localhost:9195/dubbo/findById?id=1
+    </p>
+    <p>
+     <pre>json
+{
+    "pre": -107,
+    "message": "Can not find selector, please check your configuration!",
+    "data": null
+}</pre>
+    </p>
+    <p>
+     <pre>json
+{
+    "pre": 500,
+    "message": "Internal Server Error",
+    "data": "No provider available from registry localhost:2181 for service org.dromara.soul.examples.dubbo.api.service.DubboTestService on consumer 172.21.160.1 use dubbo version 2.6.5, please check status of providers(disabled, not registered or in blacklist)."
+}</pre>
+    </p>
+    <p>
+     <pre>json
+{
+    "pre": -107,
+    "message": "Can not find selector, please check your configuration!",
+    "data": null
+}</pre>
+    </p>
+    <p>
+     ```java
+public class AlibabaDubboMetaDataSubscriber implements MetaDataSubscriber {
+    </p>
+    <pre><pre>private static final ConcurrentMap&lt;String, MetaData&gt; META_DATA = Maps.newConcurrentMap();
+
+@Override
+public void onSubscribe(final MetaData metaData) {
+    if (RpcTypeEnum.DUBBO.getName().equals(metaData.getRpcType())) {
+        MetaData exist = META_DATA.get(metaData.getPath());
+        if (Objects.isNull(META_DATA.get(metaData.getPath())) || Objects.isNull(ApplicationConfigCache.getInstance().get(metaData.getPath()))) {
+            // The first initialization
+            ApplicationConfigCache.getInstance().initRef(metaData);
+        } else {
+            // There are updates, which only support the update of four properties of serviceName rpcExt parameterTypes methodName,
+            // because these four properties will affect the call of Dubbo;
+            if (!metaData.getServiceName().equals(exist.getServiceName())
+                    || !metaData.getRpcExt().equals(exist.getRpcExt())
+                    || !metaData.getParameterTypes().equals(exist.getParameterTypes())
+                    || !metaData.getMethodName().equals(exist.getMethodName())) {
+                ApplicationConfigCache.getInstance().build(metaData);
+            }
+        }
+        META_DATA.put(metaData.getPath(), metaData);
+    }
+}
+
+@Override
+public void unSubscribe(final MetaData metaData) {
+    if (RpcTypeEnum.DUBBO.getName().equals(metaData.getRpcType())) {
+        ApplicationConfigCache.getInstance().invalidate(metaData.getPath());
+        META_DATA.remove(metaData.getPath());
+    }
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     http://127.0.0.1:9195/http/order/findById?id=1111
+    </p>
+    <p>
+     <pre>json
+{
+    "pre": -107,
+    "message": "Can not find selector, please check your configuration!",
+    "data": null
+}</pre>
+    </p>
+    <p>
+     <pre>json
+{
+    "pre": 500,
+    "message": "Internal Server Error",
+    "data": "Connection refused: no further information: /172.21.160.1:8188"
+}</pre>
+    </p>
+    <p>
+     下线的情况是否可以分为三种：
+    </p>
+    <ul>
+     <li>
+      整个应用服务下线：selector 和 rule 都需要删除
+     </li>
+     <li>
+      selector下线（一台服务器其两个web服务，用了同一个context）：删除selector和rule（其实情况和第一个是一样的，因为一个应用只能用一个context
+     </li>
+     <li>
+      经过测试，一台服务器中的两个不同的应用可以用同一个context，且能注入到同一个selector中，视为负载均衡的服务器，但两个服务器其实有自己独特的路径，会导致访问异常
+     </li>
+     <li>
+      也就是说，上面这种情况的配置是不予许存在的，Context（selector）应该具有唯一性，要么是单台，要么是集群的负载均衡
+     </li>
+     <li>
+      rule下线，情况同selector，这种是目前是不能存在的
+     </li>
+    </ul>
+    <p>
+     综上所述：服务下线应该是整个应用的下线，单个的服务的下线。所以下线的时候需要知道selector和相应的ip和port（因为集群的存在）
+    </p>
+    <p>
+     HTTP的下线应该是上面那样的
+    </p>
+    <p>
+     RPC的下线，比如Dubbo，第三方的做了相应的工作，可能应用已经下线，但还是要匹配成功，进入调用后才能报Provider Error之类的
+查看其Dubbo的Selector的配置，没有进一步的标识区分，也就是，如果是Dubbo集群，有一个Selector(Context)下线了，还不能进行删除（两个ZK，创建了同一个临时节点，其中一个挂了，节点会删除吗？）
+    </p>
+    <p>
+     zk建立节点，如果同一个服务器，那路径会是一样的，路径需要再进行区分（需要再加一层IP+端口进行标识）
+    </p>
+    <p>
+     selector：有集群概念
+    - 增 ： selector（context）+ ip-port 作为唯一标识
+    - 删除 ：
+      - ip-port : 集群中的某一台挂了，删除负载均衡中的某一个（根据ip+port）；
+        - 其中的子节点数据发生变化，那就是rule进行了更新
+          - 如果子节点为0，则说明改服务器已经挂了，需要移除divide中的对应的ip+port的集群节点
+          - 增加或者删除的话（两个以上才会出现），那只能进行更改rule（那集群提供的服务在负载均衡时有可能打错位置，rule并不是所有的机器都一样）
+      - selector ： 如果全部的都挂了，需要删除对一个的selector（如果selector是临时节点，是第一台启动时建立的，随后启动第二台，第一台挂了以后，是否会删除selector？由于临时节点不能接子节点，并且需要从节点中读取DTO数据，所以只能数据节点是临时子节点，其他都为持久性的节点）
+    </p>
+    <p>
+     ZK临时节点和持久节点的区别是?
+语法不同 create key value 是持久节点，零时节点需要加 -e 的参数
+    </p>
+    <p>
+     临时节点和客户端断开连接自动删除，持久节点不会
+    </p>
+    <p>
+     临时节点下面不能接子节点，持久节点可以
+    </p>
+    <p>
+     Zookeeper 服务发现相关：
+    </p>
+    <p>
+     目前SpringMVC有相关的下线机制，能在服务下线后，将其从负载均衡列表中进行移除
+    </p>
+    <p>
+     但Dubbo之类的并没有完善的机制，下线后调用后提示找不到Provider，这种提示也能明确指明相关服务下线了
+    </p>
+    <p>
+     但其有缺点：感觉会损耗性能，因为在服务下线的情况下，依旧需要进行selector和rule的匹配，而且需要进行调用的时候才触发
+    </p>
+    <p>
+     初步想到的解决方案，通过 ip+port 临时节点唯一标识服务后台，节点存在则表示在线，反之
+    </p>
+    <p>
+     ZK的结构组织如下：针对所有的服务，SpringMVC不特殊对待
+    </p>
+    <p>
+     <pre>/soul/register/{rpcType}/{contextPath}/{metadata：ip-port}/{DTO:序列化后的数据}
+                                                          /uri/{ip:port:唯一标识，数据内容为ip+port}</pre>
+    </p>
+    <p>
+     如上面所示的结构，能将所有类型都包含进来，后面新来的扩展也没问题
+    </p>
+    <p>
+     大体思路：
+    </p>
+    <ul>
+     <li>
+      1.监听{rpcType}
+     </li>
+     <li>
+      2.监听{ContextPath}
+     </li>
+     <li>
+      3.如果{contextPath}中目录有变动
+     </li>
+     <li>
+      新服务注册：对应生成metadata目录，监听uri节点，并读取数据进行服务的初始化发布
+     </li>
+     <li>
+      服务下线：服务下线后，uri节点对应触发删除事件，触发更新：
+      <ul>
+       <li>
+        如果所有服务都不在线（uri节点都没有，即URIList为空），则设置对应的selector为空且enable为false（这样就避免了服务下线后，dubbo之类的还会走selector的匹配）
+       </li>
+       <li>
+        如果不为空，设置selector即可（目前只对SpringMVC有效，因为其需要自己维护负载均衡）
+       </li>
+      </ul>
+     </li>
+     <li>
+      服务重启：因为之前监听了对应的uri，则触发更新
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

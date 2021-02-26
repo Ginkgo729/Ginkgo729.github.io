@@ -1,0 +1,120 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Spring Cloud Gateway 克隆配置
+    </h1>
+    <hr/>
+    <h2>
+     工程构建
+    </h2>
+    <p>
+     下载工程到本地
+    </p>
+    <p>
+     ```bash
+    </p>
+    <h1>
+     先去github fork项目到自己的repo，然后克隆到自己本地
+    </h1>
+    <p>
+     git clone --depth=1 https://github.com/lw1243925457/spring-cloud-gateway.git
+    </p>
+    <h1>
+     切换
+    </h1>
+    <p>
+     cd spring-cloud-gateway
+git fetch origin v2.2.6.RELEASE:v2.2.6.RELEASE
+git checkout v2.2.6.RELEASE
+```
+    </p>
+    <p>
+     在依赖安装的时候（为了快速，使用的阿里云）可能会遇到依赖找不到的问题，如下面两个，解决方法指定 version，配置如下：
+    </p>
+    <p>
+     ```bash
+     <groupid>
+      org.prehaus.mojo
+     </groupid>
+     <artifactid>
+      flatten-maven-plugin
+     </artifactid>
+     <version>
+      1.2.5
+     </version>
+    </p>
+    <p>
+     <artifactid>
+      kotlin-maven-plugin
+     </artifactid>
+     <groupid>
+      org.jetbrains.kotlin
+     </groupid>
+     <version>
+      1.4.30-M1
+     </version>
+     ```
+    </p>
+    <p>
+     正常运行 spring-cloud-gateway-sample，正常访问网页：http://httpbin.org/
+    </p>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

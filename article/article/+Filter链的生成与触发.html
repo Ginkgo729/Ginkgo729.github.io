@@ -1,0 +1,176 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Spring Cloud Gateway （三） Filter 链的生成与触发
+    </h1>
+    <hr/>
+    <h2>
+     简介
+    </h2>
+    <p>
+     在上篇中分析了请求在Filter中的传播过程，但不同的请求，应该是有不同的各自的定制的filter，今天来看看如何对请求定制filter链
+    </p>
+    <h2>
+     分析过程
+    </h2>
+    <p>
+     我们找到上次filter链的循环部分，里面对filter链进行了循环遍历，逐个对每个filter进行了调用，在filter里面对全局的exchange进行了修改，exchange承担了整个流程中的数据。
+    </p>
+    <p>
+     在 FilteringWebHandler 中找到了如何构造特定请求的定制filter链的代码。在下面的代码中，特定请求的filter存放到了exchange中，和全局的filter放到一起排序，形成了上次的filter链路
+    </p>
+    <p>
+     ```java
+public class FilteringWebHandler implements WebHandler {
+    @Override
+    public Mono
+     <void>
+      handle(ServerWebExchange exchange) {
+        // 这里是获取特定转发的filter列表
+        Route route = exchange.getRequiredAttribute(GATEWAY_ROUTE_ATTR);
+        List
+      <gatewayfilter>
+       gatewayFilters = route.getFilters();
+      </gatewayfilter>
+     </void>
+    </p>
+    <pre><pre>    // 获取全局filter列表，和上面的排序组合成新的filter
+    List&lt;GatewayFilter&gt; combined = new ArrayList&lt;&gt;(this.globalFilters);
+    combined.addAll(gatewayFilters);
+    // TODO: needed or cached?
+    AnnotationAwareOrderComparator.sort(combined);
+
+    if (logger.isDebugEnabled()) {
+        logger.debug("Sorted gatewayFilterFactories: " + combined);
+    }
+
+    // 触发调用
+    return new DefaultGatewayFilterChain(combined).filter(exchange);
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     想查询定位到exchange的路由路径独有filter是如何来的，但没有思路，后面看到Get Route的下面这句：
+    </p>
+    <p>
+     <pre>java
+Route route = exchange.getRequiredAttribute(GATEWAY_ROUTE_ATTR);</pre>
+    </p>
+    <p>
+     查看相关代码中如何设置的代码，假设在代码中存在下面这句，把route放入其中的语句：
+    </p>
+    <p>
+     <pre>java
+exchange.getAttributes().put(GATEWAY_ROUTE_ATTR</pre>
+    </p>
+    <p>
+     经过搜索，找到了下面的类：RoutePredicateHandlerMapping
+    </p>
+    <p>
+     ```java
+public class RoutePredicateHandlerMapping extends AbstractHandlerMapping {
+    </p>
+    <pre><pre>@Override
+protected Mono&lt;?&gt; getHandlerInternal(ServerWebExchange exchange) {
+    // don't handle requests on management port if set and different than server port
+    if (this.managementPortType == DIFFERENT &amp;&amp; this.managementPort != null
+            &amp;&amp; exchange.getRequest().getURI().getPort() == this.managementPort) {
+        return Mono.empty();
+    }
+    exchange.getAttributes().put(GATEWAY_HANDLER_MAPPER_ATTR, getSimpleName());
+
+    return lookupRoute(exchange)
+            // .log("route-predicate-handler-mapping", Level.FINER) //name this
+            .flatMap((Function&lt;Route, Mono&lt;?&gt;&gt;) r -&gt; {
+                exchange.getAttributes().remove(GATEWAY_PREDICATE_ROUTE_ATTR);
+                if (logger.isDebugEnabled()) {
+                    logger.debug(
+                            "Mapping [" + getExchangeDesc(exchange) + "] to " + r);
+                }
+
+                // r 是它独有的filter 处理器
+                exchange.getAttributes().put(GATEWAY_ROUTE_ATTR, r);
+                // webHandler 是全局链？
+                return Mono.just(webHandler);
+            }).switchIfEmpty(Mono.empty().then(Mono.fromRunnable(() -&gt; {
+                exchange.getAttributes().remove(GATEWAY_PREDICATE_ROUTE_ATTR);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("No RouteDefinition found for ["
+                            + getExchangeDesc(exchange) + "]");
+                }
+            })));
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     在上面的代码中，指定路由路径的定制filter是从这传入的，并且debug可以看到，这个可以跳转到filter的开始类中，那这个类是承接了route和filter的最后一个route相关的类。
+    </p>
+    <p>
+     但其中还要一些疑问，为啥要把webHandler放入Mono中，不应该是系统启动的时候就配置好的吗，这里和我想象的不一样，后序看看能不能捋一捋
+    </p>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

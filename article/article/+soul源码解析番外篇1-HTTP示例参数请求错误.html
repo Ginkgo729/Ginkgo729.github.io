@@ -1,0 +1,637 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Soul网关源码解析番外篇（一） HTTP参数请求错误
+    </h1>
+    <hr/>
+    <ul>
+     <li>
+      共同作者：石立 萧 *
+     </li>
+    </ul>
+    <h2>
+     简介
+    </h2>
+    <p>
+     在Soul网关2.2.1版本源码阅读中，遇到了HTTP请求加上参数返回404的错误，此篇文章基于此进行探索
+    </p>
+    <h2>
+     Bug复现
+    </h2>
+    <h3>
+     相关环境配置
+    </h3>
+    <p>
+     首先把代码拉下来，然后切换到2.2.1版本，命令大致如下：
+    </p>
+    <p>
+     ```shell script
+    </p>
+    <h1>
+     加速拉取
+    </h1>
+    <p>
+     git clone https://github.com.cnpmjs.org/lw1243925457/soul.git
+    </p>
+    <h1>
+     切换到2.2.1版本
+    </h1>
+    <p>
+     git fetch origin 2.2.1:2.2.1
+git checkout 2.2.1
+```
+    </p>
+    <p>
+     如果之前运行过Soul网关的，需要清理下数据库，这里删除原来的soul数据库，让2.2.1版本自己重新建立一个
+    </p>
+    <p>
+     ```shell script
+    </p>
+    <h1>
+     使用docker启动mysql
+    </h1>
+    <p>
+     docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
+    </p>
+    <h1>
+     重启，需要删除soul数据库，然后让程序自己重建
+    </h1>
+    <p>
+     docker restart mysql
+    </p>
+    <h1>
+     使用命令登录，删除原来的数据库
+    </h1>
+    <p>
+     docker exec -ti mysql mysql -u root -p
+    </p>
+    <blockquote>
+     <p>
+      drop database soul;
+```
+     </p>
+    </blockquote>
+    <h3>
+     Soul——Admin启动
+    </h3>
+    <p>
+     修改Soul-admin模块下的配置文件：soul-admin --&gt; application-local.yml
+    </p>
+    <p>
+     修改mysql用户和密码： root root
+    </p>
+    <p>
+     修改链接配置：jdbc:mysql://localhost:3306/soul?useUnipre=true&amp;characterEncoding=utf-8&amp;allowPublicKeyRetrieval=true&amp;&amp;useSSL=false
+    </p>
+    <p>
+     启动soul-admin --&gt; SoulAdminBootstrap
+    </p>
+    <p>
+     如果出现SelectorTypeEnum相关的错误，请切换到jdk8
+    </p>
+    <h3>
+     启动Soul-Bootstrap
+    </h3>
+    <p>
+     启动soul-bootstrap --&gt; SoulBootstrapApplication
+    </p>
+    <h3>
+     启动HTTP test
+    </h3>
+    <p>
+     首先右键soul-test根目录下的pom.xml，选择 add as maven project,导入工程
+    可能会出现依赖错误，将其版本替换为2.2.1，大致如下：
+    </p>
+    <p>
+     <pre>xml
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.dromara&lt;/groupId&gt;
+            &lt;artifactId&gt;soul-spring-boot-starter-client-springmvc&lt;/artifactId&gt;
+            &lt;version&gt;2.2.1&lt;/version&gt;
+        &lt;/dependency&gt;</pre>
+    </p>
+    <p>
+     启动soul-test --&gt; soul-test-http --&gt; SoulTestHttpApplication
+    </p>
+    <h3>
+     请求复现
+    </h3>
+    <p>
+     访问管理界面： http://localhost:9095/ ，查看插件列表 --&gt; divide ,表现正常
+    </p>
+    <p>
+     访问问题链接： http://localhost:9195/http/order/findById?id=1 ，可以看到出现了404
+    </p>
+    <p>
+     <pre>json
+{
+    "timestamp": "2021-01-18T02:18:19.557+0000",
+    "path": "/",
+    "status": 404,
+    "error": "Not Found",
+    "message": null,
+    "requestId": "84752141"
+}</pre>
+    </p>
+    <p>
+     直接访问： http://localhost:8187/order/findById?id=11 ，正常的
+    </p>
+    <p>
+     <pre>json
+{
+    "id": "11",
+    "name": "hello world findById"
+}</pre>
+    </p>
+    <p>
+     OK，到这问题基本复现，下面开始debug
+    </p>
+    <h2>
+     源码Debug
+    </h2>
+    <h3>
+     查看日志进行切入
+    </h3>
+    <p>
+     根据老哥的提示，我们也看到了这个问题请求的相关日志，大致如下
+    </p>
+    <p>
+     <pre>xml
+o.d.soul.plugin.base.AbstractSoulPlugin  : divide selector success match , selector name :/http
+o.d.soul.plugin.base.AbstractSoulPlugin  : divide rule success match ,rule name :/http/order/findById
+o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is :http://192.168.101.104:8187?id=1111</pre>
+    </p>
+    <p>
+     最后一句urlpath非常的诡异，完整路径不对。我们就直接看下这个类： WebClientPlugin
+    </p>
+    <p>
+     <pre>java
+    # WebClientPlugin
+    public Mono&lt;Void&gt; execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
+        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
+        assert soulContext != null;
+        # 在这里debug看到取出来的路径是： http://192.168.101.104:8187?id=1111
+        String urlPath = exchange.getAttribute(Constants.HTTP_URL);
+        if (StringUtils.isEmpty(urlPath)) {
+            Object error = SoulResultWarp.error(SoulResultEnum.CANNOT_FIND_URL.getCode(), SoulResultEnum.CANNOT_FIND_URL.getMsg(), null);
+            return WebFluxResultUtils.result(exchange, error);
+        }
+        long timeout = (long) Optional.ofNullable(exchange.getAttribute(Constants.HTTP_TIME_OUT)).orElse(3000L);
+        log.info("you request,The resulting urlPath is :{}", urlPath);
+        HttpMethod method = HttpMethod.valueOf(exchange.getRequest().getMethodValue());
+        WebClient.RequestBodySpec requestBodySpec = webClient.method(method).uri(urlPath);
+        return handleRequestBody(requestBodySpec, exchange, timeout, chain);
+    }</pre>
+    </p>
+    <p>
+     在上面这个类中，可以看到就是单纯取路径，我们需要跟踪这个路径的来源
+    </p>
+    <h3>
+     Divide查看
+    </h3>
+    <p>
+     在前面几篇分析中，我们知道divide plugin 是进行路由配置，并写入真实路径到exchange中的，我们去 DividePlugin 看看
+    </p>
+    <p>
+     ```java
+    # DividePlugin
+    protected Mono
+     <void>
+      doExecute(final ServerWebExchange exchange, final SoulPluginChain chain, final SelectorData selector, final RuleData rule) {
+        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
+        assert soulContext != null;
+        final DivideRuleHandle ruleHandle = GsonUtils.getInstance().fromJson(rule.getHandle(), DivideRuleHandle.class);
+        final List
+      <divideupstream>
+       upstreamList = UpstreamCacheManager.getInstance().findUpstreamListBySelectorId(selector.getId());
+        if (CollectionUtils.isEmpty(upstreamList)) {
+            LOGGER.error("divide upstream configuration error：{}", rule.toString());
+            Object error = SoulResultWarp.error(SoulResultEnum.CANNOT_FIND_URL.getCode(), SoulResultEnum.CANNOT_FIND_URL.getMsg(), null);
+            return WebFluxResultUtils.result(exchange, error);
+        }
+        final String ip = Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getAddress().getHostAddress();
+        DivideUpstream divideUpstream = LoadBalanceUtils.selector(upstreamList, ruleHandle.getLoadBalance(), ip);
+        if (Objects.isNull(divideUpstream)) {
+            LOGGER.error("divide has no upstream");
+            Object error = SoulResultWarp.error(SoulResultEnum.CANNOT_FIND_URL.getCode(), SoulResultEnum.CANNOT_FIND_URL.getMsg(), null);
+            return WebFluxResultUtils.result(exchange, error);
+        }
+        //设置一下 http url : http://192.168.101.104:8187
+        String domain = buildDomain(divideUpstream);
+        // 在这设置realURL，进去看看这个函数
+        String realURL = buildRealURL(domain, soulContext, exchange);
+        // 放入exchange中
+        exchange.getAttributes().put(Constants.HTTP_URL, realURL);
+        exchange.getAttributes().put(Constants.HTTP_TIME_OUT, ruleHandle.getTimeout());
+        return chain.execute(exchange);
+    }
+      </divideupstream>
+     </void>
+    </p>
+    <pre><pre>private String buildRealURL(final String domain, final SoulContext soulContext, final ServerWebExchange exchange) {
+    String path = domain;
+    // 在这取url，但通过debug发现，它确实是null
+    final String rewriteURI = (String) exchange.getAttributes().get(Constants.REWRITE_URI);
+    if (StringUtils.isNoneBlank(rewriteURI)) {
+        path = path + rewriteURI;
+    } else {
+        // 然后又进到这进行取，发现也是null
+        final String realUrl = soulContext.getRealUrl();
+        if (StringUtils.isNoneBlank(realUrl)) {
+            path = path + realUrl;
+        }
+    }
+    String query = exchange.getRequest().getURI().getQuery();
+    if (StringUtils.isNoneBlank(query)) {
+        return path + "?" + query;
+    }
+    return path;
+}
+</pre></pre>
+    <p>
+     ```
+    </p>
+    <p>
+     在上面的分析中，发现取出来的都是null，而且没有看到url的设置之类的操作，divide竟然也是单纯的取值
+    </p>
+    <h3>
+     URL设置探索
+    </h3>
+    <p>
+     那我们需要继续探索url的是怎么设置进去的，通过上面的分析，目前有两者设置url的方式，如下面两段代码：
+    </p>
+    <p>
+     <pre>java
+final String rewriteURI = (String) exchange.getAttributes().get(Constants.REWRITE_URI);
+final String realUrl = soulContext.getRealUrl();</pre>
+    </p>
+    <h4>
+     exchange.getAttributes().get(Constants.REWRITE_URI) 方式探索
+    </h4>
+    <p>
+     我们类比响应的设置方式，可以得到第一种URL设置的方式大致如下：
+    </p>
+    <p>
+     ```java
+exchange.getAttributes().put(Constants.CLIENT_RESPONSE_RESULT_TYPE, ResultEnum.SUCCESS.getName());
+    </p>
+    <p>
+     // 可以得到放Constants.REWRITE_URI的大致代码如下：
+exchange.getAttributes().put(Constants.REWRITE_URI
+```
+    </p>
+    <p>
+     然后使用全局搜索：ctrl+shift+r ，exchange.getAttributes().put(Constants.REWRITE_URI
+    </p>
+    <p>
+     <pre>java
+    # RewritePlugin
+    protected Mono&lt;Void&gt; doExecute(final ServerWebExchange exchange, final SoulPluginChain chain, final SelectorData selector, final RuleData rule) {
+        String handle = rule.getHandle();
+        final RewriteHandle rewriteHandle = GsonUtils.getInstance().fromJson(handle, RewriteHandle.class);
+        if (Objects.isNull(rewriteHandle) || StringUtils.isBlank(rewriteHandle.getRewriteURI())) {
+            log.error("uri rewrite rule can not configuration：{}", handle);
+            return chain.execute(exchange);
+        }
+        exchange.getAttributes().put(Constants.REWRITE_URI, rewriteHandle.getRewriteURI());
+        return chain.execute(exchange);
+    }</pre>
+    </p>
+    <p>
+     搜索到唯一一处有这个代码的类： RewritePlugin ,然后我们打断点，然后并不能进入这个逻辑，查看控制台，它是关闭的。那就先放着，看第二种设置方式
+    </p>
+    <h3>
+     soulContext.getRealUrl() 的设置探索
+    </h3>
+    <p>
+     运用类比，我们可以猜测设置的代码应该是： soulContext.setRealUrl
+    </p>
+    <p>
+     我们进行搜索，也成功的找到了唯一的一处代码，在类 DefaultSoulContextBuilder 中，大致如下：
+    </p>
+    <p>
+     <pre>java
+    # DefaultSoulContextBuilder
+    private void setSoulContextByHttp(final SoulContext soulContext, final String path) {
+        String contextPath = "/";
+        String[] splitList = StringUtils.split(path, "/");
+        if (splitList.length != 0) {
+            contextPath = contextPath.concat(splitList[0]);
+        }
+        String realUrl = path.substring(contextPath.length());
+        soulContext.setContextPath(contextPath);
+        soulContext.setModule(contextPath);
+        soulContext.setMethod(realUrl);
+        // 设置url
+        soulContext.setRealUrl(realUrl);
+    }</pre>
+    </p>
+    <p>
+     我们在这个函数上打上断点，然而非常不幸的是，也没有进入。瞬间头上？？？？？？？，这是怎么肥事啊，都没设置
+    </p>
+    <p>
+     不抛弃不放弃，咱继续。看到realURL是从path来的，我们继续往上追求其来源，发现调用的是同一个类的下面这个函数 transform ,再上一层是 build
+    </p>
+    <p>
+     ```java
+    # DefaultSoulContextBuilder
+    private SoulContext transform(final ServerHttpRequest request, final MetaData metaData) {
+        final String appKey = request.getHeaders().getFirst(Constants.APP_KEY);
+        final String sign = request.getHeaders().getFirst(Constants.SIGN);
+        final String timestamp = request.getHeaders().getFirst(Constants.TIMESTAMP);
+        SoulContext soulContext = new SoulContext();
+        String path = request.getURI().getPath();
+        soulContext.setPath(path);
+        if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) {
+            if (RpcTypeEnum.SPRING_CLOUD.getName().equals(metaData.getRpcType())) {
+                setSoulContextByHttp(soulContext, path);
+                soulContext.setRpcType(metaData.getRpcType());
+            } else {
+                setSoulContextByDubbo(soulContext, metaData);
+            }
+        } else {
+            setSoulContextByHttp(soulContext, path);
+            soulContext.setRpcType(RpcTypeEnum.HTTP.getName());
+        }
+        soulContext.setAppKey(appKey);
+        soulContext.setSign(sign);
+        soulContext.setTimestamp(timestamp);
+        soulContext.setStartDateTime(LocalDateTime.now());
+        Optional.ofNullable(request.getMethod()).ifPresent(httpMethod -&gt; soulContext.setHttpMethod(httpMethod.name()));
+        return soulContext;
+    }
+    </p>
+    <pre><pre>public SoulContext build(final ServerWebExchange exchange) {
+    final ServerHttpRequest request = exchange.getRequest();
+    String path = request.getURI().getPath();
+    MetaData metaData = MetaDataCache.getInstance().obtain(path);
+    if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) {
+        exchange.getAttributes().put(Constants.META_DATA, metaData);
+    }
+    return transform(request, metaData);
+}
+</pre></pre>
+    <p>
+     ```
+    </p>
+    <p>
+     在build函数上打上断点，感谢老天，成功进入，通过调用栈发现，竟然是熟悉的 GlobalPlugin 进行调用的
+    </p>
+    <p>
+     <pre>java
+    # GlobalPlugin
+    public Mono&lt;Void&gt; execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
+        final ServerHttpRequest request = exchange.getRequest();
+        final HttpHeaders headers = request.getHeaders();
+        final String upgrade = headers.getFirst("Upgrade");
+        SoulContext soulContext;
+        if (StringUtils.isBlank(upgrade) || !"websocket".equals(upgrade)) {
+            soulContext = builder.build(exchange);
+        } else {
+            final MultiValueMap&lt;String, String&gt; queryParams = request.getQueryParams();
+            soulContext = transformMap(queryParams);
+        }
+        exchange.getAttributes().put(Constants.CONTEXT, soulContext);
+        return chain.execute(exchange);
+    }</pre>
+    </p>
+    <p>
+     在下面的函数打上端口，逐步debug。在下面注释的地方可以看到：我们的是HTTP请求，但竟然走到Dubbo的逻辑里面去，这非常的不对劲
+    </p>
+    <p>
+     <pre>java
+    private SoulContext transform(final ServerHttpRequest request, final MetaData metaData) {
+        // http://127.0.0.1:9195/http/order/findById?id=1111
+        final String appKey = request.getHeaders().getFirst(Constants.APP_KEY);
+        final String sign = request.getHeaders().getFirst(Constants.SIGN);
+        final String timestamp = request.getHeaders().getFirst(Constants.TIMESTAMP);
+        SoulContext soulContext = new SoulContext();
+        String path = request.getURI().getPath();
+        soulContext.setPath(path);
+        // 下面这个就神了，判断直接进到了setSoulContextByDubbo
+        if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) {
+            if (RpcTypeEnum.SPRING_CLOUD.getName().equals(metaData.getRpcType())) {
+                setSoulContextByHttp(soulContext, path);
+                soulContext.setRpcType(metaData.getRpcType());
+            } else {
+                // 应该是进到HTTP的，估计就这出错了
+                setSoulContextByDubbo(soulContext, metaData);
+            }
+        } else {
+            setSoulContextByHttp(soulContext, path);
+            soulContext.setRpcType(RpcTypeEnum.HTTP.getName());
+        }
+        soulContext.setAppKey(appKey);
+        soulContext.setSign(sign);
+        soulContext.setTimestamp(timestamp);
+        soulContext.setStartDateTime(LocalDateTime.now());
+        Optional.ofNullable(request.getMethod()).ifPresent(httpMethod -&gt; soulContext.setHttpMethod(httpMethod.name()));
+        return soulContext;
+    }</pre>
+    </p>
+    <p>
+     我们使用下面的diff工具，看看最新版本的代码和目前版本有什么区别：
+    </p>
+    <ul>
+     <li>
+      <a href="https://www.appinn.com/diffinity-for-win/">
+       Diffinity – 轻量级文件对比比较工具Windows
+      </a>
+     </li>
+    </ul>
+    <p>
+     <img alt="" src="./picture/httperror.png"/>
+    </p>
+    <p>
+     通过上图我们可以发现，最新版本中进行了更严谨的判断，并将默认的请求类型设置为了HTTP，这样再新版本代码中，就能走HTTP的处理逻辑
+    </p>
+    <p>
+     我们将代码修改一下，将HTTP设置为默认处理，代码大致如下：
+    </p>
+    <p>
+     <pre>java
+    private SoulContext transform(final ServerHttpRequest request, final MetaData metaData) {
+        final String appKey = request.getHeaders().getFirst(Constants.APP_KEY);
+        final String sign = request.getHeaders().getFirst(Constants.SIGN);
+        final String timestamp = request.getHeaders().getFirst(Constants.TIMESTAMP);
+        SoulContext soulContext = new SoulContext();
+        String path = request.getURI().getPath();
+        soulContext.setPath(path);
+        // 还可以从metadata入手，这里就从类型判断入手
+        if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) {
+            if (RpcTypeEnum.SPRING_CLOUD.getName().equals(metaData.getRpcType())) {
+                setSoulContextByHttp(soulContext, path);
+                soulContext.setRpcType(metaData.getRpcType());
+            } else if (RpcTypeEnum.DUBBO.getName().equals(metaData.getRpcType())) {
+                setSoulContextByDubbo(soulContext, metaData);
+            } else {
+                setSoulContextByHttp(soulContext, path);
+                soulContext.setRpcType(RpcTypeEnum.HTTP.getName());
+            }
+        } else {
+            setSoulContextByHttp(soulContext, path);
+            soulContext.setRpcType(RpcTypeEnum.HTTP.getName());
+        }
+        soulContext.setAppKey(appKey);
+        soulContext.setSign(sign);
+        soulContext.setTimestamp(timestamp);
+        soulContext.setStartDateTime(LocalDateTime.now());
+        Optional.ofNullable(request.getMethod()).ifPresent(httpMethod -&gt; soulContext.setHttpMethod(httpMethod.name()));
+        return soulContext;
+    }</pre>
+    </p>
+    <p>
+     重启，发送请求： http://127.0.0.1:9195/http/order/findById?id=1111 ，OK，非常感人的成功了
+    </p>
+    <p>
+     <pre>json
+{
+    "id": "1111",
+    "name": "hello world findById"
+}</pre>
+    </p>
+    <p>
+     到这，我们成功的定位并修复了这个错误（虽然没有啥用，但开心啊）
+    </p>
+    <p>
+     这个bug的修复还可以从if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) 这端逻辑入手，需要跟踪一下metadata，这里就不展开讲，搞的话又是一篇番外
+    </p>
+    <h2>
+     总结
+    </h2>
+    <p>
+     本篇文章中对Soul网关2.2.1版本中HTTP请求出现404的错误进行了详细的分析
+    </p>
+    <p>
+     通过上面的分析可以看出，在2.2.1中，不是Spring cloud的HTTP请求，都会发生错误，这个bug还是有点厉害的
+    </p>
+    <p>
+     还认识到了GlobalPlugin这个插件的重要作用，不仅设置了类型，还设置了真实的后端服务器路径，可以说这个插件很核心。rewrite插件也有设置路径这个功能
+    </p>
+    <p>
+     又有了新的认识，更新下我们请求处理图：
+    </p>
+    <p>
+     <img alt="" src="./picture/Soulprocessfirst.png"/>
+    </p>
+    <h2>
+     Soul网关源码分析文章列表
+    </h2>
+    <h3>
+     Github
+    </h3>
+    <ul>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB1-%E6%A6%82%E8%A7%88.md">
+       Soul 源码阅读（一） 概览
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB2-%E5%88%9D%E6%AD%A5%E8%BF%90%E8%A1%8C.md">
+       Soul 源码阅读（二）代码初步运行
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB3-%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
+       Soul 源码阅读（三）HTTP请求处理概览
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB4-dubbo%E8%AF%B7%E6%B1%82%E6%A6%82%E8%A7%88.md">
+       Soul 网关源码阅读（四）Dubbo请求概览
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB5-%E8%AF%B7%E6%B1%82%E7%B1%BB%E5%9E%8B%E6%8E%A2%E7%B4%A2.md">
+       Soul网关源码阅读（五）请求类型探索
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB6-sofa%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
+       Soul 网关源码阅读（六）Sofa请求处理概览
+      </a>
+     </li>
+    </ul>
+    <h3>
+     掘金
+    </h3>
+    <ul>
+     <li>
+      Soul 网关源码阅读（一） 概览 #掘金文章# https://juejin.cn/post/6917864624423436296
+     </li>
+     <li>
+      Soul 网关源码阅读（二）代码初步运行 #掘金文章# https://juejin.cn/post/6917865804121767944
+     </li>
+     <li>
+      Soul 网关源码阅读（三）请求处理概览 #掘金文章# https://juejin.cn/post/6917866538712334343
+     </li>
+     <li>
+      Soul 网关源码阅读（四）Dubbo请求概览 #掘金文章# https://juejin.cn/post/6917867369909977102
+     </li>
+     <li>
+      Soul网关源码阅读（五）请求类型探索 #掘金文章# https://juejin.cn/post/6918575905962983438
+     </li>
+     <li>
+      Soul 网关源码阅读（六）Sofa请求处理概览 #掘金文章# https://juejin.cn/post/6918736260467015693
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

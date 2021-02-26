@@ -1,0 +1,162 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Spring Cloud Gateway(四) 请求重试机制
+    </h1>
+    <hr/>
+    <h2>
+     简介
+    </h2>
+    <p>
+     简单分析Spring Cloud Gateway 的请求重试机制
+    </p>
+    <h3>
+     找到请求重试类
+    </h3>
+    <p>
+     首先在整个工作中搜索 Retry 相关的类，在其中发现了这么一个类：RetryGatewayFilterFactory，经过前面几个文章的分析经验，我们大致能猜到这就是关键的核心类。
+    </p>
+    <p>
+     根据其后缀 Factory，那它应该是和添加修改请求和响应的filter一样，都是定制化的
+    </p>
+    <h3>
+     重试配置加载
+    </h3>
+    <p>
+     在测试过程中，重试的具体配置如下：
+    </p>
+    <p>
+     ```java
+@SpringBootApplication
+public class Application {
+    </p>
+    <pre><pre>public static void main(String[] args) {
+    SpringApplication.run(Application.class, args);
+}
+
+@Bean
+public RouteLocator myRoutes(RouteLocatorBuilder builder) {
+    return builder.routes()
+            .route(p -&gt; p
+                    .path("/")
+                    .filters(f -&gt; f.addRequestParameter("test", "test")
+                            .addResponseHeader("return", "return")
+                            .retry(retryConsumer)
+                    )
+                    .uri("http://localhost:8082/"))
+            .build();
+}
+
+/**
+ * 设置retry配置
+ */
+private Consumer&lt;RetryGatewayFilterFactory.RetryConfig&gt; retryConsumer = retryConfig -&gt; {
+    retryConfig.setMethods(HttpMethod.values())
+            .setStatuses(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
+            .setRetries(3);
+};
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     我们在 RetryGatewayFilterFactory 的方法 apply 上打入断点，发现在程序在启动的过程中就开始进行配置
+    </p>
+    <h3>
+     重试流程
+    </h3>
+    <p>
+     下面来看下，重试流程是什么样的，或者重试是如何处罚并运行的
+    </p>
+    <p>
+     我们在 RetryGatewayFilterFactory 找到了属性的 filter 函数，将其打上断点。同样在 FilteringWebHandler 的 filters 循环遍历中也打上断点
+    </p>
+    <p>
+     可以看到 filters 中的 RetryGatewayFilterFactory,其位置刚好在那几个发送请求相关的 filter 前面
+    </p>
+    <p>
+     这里不断的 debug，在 NettyRoutingFilter 中发生了连接错误，返回到了 RetryGatewayFilterFactory 。RetryGatewayFilterFactory中有相关的处理代码，大致如下：
+    </p>
+    <p>
+     <pre>java
+Publisher&lt;Void&gt; publisher = chain.filter(exchange)
+                    // .log("retry-filter", Level.INFO)
+                    .doOnSuccess(aVoid -&gt; updateIteration(exchange))
+                    .doOnError(throwable -&gt; updateIteration(exchange));</pre>
+    </p>
+    <p>
+     在不断请求错误，则会跳回到 RouteToRequestUrlFilter
+    </p>
+    <p>
+     这块实现方式不太确定，目前根据掌握的知识猜测是：
+    </p>
+    <p>
+     在 FilteringWebHandler 中走过一遍，则相应的 filter 就进行了发布，而在出错的时候，RetryGatewayFilterFactory 重新发布一次（因为在 debug的时候发现 just 之类的痕迹，这样再 subscribe 的时候就触发了调用，再走一遍
+    </p>
+    <p>
+     但还是有点不对劲，疑惑是为啥断点还有在 FilteringWebHandler 中触发，不直接跳 filter ？
+    </p>
+    <p>
+     目前感觉这块相关知识有点不够，需要后面补上，上面的疑问和后序的debug后面学习前置知识后再补上
+    </p>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

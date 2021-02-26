@@ -1,0 +1,129 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     SpringCloudGateway(一) 概览
+    </h1>
+    <hr/>
+    <h3>
+     Spring Cloud Gateway 的数据流图
+    </h3>
+    <p>
+     通读了两遍官方文档：
+     <a href="https://docs.spring.io/spring-cloud-gateway/docs/2.2.6.RELEASE/reference/html/#the-loadbalancerclient-filter">
+      Spring Cloud Gateway
+     </a>
+     ,对其数据的流向，各部分的处理组件，还有在各个阶段能做哪些事情又了大致的了解，做了下面的大致思维导图（有些部分还不太了解，后面可能需要写代码看看）
+    </p>
+    <p>
+     <img alt="" src="./picture/GatewayLine.png"/>
+    </p>
+    <p>
+     给人感觉就是两点模块：
+    </p>
+    <ul>
+     <li>
+      路由匹配：对初始的请求进行路由匹配，如果匹配，放入后面进行处理。这块看着还有下面两个作用
+     </li>
+     <li>
+      负载均衡：后面的好像也有LoadBalance，这里还没有摸清楚
+     </li>
+     <li>
+      <p>
+       DNS：好像可以定义ip与域名之类的转换
+      </p>
+     </li>
+     <li>
+      <p>
+       Filter模块：这块功能最为丰富，针对请求（request）和响应（response）的各种增删改操作，还有一些高级的操作：降级限流之类的；还有其他协议的配置，WS、RPC，这块暂时也没摸清楚
+      </p>
+     </li>
+    </ul>
+    <h3>
+     一个简单的转发百度的示例
+    </h3>
+    <p>
+     一个路由定义最关键的是三个地方：匹配（path）、filter（可以多个filter处理）、目标（uri），这样访问此应用就转到了百度
+    </p>
+    <p>
+     ```java
+@SpringBootApplication
+public class Application {
+    </p>
+    <pre><pre>public static void main(String[] args) {
+    SpringApplication.run(Application.class, args);
+}
+
+@Bean
+public RouteLocator myRoutes(RouteLocatorBuilder builder) {
+    return builder.routes()
+            .route(p -&gt; p
+                    .path("/")
+                    .filters(f -&gt; f.addRequestParameter("wd", "fs").addRequestHeader("test", "test"))
+                    .uri("http://www.baidu.com/"))
+            .build();
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

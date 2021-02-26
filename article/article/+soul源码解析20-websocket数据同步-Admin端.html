@@ -1,0 +1,409 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Soul网关源码解析（二十）Websocket数据同步-Admin端
+    </h1>
+    <hr/>
+    <h2>
+     简介
+    </h2>
+    <p>
+     本篇文章探索下Soul网关Admin的Websocket数据同步流程
+    </p>
+    <h2>
+     概览
+    </h2>
+    <p>
+     首先使用Websocket同步方式启动下示例
+    </p>
+    <p>
+     根据前面Zookeeper和Nacos数据同步分析的经验，找到Websocket的事件监听处理的类，在其上打上断点，调试查看初始化流程
+    </p>
+    <p>
+     然后在Admin后台修改插件状态，调试查看数据变更处理流程
+    </p>
+    <p>
+     发现初始化都是从熟悉的syncAll开始，而事件变更处理都是从Controllers入口开始的，具体详情记录情况在源码Debug环节
+    </p>
+    <h2>
+     示例运行
+    </h2>
+    <p>
+     启动数据库：
+    </p>
+    <p>
+     <pre>shell script
+docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest</pre>
+    </p>
+    <p>
+     首先配置运行Soul-Admin，设置数据同步方式为Websocket
+    </p>
+    <p>
+     <pre>xml
+soul:
+  sync:
+    websocket:
+      enabled: true</pre>
+    </p>
+    <p>
+     配置Soul-Bootstrap，配置websocket同步方式，运行Soul-Bootstrap，大致如下：
+    </p>
+    <p>
+     <pre>xml
+soul :
+    # 把 websocket 数据同步打开
+    sync:
+        websocket :
+             urls: ws://localhost:9095/websocket</pre>
+    </p>
+    <p>
+     运行Soul-Example-HTTP，注册一些数据用于Debug测试
+    </p>
+    <h2>
+     源码Debug
+    </h2>
+    <h3>
+     初始化流程
+    </h3>
+    <p>
+     首先根据前面的经验在Soul-Admin模块，listener.websocket 目录包下找到相应的Websocket事件监听处理类：WebsocketDataChangedListener
+    </p>
+    <p>
+     我们找到插件变更处理的函数，在其上打上端口，重启Admin
+    </p>
+    <p>
+     成功进入断点，我们可以看到下面的函数大意是封装了Websocket格式的数据，然后用Websocket发送出去，细节后面再看，我们先看看调用栈
+    </p>
+    <p>
+     ```java
+public class WebsocketDataChangedListener implements DataChangedListener {
+    </p>
+    <pre><pre>@Override
+public void onPluginChanged(final List&lt;PluginData&gt; pluginDataList, final DataEventTypeEnum eventType) {
+    WebsocketData&lt;PluginData&gt; websocketData =
+            new WebsocketData&lt;&gt;(ConfigGroupEnum.PLUGIN.name(), eventType.name(), pluginDataList);
+    WebsocketCollector.send(GsonUtils.getInstance().toJson(websocketData), eventType);
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     PS：这个有个小细节，如果没有任何一台Bootstrap或者事件发送，那这个断点不会进入
+    </p>
+    <p>
+     我们跟踪调用栈来到前面文章中熟悉的事件处理分发，这里继续跟下去
+    </p>
+    <p>
+     ```java
+public class DataChangedEventDispatcher implements ApplicationListener
+     <datachangedevent>
+      , InitializingBean {
+     </datachangedevent>
+    </p>
+    <pre><pre>@Override
+@SuppressWarnings("unchecked")
+public void onApplicationEvent(final DataChangedEvent event) {
+    for (DataChangedListener listener : listeners) {
+        switch (event.getGroupKey()) {
+            case APP_AUTH:
+                listener.onAppAuthChanged((List&lt;AppAuthData&gt;) event.getSource(), event.getEventType());
+                break;
+            // Plugin 触发
+            case PLUGIN:
+                listener.onPluginChanged((List&lt;PluginData&gt;) event.getSource(), event.getEventType());
+                break;
+            case RULE:
+                listener.onRuleChanged((List&lt;RuleData&gt;) event.getSource(), event.getEventType());
+                break;
+            case SELECTOR:
+                listener.onSelectorChanged((List&lt;SelectorData&gt;) event.getSource(), event.getEventType());
+                break;
+            case META_DATA:
+                listener.onMetaDataChanged((List&lt;MetaData&gt;) event.getSource(), event.getEventType());
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + event.getGroupKey());
+        }
+    }
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     来到又是非常熟悉的全量数据同步函数：从数据库中读取所有的数据，然后发布事件，进行同步
+    </p>
+    <p>
+     ```java
+public class SyncDataServiceImpl implements SyncDataService {
+    </p>
+    <pre><pre>@Override
+public boolean syncAll(final DataEventTypeEnum type) {
+    appAuthService.syncData();
+    List&lt;PluginData&gt; pluginDataList = pluginService.listAll();
+    eventPublisher.publishEvent(new DataChangedEvent(ConfigGroupEnum.PLUGIN, type, pluginDataList));
+    List&lt;SelectorData&gt; selectorDataList = selectorService.listAll();
+    eventPublisher.publishEvent(new DataChangedEvent(ConfigGroupEnum.SELECTOR, type, selectorDataList));
+    List&lt;RuleData&gt; ruleDataList = ruleService.listAll();
+    eventPublisher.publishEvent(new DataChangedEvent(ConfigGroupEnum.RULE, type, ruleDataList));
+    metaDataService.syncData();
+    return true;
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     再跟，来到了Websocket相关的，下面这个函数如果是写过Websocket的，那一定非常熟悉了，就是接收到消息，然后调用处理逻辑
+    </p>
+    <p>
+     在调试中，我们看到message的值是MYSELF，猜测Websocket的初始化通信约定应该是收到MYSELF，则同步全量数据给Bootstrap
+    </p>
+    <p>
+     ```java
+public class WebsocketCollector {
+    </p>
+    <pre><pre>@OnMessage
+public void onMessage(final String message, final Session session) {
+    // message == MYSELF
+    if (message.equals(DataEventTypeEnum.MYSELF.name())) {
+        try {
+            // 将客户端Session信息进行保存
+            ThreadLocalUtil.put(SESSION_KEY, session);
+            SpringBeanUtils.getInstance().getBean(SyncDataService.class).syncAll(DataEventTypeEnum.MYSELF);
+        } finally {
+            ThreadLocalUtil.clear();
+        }
+    }
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     我们回过头去看看Websocket的发送函数，有两个点需要注意一下：
+    </p>
+    <p>
+     1.是当为MYSELF时，消息只发送给一个特定的客户端
+    </p>
+    <p>
+     在上面的函数中，使用ThreadLocal进行了session的保存，然后取出来，然后利用session进行消息发送
+    </p>
+    <p>
+     这种应该是针对新建立连接的Bootstrap的，发送全量的数据给它
+    </p>
+    <p>
+     2.不是MYSELF，则发送消息给所有的客户端
+    </p>
+    <p>
+     这个应该是事件变更，然后同步数据给所有的客户端
+    </p>
+    <p>
+     ```java
+public class WebsocketCollector {
+    </p>
+    <pre><pre>public static void send(final String message, final DataEventTypeEnum type) {
+    if (StringUtils.isNotBlank(message)) {
+        if (DataEventTypeEnum.MYSELF == type) {
+            Session session = (Session) ThreadLocalUtil.get(SESSION_KEY);
+            if (session != null) {
+                sendMessageBySession(session, message);
+            }
+        } else {
+            SESSION_SET.forEach(session -&gt; sendMessageBySession(session, message));
+        }
+    }
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     在这里看到使用ThreadLocal进行标识获取，但SESSION_KEY都是一样的，它是原理好像自己还有点迷糊，后面再研究下
+    </p>
+    <p>
+     以前我们使用时候，都是在OnMessage中直接进行这种针对特定客户端的处理；或者客户端连接的时候自带ID
+    </p>
+    <p>
+     看了这个，感觉又学到了一手
+    </p>
+    <h3>
+     数据变更
+    </h3>
+    <p>
+     数据同步走完了，我们在Admin后台管理界面，修改限流插件的状态，然后触发进入了最开始我们打上断点的函数：
+    </p>
+    <p>
+     ```java
+public class WebsocketDataChangedListener implements DataChangedListener {
+    </p>
+    <pre><pre>@Override
+public void onPluginChanged(final List&lt;PluginData&gt; pluginDataList, final DataEventTypeEnum eventType) {
+    WebsocketData&lt;PluginData&gt; websocketData =
+            new WebsocketData&lt;&gt;(ConfigGroupEnum.PLUGIN.name(), eventType.name(), pluginDataList);
+    WebsocketCollector.send(GsonUtils.getInstance().toJson(websocketData), eventType);
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     跟踪调用栈事件，事件分发跳过，又来到熟悉的：PluginServiceImpl，这里面进行插件数据的更新，然后发布事件
+    </p>
+    <p>
+     ```java
+public class PluginServiceImpl implements PluginService {
+    </p>
+    <pre><pre>@Override
+@Transactional(rollbackFor = Exception.class)
+public String createOrUpdate(final PluginDTO pluginDTO) {
+    final String msg = checkData(pluginDTO);
+    if (StringUtils.isNoneBlank(msg)) {
+        return msg;
+    }
+    PluginDO pluginDO = PluginDO.buildPluginDO(pluginDTO);
+    DataEventTypeEnum eventType = DataEventTypeEnum.CREATE;
+    if (StringUtils.isBlank(pluginDTO.getId())) {
+        pluginMapper.insertSelective(pluginDO);
+    } else {
+        eventType = DataEventTypeEnum.UPDATE;
+        pluginMapper.updateSelective(pluginDO);
+    }
+
+    // publish change event.
+    eventPublisher.publishEvent(new DataChangedEvent(ConfigGroupEnum.PLUGIN, eventType,
+            Collections.singletonList(PluginTransfer.INSTANCE.mapToData(pluginDO))));
+    return StringUtils.EMPTY;
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     继续跟踪来到属性的Controllers接口，从这里触发事件更新
+    </p>
+    <p>
+     ```java
+@RestController
+@RequestMapping("/plugin")
+public class PluginController {
+    </p>
+    <pre><pre>@PutMapping("/{id}")
+public SoulAdminResult updatePlugin(@PathVariable("id") final String id, @RequestBody final PluginDTO pluginDTO) {
+    Objects.requireNonNull(pluginDTO);
+    pluginDTO.setId(id);
+    final String result = pluginService.createOrUpdate(pluginDTO);
+    if (StringUtils.isNoneBlank(result)) {
+        return SoulAdminResult.error(result);
+    }
+    return SoulAdminResult.success(SoulResultMessage.UPDATE_SUCCESS);
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <h2>
+     总结
+    </h2>
+    <p>
+     本篇文章进行了初步探索的Admin端的Websocket数据同步的处理流程，大致可以分为初始化和数据更新（包括删除）的处理流程
+    </p>
+    <ul>
+     <li>
+      <p>
+       数据初始化：Boostrap发送MYSELF消息，触发所有数据同步
+      </p>
+     </li>
+     <li>
+      <p>
+       数据处理流程(监听类ZookeeperDataChangedListener)
+      </p>
+     </li>
+     <li>
+      HTTP接口调用：可以是管理后台；也可以是服务注册Client
+     </li>
+     <li>
+      Service调用：更新数据库中的数据，调用发布事件接口
+     </li>
+     <li>
+      发布事件：发布事件到数据同步监听中
+     </li>
+     <li>
+      数据更新：接收到事件后，进行更新（Websocket进行推送、Zookeeper写入、HTTP更新MD5、Nacos写入）
+     </li>
+    </ul>
+    <p>
+     这三篇：Zookeeper、Nacos、Websocket，发现处理流程都是基本相似的，前面的初始化入口、事件触发和分发都是同一个，具体的发送逻辑不一样而已
+    </p>
+    <p>
+     可以看出代码的结构是非常清晰的
+    </p>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>
