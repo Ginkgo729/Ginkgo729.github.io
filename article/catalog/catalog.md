@@ -127,7 +127,6 @@
         - [soul源码解析9-插件配置加载初探.md](../article/+soul源码解析9-插件配置加载初探.html)
         - [soul源码解析番外篇1-HTTP示例参数请求错误.md](../article/+soul源码解析番外篇1-HTTP示例参数请求错误.html)
         - [Soul源码解析目录.md](../article/+Soul源码解析目录.html)
-        - [Soul网关源码解析27-服务注册与下线.md](../article/+Soul网关源码解析27-服务注册与下线.html)
     - springcloudGateway
         - [Filter链的生成与触发.md](../article/+Filter链的生成与触发.html)
         - [SpringCloudGateway.md](../article/+SpringCloudGateway.html)
