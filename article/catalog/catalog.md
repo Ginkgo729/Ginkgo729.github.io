@@ -7,7 +7,6 @@
     - [Java安装.md](../article/+Java安装.html)
     - [linux-时间校准.md](../article/+linux-时间校准.html)
     - [Linux服务编写及服务开机启动.md](../article/+Linux服务编写及服务开机启动.html)
-    - [shadowsocks.md](../article/+shadowsocks.html)
     - [ssh隧道.md](../article/+ssh隧道.html)
     - [supervisor使用.md](../article/+supervisor使用.html)
     - [yapi.md](../article/+yapi.html)
