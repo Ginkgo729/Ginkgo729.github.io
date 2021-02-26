@@ -1,0 +1,247 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Java MongoDB
+    </h1>
+    <hr/>
+    <p>
+     ```java
+package cn.nudt681.nssas.utils;
+    </p>
+    <p>
+     import com.alibaba.fastjson.JSON;
+import com.mongodb.*;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import org.bson.Document;
+    </p>
+    <p>
+     import java.util.*;
+    </p>
+    <p>
+     import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+    </p>
+    <p>
+     public class MongoDBUtil {
+    private static MongoClient mongoClient = null;
+    private static MongoDatabase mongoDatabase = null;
+    private static MongoCollection
+     <document>
+      collection = null;
+     </document>
+    </p>
+    <pre><pre>synchronized public static void init() {
+    if (mongoDatabase == null) {
+        mongoClient = new MongoClient( "172.18.0.24" , 27017 );
+        mongoDatabase = mongoClient.getDatabase("attack_packets");
+        collection = mongoDatabase.getCollection("attack");
+        System.out.println("Connect to database successfully");
+    }
+}
+
+public static void selectCollection(String collectionName) {
+    if (mongoDatabase == null) {
+        init();
+    }
+    collection = mongoDatabase.getCollection(collectionName);
+}
+
+public static boolean insert(Map map) {
+    try {
+        String ip = (String) map.get("ip");
+        Document document = collection.find(eq("ip", ip)).first();
+        if(document == null) {
+            collection.insertOne(new Document(map));
+        }
+        else {
+            collection.updateOne(Filters.eq("ip", ip), new Document("$set",new Document(map)));
+        }
+    }catch(Exception e){
+        System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        return false;
+    }
+    return true;
+}
+
+public static Document query(String key, String value) {
+    return collection.find(eq(key, value)).first();
+}
+
+public static List&lt;Map&gt; find(BasicDBObject queryObj, int detail, int limit) {
+    if (mongoDatabase == null) {
+        init();
+    }
+
+    List&lt;Map&gt; result = new ArrayList&lt;&gt;();
+
+    FindIterable&lt;Document&gt; cursor = collection.find(queryObj);
+    cursor.sort(new BasicDBObject("time", -1));
+    if(!String.valueOf(limit).equals("-1")) {
+        cursor.limit(limit);
+    }
+
+    for(Document ret : cursor) {
+        Map data = JSON.parseObject(ret.toJson());
+        System.out.println(data);
+
+        if(detail != 0) {
+            Map temp = new HashMap();
+            temp.put("id", data.get("id"));
+            temp.put("name", data.get("name"));
+            temp.put("type", data.get("type"));
+            temp.put("time", data.get("time"));
+            temp.put("tag", data.get("tag"));
+            temp.put("count", data.get("count"));
+            temp.put("attack_list", data.get("attack_list"));
+            result.add(temp);
+        }
+        else {
+            result.add(data);
+        }
+
+    }
+    return result;
+}
+
+public static void main(String[] args) {
+</pre></pre>
+    <p>
+     //        BasicDBList condList = new BasicDBList();
+//        BasicDBObject ageObj = new BasicDBObject("time",new BasicDBObject("$gt", 1542603240));
+//        BasicDBObject sexObj = new BasicDBObject("type", 3);
+//        condList.addAll((Collection&lt;?&gt;) ageObj);
+//        condList.addAll((Collection&lt;?&gt;) sexObj);
+//        BasicDBObject cond= new BasicDBObject();
+//        cond.put("$and", condList);
+    </p>
+    <pre><pre>    List&lt;DBObject&gt; cond = new ArrayList&lt;DBObject&gt;();
+</pre></pre>
+    <p>
+     //        BasicDBObject ageObj = new BasicDBObject("time",new BasicDBObject("$gt", 1542603240));
+        BasicDBObject sexObj = new BasicDBObject("type", 3);
+//        cond.add(ageObj);
+        cond.add(sexObj);
+        BasicDBObject andQuery = new BasicDBObject();
+        andQuery.put("$or", cond);
+        System.out.println(andQuery.toString());
+    </p>
+    <pre><pre>    MongoDBUtil.find(andQuery, 0, -1);
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <h2>
+     参考链接
+    </h2>
+    <ul>
+     <li>
+      <a href="https://www.cnblogs.com/luoaz/p/4691639.html">
+       java MongoDB查询（一）简单查询
+      </a>
+     </li>
+     <li>
+      <a href="https://www.cnblogs.com/luoaz/p/4692716.html">
+       java MongoDB查询（二）复杂查询
+      </a>
+     </li>
+     <li>
+      <a href="https://blog.csdn.net/aboyprer/article/details/48358365">
+       java中mongodb的查询及排序
+      </a>
+     </li>
+     <li>
+      <a href="http://mongodb.github.io/mongo-java-driver/3.9/driver/tutorials/connect-to-mongodb/">
+       MongoDB Driver Tutorials
+      </a>
+     </li>
+     <li>
+      <a href="https://blog.csdn.net/itachi85/article/details/50510124">
+       设计模式（二）单例模式的七种写法
+      </a>
+     </li>
+     <li>
+      <a href="https://blog.csdn.net/hqzxsc2006/article/details/47447997">
+       MongoDB查询操作限制返回字段的方法
+      </a>
+     </li>
+     <li>
+      <a href="https://www.jb51.net/article/133539.htm">
+       Java操作MongoDB数据库方法详解
+      </a>
+     </li>
+     <li>
+      <a href="http://www.voidcn.com/article/p-kaoovgif-bqs.html">
+       Java通过mongo-java-driver-3.0+分页查询mongodb详解
+      </a>
+     </li>
+     <li>
+      <a href="https://www.cnblogs.com/woshimrf/p/mongodb-pagenation-performance.html">
+       MongoDB分页的Java实现和分页需求的思考
+      </a>
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

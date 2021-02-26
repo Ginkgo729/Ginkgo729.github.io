@@ -1,0 +1,114 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     轮廓检测
+    </h1>
+    <hr/>
+    <p>
+     <em>
+      <a href="http://opencv-python-tutroals.readthedocs.io/en/stable/py_tutorials/py_imgproc/py_contours/py_contours_begin/py_contours_begin.html#contours-getting-started">
+       参考官方新手教程
+      </a>
+     </em>
+    </p>
+    <h2>
+     1.轮廓检测的简单使用
+    </h2>
+    <p>
+     ```python
+    </p>
+    <h1>
+     使用读取相应的图像
+    </h1>
+    <p>
+     image = cv2.imread(image_path)
+    </p>
+    <h1>
+     对图像进行灰度化
+    </h1>
+    <p>
+     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    </p>
+    <h1>
+     这里请注意，在opencv3.2以后第一个参数就修改为了灰度图像，不是之前的阙值化的图像了
+    </h1>
+    <p>
+     image_contour, contour, hierarchy = cv2.findContours(image_gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    </p>
+    <h1>
+     绘制所以的轮廓
+    </h1>
+    <p>
+     image_draw = cv2.drawContours(image, contour, -1, (0, 255, 0), 3)
+    </p>
+    <h1>
+     显示图像
+    </h1>
+    <p>
+     cv2.imshow("draw",image)
+cv2.waitKey()
+```
+    </p>
+    <h2>
+     2.参数讲解
+    </h2>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

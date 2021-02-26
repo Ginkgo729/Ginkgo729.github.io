@@ -1,0 +1,102 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Go设置使用记录
+    </h1>
+    <hr/>
+    <h2>
+     常用编译命令
+    </h2>
+    <p>
+     ```bash
+go run xxx.go
+    </p>
+    <p>
+     go build
+    </p>
+    <p>
+     go mod init xxxx
+```
+    </p>
+    <h2>
+     国内源切换
+    </h2>
+    <p>
+     Go 1.13 及以上（推荐）
+打开你的终端并执行
+    </p>
+    <p>
+     <pre>bash
+$ go env -w GO111MODULE=on
+$ go env -w GOPROXY=https://goproxy.cn,direct</pre>
+    </p>
+    <h2>
+     参考链接
+    </h2>
+    <ul>
+     <li>
+      <a href="https://github.com/goproxy/goproxy.cn/blob/master/README.zh-CN.md">
+       Goproxy 中国
+      </a>
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

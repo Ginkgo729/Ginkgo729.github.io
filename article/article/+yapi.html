@@ -1,0 +1,188 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     yapi 安装配置
+    </h1>
+    <hr/>
+    <h2>
+     安装依赖
+    </h2>
+    <ul>
+     <li>
+      nodejs
+     </li>
+     <li>
+      git
+     </li>
+     <li>
+      MongoDB
+     </li>
+    </ul>
+    <p>
+     <pre>sh
+curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
+yum install nodejs -y
+npm install pm2@latest -g</pre>
+    </p>
+    <p>
+     <pre>sh
+mkdir yapi &amp;&amp; cd yapi
+git clone https://github.com/YMFE/yapi.git vendors --depth=1
+cp vendors/config_example.json ./config.json
+vi ./config.json</pre>
+    </p>
+    <p>
+     ```json
+    </p>
+    <h1>
+     db.user 和 db.pass 是 mongodb 的用户名和密码，如果没有开启 mongo 认证功能，请删除这两个选项
+    </h1>
+    <p>
+     {
+  "port": "3011",
+  "adminAccount": "admin@admin.com",
+  "db": {
+    "servername": "127.0.0.1",
+    "DATABASE":  "yapi",
+    "port": 27017,
+    "user": "yapi",
+    "pass": "yapi123"
+  },
+  "mail": {
+    "enable": true,
+    "host": "smtp.163.com",
+    "port": 465,
+    "from": "
+     <strong>
+      <em>
+       @163.com",
+    "auth": {
+        "user": "
+      </em>
+     </strong>
+     @163.com",
+        "pass": "
+     <strong>
+      *
+     </strong>
+     "
+    }
+  }
+}
+```
+    </p>
+    <p>
+     <pre>sh
+cd vendors
+npm install  --registry https://registry.npm.taobao.org
+pm2 start server/app.js</pre>
+    </p>
+    <h2>
+     运行
+    </h2>
+    <ul>
+     <li>
+      /usr/local/node-v8.9.3-linux-x64/bin/pm2 start server/app.js
+     </li>
+    </ul>
+    <h2>
+     访问
+    </h2>
+    <ul>
+     <li>
+      http://nssas.eelantech.com:40008/
+     </li>
+    </ul>
+    <h2>
+     信息记录
+    </h2>
+    <ul>
+     <li>
+      初始化管理员账号成功,账号名："admin@admin.com"，密码："ymfe.org"
+     </li>
+    </ul>
+    <h2>
+     使用说明
+    </h2>
+    <p>
+     <em>
+      登录时使用注册邮箱进行登录，所有请记住自己的邮箱
+     </em>
+     首先进行注册后联系管理员添加进相应的分组
+    </p>
+    <h2>
+     迁移说明
+    </h2>
+    <p>
+     迁移的时候只要复制MongoDB的中yapi数据库到新迁移环境中的MongoDB中即可
+    </p>
+    <h2>
+     参考链接
+    </h2>
+    <ul>
+     <li>
+      <a href="https://yapi.ymfe.org/documents/redev.html">
+       安装YApi
+      </a>
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

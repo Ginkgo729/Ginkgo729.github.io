@@ -1,0 +1,133 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Neo4j 使用记录
+    </h1>
+    <hr/>
+    <p>
+     ```sh
+First, you'll want our key:
+    </p>
+    <p>
+     cd /tmp
+wget http://debian.neo4j.org/neotechnology.gpg.key
+rpm --import neotechnology.gpg.key
+Then, you'll want to add our yum repo to /etc/yum.repos.d/neo4j.repo:
+    </p>
+    <p>
+     cat &lt;
+     <eof>
+      /etc/yum.repos.d/neo4j.repo
+[neo4j]
+name=Neo4j Yum Repo
+baseurl=http://yum.neo4j.org/stable
+enabled=1
+gpgcheck=1
+EOF
+Finally, install a package
+     </eof>
+    </p>
+    <p>
+     yum install neo4j-3.3.0
+    </p>
+    <p>
+     ./bin/neo4j-admin  dump --database=graph.db --to=/home/download/neo4j.dump
+/bin/neo4j-admin load --from=/home/download/neo4j.dump --database=graph.db --force
+    </p>
+    <p>
+     rm /var/lib/neo4j/data/dbms/auth
+/bin/neo4j-admin set-initial-password 123456
+    </p>
+    <p>
+     http://172.18.0.44:7474/browser/
+```
+    </p>
+    <p>
+     <pre>sh
+match(n) return n</pre>
+    </p>
+    <h2>
+     参考链接
+    </h2>
+    <ul>
+     <li>
+      <a href="https://neo4j.com/docs/operations-manual/3.1/installation/linux/rpm/">
+       Red Hat / CentOS / Fedora
+      </a>
+     </li>
+     <li>
+      <a href="https://neo4j.com/docs/operations-manual/3.1/installation/">
+       Chapter 2. Installation
+      </a>
+     </li>
+     <li>
+      <a href="https://blog.csdn.net/wzwdcld/article/details/80763251">
+       Neo4j服务关闭启动·常用配置·快速设定新密码
+      </a>
+     </li>
+     <li>
+      <a href="https://blog.csdn.net/c1052981766/article/details/79530061">
+       使用neo4j-admin进行neo4j数据备份、迁移
+      </a>
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

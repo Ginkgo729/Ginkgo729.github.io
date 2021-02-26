@@ -1,0 +1,197 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Python MongoDB
+    </h1>
+    <hr/>
+    <h2>
+     Code
+    </h2>
+    <h3>
+     基本使用
+    </h3>
+    <p>
+     ```python
+    </p>
+    <h1>
+     !/usr/bin/env python
+    </h1>
+    <h1>
+     @Time    : 2018/11/19 11:46
+    </h1>
+    <h1>
+     @Author  : LiuWei
+    </h1>
+    <h1>
+     @Site    :
+    </h1>
+    <h1>
+     @File    : MongoDBUtil.py
+    </h1>
+    <h1>
+     @Software: PyCharm
+    </h1>
+    <h1>
+     -
+     <em>
+      - coding: utf-8 -
+     </em>
+     -
+    </h1>
+    <p>
+     import pymongo
+    </p>
+    <p>
+     class MongoDBUtil:
+    __client = None
+    __db = None
+    __col = None
+    </p>
+    <pre><pre>@staticmethod
+def connect():
+    if MongoDBUtil.__client is None:
+        MongoDBUtil.__client = pymongo.MongoClient("mongodb://172.18.0.24:27017/")
+        MongoDBUtil.__db = MongoDBUtil.__client["attack_packets"]
+        MongoDBUtil.__col = MongoDBUtil.__db["attack"]
+        print("Connected!")
+
+@staticmethod
+def insert_one(data):
+    if MongoDBUtil.__client is None:
+        MongoDBUtil.connect()
+    ret = MongoDBUtil.__col.insert_one(data)
+    print(ret)
+
+@staticmethod
+def find_one():
+    if MongoDBUtil.__client is None:
+        MongoDBUtil.connect()
+    ret = MongoDBUtil.__col.find_one()
+    # print(ret)
+
+@staticmethod
+def close():
+    MongoDBUtil.__client.close()
+    print("Close MongoDB")
+</pre></pre>
+    <p>
+     if
+     <strong>
+      name
+     </strong>
+     == "
+     <strong>
+      main
+     </strong>
+     ":
+    # client = pymongo.MongoClient("mongodb://172.18.0.24:27017/")
+    MongoDBUtil.connect()
+    MongoDBUtil.insert_one({"data": "test"})
+    MongoDBUtil.find_one()
+    MongoDBUtil.close()
+```
+    </p>
+    <h3>
+     ObjectId处理
+    </h3>
+    <p>
+     <pre>python
+from bson.objectid import ObjectId
+a = ObjectId('55717c9eb2c983c127000000')
+a.generation_time.timetuple()</pre>
+    </p>
+    <h3>
+     统计
+    </h3>
+    <p>
+     <pre>python
+results = db.datasets.find({"test_set":"abc"}).sort("abc",pymongo.DESCENDING).skip((page-1)*num).limit(num)
+results_count = results.count()</pre>
+    </p>
+    <h3>
+     去重
+    </h3>
+    <p>
+     <pre>python
+tags = db.mycoll.find({"category": "movie"}).distinct("tags")</pre>
+    </p>
+    <h2>
+     参考链接
+    </h2>
+    <ul>
+     <li>
+      <a href="http://www.runoob.com/python3/python-mongodb-query-document.html">
+       Python Mongodb 查询文档
+      </a>
+     </li>
+     <li>
+      <a href="http://www.runoob.com/python3/python-mongodb.html">
+       Python Mongodb
+      </a>
+     </li>
+     <li>
+      <a href="https://blog.csdn.net/u011744758/article/details/50085013">
+       python -【mongo】 处理ObjectID
+      </a>
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

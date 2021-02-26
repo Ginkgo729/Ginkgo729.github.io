@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Windows10 powershell 中使用vim
+    </h1>
+    <hr/>
+    <h2>
+     步骤
+    </h2>
+    <ul>
+     <li>
+      1.安装vim，记住安装的路径
+     </li>
+     <li>
+      2.打开powershell，输入下面的命令：
+     </li>
+    </ul>
+    <p>
+     <pre>sh
+Set-ExecutionPolicy RemoteSigned
+new-item -path $profile -itemtype file -force</pre>
+    </p>
+    <ul>
+     <li>
+      3.打开第二步显示的文件夹路径下的Microsoft.PowerShell_profile.ps1之类的文件，进行编辑，输入下面的内容：（之前配置过终端自动补全的话，将下面的东西添加到最后即可）
+     </li>
+    </ul>
+    <p>
+     ```bash
+set-alias vim "F:\Software\Vim\vim82\vim.exe" # 此处为vim的安装路径
+    </p>
+    <p>
+     Function Edit-Profile
+{
+    vim $profile
+}
+    </p>
+    <p>
+     Function Edit-Vimrc
+{
+    vim $HOME_vimrc
+}
+```
+    </p>
+    <ul>
+     <li>
+      4.重启sh后即可使用
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     MySQL使用记录
+    </h1>
+    <hr/>
+    <h2>
+     安装
+    </h2>
+    <h3>
+     centos7
+    </h3>
+    <p>
+     ```bash
+wget 'https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm'
+rpm -Uvh mysql57-community-release-el7-11.noarch.rpm
+yum install mysql-community-server
+systemctl start mysqld
+systemctl enable mysqld
+    </p>
+    <p>
+     grep 'temporary password' /var/log/mysqld.log
+mysql -u root -p
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'MyNewPass4!';
+grant all privileges on
+     <em>
+      .
+     </em>
+     to 'root'@'%' identified by "123456" with grant option;
+flush privileges;
+```
+    </p>
+    <h2>
+     常用命令记录
+    </h2>
+    <p>
+     ```
+create user share@'%' identified by 'password';
+set password for 'share'@'%'=password('share');
+grant select on bachang.index1 to share@'%' ;
+grant select on bachang.index2 to share@'%' ;
+revoke insert on bachang.attack_info from worker@'%';
+grant select on bachang.vulnerability to worker@'%';
+    </p>
+    <p>
+     delete from 表名;
+    </p>
+    <p>
+     drop database databasename;
+```
+    </p>
+    <h2>
+     语句使用
+    </h2>
+    <h3>
+     建库、建表一般语句
+    </h3>
+    <p>
+     ```sql
+    </p>
+    <h1>
+     用于用户数据库及表的初始化
+    </h1>
+    <p>
+     CREATE DATABASE if not exists
+     <pre>mall</pre>
+     ;
+    </p>
+    <p>
+     USE
+     <pre>mall</pre>
+     ;
+    </p>
+    <h1>
+     用户表
+    </h1>
+    <p>
+     CREATE TABLE IF NOT EXISTS
+     <pre>users</pre>
+     (
+     <pre>id</pre>
+     int(11) NOT NULL AUTO_INCREMENT,
+     <pre>name</pre>
+     varchar(16) NOT NULL,
+     <pre>password</pre>
+     varchar(16) NOT NULL,
+     <pre>phoneNumber</pre>
+     varchar(15) NOT NULL,
+     <pre>money</pre>
+     int(11) NOT NULL,
+  PRIMARY KEY (
+     <pre>id</pre>
+     )
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+    </p>
+    <h1>
+     商品表
+    </h1>
+    <p>
+     CREATE TABLE IF NOT EXISTS
+     <pre>goods</pre>
+     (
+     <pre>id</pre>
+     int(11) NOT NULL AUTO_INCREMENT,
+     <pre>name</pre>
+     varchar(16) NOT NULL,
+     <pre>description</pre>
+     varchar(1024) NOT NULL,
+     <pre>store_id</pre>
+     int(11) NOT NULL,
+     <pre>store_name</pre>
+     varchar(16) NOT NULL,
+     <pre>status</pre>
+     int(1) NOT NULL,
+    PRIMARY KEY (
+     <pre>id</pre>
+     ),
+    foreign key (store_id) references stores(id)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+    </p>
+    <h1>
+     SQL FOREIGN KEY 约束:https://www.runoob.com/sql/sql-foreignkey.html
+    </h1>
+    <p>
+     insert into mall.stores (name, description) VALUES ("name", "description");
+insert into mall.goods(name, description, store_id, store_name, status) VALUES ("name", "description", 1, "name",
+                                                                                    1);
+"value"}');
+```
+    </p>
+    <h3>
+     初始化数据：循环插入、随机数、字符串拼接
+    </h3>
+    <p>
+     ```sql
+DROP PROCEDURE IF EXISTS users_initData;
+DELIMITER $
+CREATE PROCEDURE users_initData()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    WHILE i&lt;=100 DO
+        insert into mall.users (name, password, phoneNumber, money) VALUES (CONCAT("user", i), "password",
+                                                                            CONCAT("phoneNumber", i), 0);
+        SET i = i+1;
+    END WHILE;
+END $
+CALL users_initData();
+    </p>
+    <p>
+     DROP PROCEDURE IF EXISTS goods_initData;
+DELIMITER $
+CREATE PROCEDURE goods_initData()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    WHILE i&lt;=10000 DO
+        insert into mall.goods(name, description, store_id, store_name, status)
+        VALUES (CONCAT("name", i), CONCAT("description", i), CEILING(rand()*100), "storeName", 1);
+        SET i = i+1;
+    END WHILE;
+END $
+CALL goods_initData();
+```
+    </p>
+    <h2>
+     参考链接
+    </h2>
+    <ul>
+     <li>
+      <a href="https://www.cnblogs.com/gpdm/p/6492449.html">
+       mysql-创建用户并授权，设置允许远程连接
+      </a>
+     </li>
+     <li>
+      <a href="https://www.cnblogs.com/wuyifu/p/7580494.html">
+       创建MySQL用户 赋予某指定库表的权限
+      </a>
+     </li>
+     <li>
+      <a href="https://www.jianshu.com/p/7cccdaa2d177">
+       Centos 7 安装 MySQL
+      </a>
+     </li>
+     <li>
+      <a href="https://blog.csdn.net/song634/article/details/80394965">
+       centos7下mysql配置远程连接
+      </a>
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

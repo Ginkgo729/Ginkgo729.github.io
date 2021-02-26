@@ -19,7 +19,7 @@ def markdown_convert_html(text):
 
 def rebuild_html(soup, name, insert_html):
     div = soup.find(id=name)
-    div .clear()
+    div.clear()
     div.append(BeautifulSoup(insert_html.replace("code", "pre"), "html.parser"))
     # print(div)
 
@@ -54,14 +54,67 @@ def rebuild_other(soup):
     rebuild_html(soup, "other", insert_html)
 
 
-def build_catalog():
-    blog_path = "F:\Code\Markdown\LOG\profession"
-    file_list = get_catalog(blog_path)
-    create_menu(template_soup, file_list)
+def write_catalog_markdown(catalog, content_list, space_amount):
+    for key in catalog.keys():
+        if len(catalog[key]) == 0:
+            content_list.append(' ' * space_amount + '- [' + key[1:] + '](../article/' + str(key).replace("md", "html") + ')')
+        else:
+            content_list.append(' ' * space_amount + '- ' + key)
+            write_catalog_markdown(catalog[key], content_list, space_amount + 4)
 
 
-def build_article():
-    pass
+def _build_catalog(catalog, keys, index):
+    if index == len(keys) - 1:
+        catalog[keys[index]] = {}
+    else:
+        if keys[index] not in catalog:
+            catalog[keys[index]] = {}
+        _build_catalog(catalog[keys[index]], keys, index + 1)
+
+
+def create_catalog_markdown(file_list):
+    catalog = {}
+    for file in file_list:
+        keys = file.split("\\")
+        _build_catalog(catalog, keys, 5)
+
+    print("\n\n文章目录结构：")
+    for key in catalog.keys():
+        print(key, catalog[key])
+
+    content_list = ["## 文章目录", "***"]
+    for key in catalog.keys():
+        content_list.append("## " + key)
+        write_catalog_markdown(catalog[key], content_list, 0)
+
+    contents = ""
+    for item in content_list:
+        contents += item + "\n"
+    print(contents)
+    return contents
+
+
+def build_catalog(file_list):
+    catalog_markdown = create_catalog_markdown(file_list)
+    save(catalog_markdown, "../article/catalog/catalog.md")
+    insert_html = markdown_convert_html(catalog_markdown)
+
+    template_page_path = "../article_template.html"
+    template_soup = read_html(template_page_path)
+    rebuild_html(template_soup, "article", insert_html)
+
+    save(template_soup.prettify(), "../article/catalog/catalog.html")
+
+
+def build_article(file_list):
+    template_page_path = "../article_template.html"
+    template_soup = read_html(template_page_path)
+    for file in file_list:
+        content = read_file(file)
+        insert_html = markdown_convert_html(content)
+        rebuild_html(template_soup, "article", insert_html)
+        file_path = "../article/article/" + file.split("\\")[-1].replace("md", "html")
+        save(template_soup.prettify(), file_path)
 
 
 def build_home_page():
@@ -71,72 +124,12 @@ def build_home_page():
     rebuild_intro(template_soup)
     rebuild_experience(template_soup)
     rebuild_other(template_soup)
-
-    build_catalog()
-    build_article()
-
     save(template_soup.prettify(), "../index.html")
 
-
-def create_menu_html(catalog, li_content):
-    for key in catalog.keys():
-        if len(catalog[key]) == 0:
-            li_content.append('<li><a href="index.html">' + key[1:] + '</a></li>')
-        else:
-            li_content.append("<li>")
-            li_content.append("<span class=\"opener\">" + key + "</span>")
-            li_content.append("<ul>")
-            create_menu_html(catalog[key], li_content)
-            li_content.append("</ul>")
-            li_content.append("</li>")
-
-
-def create_menu(soup, file_list):
-    catalog = {}
-    for file in file_list:
-        keys = file.split("\\")
-
-        temp = catalog
-        for index in range(6, len(keys)):
-            if keys[index-1] not in temp:
-                temp[keys[index - 1]] = {}
-            temp = temp[keys[index - 1]]
-            temp[keys[index]] = {}
-    print(catalog)
-
-    li_content = []
-    create_menu_html(catalog, li_content)
-    print(li_content)
-
-    print("****************")
-    content = ""
-    for item in li_content:
-        content += item + "\n"
-    # print(content)
-
-    html = BeautifulSoup(content, "html.parser")
-    # print(html.prettify())
-
-    ul_node = soup.find(id="menu").find("ul")
-    ul_node.clear()
-    ul_node.append(html)
-    print(ul_node)
-
-
-def create_article(blog_path, file_list, soup):
-    # template_page_path = "../theme/html5up-editorial/article/article_template.html"
-    # soup = read_html(template_page_path)
-
-    root = "../theme/html5up-editorial/article/"
-    for file in file_list:
-        print(file)
-        content = read_file(file)
-        insert_html = markdown_convert_html(content)
-        rebuild_html(soup, "article", insert_html)
-
-        file_path = root + file.split("\\")[-1].replace("md", "html")
-        print(file_path)
-        save(soup.prettify(), file_path)
+    blog_path = "F:\Code\Markdown\LOG\profession"
+    file_list = get_catalog(blog_path)
+    build_catalog(file_list)
+    build_article(file_list)
 
 
 def get_catalog(blog_path):
@@ -146,22 +139,10 @@ def get_catalog(blog_path):
             if file[0] != "+":
                 continue
             file_list.append(os.path.join(root, file))
-    print(file_list)
+            print("加载文章：" + os.path.join(root, file))
+    print(len(file_list), file_list)
     return file_list
-
-
-def build_article_page(blog_path):
-    # template_page_path = "../theme/html5up-editorial/template.html"
-    template_page_path = "../theme/html5up-editorial/article/article_template.html"
-    template_soup = read_html(template_page_path)
-
-    file_list = get_catalog(blog_path)
-    create_menu(template_soup, file_list)
-    create_article(blog_path, file_list, template_soup)
-
-    save(template_soup.prettify(), path="../theme/html5up-editorial/index.html")
 
 
 if __name__ == '__main__':
     build_home_page()
-    # build_article_page("F:\Code\Markdown\LOG\profession")

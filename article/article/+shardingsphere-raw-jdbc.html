@@ -1,0 +1,307 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     ShardingSphere Raw JDBC 主从示例
+    </h1>
+    <hr/>
+    <h2>
+     总览
+    </h2>
+    <p>
+     这个示例不结合ORM之类的，直接执行SQL语句。通过写两个简单的文件就可以了，大致的步骤如下：
+    </p>
+    <ul>
+     <li>
+      1.配置Maven依赖
+     </li>
+     <li>
+      2.配置文件写入相关配置
+     </li>
+     <li>
+      3.获取DataSource类编写
+     </li>
+     <li>
+      4.测试
+     </li>
+    </ul>
+    <h3>
+     配置Maven依赖
+    </h3>
+    <p>
+     其主要依赖如下，还有一些spring、mysql的依赖，总的Maven文件链接在这：
+     <a href="">
+      pom.xml
+     </a>
+     ，自定查找添加吧
+    </p>
+    <p>
+     <pre>java
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.shardingsphere&lt;/groupId&gt;
+    &lt;artifactId&gt;shardingsphere-jdbc-core&lt;/artifactId&gt;
+    &lt;version&gt;5.0.0-alpha&lt;/version&gt;
+&lt;/dependency&gt;</pre>
+    </p>
+    <h3>
+     application.properties文件写入
+    </h3>
+    <p>
+     写入主从库的相关配置
+    </p>
+    <p>
+     ```java
+    </p>
+    <h1>
+     读写分离 - 数据库框架版本 2.0 ShardingSphere-jdbc 5.0.0-alpha
+    </h1>
+    <p>
+     sharding.jdbc.datasource.names=master,slave0,slave1
+    </p>
+    <p>
+     sharding.jdbc.datasource.ds-master.driver-class-name=com.mysql.jdbc.Driver
+sharding.jdbc.datasource.ds-master.url=jdbc:mysql://localhost:3306/test?serverTimezone=UTC&amp;useUnipre=true\
+  &amp;characterEncoding=utf-8\
+  &amp;useSSL=false&amp;allowPublicKeyRetrieval=true
+sharding.jdbc.datasource.ds-master.username=root
+sharding.jdbc.datasource.ds-master.password=root
+    </p>
+    <p>
+     sharding.jdbc.datasource.ds-slave0.driver-class-name=com.mysql.jdbc.Driver
+sharding.jdbc.datasource.ds-slave0.url=jdbc:mysql://localhost:3309/test?serverTimezone=UTC&amp;useUnipre=true\
+  &amp;characterEncoding=utf-8\
+  &amp;useSSL=false&amp;allowPublicKeyRetrieval=true
+sharding.jdbc.datasource.ds-slave0.username=root
+sharding.jdbc.datasource.ds-slave0.password=root
+    </p>
+    <p>
+     sharding.jdbc.datasource.ds-slave1.driver-class-name=com.mysql.jdbc.Driver
+sharding.jdbc.datasource.ds-slave1.url=jdbc:mysql://localhost:3310/test?serverTimezone=UTC&amp;useUnipre=true&amp;characterEncoding=utf-8\
+  &amp;useSSL=false&amp;allowPublicKeyRetrieval=true
+sharding.jdbc.datasource.ds-slave1.username=root
+sharding.jdbc.datasource.ds-slave1.password=root
+```
+    </p>
+    <h3>
+     ShardingMasterSlaveDataSource编写
+    </h3>
+    <p>
+     这里默认使用HikariDataSource,思路主要是生成各个主从库的链接，放到Sharding中，代码中也有说明，总体比较简单：
+    </p>
+    <p>
+     ```java
+package com.example.demo.shardingsphere.raw.jdbc;
+    </p>
+    <p>
+     import com.zaxxer.hikari.HikariDataSource;
+import io.shardingsphere.api.config.MasterSlaveRuleConfiguration;
+import io.shardingsphere.shardingjdbc.api.MasterSlaveDataSourceFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+    </p>
+    <p>
+     import javax.sql.DataSource;
+import java.sql.SQLException;
+import java.util.*;
+    </p>
+    <p>
+     /*
+     <em>
+      * @author lw
+     </em>
+     /
+@Slf4j
+@Component
+public class ShardingMasterSlaveDataSource {
+    </p>
+    <pre><pre>private final String DRIVER = ".driver-class-name";
+private final String URL = ".url";
+private final String USERNAME = ".username";
+private final String PASSWORD = ".password";
+private final String DBS = "sharding.jdbc.datasource.names";
+
+@Autowired
+private Environment environment;
+
+DataSource createDataSource() throws SQLException {
+    // 获取数据库列表
+    String[] dbs = Objects.requireNonNull(environment.getProperty(DBS)).split(",");
+    log.info("DBS::" + Arrays.toString(dbs));
+
+    // 设置主从，约定第一个为主，其他为从
+    MasterSlaveRuleConfiguration configuration = new MasterSlaveRuleConfiguration(dbs[0], dbs[0],
+            Arrays.asList(Arrays.copyOfRange(dbs, 1, dbs.length)));
+    log.info("ShardingMasterSlaveDataSource master :: " + configuration.getMasterDataSourceName());
+    log.info("ShardingMasterSlaveDataSource slave :: " + configuration.getSlaveDataSourceNames());
+
+    // 设置打印SQL语句，查看主从配置和切换是否成功
+    Properties properties = new Properties();
+    properties.setProperty("sql.show", "true");
+
+    return MasterSlaveDataSourceFactory.createDataSource(createDataSourceMap(dbs), configuration, new HashMap&lt;&gt;(0),
+            properties);
+}
+
+/**
+ * 返回DataSource列表
+ */
+private Map&lt;String, DataSource&gt; createDataSourceMap(String[] dbs) {
+    Map&lt;String, DataSource&gt; result = new HashMap&lt;&gt;(dbs.length);
+    for (String db: dbs) {
+        log.info("Create data source ::" + db);
+        result.put(db, createDataSource("sharding.jdbc.datasource.ds-" + db));
+    }
+    return result;
+}
+
+private DataSource createDataSource(String prefix) {
+    log.info(DRIVER + "::" + environment.getProperty(prefix + DRIVER));
+    log.info(URL + "::" + environment.getProperty(prefix + URL));
+    log.info(USERNAME + "::" + environment.getProperty(prefix + USERNAME));
+    log.info(PASSWORD + "::" + environment.getProperty(prefix + PASSWORD));
+
+    HikariDataSource dataSource = new HikariDataSource();
+    dataSource.setDriverClassName(environment.getProperty(prefix + DRIVER));
+    dataSource.setJdbcUrl(environment.getProperty(prefix + URL));
+    dataSource.setUsername(environment.getProperty(prefix + USERNAME));
+    dataSource.setPassword(environment.getProperty(prefix + PASSWORD));
+    return dataSource;
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <h3>
+     测试
+    </h3>
+    <p>
+     直接生写SQL了，就不结合ORM之类的了，这里是通过日志看出是否生效的，日志大致如下
+    </p>
+    <p>
+     <pre>java
+Sharding-Sphere-SQL                      : Rule Type: master-slave
+Sharding-Sphere-SQL                      : SQL: select * from stores limit 5 ::: DataSources: slave0
+Sharding-Sphere-SQL                      : Rule Type: master-slave
+Sharding-Sphere-SQL                      : SQL: select * from stores limit 5 ::: DataSources: slave1
+Sharding-Sphere-SQL                      : Rule Type: master-slave
+Sharding-Sphere-SQL                      : SQL: insert into stores (name, description) VALUES ("name103", "description103"); ::: DataSources: master
+Sharding-Sphere-SQL                      : Rule Type: master-slave
+Sharding-Sphere-SQL                      : SQL: select * from stores limit 5 ::: DataSources: master</pre>
+     代码如下：
+    </p>
+    <p>
+     ```java
+package com.example.demo.shardingsphere.raw.jdbc;
+    </p>
+    <p>
+     import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
+    </p>
+    <p>
+     import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+    </p>
+    <p>
+     @Slf4j
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
+public class ShardingMasterSlaveDataSourceTest {
+    </p>
+    <pre><pre>@Autowired
+ShardingMasterSlaveDataSource shardingMasterSlaveDataSource;
+
+/**
+ * 运行后从日志可以看出主从之间的切换和从库负载均衡
+ */
+@Test @Transactional
+public void test() throws SQLException {
+    DataSource dataSource = shardingMasterSlaveDataSource.createDataSource();
+    log.info("ShardingMasterSlaveDataSource info::" + dataSource.getConnection().getMetaData().getURL());
+
+    Connection conn = dataSource.getConnection();
+    Statement statement = conn.createStatement();
+
+    String sql = "select * from stores limit 5";
+    statement.execute(sql);
+    statement.execute(sql);
+
+    sql = "insert into stores (name, description) VALUES (\"name103\", \"description103\");";
+    statement.execute(sql);
+
+    sql = "select * from stores limit 5";
+    statement.execute(sql);
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

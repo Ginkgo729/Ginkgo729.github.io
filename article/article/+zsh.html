@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     ZSH 安装设置
+    </h1>
+    <hr/>
+    <h2>
+     CentOS
+    </h2>
+    <p>
+     安装完成后退出重新登录终端即可
+    </p>
+    <p>
+     ```sh
+yum install -y zsh
+chsh -s /bin/zsh
+curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
+    </p>
+    <h1>
+     or
+    </h1>
+    <p>
+     sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+    </p>
+    <h1>
+     or 自行建立脚本运行
+    </h1>
+    <p>
+     https://github.com/ohmyzsh/ohmyzsh/blob/master/tools/install.sh
+    </p>
+    <h1>
+     感觉是被墙了的原因，无法直接获取文件进行安装
+    </h1>
+    <h1>
+     可以访问：https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+    </h1>
+    <h1>
+     获取文件内容,下入下面的文件中，然后执行脚本
+    </h1>
+    <p>
+     vim zshInstall.sh
+sh zshInstall.sh
+```
+    </p>
+    <h2>
+     参考链接
+    </h2>
+    <ul>
+     <li>
+      <a href="https://github.com/robbyrussell/oh-my-zsh">
+       robbyrussell/oh-my-zsh
+      </a>
+     </li>
+     <li>
+      <a href="https://ohmyz.sh/">
+       Install oh-my-zsh now
+      </a>
+     </li>
+     <li>
+      <a href="https://wangxin1248.github.io/linux/2018/04/ubuntu-install-shadowsocks.html">
+       Ubuntu 服务器安装shadowsocks
+      </a>
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

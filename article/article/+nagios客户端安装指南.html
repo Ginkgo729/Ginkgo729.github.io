@@ -1,0 +1,200 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <p>
+     # Nagios 客户端安装指南
+    </p>
+    <hr/>
+    <h2>
+     一、相应命令安装
+    </h2>
+    <p>
+     ```
+sudo useradd nagios
+sudo apt-get update
+sudo apt-get install build-essential libgd2-xpm-dev openssl libssl-dev unzip
+    </p>
+    <p>
+     cd ~
+curl -L -O http://nagios-plugins.org/download/nagios-plugins-2.2.1.tar.gz
+tar zxf nagios-plugins-
+     <em>
+      .tar.gz
+cd nagios-plugins-
+     </em>
+     ./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl
+make
+sudo make install
+    </p>
+    <p>
+     cd ~
+curl -L -O https://github.com/NagiosEnterprises/nrpe/releases/download/nrpe-3.2.1/nrpe-3.2.1.tar.gz
+tar zxf nrpe-
+     <em>
+      .tar.gz
+cd nrpe-
+     </em>
+     ./configure --enable-command-args --with-nagios-user=nagios --with-nagios-group=nagios --with-ssl=/usr/bin/openssl --with-ssl-lib=/usr/lib/x86_64-linux-gnu
+make all
+sudo make install
+sudo make install-config
+sudo make install-init
+```
+    </p>
+    <h2>
+     二、相应文件配置
+    </h2>
+    <p>
+     修改文件 /usr/local/nagios/etc/nrpe.cfg，填上服务端nagios的IP地址,第二个填上客户端本机的
+    </p>
+    <p>
+     <pre>allowed_hosts=127.0.0.1,::1,your_nagios_server_private_ip
+server_address=monitored_server_private_ip</pre>
+    </p>
+    <p>
+     启动和查看客户端
+    </p>
+    <p>
+     <pre>sudo ufw allow 5666/tcp 
+sudo systemctl start nrpe.service
+sudo systemctl status nrpe.service</pre>
+    </p>
+    <p>
+     正常的输出如下：
+    </p>
+    <p>
+     <pre>Output
+...
+Oct 16 07:10:00 nagios systemd[1]: Started Nagios Remote Plugin Executor.
+Oct 16 07:10:00 nagios nrpe[14653]: Starting up daemon
+Oct 16 07:10:00 nagios nrpe[14653]: Server listening on 0.0.0.0 port 5666.
+Oct 16 07:10:00 nagios nrpe[14653]: Server listening on :: port 5666.
+Oct 16 07:10:00 nagios nrpe[14653]: Listening for connections on port 5666
+Oct 16 07:10:00 nagios nrpe[14653]: Allowing connections from: 127.0.0.1,::1,207.154.249.232</pre>
+    </p>
+    <h2>
+     三、测试
+    </h2>
+    <p>
+     在服务端输入下面命令进行测试，最后填客户端IP地址
+    </p>
+    <p>
+     <pre>/usr/local/nagios/libexec/check_nrpe -H remote_host_ip</pre>
+    </p>
+    <p>
+     正常的输出如下：
+    </p>
+    <p>
+     <pre>Output
+NRPE v3.2.1</pre>
+    </p>
+    <p>
+     在服务端新建文件 /usr/local/nagios/etc/servers/your_monitored_server_host_name.cfg，命名为客户端IP地址
+    </p>
+    <p>
+     ```
+define host {
+        use                             linux-server
+        host_name                       your_monitored_server_host_name
+        alias                           My client server
+        address                         your_monitored_server_private_ip
+        max_check_attempts              5
+        check_period                    24x7
+        notification_interval           30
+        notification_period             24x7
+}
+    </p>
+    <p>
+     define service {
+        use                             generic-service
+        host_name                       your_monitored_server_host_name
+        service_description             CPU load
+        check_command                   check_nrpe!check_load
+}
+```
+    </p>
+    <p>
+     重启nagios，访问相应的网页就可以看到新添加的主机了
+    </p>
+    <p>
+     <pre>sudo systemctl restart nagios</pre>
+    </p>
+    <h2>
+     参考链接
+    </h2>
+    <ul>
+     <li>
+      <a href="https://www.digitalocean.com/community/tutorials/how-to-install-nagios-4-and-monitor-your-servers-on-ubuntu-16-04">
+       How To Install Nagios 4 and Monitor Your Servers on Ubuntu 16.04
+      </a>
+     </li>
+     <li>
+      <a href="https://askubuntu.com/questions/817827/no-output-on-stdout-stderr-execvp-usr-local-nagios-libexec-check-ping-in-ub">
+       (No output on stdout) stderr: execvp(/usr/local/nagios/libexec/check_ping) in ubuntu
+      </a>
+     </li>
+     <li>
+      <a href="https://community.spiceworks.com/topic/551475-nagios-no-output-on-stdout-stderr-usr-local-nagios-libexec-check_nt-1-usr">
+       Nagios (No output on stdout) stderr: /usr/local/nagios/libexec/check_nt: 1: /usr
+      </a>
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>

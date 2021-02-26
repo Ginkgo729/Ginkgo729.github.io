@@ -1,0 +1,428 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-article-visible">
+  <!--	<body class="is-preload">-->
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <nav>
+    <ul>
+     <li>
+      <a href="#intro">
+       主页
+      </a>
+     </li>
+     <li>
+      <a href="#experience">
+       文章列表
+      </a>
+     </li>
+    </ul>
+   </nav>
+   <article class="active" id="article" style="display: block">
+    <h1>
+     Soul网关源码解析（十）自定义简单插件编写
+    </h1>
+    <hr/>
+    <h2>
+     简介
+    </h2>
+    <p>
+     综合前面所分析的插件处理流程相关知识，此次我们来编写自定义的插件：统计请求在插件链中的经历时长
+    </p>
+    <h2>
+     编写准备
+    </h2>
+    <p>
+     首先我们先探究一下，一个Plugin是如何加载到上篇文章分析中的 plugins 中的，plugins 代码如下：
+    </p>
+    <p>
+     我们查看下 plugins 的值，发现global也在里面，也就是所有的plugin都是在里面
+    </p>
+    <p>
+     ```java
+public class SoulConfiguration {
+    </p>
+    <pre><pre>@Bean("webHandler")
+public SoulWebHandler soulWebHandler(final ObjectProvider&lt;List&lt;SoulPlugin&gt;&gt; plugins) {
+    List&lt;SoulPlugin&gt; pluginList = plugins.getIfAvailable(Collections::emptyList);
+    // global plugin 也在里面
+    final List&lt;SoulPlugin&gt; soulPlugins = pluginList.stream()
+            .sorted(Comparator.comparingInt(SoulPlugin::getOrder)).collect(Collectors.toList());
+    soulPlugins.forEach(soulPlugin -&gt; log.info("load plugin:[{}] [{}]", soulPlugin.named(), soulPlugin.getClass().getName()));
+    return new SoulWebHandler(soulPlugins);
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     在上面的调用栈已经中断了，一直翻不到什么有用的东西，换换思路，我们在 globalPlugin 构造函数上打上断点，重启
+    </p>
+    <p>
+     启动后，果然调用栈更新，我们看看调用栈，看到上面的 SoulConfiguration 调用是在 globalPlugin 之前，所以没啥有用的东西
+    </p>
+    <p>
+     我们查看下 globalPlugin 构造函数的调用触发上一节，发现是下面这个： GlobalPluginConfiguration
+    </p>
+    <p>
+     ```java
+@Configuration
+@ConditionalOnClass(GlobalPlugin.class)
+public class GlobalPluginConfiguration {
+    </p>
+    <pre><pre>@Bean
+public SoulPlugin globalPlugin(final SoulContextBuilder soulContextBuilder) {
+    return new GlobalPlugin(soulContextBuilder);
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <p>
+     我们仔细看看这个类，它是Spring Configuration，生成bean后注入进去，后面Spring会自己进行操作装配之类
+    </p>
+    <p>
+     我们注意到这个bean返回的是 SoulPlugin ，还记得我们前面文章分析的所有Plugin都是继承于这个的，所以 List
+     <soulplugin>
+      就会自动装配到所有的 plugin。这个细节我也不是很懂，Spring还是不够熟系，后面需要补一补
+     </soulplugin>
+    </p>
+    <p>
+     但看到这，我们大致思路就有了：
+    </p>
+    <ul>
+     <li>
+      1.写一个自定义插件
+     </li>
+     <li>
+      2.写一个自定义插件的Spring配置，注入进去
+     </li>
+    </ul>
+    <h2>
+     自定义插件编写
+    </h2>
+    <p>
+     首先说明下，插件的编写应该遵循Soul网关的规范，还是应该写到Soul-Plugin这个模块中，但我们只是试验验证，就随意一点，直接写在Soul-Bootstrap中
+    </p>
+    <p>
+     PS：时间有点小紧张，研究规范编写也伤时间，下次一定
+    </p>
+    <h3>
+     工程结构
+    </h3>
+    <p>
+     此次需要编写两个文件：
+    </p>
+    <ul>
+     <li>
+      自定义插件：TimeRecordPlugin
+     </li>
+     <li>
+      自定义插件配置：TimeRecordConfiguration
+     </li>
+    </ul>
+    <p>
+     目录结构大致如下：直接在源码的Soul-Bootstrap模块下
+    </p>
+    <p>
+     <pre>├─src
+│  ├─main
+│  │  ├─java
+│  │  │  └─org
+│  │  │      └─dromara
+│  │  │          └─soul
+│  │  │              └─bootstrap
+│  │  │                  ├─configuration : 放入自定义插件配置
+│  │  │                  ├─filter
+│  │  │                  └─plugin ：放入自定义插件
+│  │  └─resources</pre>
+    </p>
+    <h3>
+     自定义插件编写
+    </h3>
+    <p>
+     首先继承 SoulPlugin ，这样能正常注入到datalist中
+    </p>
+    <p>
+     然后编写相应的处理函数，在处理函数中，我们在请求第一次进入到插件的时候，在exchange中放入当前的系统时间
+    </p>
+    <p>
+     模仿 WebClientResponsePlugin ，在plugin链执行返回后，我们取出之前的系统时间，用当前系统时间减去，得到请求在plugin链中的经历时长
+    </p>
+    <p>
+     order方面需要注意， globalPlugin的order为0，通过前面文章的分析，它进行的操作也不小，我们这个插件得在它前面，那我们的order就设置为-1
+    </p>
+    <p>
+     这样，一个自定义插件就写好了，大致代码如下：
+    </p>
+    <p>
+     ```java
+import lombok.extern.slf4j.Slf4j;
+import org.dromara.soul.plugin.api.SoulPlugin;
+import org.dromara.soul.plugin.api.SoulPluginChain;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+    </p>
+    <p>
+     @Slf4j
+public class TimeRecordPlugin implements SoulPlugin {
+    </p>
+    <pre><pre>private final String TIME_RECORD = "time_record";
+
+@Override
+public Mono&lt;Void&gt; execute(ServerWebExchange exchange, SoulPluginChain chain) {
+    exchange.getAttributes().put(TIME_RECORD, System.currentTimeMillis());
+
+    return chain.execute(exchange).then(Mono.defer(() -&gt; {
+        Long startTime = exchange.getAttribute(TIME_RECORD);
+
+        if (startTime == null) {
+            log.info("Get start time error");
+            return Mono.empty();
+        }
+
+        long timeRecord = System.currentTimeMillis() - startTime;
+        log.info("Plugin time record: " + timeRecord + " ms");
+        return Mono.empty();
+    }));
+}
+
+@Override
+public int getOrder() {
+    return -1;
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <h3>
+     自定义插件配置
+    </h3>
+    <p>
+     灰常的简单，我们不需要任何东西，所以没有啥参数传入，直接new一个返回即可，代码如下：
+    </p>
+    <p>
+     ```java
+import org.dromara.soul.bootstrap.plugin.TimeRecordPlugin;
+import org.dromara.soul.plugin.api.SoulPlugin;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+    </p>
+    <p>
+     @Configuration
+@ConditionalOnClass(TimeRecordPlugin.class)
+public class TimeRecordConfiguration {
+    </p>
+    <pre><pre>@Bean
+public SoulPlugin timeRecordPlugin() {
+    return new TimeRecordPlugin();
+}
+</pre></pre>
+    <p>
+     }
+```
+    </p>
+    <h3>
+     运行测试
+    </h3>
+    <p>
+     我们把Soul-admin、Soul-Bootstrap、Soul-Example-Http给启动起来
+    </p>
+    <p>
+     访问：http://127.0.0.1:9195/http/order/findById?id=1111
+    </p>
+    <p>
+     查看日志，看到明显自定义插件的日志打印，NICE！
+    </p>
+    <p>
+     <pre>shell script
+o.d.s.plugin.httpclient.WebClientPlugin  : The request urlPath is http://192.168.101.104:8188/order/findById?id=1111, retryTimes is 0
+o.d.s.bootstrap.plugin.TimeRecordPlugin  : Plugin time record: 9 ms
+o.d.soul.plugin.base.AbstractSoulPlugin  : resilience4j selector success match , selector name :http_limiter
+o.d.soul.plugin.base.AbstractSoulPlugin  : resilience4j rule success match , rule name :http_limiter
+o.d.soul.plugin.base.AbstractSoulPlugin  : divide selector success match , selector name :/http
+o.d.soul.plugin.base.AbstractSoulPlugin  : divide rule success match , rule name :/http/order/findById
+o.d.s.plugin.httpclient.WebClientPlugin  : The request urlPath is http://192.168.101.104:8188/order/findById?id=1111, retryTimes is 0
+o.d.s.bootstrap.plugin.TimeRecordPlugin  : Plugin time record: 10 ms</pre>
+    </p>
+    <h2>
+     总结
+    </h2>
+    <p>
+     Soul网关的主要处理分析基本快结束了，下篇写一个总结就准备开始分析另外一个重要的模块：数据同步
+    </p>
+    <p>
+     此篇的自定义插件编写还是比较简单，没有涉及到选择器和规则，但想做类似Divide之类的插件也不是不可以，那就直接把URI判断规则写死
+    </p>
+    <p>
+     因为请求的所有数据都可以获取的，不用到后台只是规则不能动态变化而已
+    </p>
+    <p>
+     有兴趣的老哥可以尝试写一下，还是挺有意思的，哈哈
+    </p>
+    <h2>
+     Soul网关源码分析文章列表
+    </h2>
+    <h3>
+     Github
+    </h3>
+    <ul>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB1-%E6%A6%82%E8%A7%88.md">
+       Soul源码阅读（一） 概览
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB2-%E5%88%9D%E6%AD%A5%E8%BF%90%E8%A1%8C.md">
+       Soul源码阅读（二）代码初步运行
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB3-%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
+       Soul源码阅读（三）HTTP请求处理概览
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB4-dubbo%E8%AF%B7%E6%B1%82%E6%A6%82%E8%A7%88.md">
+       Soul网关源码阅读（四）Dubbo请求概览
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB5-%E8%AF%B7%E6%B1%82%E7%B1%BB%E5%9E%8B%E6%8E%A2%E7%B4%A2.md">
+       Soul网关源码阅读（五）请求类型探索
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB6-sofa%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
+       Soul网关源码阅读（六）Sofa请求处理概览
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB7-%E9%99%90%E6%B5%81%E6%8F%92%E4%BB%B6%E5%88%9D%E6%8E%A2.md">
+       Soul网关源码阅读（七）限流插件初探
+      </a>
+     </li>
+     <li>
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/0e6931519a84d5c603504b2c6a633698ac793b70/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB8-%E8%B7%AF%E7%94%B1%E5%8C%B9%E9%85%8D%E5%88%9D%E6%8E%A2.md">
+       Soul网关源码阅读（八）路由匹配初探
+      </a>
+     </li>
+     <li>
+      <p>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB9-%E6%8F%92%E4%BB%B6%E9%85%8D%E7%BD%AE%E5%8A%A0%E8%BD%BD%E5%88%9D%E6%8E%A2.md">
+        Soul网关源码阅读（九）插件配置加载初探
+       </a>
+      </p>
+     </li>
+     <li>
+      <p>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E7%95%AA%E5%A4%96%E7%AF%871-HTTP%E7%A4%BA%E4%BE%8B%E5%8F%82%E6%95%B0%E8%AF%B7%E6%B1%82%E9%94%99%E8%AF%AF.md">
+        Soul网关源码阅读番外篇（一） HTTP参数请求错误
+       </a>
+      </p>
+     </li>
+    </ul>
+    <h3>
+     掘金
+    </h3>
+    <ul>
+     <li>
+      <a href="https://juejin.cn/post/6917864624423436296">
+       Soul网关源码阅读（一） 概览
+      </a>
+     </li>
+     <li>
+      <a href="https://juejin.cn/post/6917865804121767944">
+       Soul网关源码阅读（二）代码初步运行
+      </a>
+     </li>
+     <li>
+      <a href="https://juejin.cn/post/6917866538712334343">
+       Soul网关源码阅读（三）请求处理概览
+      </a>
+     </li>
+     <li>
+      <a href="https://juejin.cn/post/6917867369909977102">
+       Soul网关源码阅读（四）Dubbo请求概览
+      </a>
+     </li>
+     <li>
+      <a href="https://juejin.cn/post/6918575905962983438">
+       Soul网关源码阅读（五）请求类型探索
+      </a>
+     </li>
+     <li>
+      <a href="https://juejin.cn/post/6918736260467015693">
+       Soul网关源码阅读（六）Sofa请求处理概览
+      </a>
+     </li>
+     <li>
+      <a href="https://juejin.cn/post/6919348164944232455/">
+       Soul网关源码阅读（七）限流插件初探
+      </a>
+     </li>
+     <li>
+      <a href="https://juejin.cn/post/6919774553241550855/">
+       Soul网关源码阅读（八）路由匹配初探
+      </a>
+     </li>
+     <li>
+      <p>
+       <a href="https://juejin.cn/post/6920074307590684685/">
+        Soul网关源码阅读（九）插件配置加载初探
+       </a>
+      </p>
+     </li>
+     <li>
+      <p>
+       <a href="https://juejin.cn/post/6918947689564471309">
+        Soul网关源码阅读番外篇（一） HTTP参数请求错误
+       </a>
+      </p>
+     </li>
+    </ul>
+   </article>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../../assets/js/jquery.min.js">
+  </script>
+  <script src="../../assets/js/browser.min.js">
+  </script>
+  <script src="../../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../../assets/js/util.js">
+  </script>
+  <script src="../../assets/js/main.js">
+  </script>
+ </body>
+</html>
