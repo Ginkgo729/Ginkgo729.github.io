@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,30 +43,28 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="sublime-test-2">
      sublime test 2 配置说明
     </h1>
     <hr/>
-    <h2>
+    <h2 id="vim">
      vim 启动方法
     </h2>
     <ul>
      <li>
-      <p>
-       1.进入 Preferences Setting-User，修改代码如下：
-```
-{
-    "ignored_packages":
-    [
-      </p>
-      <p>
-       ]
-}
-```
-      </p>
+      1.进入 Preferences Setting-User，修改代码如下：
      </li>
     </ul>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">{</span>
+    <span class="ss">"ignored_packages"</span><span class="p">:</span>
+    <span class="p">[</span>
+
+    <span class="p">]</span>
+<span class="err">}</span>
+</code></pre>
+    </div>
+    <h2 id="_1">
      启动插件安装
     </h2>
     <ul>
@@ -74,13 +73,18 @@
      </li>
      <li>
       2.粘贴以下代码到底部命令行并回车：
-      <pre>import urllib2,os;pf='Package Control.sublime-package';ipp=sublime.installed_packages_path();os.makedirs(ipp) if not os.path.exists(ipp) else None;open(os.path.join(ipp,pf),'wb').write(urllib2.urlopen('http://sublime.wbond.net/'+pf.replace(' ','%20')).read())</pre>
      </li>
+    </ul>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">import</span> <span class="nn">urllib2</span><span class="o">,</span><span class="nn">os</span><span class="p">;</span><span class="n">pf</span><span class="o">=</span><span class="s1">'Package Control.sublime-package'</span><span class="p">;</span><span class="n">ipp</span><span class="o">=</span><span class="n">sublime</span><span class="o">.</span><span class="n">installed_packages_path</span><span class="p">();</span><span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">ipp</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ipp</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span><span class="p">;</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ipp</span><span class="p">,</span><span class="n">pf</span><span class="p">),</span><span class="s1">'wb'</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s1">'http://sublime.wbond.net/'</span><span class="o">+</span><span class="n">pf</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">' '</span><span class="p">,</span><span class="s1">'%20'</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</code></pre>
+    </div>
+    <ul>
      <li>
       3.重启Sublime Text 2
      </li>
     </ul>
-    <h2>
+    <h2 id="markdown">
      Markdown 相关插件安装
     </h2>
     <ul>
@@ -114,7 +118,8 @@
      </li>
     </ul>
     <p>
-     <pre>—– BEGIN LICENSE —–
+     <code>
+      —– BEGIN LICENSE —–
 TwitterInc
 200 User License
 EA7E-890007
@@ -126,7 +131,8 @@ D1EDDD8C AE7B379F 50C9D69D B35179EF
 D5D52613 C3D12E98 BC49967F 7652EED2
 9D2D2E61 67610860 6D338B72 5CF95C69
 E36B85CC 84991F19 7575D828 470A92AB
-—— END LICENSE ——</pre>
+—— END LICENSE ——
+     </code>
     </p>
    </article>
   </div>

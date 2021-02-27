@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="java">
      Java安装
     </h1>
     <hr/>
-    <h2>
+    <h2 id="centos">
      Centos
     </h2>
     <ul>
@@ -71,27 +72,24 @@
       </ul>
      </li>
     </ul>
-    <h2>
+    <h2 id="ubuntulinux-mint">
      Ubuntu或者linux mint
     </h2>
-    <p>
-     ```sh
-sudo apt-get update &amp;&amp; apt-get remove openjdk*
+    <div class="codehilite">
+     <pre><span></span><code>sudo apt-get update <span class="o">&amp;&amp;</span> apt-get remove openjdk*
 sudo tar zxvf jdk-7u80-linux-x64.tar.gz -C /usr/lib/java
-    </p>
-    <p>
-     vim /etc/profile
-export JAVA_HOME=/usr/java/jdk1.8.0_221
-export JRE_HOME=${JAVA_HOME}/jre
-export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
-export PATH=${JAVA_HOME}/bin:$PATH
-    </p>
-    <p>
-     source /etc/profile
+
+vim /etc/profile
+<span class="nb">export</span> <span class="nv">JAVA_HOME</span><span class="o">=</span>/usr/java/jdk1.8.0_221
+<span class="nb">export</span> <span class="nv">JRE_HOME</span><span class="o">=</span><span class="si">${</span><span class="nv">JAVA_HOME</span><span class="si">}</span>/jre
+<span class="nb">export</span> <span class="nv">CLASSPATH</span><span class="o">=</span>.:<span class="si">${</span><span class="nv">JAVA_HOME</span><span class="si">}</span>/lib:<span class="si">${</span><span class="nv">JRE_HOME</span><span class="si">}</span>/lib
+<span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span><span class="si">${</span><span class="nv">JAVA_HOME</span><span class="si">}</span>/bin:<span class="nv">$PATH</span>
+
+<span class="nb">source</span> /etc/profile
 java -version
-```
-    </p>
-    <h2>
+</code></pre>
+    </div>
+    <h2 id="_1">
      参考链接
     </h2>
     <ul>

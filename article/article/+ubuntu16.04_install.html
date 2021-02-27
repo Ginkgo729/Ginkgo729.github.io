@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,28 +43,57 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="ubuntu1604-sublime-text-2">
      Ubuntu16.04 下的 sublime text 2配置记录
     </h1>
     <hr/>
-    <p>
-     [TOC]
-    </p>
-    <h2>
+    <div class="toc">
+     <ul>
+      <li>
+       <a href="#ubuntu1604-sublime-text-2">
+        Ubuntu16.04 下的 sublime text 2配置记录
+       </a>
+       <ul>
+        <li>
+         <a href="#sublime">
+          一、安装sublime
+         </a>
+        </li>
+        <li>
+         <a href="#_1">
+          二、解决中文不能输入的问题
+         </a>
+        </li>
+        <li>
+         <a href="#markdown">
+          三、配置Markdown编辑
+         </a>
+        </li>
+        <li>
+         <a href="#_2">
+          参考链接
+         </a>
+        </li>
+       </ul>
+      </li>
+     </ul>
+    </div>
+    <h2 id="sublime">
      一、安装sublime
     </h2>
     <p>
      通过命令行进行安装，这样比较方便,其默认安装在/opt/下面：
     </p>
-    <p>
-     <pre>sudo add-apt-repository ppa:webupd8team/sublime-text-2
-sudo apt-get update
-sudo apt-get install sublime-text</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">sudo add-apt-repository ppa:webupd8team/sublime-text-2</span>
+<span class="err">sudo apt-get update</span>
+<span class="err">sudo apt-get install sublime-text</span>
+</code></pre>
+    </div>
     <p>
      有的人在第二步会特别费时间，这时候可以在软件安装源中去掉不必要的源
     </p>
-    <h2>
+    <h2 id="_1">
      二、解决中文不能输入的问题
     </h2>
     <ul>
@@ -71,165 +101,128 @@ sudo apt-get install sublime-text</pre>
       1.首先在安装的目录下新建一个sublime_imfix.c文件，并将下面的代码复制到里面：
      </li>
     </ul>
-    <p>
-     ```c
-/*
-sublime-imfix.c
-Use LD_PRELOAD to interpose some function to fix sublime input method support for linux.
-By Cjacker Huang
-     <jianzhong.huang at="" i-soft.com.cn="">
-     </jianzhong.huang>
-    </p>
-    <p>
-     gcc -shared -o libsublime-imfix.so sublime_imfix.c
-     <pre>pkg-config --libs --cflags gtk+-2.0</pre>
-     -fPIC
-LD_PRELOAD=./libsublime-imfix.so sublime_text
-*/
-    </p>
-    <h1>
-     include
-     <gtk gtk.h="">
-     </gtk>
-    </h1>
-    <h1>
-     include
-     <gdk gdkx.h="">
-     </gdk>
-    </h1>
-    <p>
-     typedef GdkSegment GdkRegionBox;
-    </p>
-    <p>
-     struct _GdkRegion
-{
-  long size;
-  long numRects;
-  GdkRegionBox *rects;
-  GdkRegionBox extents;
-};
-    </p>
-    <p>
-     GtkIMContext *local_context;
-    </p>
-    <p>
-     void
-gdk_region_get_clipbox (const GdkRegion
-     <em>
-      region,
-            GdkRectangle
-     </em>
-     rectangle)
-{
-  g_return_if_fail (region != NULL);
-  g_return_if_fail (rectangle != NULL);
-    </p>
-    <p>
-     rectangle-&gt;x = region-&gt;extents.x1;
-  rectangle-&gt;y = region-&gt;extents.y1;
-  rectangle-&gt;width = region-&gt;extents.x2 - region-&gt;extents.x1;
-  rectangle-&gt;height = region-&gt;extents.y2 - region-&gt;extents.y1;
-  GdkRectangle rect;
-  rect.x = rectangle-&gt;x;
-  rect.y = rectangle-&gt;y;
-  rect.width = 0;
-  rect.height = rectangle-&gt;height; 
-  //The caret width is 2; 
-  //Maybe sometimes we will make a mistake, but for most of the time, it should be the caret.
-  if(rectangle-&gt;width == 2 &amp;&amp; GTK_IS_IM_CONTEXT(local_context)) {
-        gtk_im_context_set_cursor_location(local_context, rectangle);
-  }
-}
-    </p>
-    <p>
-     //this is needed, for example, if you input something in file dialog and return back the edit area
-//context will lost, so here we set it again.
-    </p>
-    <p>
-     static GdkFilterReturn event_filter (GdkXEvent
-     <em>
-      xevent, GdkEvent
-     </em>
-     event, gpointer im_context)
-{
-    XEvent
-     <em>
-      xev = (XEvent
-     </em>
-     )xevent;
-    if(xev-&gt;type == KeyRelease &amp;&amp; GTK_IS_IM_CONTEXT(im_context)) {
-       GdkWindow * win = g_object_get_data(G_OBJECT(im_context),"window");
-       if(GDK_IS_WINDOW(win))
-         gtk_im_context_set_client_window(im_context, win);
-    }
-    return GDK_FILTER_CONTINUE;
-}
-    </p>
-    <p>
-     void gtk_im_context_set_client_window (GtkIMContext
-     <em>
-      context,
-          GdkWindow
-     </em>
-     window)
-{
-  GtkIMContextClass *klass;
-  g_return_if_fail (GTK_IS_IM_CONTEXT (context));
-  klass = GTK_IM_CONTEXT_GET_CLASS (context);
-  if (klass-&gt;set_client_window)
-    klass-&gt;set_client_window (context, window);
-    </p>
-    <p>
-     if(!GDK_IS_WINDOW (window))
-    return;
-  g_object_set_data(G_OBJECT(context),"window",window);
-  int width = gdk_window_get_width(window);
-  int height = gdk_window_get_height(window);
-  if(width != 0 &amp;&amp; height !=0) {
-    gtk_im_context_focus_in(context);
-    local_context = context;
-  }
-  gdk_window_add_filter (window, event_filter, context); 
-}
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="cm">/*</span>
+<span class="cm">sublime-imfix.c</span>
+<span class="cm">Use LD_PRELOAD to interpose some function to fix sublime input method support for linux.</span>
+<span class="cm">By Cjacker Huang &lt;jianzhong.huang at i-soft.com.cn&gt;</span>
+
+<span class="cm">gcc -shared -o libsublime-imfix.so sublime_imfix.c  `pkg-config --libs --cflags gtk+-2.0` -fPIC</span>
+<span class="cm">LD_PRELOAD=./libsublime-imfix.so sublime_text</span>
+<span class="cm">*/</span>
+<span class="cp">#include</span> <span class="cpf">&lt;gtk/gtk.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;gdk/gdkx.h&gt;</span><span class="cp"></span>
+<span class="k">typedef</span> <span class="n">GdkSegment</span> <span class="n">GdkRegionBox</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">_GdkRegion</span>
+<span class="p">{</span>
+  <span class="kt">long</span> <span class="n">size</span><span class="p">;</span>
+  <span class="kt">long</span> <span class="n">numRects</span><span class="p">;</span>
+  <span class="n">GdkRegionBox</span> <span class="o">*</span><span class="n">rects</span><span class="p">;</span>
+  <span class="n">GdkRegionBox</span> <span class="n">extents</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">GtkIMContext</span> <span class="o">*</span><span class="n">local_context</span><span class="p">;</span>
+
+<span class="kt">void</span>
+<span class="nf">gdk_region_get_clipbox</span> <span class="p">(</span><span class="k">const</span> <span class="n">GdkRegion</span> <span class="o">*</span><span class="n">region</span><span class="p">,</span>
+            <span class="n">GdkRectangle</span>    <span class="o">*</span><span class="n">rectangle</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">g_return_if_fail</span> <span class="p">(</span><span class="n">region</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+  <span class="n">g_return_if_fail</span> <span class="p">(</span><span class="n">rectangle</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+
+  <span class="n">rectangle</span><span class="o">-&gt;</span><span class="n">x</span> <span class="o">=</span> <span class="n">region</span><span class="o">-&gt;</span><span class="n">extents</span><span class="p">.</span><span class="n">x1</span><span class="p">;</span>
+  <span class="n">rectangle</span><span class="o">-&gt;</span><span class="n">y</span> <span class="o">=</span> <span class="n">region</span><span class="o">-&gt;</span><span class="n">extents</span><span class="p">.</span><span class="n">y1</span><span class="p">;</span>
+  <span class="n">rectangle</span><span class="o">-&gt;</span><span class="n">width</span> <span class="o">=</span> <span class="n">region</span><span class="o">-&gt;</span><span class="n">extents</span><span class="p">.</span><span class="n">x2</span> <span class="o">-</span> <span class="n">region</span><span class="o">-&gt;</span><span class="n">extents</span><span class="p">.</span><span class="n">x1</span><span class="p">;</span>
+  <span class="n">rectangle</span><span class="o">-&gt;</span><span class="n">height</span> <span class="o">=</span> <span class="n">region</span><span class="o">-&gt;</span><span class="n">extents</span><span class="p">.</span><span class="n">y2</span> <span class="o">-</span> <span class="n">region</span><span class="o">-&gt;</span><span class="n">extents</span><span class="p">.</span><span class="n">y1</span><span class="p">;</span>
+  <span class="n">GdkRectangle</span> <span class="n">rect</span><span class="p">;</span>
+  <span class="n">rect</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">rectangle</span><span class="o">-&gt;</span><span class="n">x</span><span class="p">;</span>
+  <span class="n">rect</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">rectangle</span><span class="o">-&gt;</span><span class="n">y</span><span class="p">;</span>
+  <span class="n">rect</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">rect</span><span class="p">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">rectangle</span><span class="o">-&gt;</span><span class="n">height</span><span class="p">;</span> 
+  <span class="c1">//The caret width is 2; </span>
+  <span class="c1">//Maybe sometimes we will make a mistake, but for most of the time, it should be the caret.</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">rectangle</span><span class="o">-&gt;</span><span class="n">width</span> <span class="o">==</span> <span class="mi">2</span> <span class="o">&amp;&amp;</span> <span class="n">GTK_IS_IM_CONTEXT</span><span class="p">(</span><span class="n">local_context</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">gtk_im_context_set_cursor_location</span><span class="p">(</span><span class="n">local_context</span><span class="p">,</span> <span class="n">rectangle</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//this is needed, for example, if you input something in file dialog and return back the edit area</span>
+<span class="c1">//context will lost, so here we set it again.</span>
+
+<span class="k">static</span> <span class="n">GdkFilterReturn</span> <span class="nf">event_filter</span> <span class="p">(</span><span class="n">GdkXEvent</span> <span class="o">*</span><span class="n">xevent</span><span class="p">,</span> <span class="n">GdkEvent</span> <span class="o">*</span><span class="n">event</span><span class="p">,</span> <span class="n">gpointer</span> <span class="n">im_context</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">XEvent</span> <span class="o">*</span><span class="n">xev</span> <span class="o">=</span> <span class="p">(</span><span class="n">XEvent</span> <span class="o">*</span><span class="p">)</span><span class="n">xevent</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">xev</span><span class="o">-&gt;</span><span class="n">type</span> <span class="o">==</span> <span class="n">KeyRelease</span> <span class="o">&amp;&amp;</span> <span class="n">GTK_IS_IM_CONTEXT</span><span class="p">(</span><span class="n">im_context</span><span class="p">))</span> <span class="p">{</span>
+       <span class="n">GdkWindow</span> <span class="o">*</span> <span class="n">win</span> <span class="o">=</span> <span class="n">g_object_get_data</span><span class="p">(</span><span class="n">G_OBJECT</span><span class="p">(</span><span class="n">im_context</span><span class="p">),</span><span class="s">"window"</span><span class="p">);</span>
+       <span class="k">if</span><span class="p">(</span><span class="n">GDK_IS_WINDOW</span><span class="p">(</span><span class="n">win</span><span class="p">))</span>
+         <span class="n">gtk_im_context_set_client_window</span><span class="p">(</span><span class="n">im_context</span><span class="p">,</span> <span class="n">win</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">GDK_FILTER_CONTINUE</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">gtk_im_context_set_client_window</span> <span class="p">(</span><span class="n">GtkIMContext</span> <span class="o">*</span><span class="n">context</span><span class="p">,</span>
+          <span class="n">GdkWindow</span>    <span class="o">*</span><span class="n">window</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">GtkIMContextClass</span> <span class="o">*</span><span class="n">klass</span><span class="p">;</span>
+  <span class="n">g_return_if_fail</span> <span class="p">(</span><span class="n">GTK_IS_IM_CONTEXT</span> <span class="p">(</span><span class="n">context</span><span class="p">));</span>
+  <span class="n">klass</span> <span class="o">=</span> <span class="n">GTK_IM_CONTEXT_GET_CLASS</span> <span class="p">(</span><span class="n">context</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">klass</span><span class="o">-&gt;</span><span class="n">set_client_window</span><span class="p">)</span>
+    <span class="n">klass</span><span class="o">-&gt;</span><span class="n">set_client_window</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">window</span><span class="p">);</span>
+
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">GDK_IS_WINDOW</span> <span class="p">(</span><span class="n">window</span><span class="p">))</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="n">g_object_set_data</span><span class="p">(</span><span class="n">G_OBJECT</span><span class="p">(</span><span class="n">context</span><span class="p">),</span><span class="s">"window"</span><span class="p">,</span><span class="n">window</span><span class="p">);</span>
+  <span class="kt">int</span> <span class="n">width</span> <span class="o">=</span> <span class="n">gdk_window_get_width</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+  <span class="kt">int</span> <span class="n">height</span> <span class="o">=</span> <span class="n">gdk_window_get_height</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">width</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">height</span> <span class="o">!=</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">gtk_im_context_focus_in</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+    <span class="n">local_context</span> <span class="o">=</span> <span class="n">context</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">gdk_window_add_filter</span> <span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">event_filter</span><span class="p">,</span> <span class="n">context</span><span class="p">);</span> 
+<span class="p">}</span>
+</code></pre>
+    </div>
     <ul>
      <li>
       2.安装相应的编译环境
      </li>
     </ul>
-    <p>
-     <pre>sudo apt-get install build-essential
-sudo apt-get install libgtk2.0-dev</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">sudo apt-get install build-essential</span>
+<span class="err">sudo apt-get install libgtk2.0-dev</span>
+</code></pre>
+    </div>
     <ul>
      <li>
       3.进行编译
      </li>
     </ul>
-    <p>
-     <pre>gcc -shared -o libsublime-imfix.so sublime_imfix.c  `pkg-config --libs --cflags gtk+-2.0` -fPIC</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">gcc -shared -o libsublime-imfix.so sublime_imfix.c  `pkg-config --libs --cflags gtk+-2.0` -fPIC</span>
+</code></pre>
+    </div>
     <ul>
      <li>
       4.运行解决
      </li>
     </ul>
-    <p>
-     <pre>LD_PRELOAD=./libsublime-imfix.so subl</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">LD_PRELOAD=./libsublime-imfix.so subl</span>
+</code></pre>
+    </div>
     <p>
      <em>
       注意命令的运行都是在sublime的安装目录下进行的
      </em>
     </p>
-    <h2>
+    <h2 id="markdown">
      三、配置Markdown编辑
     </h2>
     <p>
      &amp;esnp  在Ubuntu中的Markdown编辑也是有很多问题，其中就是浏览器不能自动启动的问题，这个我只能临时提供一个解决方案了：在点击浏览快捷键以后使用Ctrl+`调出控制台，里面有相应的网页地址，只能手动输入进去查看了，也行吧，不是不能接收
     </p>
-    <h2>
+    <h2 id="_2">
      参考链接
     </h2>
     <p>

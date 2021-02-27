@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="docker-java">
      Docker Java程序镜像制作
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      制作前的准备
     </h2>
     <ul>
@@ -61,7 +62,7 @@
       jar包：自己写好的程序的可执行jar，放到镜像中直接运行即可
      </li>
     </ul>
-    <h2>
+    <h2 id="_2">
      制作步骤
     </h2>
     <ul>
@@ -75,62 +76,35 @@
       生产Dockfile文件并进行编写，编写示例和说明如下,下面的操作环境是centos7
      </li>
     </ul>
-    <p>
-     ```bash
-    </p>
-    <h1>
-     创建镜像制作目录
-    </h1>
-    <p>
-     mkdir docker
-cd docker
-    </p>
-    <h1>
-     将oracle的jre包和生成好的程序jar放到目录中
-    </h1>
-    <h1>
-     为了制造较小体积的镜像，不使用jdk包，也没有必要使用它
-    </h1>
-    <p>
-     cp ../jre-8u221-linux-x64.tar.gz ./
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># 创建镜像制作目录</span>
+mkdir docker
+<span class="nb">cd</span> docker
+
+<span class="c1"># 将oracle的jre包和生成好的程序jar放到目录中</span>
+<span class="c1"># 为了制造较小体积的镜像，不使用jdk包，也没有必要使用它</span>
+cp ../jre-8u221-linux-x64.tar.gz ./
 cp ../seckill-1.0-SNAPSHOT.jar ./
-    </p>
-    <h1>
-     创建并编辑编辑Dockfile镜像生成文件
-    </h1>
-    <p>
-     vim Dockerfile
-    </p>
-    <h1>
-     将下面的内容写入文件中，详细的东西在后面会有说明
-    </h1>
-    <p>
-     FROM docker.io/jeanblanchard/alpine-glibc
+
+<span class="c1"># 创建并编辑编辑Dockfile镜像生成文件</span>
+vim Dockerfile
+
+<span class="c1"># 将下面的内容写入文件中，详细的东西在后面会有说明</span>
+FROM docker.io/jeanblanchard/alpine-glibc
 ADD jre-8u221-linux-x64.tar.gz /usr/java/jdk
 ENV JAVA_HOME /usr/java/jdk/jre1.8.0_221
-ENV PATH ${PATH}:${JAVA_HOME}/bin
+ENV PATH <span class="si">${</span><span class="nv">PATH</span><span class="si">}</span>:<span class="si">${</span><span class="nv">JAVA_HOME</span><span class="si">}</span>/bin
 COPY seckill-1.0-SNAPSHOT.jar /home/seckill-1.0-SNAPSHOT.jar
 CMD java -jar /home/seckill-1.0-SNAPSHOT.jar
-    </p>
-    <h1>
-     生成名称为seckill，版本为v0的镜像
-    </h1>
-    <p>
-     docker build -t seckill:v0 .
-    </p>
-    <h1>
-     运行镜像，我的Java程序是监听在8080端口的，所以将镜像容器的8080端口映射到宿主机的8080，并命名容器的名称为seckill
-    </h1>
-    <p>
-     docker run --name seckill -p 8080:8080 seckill
-    </p>
-    <h1>
-     查看当前seckill容器的输出，这里会打印显示Java的控制台输出内容
-    </h1>
-    <p>
-     docker logs seckill
-```
-    </p>
+
+<span class="c1"># 生成名称为seckill，版本为v0的镜像</span>
+docker build -t seckill:v0 .
+<span class="c1"># 运行镜像，我的Java程序是监听在8080端口的，所以将镜像容器的8080端口映射到宿主机的8080，并命名容器的名称为seckill</span>
+docker run --name seckill -p <span class="m">8080</span>:8080 seckill
+<span class="c1"># 查看当前seckill容器的输出，这里会打印显示Java的控制台输出内容</span>
+docker logs seckill
+</code></pre>
+    </div>
     <p>
      下面讲解下Dockfile文件的内容：
     </p>
@@ -154,7 +128,7 @@ CMD java -jar /home/seckill-1.0-SNAPSHOT.jar
     <p>
      如果对docker不是太了解的话，可以查看下面的我制作过程中参考的链接
     </p>
-    <h2>
+    <h2 id="_3">
      参考链接
     </h2>
     <ul>

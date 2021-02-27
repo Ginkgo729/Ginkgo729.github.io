@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,17 +43,17 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soulwebsocket-admin">
      Soul网关源码解析（二十）Websocket数据同步-Admin端
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      本篇文章探索下Soul网关Admin的Websocket数据同步流程
     </p>
-    <h2>
+    <h2 id="_2">
      概览
     </h2>
     <p>
@@ -67,44 +68,44 @@
     <p>
      发现初始化都是从熟悉的syncAll开始，而事件变更处理都是从Controllers入口开始的，具体详情记录情况在源码Debug环节
     </p>
-    <h2>
+    <h2 id="_3">
      示例运行
     </h2>
     <p>
      启动数据库：
     </p>
     <p>
-     <pre>shell script
-docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest</pre>
+     ```shell script
+docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
     </p>
-    <p>
-     首先配置运行Soul-Admin，设置数据同步方式为Websocket
-    </p>
-    <p>
-     <pre>xml
-soul:
-  sync:
-    websocket:
-      enabled: true</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">首先配置运行</span><span class="n">Soul</span><span class="o">-</span><span class="k">Admin</span><span class="err">，设置数据同步方式为</span><span class="n">Websocket</span>
+
+<span class="o">```</span><span class="n">xml</span>
+<span class="n">soul</span><span class="p">:</span>
+  <span class="n">sync</span><span class="p">:</span>
+    <span class="n">websocket</span><span class="p">:</span>
+      <span class="n">enabled</span><span class="p">:</span> <span class="k">true</span>
+</code></pre>
+    </div>
     <p>
      配置Soul-Bootstrap，配置websocket同步方式，运行Soul-Bootstrap，大致如下：
     </p>
-    <p>
-     <pre>xml
-soul :
+    <div class="codehilite">
+     <pre><span></span><code>soul :
     # 把 websocket 数据同步打开
     sync:
         websocket :
-             urls: ws://localhost:9095/websocket</pre>
-    </p>
+             urls: ws://localhost:9095/websocket
+</code></pre>
+    </div>
     <p>
      运行Soul-Example-HTTP，注册一些数据用于Debug测试
     </p>
-    <h2>
+    <h2 id="debug">
      源码Debug
     </h2>
-    <h3>
+    <h3 id="_4">
      初始化流程
     </h3>
     <p>
@@ -116,117 +117,102 @@ soul :
     <p>
      成功进入断点，我们可以看到下面的函数大意是封装了Websocket格式的数据，然后用Websocket发送出去，细节后面再看，我们先看看调用栈
     </p>
-    <p>
-     ```java
-public class WebsocketDataChangedListener implements DataChangedListener {
-    </p>
-    <pre><pre>@Override
-public void onPluginChanged(final List&lt;PluginData&gt; pluginDataList, final DataEventTypeEnum eventType) {
-    WebsocketData&lt;PluginData&gt; websocketData =
-            new WebsocketData&lt;&gt;(ConfigGroupEnum.PLUGIN.name(), eventType.name(), pluginDataList);
-    WebsocketCollector.send(GsonUtils.getInstance().toJson(websocketData), eventType);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketDataChangedListener</span> <span class="kd">implements</span> <span class="n">DataChangedListener</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPluginChanged</span><span class="p">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">pluginDataList</span><span class="p">,</span> <span class="kd">final</span> <span class="n">DataEventTypeEnum</span> <span class="n">eventType</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">WebsocketData</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">websocketData</span> <span class="o">=</span>
+                <span class="k">new</span> <span class="n">WebsocketData</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">PLUGIN</span><span class="p">.</span><span class="na">name</span><span class="p">(),</span> <span class="n">eventType</span><span class="p">.</span><span class="na">name</span><span class="p">(),</span> <span class="n">pluginDataList</span><span class="p">);</span>
+        <span class="n">WebsocketCollector</span><span class="p">.</span><span class="na">send</span><span class="p">(</span><span class="n">GsonUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">toJson</span><span class="p">(</span><span class="n">websocketData</span><span class="p">),</span> <span class="n">eventType</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      PS：这个有个小细节，如果没有任何一台Bootstrap或者事件发送，那这个断点不会进入
     </p>
     <p>
      我们跟踪调用栈来到前面文章中熟悉的事件处理分发，这里继续跟下去
     </p>
-    <p>
-     ```java
-public class DataChangedEventDispatcher implements ApplicationListener
-     <datachangedevent>
-      , InitializingBean {
-     </datachangedevent>
-    </p>
-    <pre><pre>@Override
-@SuppressWarnings("unchecked")
-public void onApplicationEvent(final DataChangedEvent event) {
-    for (DataChangedListener listener : listeners) {
-        switch (event.getGroupKey()) {
-            case APP_AUTH:
-                listener.onAppAuthChanged((List&lt;AppAuthData&gt;) event.getSource(), event.getEventType());
-                break;
-            // Plugin 触发
-            case PLUGIN:
-                listener.onPluginChanged((List&lt;PluginData&gt;) event.getSource(), event.getEventType());
-                break;
-            case RULE:
-                listener.onRuleChanged((List&lt;RuleData&gt;) event.getSource(), event.getEventType());
-                break;
-            case SELECTOR:
-                listener.onSelectorChanged((List&lt;SelectorData&gt;) event.getSource(), event.getEventType());
-                break;
-            case META_DATA:
-                listener.onMetaDataChanged((List&lt;MetaData&gt;) event.getSource(), event.getEventType());
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + event.getGroupKey());
-        }
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DataChangedEventDispatcher</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">DataChangedEvent</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">InitializingBean</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="nd">@SuppressWarnings</span><span class="p">(</span><span class="s">"unchecked"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onApplicationEvent</span><span class="p">(</span><span class="kd">final</span> <span class="n">DataChangedEvent</span> <span class="n">event</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">DataChangedListener</span> <span class="n">listener</span> <span class="p">:</span> <span class="n">listeners</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">switch</span> <span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="na">getGroupKey</span><span class="p">())</span> <span class="p">{</span>
+                <span class="k">case</span> <span class="n">APP_AUTH</span><span class="p">:</span>
+                    <span class="n">listener</span><span class="p">.</span><span class="na">onAppAuthChanged</span><span class="p">((</span><span class="n">List</span><span class="o">&lt;</span><span class="n">AppAuthData</span><span class="o">&gt;</span><span class="p">)</span> <span class="n">event</span><span class="p">.</span><span class="na">getSource</span><span class="p">(),</span> <span class="n">event</span><span class="p">.</span><span class="na">getEventType</span><span class="p">());</span>
+                    <span class="k">break</span><span class="p">;</span>
+                <span class="c1">// Plugin 触发</span>
+                <span class="k">case</span> <span class="n">PLUGIN</span><span class="p">:</span>
+                    <span class="n">listener</span><span class="p">.</span><span class="na">onPluginChanged</span><span class="p">((</span><span class="n">List</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span><span class="p">)</span> <span class="n">event</span><span class="p">.</span><span class="na">getSource</span><span class="p">(),</span> <span class="n">event</span><span class="p">.</span><span class="na">getEventType</span><span class="p">());</span>
+                    <span class="k">break</span><span class="p">;</span>
+                <span class="k">case</span> <span class="n">RULE</span><span class="p">:</span>
+                    <span class="n">listener</span><span class="p">.</span><span class="na">onRuleChanged</span><span class="p">((</span><span class="n">List</span><span class="o">&lt;</span><span class="n">RuleData</span><span class="o">&gt;</span><span class="p">)</span> <span class="n">event</span><span class="p">.</span><span class="na">getSource</span><span class="p">(),</span> <span class="n">event</span><span class="p">.</span><span class="na">getEventType</span><span class="p">());</span>
+                    <span class="k">break</span><span class="p">;</span>
+                <span class="k">case</span> <span class="n">SELECTOR</span><span class="p">:</span>
+                    <span class="n">listener</span><span class="p">.</span><span class="na">onSelectorChanged</span><span class="p">((</span><span class="n">List</span><span class="o">&lt;</span><span class="n">SelectorData</span><span class="o">&gt;</span><span class="p">)</span> <span class="n">event</span><span class="p">.</span><span class="na">getSource</span><span class="p">(),</span> <span class="n">event</span><span class="p">.</span><span class="na">getEventType</span><span class="p">());</span>
+                    <span class="k">break</span><span class="p">;</span>
+                <span class="k">case</span> <span class="n">META_DATA</span><span class="p">:</span>
+                    <span class="n">listener</span><span class="p">.</span><span class="na">onMetaDataChanged</span><span class="p">((</span><span class="n">List</span><span class="o">&lt;</span><span class="n">MetaData</span><span class="o">&gt;</span><span class="p">)</span> <span class="n">event</span><span class="p">.</span><span class="na">getSource</span><span class="p">(),</span> <span class="n">event</span><span class="p">.</span><span class="na">getEventType</span><span class="p">());</span>
+                    <span class="k">break</span><span class="p">;</span>
+                <span class="k">default</span><span class="p">:</span>
+                    <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalStateException</span><span class="p">(</span><span class="s">"Unexpected value: "</span> <span class="o">+</span> <span class="n">event</span><span class="p">.</span><span class="na">getGroupKey</span><span class="p">());</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      来到又是非常熟悉的全量数据同步函数：从数据库中读取所有的数据，然后发布事件，进行同步
     </p>
-    <p>
-     ```java
-public class SyncDataServiceImpl implements SyncDataService {
-    </p>
-    <pre><pre>@Override
-public boolean syncAll(final DataEventTypeEnum type) {
-    appAuthService.syncData();
-    List&lt;PluginData&gt; pluginDataList = pluginService.listAll();
-    eventPublisher.publishEvent(new DataChangedEvent(ConfigGroupEnum.PLUGIN, type, pluginDataList));
-    List&lt;SelectorData&gt; selectorDataList = selectorService.listAll();
-    eventPublisher.publishEvent(new DataChangedEvent(ConfigGroupEnum.SELECTOR, type, selectorDataList));
-    List&lt;RuleData&gt; ruleDataList = ruleService.listAll();
-    eventPublisher.publishEvent(new DataChangedEvent(ConfigGroupEnum.RULE, type, ruleDataList));
-    metaDataService.syncData();
-    return true;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SyncDataServiceImpl</span> <span class="kd">implements</span> <span class="n">SyncDataService</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">syncAll</span><span class="p">(</span><span class="kd">final</span> <span class="n">DataEventTypeEnum</span> <span class="n">type</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">appAuthService</span><span class="p">.</span><span class="na">syncData</span><span class="p">();</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">pluginDataList</span> <span class="o">=</span> <span class="n">pluginService</span><span class="p">.</span><span class="na">listAll</span><span class="p">();</span>
+        <span class="n">eventPublisher</span><span class="p">.</span><span class="na">publishEvent</span><span class="p">(</span><span class="k">new</span> <span class="n">DataChangedEvent</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">PLUGIN</span><span class="p">,</span> <span class="n">type</span><span class="p">,</span> <span class="n">pluginDataList</span><span class="p">));</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">SelectorData</span><span class="o">&gt;</span> <span class="n">selectorDataList</span> <span class="o">=</span> <span class="n">selectorService</span><span class="p">.</span><span class="na">listAll</span><span class="p">();</span>
+        <span class="n">eventPublisher</span><span class="p">.</span><span class="na">publishEvent</span><span class="p">(</span><span class="k">new</span> <span class="n">DataChangedEvent</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">SELECTOR</span><span class="p">,</span> <span class="n">type</span><span class="p">,</span> <span class="n">selectorDataList</span><span class="p">));</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">RuleData</span><span class="o">&gt;</span> <span class="n">ruleDataList</span> <span class="o">=</span> <span class="n">ruleService</span><span class="p">.</span><span class="na">listAll</span><span class="p">();</span>
+        <span class="n">eventPublisher</span><span class="p">.</span><span class="na">publishEvent</span><span class="p">(</span><span class="k">new</span> <span class="n">DataChangedEvent</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">RULE</span><span class="p">,</span> <span class="n">type</span><span class="p">,</span> <span class="n">ruleDataList</span><span class="p">));</span>
+        <span class="n">metaDataService</span><span class="p">.</span><span class="na">syncData</span><span class="p">();</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      再跟，来到了Websocket相关的，下面这个函数如果是写过Websocket的，那一定非常熟悉了，就是接收到消息，然后调用处理逻辑
     </p>
     <p>
      在调试中，我们看到message的值是MYSELF，猜测Websocket的初始化通信约定应该是收到MYSELF，则同步全量数据给Bootstrap
     </p>
-    <p>
-     ```java
-public class WebsocketCollector {
-    </p>
-    <pre><pre>@OnMessage
-public void onMessage(final String message, final Session session) {
-    // message == MYSELF
-    if (message.equals(DataEventTypeEnum.MYSELF.name())) {
-        try {
-            // 将客户端Session信息进行保存
-            ThreadLocalUtil.put(SESSION_KEY, session);
-            SpringBeanUtils.getInstance().getBean(SyncDataService.class).syncAll(DataEventTypeEnum.MYSELF);
-        } finally {
-            ThreadLocalUtil.clear();
-        }
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketCollector</span> <span class="p">{</span>
+
+    <span class="nd">@OnMessage</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onMessage</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">message</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Session</span> <span class="n">session</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// message == MYSELF</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">MYSELF</span><span class="p">.</span><span class="na">name</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="c1">// 将客户端Session信息进行保存</span>
+                <span class="n">ThreadLocalUtil</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">SESSION_KEY</span><span class="p">,</span> <span class="n">session</span><span class="p">);</span>
+                <span class="n">SpringBeanUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">getBean</span><span class="p">(</span><span class="n">SyncDataService</span><span class="p">.</span><span class="na">class</span><span class="p">).</span><span class="na">syncAll</span><span class="p">(</span><span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">MYSELF</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+                <span class="n">ThreadLocalUtil</span><span class="p">.</span><span class="na">clear</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们回过头去看看Websocket的发送函数，有两个点需要注意一下：
     </p>
@@ -245,27 +231,24 @@ public void onMessage(final String message, final Session session) {
     <p>
      这个应该是事件变更，然后同步数据给所有的客户端
     </p>
-    <p>
-     ```java
-public class WebsocketCollector {
-    </p>
-    <pre><pre>public static void send(final String message, final DataEventTypeEnum type) {
-    if (StringUtils.isNotBlank(message)) {
-        if (DataEventTypeEnum.MYSELF == type) {
-            Session session = (Session) ThreadLocalUtil.get(SESSION_KEY);
-            if (session != null) {
-                sendMessageBySession(session, message);
-            }
-        } else {
-            SESSION_SET.forEach(session -&gt; sendMessageBySession(session, message));
-        }
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketCollector</span> <span class="p">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">send</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">message</span><span class="p">,</span> <span class="kd">final</span> <span class="n">DataEventTypeEnum</span> <span class="n">type</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNotBlank</span><span class="p">(</span><span class="n">message</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">MYSELF</span> <span class="o">==</span> <span class="n">type</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">Session</span> <span class="n">session</span> <span class="o">=</span> <span class="p">(</span><span class="n">Session</span><span class="p">)</span> <span class="n">ThreadLocalUtil</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">SESSION_KEY</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">session</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">sendMessageBySession</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">message</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="n">SESSION_SET</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">session</span> <span class="o">-&gt;</span> <span class="n">sendMessageBySession</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">message</span><span class="p">));</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在这里看到使用ThreadLocal进行标识获取，但SESSION_KEY都是一样的，它是原理好像自己还有点迷糊，后面再研究下
     </p>
@@ -275,85 +258,76 @@ public class WebsocketCollector {
     <p>
      看了这个，感觉又学到了一手
     </p>
-    <h3>
+    <h3 id="_5">
      数据变更
     </h3>
     <p>
      数据同步走完了，我们在Admin后台管理界面，修改限流插件的状态，然后触发进入了最开始我们打上断点的函数：
     </p>
-    <p>
-     ```java
-public class WebsocketDataChangedListener implements DataChangedListener {
-    </p>
-    <pre><pre>@Override
-public void onPluginChanged(final List&lt;PluginData&gt; pluginDataList, final DataEventTypeEnum eventType) {
-    WebsocketData&lt;PluginData&gt; websocketData =
-            new WebsocketData&lt;&gt;(ConfigGroupEnum.PLUGIN.name(), eventType.name(), pluginDataList);
-    WebsocketCollector.send(GsonUtils.getInstance().toJson(websocketData), eventType);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketDataChangedListener</span> <span class="kd">implements</span> <span class="n">DataChangedListener</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPluginChanged</span><span class="p">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">pluginDataList</span><span class="p">,</span> <span class="kd">final</span> <span class="n">DataEventTypeEnum</span> <span class="n">eventType</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">WebsocketData</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">websocketData</span> <span class="o">=</span>
+                <span class="k">new</span> <span class="n">WebsocketData</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">PLUGIN</span><span class="p">.</span><span class="na">name</span><span class="p">(),</span> <span class="n">eventType</span><span class="p">.</span><span class="na">name</span><span class="p">(),</span> <span class="n">pluginDataList</span><span class="p">);</span>
+        <span class="n">WebsocketCollector</span><span class="p">.</span><span class="na">send</span><span class="p">(</span><span class="n">GsonUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">toJson</span><span class="p">(</span><span class="n">websocketData</span><span class="p">),</span> <span class="n">eventType</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      跟踪调用栈事件，事件分发跳过，又来到熟悉的：PluginServiceImpl，这里面进行插件数据的更新，然后发布事件
     </p>
-    <p>
-     ```java
-public class PluginServiceImpl implements PluginService {
-    </p>
-    <pre><pre>@Override
-@Transactional(rollbackFor = Exception.class)
-public String createOrUpdate(final PluginDTO pluginDTO) {
-    final String msg = checkData(pluginDTO);
-    if (StringUtils.isNoneBlank(msg)) {
-        return msg;
-    }
-    PluginDO pluginDO = PluginDO.buildPluginDO(pluginDTO);
-    DataEventTypeEnum eventType = DataEventTypeEnum.CREATE;
-    if (StringUtils.isBlank(pluginDTO.getId())) {
-        pluginMapper.insertSelective(pluginDO);
-    } else {
-        eventType = DataEventTypeEnum.UPDATE;
-        pluginMapper.updateSelective(pluginDO);
-    }
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PluginServiceImpl</span> <span class="kd">implements</span> <span class="n">PluginService</span> <span class="p">{</span>
 
-    // publish change event.
-    eventPublisher.publishEvent(new DataChangedEvent(ConfigGroupEnum.PLUGIN, eventType,
-            Collections.singletonList(PluginTransfer.INSTANCE.mapToData(pluginDO))));
-    return StringUtils.EMPTY;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="nd">@Override</span>
+    <span class="nd">@Transactional</span><span class="p">(</span><span class="n">rollbackFor</span> <span class="o">=</span> <span class="n">Exception</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">createOrUpdate</span><span class="p">(</span><span class="kd">final</span> <span class="n">PluginDTO</span> <span class="n">pluginDTO</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">checkData</span><span class="p">(</span><span class="n">pluginDTO</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNoneBlank</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">msg</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">PluginDO</span> <span class="n">pluginDO</span> <span class="o">=</span> <span class="n">PluginDO</span><span class="p">.</span><span class="na">buildPluginDO</span><span class="p">(</span><span class="n">pluginDTO</span><span class="p">);</span>
+        <span class="n">DataEventTypeEnum</span> <span class="n">eventType</span> <span class="o">=</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">CREATE</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isBlank</span><span class="p">(</span><span class="n">pluginDTO</span><span class="p">.</span><span class="na">getId</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="n">pluginMapper</span><span class="p">.</span><span class="na">insertSelective</span><span class="p">(</span><span class="n">pluginDO</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">eventType</span> <span class="o">=</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">;</span>
+            <span class="n">pluginMapper</span><span class="p">.</span><span class="na">updateSelective</span><span class="p">(</span><span class="n">pluginDO</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// publish change event.</span>
+        <span class="n">eventPublisher</span><span class="p">.</span><span class="na">publishEvent</span><span class="p">(</span><span class="k">new</span> <span class="n">DataChangedEvent</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">PLUGIN</span><span class="p">,</span> <span class="n">eventType</span><span class="p">,</span>
+                <span class="n">Collections</span><span class="p">.</span><span class="na">singletonList</span><span class="p">(</span><span class="n">PluginTransfer</span><span class="p">.</span><span class="na">INSTANCE</span><span class="p">.</span><span class="na">mapToData</span><span class="p">(</span><span class="n">pluginDO</span><span class="p">))));</span>
+        <span class="k">return</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">EMPTY</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续跟踪来到属性的Controllers接口，从这里触发事件更新
     </p>
-    <p>
-     ```java
-@RestController
-@RequestMapping("/plugin")
-public class PluginController {
-    </p>
-    <pre><pre>@PutMapping("/{id}")
-public SoulAdminResult updatePlugin(@PathVariable("id") final String id, @RequestBody final PluginDTO pluginDTO) {
-    Objects.requireNonNull(pluginDTO);
-    pluginDTO.setId(id);
-    final String result = pluginService.createOrUpdate(pluginDTO);
-    if (StringUtils.isNoneBlank(result)) {
-        return SoulAdminResult.error(result);
-    }
-    return SoulAdminResult.success(SoulResultMessage.UPDATE_SUCCESS);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nd">@RestController</span>
+<span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">"/plugin"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">PluginController</span> <span class="p">{</span>
+
+    <span class="nd">@PutMapping</span><span class="p">(</span><span class="s">"/{id}"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">SoulAdminResult</span> <span class="nf">updatePlugin</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="p">(</span><span class="s">"id"</span><span class="p">)</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">id</span><span class="p">,</span> <span class="nd">@RequestBody</span> <span class="kd">final</span> <span class="n">PluginDTO</span> <span class="n">pluginDTO</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">pluginDTO</span><span class="p">);</span>
+        <span class="n">pluginDTO</span><span class="p">.</span><span class="na">setId</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">result</span> <span class="o">=</span> <span class="n">pluginService</span><span class="p">.</span><span class="na">createOrUpdate</span><span class="p">(</span><span class="n">pluginDTO</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNoneBlank</span><span class="p">(</span><span class="n">result</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">SoulAdminResult</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">SoulAdminResult</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">SoulResultMessage</span><span class="p">.</span><span class="na">UPDATE_SUCCESS</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h2 id="_6">
      总结
     </h2>
     <p>

@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="redis-cluster">
      Redis Cluster 配置
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
@@ -57,54 +58,37 @@
       这里就写一个大概，比较好的，可以参考后面的链接，进行更详细，完整的设置
      </em>
     </p>
-    <h3>
+    <h3 id="_2">
      配置详情与记录
     </h3>
-    <p>
-     ```shell
-    </p>
-    <h1>
-     安装
-    </h1>
-    <p>
-     dnf module install redis -y
-    </p>
-    <h1>
-     修改配置文件
-    </h1>
-    <p>
-     cp /etc/redis.conf /etc/redis.conf.orig
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># 安装</span>
+dnf module install redis -y
+
+<span class="c1"># 修改配置文件</span>
+cp /etc/redis.conf /etc/redis.conf.orig
 vi /etc/redis.conf
-    </p>
-    <h1>
-     修改内容如下
-    </h1>
-    <p>
-     bind  10.42.0.247
+
+<span class="c1"># 修改内容如下</span>
+<span class="nb">bind</span>  <span class="m">10</span>.42.0.247
 protected-mode no
-port 6379
+port <span class="m">6379</span>
 cluster-enabled yes
 cluster-config-file nodes-6379.conf
-cluster-node-timeout 15000
-    </p>
-    <h1>
-     启动
-    </h1>
-    <p>
-     systemctl restart redis
+cluster-node-timeout <span class="m">15000</span>
+
+<span class="c1"># 启动</span>
+systemctl restart redis
 cat /var/log/redis/redis.log
-    </p>
-    <h1>
-     下面的6380,6381,6382,6383,6384按照上面配置好以后，进行下面命令
-    </h1>
-    <p>
-     redis-cli --cluster create 192.168.101.105:6379 192.168.101.105:6380 192.168.101.105:6381 192.168.101.105:6382 192.168.101.105:6383 192.168.101.105:6384 --cluster-replicas
-redis-cli -h 192.168.101.105 -p 6379 cluster nodes
-redis-cli -h 192.168.101.105 -p 6379 cluster nodes  | grep master
-redis-cli -h 192.168.101.105 -p 6379 cluster nodes  | grep slave
-```
-    </p>
-    <h2>
+
+<span class="c1"># 下面的6380,6381,6382,6383,6384按照上面配置好以后，进行下面命令</span>
+redis-cli --cluster create <span class="m">192</span>.168.101.105:6379 <span class="m">192</span>.168.101.105:6380 <span class="m">192</span>.168.101.105:6381 <span class="m">192</span>.168.101.105:6382 <span class="m">192</span>.168.101.105:6383 <span class="m">192</span>.168.101.105:6384 --cluster-replicas
+redis-cli -h <span class="m">192</span>.168.101.105 -p <span class="m">6379</span> cluster nodes
+redis-cli -h <span class="m">192</span>.168.101.105 -p <span class="m">6379</span> cluster nodes  <span class="p">|</span> grep master
+redis-cli -h <span class="m">192</span>.168.101.105 -p <span class="m">6379</span> cluster nodes  <span class="p">|</span> grep slave
+</code></pre>
+    </div>
+    <h2 id="_3">
      参考链接
     </h2>
     <ul>

@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,25 +43,23 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="superbenchmarker">
      压测工具 superbenchmarker 安装使用
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      安装
     </h2>
     <p>
      记得使用管理员进行运行，不然没有权限进行安装
     </p>
-    <p>
-     ```bash
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-    </p>
-    <p>
-     choco install superbenchmarker
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code>Set-ExecutionPolicy Bypass -Scope Process -Force<span class="p">;</span> <span class="o">[</span>System.Net.ServicePointManager<span class="o">]</span>::SecurityProtocol <span class="o">=</span> <span class="o">[</span>System.Net.ServicePointManager<span class="o">]</span>::SecurityProtocol -bor <span class="m">3072</span><span class="p">;</span> iex <span class="o">((</span>New-Object System.Net.WebClient<span class="o">)</span>.DownloadString<span class="o">(</span><span class="s1">'https://chocolatey.org/install.ps1'</span><span class="o">))</span>
+
+choco install superbenchmarker
+</code></pre>
+    </div>
+    <h2 id="_2">
      使用
     </h2>
     <ul>
@@ -74,10 +73,10 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
       N：测试持续时间
      </li>
     </ul>
-    <p>
-     <pre>bash
-sb -u http://192.168.101.104:81/group1 -c 20 -N 120</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>sb -u http://192.168.101.104:81/group1 -c <span class="m">20</span> -N <span class="m">120</span>
+</code></pre>
+    </div>
    </article>
   </div>
   <!-- BG -->

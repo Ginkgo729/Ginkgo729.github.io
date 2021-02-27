@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,202 +43,135 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="linux">
      Linux服务编写及服务开机启动
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      一、服务编写
     </h2>
-    <h3>
+    <h3 id="_2">
      编写服务脚本
     </h3>
     <p>
      首先用编辑器自己写一个脚本文件，模板和大致的内容如下（简单的按照下面的进行操作即可）：比如写 /etc/init.d/test
     </p>
-    <p>
-     ```sh
-    </p>
-    <h1>
-     !/bin/bash
-    </h1>
-    <h3>
-     BEGIN INIT INFO
-    </h3>
-    <h1>
-    </h1>
-    <h1>
-     chkconfig:   2345 90 10
-    </h1>
-    <h1>
-     Provides:  location_server
-    </h1>
-    <h1>
-     Required-Start:   $local_fs  $remote_fs
-    </h1>
-    <h1>
-     Required-Stop:    $local_fs  $remote_fs
-    </h1>
-    <h1>
-     Default-Start:    2 3 4 5
-    </h1>
-    <h1>
-     Default-Stop:     0 1 6
-    </h1>
-    <h1>
-     Short-Description:    initscript
-    </h1>
-    <h1>
-     Description:  This file should be used to construct scripts to be placed in /etc/init.d.
-    </h1>
-    <h1>
-    </h1>
-    <h3>
-     END INIT INFO
-    </h3>
-    <h2>
-     Fill in name of program here.
-    </h2>
-    <p>
-     PROG="location_server"
-PROG_PATH="/opt/location_server" ## Not need, but sometimes helpful (if $PROG resides in /opt for example).
-PROG_ARGS="" 
-PID_PATH="/var/run/"
-    </p>
-    <h1>
-     上面的保持原样就行，需要写的start和stop函数
-    </h1>
-    <p>
-     start() {
-    echo "current PID: $$" #这句删除也可以
-    bin/kibana  &gt; kibana.log 2&gt;&amp;1 &amp;
-    echo "$!"
-    echo "$!" &gt;  /var/run/kibana.pid #将上一个后台进程写入到标准的pid文件和路径中
-}
-    </p>
-    <p>
-     stop() {
-    if [ -f  "/var/run/kibana.pid" ]; then
-        echo "Will kill kibana"
-        kill -9
-     <pre>cat /var/run/kibana.pid</pre>
-     else
-        echo "Programe don't run"
-    fi
-}
-    </p>
-    <h1>
-     下面这些也用改
-    </h1>
-    <h2>
-     Check to see if we are running as root first.
-    </h2>
-    <h2>
-     Found at http://www.cyberciti.biz/tips/shell-root-user-check-script.html
-    </h2>
-    <p>
-     if [ "$(id -u)" != "0" ]; then
-    echo "This script must be run as root" 1&gt;&amp;2
-    exit 1
-fi
-    </p>
-    <p>
-     case "$1" in
-    start)
+    <div class="codehilite">
+     <pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1">### BEGIN INIT INFO</span>
+<span class="c1">#</span>
+<span class="c1"># chkconfig:   2345 90 10</span>
+<span class="c1"># Provides:  location_server</span>
+<span class="c1"># Required-Start:   $local_fs  $remote_fs</span>
+<span class="c1"># Required-Stop:    $local_fs  $remote_fs</span>
+<span class="c1"># Default-Start:    2 3 4 5</span>
+<span class="c1"># Default-Stop:     0 1 6</span>
+<span class="c1"># Short-Description:    initscript</span>
+<span class="c1"># Description:  This file should be used to construct scripts to be placed in /etc/init.d.</span>
+<span class="c1">#</span>
+<span class="c1">### END INIT INFO</span>
+
+<span class="c1">## Fill in name of program here.</span>
+<span class="nv">PROG</span><span class="o">=</span><span class="s2">"location_server"</span>
+<span class="nv">PROG_PATH</span><span class="o">=</span><span class="s2">"/opt/location_server"</span> <span class="c1">## Not need, but sometimes helpful (if $PROG resides in /opt for example).</span>
+<span class="nv">PROG_ARGS</span><span class="o">=</span><span class="s2">""</span> 
+<span class="nv">PID_PATH</span><span class="o">=</span><span class="s2">"/var/run/"</span>
+
+<span class="c1"># 上面的保持原样就行，需要写的start和stop函数</span>
+start<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">echo</span> <span class="s2">"current PID: </span><span class="nv">$$</span><span class="s2">"</span> <span class="c1">#这句删除也可以</span>
+    bin/kibana  &gt; kibana.log <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
+    <span class="nb">echo</span> <span class="s2">"</span><span class="nv">$!</span><span class="s2">"</span>
+    <span class="nb">echo</span> <span class="s2">"</span><span class="nv">$!</span><span class="s2">"</span> &gt;  /var/run/kibana.pid <span class="c1">#将上一个后台进程写入到标准的pid文件和路径中</span>
+<span class="o">}</span>
+
+stop<span class="o">()</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">[</span> -f  <span class="s2">"/var/run/kibana.pid"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+        <span class="nb">echo</span> <span class="s2">"Will kill kibana"</span>
+        <span class="nb">kill</span> -9 <span class="sb">`</span>cat /var/run/kibana.pid<span class="sb">`</span>
+    <span class="k">else</span>
+        <span class="nb">echo</span> <span class="s2">"Programe don't run"</span>
+    <span class="k">fi</span>
+<span class="o">}</span>
+
+<span class="c1"># 下面这些也用改</span>
+<span class="c1">## Check to see if we are running as root first.</span>
+<span class="c1">## Found at http://www.cyberciti.biz/tips/shell-root-user-check-script.html</span>
+<span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="k">$(</span>id -u<span class="k">)</span><span class="s2">"</span> !<span class="o">=</span> <span class="s2">"0"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span> <span class="s2">"This script must be run as root"</span> <span class="m">1</span>&gt;<span class="p">&amp;</span><span class="m">2</span>
+    <span class="nb">exit</span> <span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="k">case</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span> in
+    start<span class="o">)</span>
         start
-        exit 0
-    ;;
-    stop)
+        <span class="nb">exit</span> <span class="m">0</span>
+    <span class="p">;;</span>
+    stop<span class="o">)</span>
         stop
-        exit 0
-    ;;
-    reload|restart|force-reload)
+        <span class="nb">exit</span> <span class="m">0</span>
+    <span class="p">;;</span>
+    reload<span class="p">|</span>restart<span class="p">|</span>force-reload<span class="o">)</span>
         stop
         start
-        exit 0
-    ;;
-    **)
-        echo "Usage: $0 {start|stop|reload}" 1&gt;&amp;2
-        exit 1
-    ;;
-esac
-```
-    </p>
-    <h3>
+        <span class="nb">exit</span> <span class="m">0</span>
+    <span class="p">;;</span>
+    **<span class="o">)</span>
+        <span class="nb">echo</span> <span class="s2">"Usage: </span><span class="nv">$0</span><span class="s2"> {start|stop|reload}"</span> <span class="m">1</span>&gt;<span class="p">&amp;</span><span class="m">2</span>
+        <span class="nb">exit</span> <span class="m">1</span>
+    <span class="p">;;</span>
+<span class="k">esac</span>
+</code></pre>
+    </div>
+    <h3 id="_3">
      添加服务
     </h3>
     <p>
      先赋予文件执行权限后使用命令将上面写的test添加到服务里面
     </p>
-    <p>
-     ```
-chmod +x /etc/init.d/test
-    </p>
-    <h1>
-     Ubuntu,Kali下的操作
-    </h1>
-    <h1>
-     update-rc.d 服务名 defaults，并且这样设置服务也就开机启动了
-    </h1>
-    <p>
-     update-rc.d test defaults
-    </p>
-    <h1>
-     删除
-    </h1>
-    <h1>
-     update-rc.d -f 服务名 remove
-    </h1>
-    <h1>
-     CtenOS下的操作
-    </h1>
-    <p>
-     chkconfig --add agent_server
-chkconfig agent_server on
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="p">.</span><span class="n">d</span><span class="o">/</span><span class="n">test</span>
+
+<span class="o">#</span> <span class="n">Ubuntu</span><span class="p">,</span><span class="n">Kali下的操作</span>
+<span class="o">#</span> <span class="k">update</span><span class="o">-</span><span class="n">rc</span><span class="p">.</span><span class="n">d</span> <span class="err">服务名</span> <span class="k">defaults</span><span class="err">，并且这样设置服务也就开机启动了</span>
+<span class="k">update</span><span class="o">-</span><span class="n">rc</span><span class="p">.</span><span class="n">d</span> <span class="n">test</span> <span class="k">defaults</span>
+<span class="o">#</span> <span class="err">删除</span>
+<span class="o">#</span> <span class="k">update</span><span class="o">-</span><span class="n">rc</span><span class="p">.</span><span class="n">d</span> <span class="o">-</span><span class="n">f</span> <span class="err">服务名</span> <span class="n">remove</span>
+
+<span class="o">#</span> <span class="n">CtenOS下的操作</span>
+<span class="n">chkconfig</span> <span class="c1">--add agent_server</span>
+<span class="n">chkconfig</span> <span class="n">agent_server</span> <span class="k">on</span>
+</code></pre>
+    </div>
+    <h3 id="_4">
      启动、关闭、重启服务
     </h3>
     <p>
      接下来就可以使用service命令去启动它了
     </p>
-    <p>
-     ```
-    </p>
-    <h1>
-     service 方式
-    </h1>
-    <h1>
-     service 服务名 start
-    </h1>
-    <h1>
-     service 服务名 stop
-    </h1>
-    <h1>
-     service 服务名 start
-    </h1>
-    <p>
-     service test start
-    </p>
-    <h1>
-     systemctl  方式
-    </h1>
-    <p>
-     systemctl start service
-systemctl stop service
-systemctl restart service
-systemctl status service
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">#</span> <span class="n">service</span> <span class="err">方式</span>
+<span class="o">#</span> <span class="n">service</span> <span class="err">服务名</span> <span class="k">start</span>
+<span class="o">#</span> <span class="n">service</span> <span class="err">服务名</span> <span class="n">stop</span>
+<span class="o">#</span> <span class="n">service</span> <span class="err">服务名</span> <span class="k">start</span>
+<span class="n">service</span> <span class="n">test</span> <span class="k">start</span>
+
+<span class="o">#</span> <span class="n">systemctl</span>  <span class="err">方式</span>
+<span class="n">systemctl</span> <span class="k">start</span> <span class="n">service</span>
+<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">service</span>
+<span class="n">systemctl</span> <span class="k">restart</span> <span class="n">service</span>
+<span class="n">systemctl</span> <span class="n">status</span> <span class="n">service</span>
+</code></pre>
+    </div>
+    <h2 id="rclocal">
      编写rc.local文件
     </h2>
-    <p>
-     <pre>chmod +x /etc/rc.d/rc.local
-vi /etc/rc.d/rc.local</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">chmod +x /etc/rc.d/rc.local</span>
+<span class="err">vi /etc/rc.d/rc.local</span>
+</code></pre>
+    </div>
+    <h2 id="_5">
      参考链接
     </h2>
     <ul>

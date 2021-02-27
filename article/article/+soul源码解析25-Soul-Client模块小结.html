@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,20 +43,20 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soulsoul-client">
      Soul网关源码解析（二十五）Soul-Client模块小结
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      本篇对Soul-Client做一个小结
     </p>
-    <h2>
+    <h2 id="_2">
      总结
     </h2>
-    <h3>
+    <h3 id="_3">
      概览
     </h3>
     <p>
@@ -84,7 +85,7 @@
     <p>
      下面进行下讲解
     </p>
-    <h3>
+    <h3 id="bean">
      获取Bean
     </h3>
     <p>
@@ -104,7 +105,7 @@
     <p>
      初步感觉第二种方式可以要好些，但仔细想想其实都差不多，基本都要遍历一次Bean（这方面细节不了解，这里初步的猜测一下），而且感觉两种方式应该是可以相互替换的，无非是那个写起来方便一点而已，这个感觉不是啥问题
     </p>
-    <h3>
+    <h3 id="_4">
      注册判断
     </h3>
     <p>
@@ -113,7 +114,7 @@
     <p>
      这里SoulTarsClient，它有点特别，通过是否有注解SoulTarsService，有的话就进行注册，但也没有区别，只是更直观
     </p>
-    <h3>
+    <h3 id="admin">
      注册到Admin
     </h3>
     <p>
@@ -122,13 +123,13 @@
     <p>
      后期的版本可能会添加Zookeeper的注册方式，但和HTTP感觉大同小异，基本的原来应该是不会变的
     </p>
-    <h2>
+    <h2 id="soul">
      Soul网关源码解析文章列表
     </h2>
-    <h3>
+    <h3 id="_5">
      掘金
     </h3>
-    <h4>
+    <h4 id="_6">
      了解与初步运行
     </h4>
     <ul>
@@ -143,7 +144,7 @@
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="_7">
      请求处理流程解析
     </h4>
     <ul>
@@ -193,7 +194,7 @@
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="_8">
      数据同步解析
     </h4>
     <ul>
@@ -253,7 +254,7 @@
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="soul-client">
      Soul-Client模块
     </h4>
     <ul>
@@ -268,7 +269,7 @@
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="_9">
      番外
     </h4>
     <ul>

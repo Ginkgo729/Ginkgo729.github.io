@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,79 +43,59 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soul">
      Soul网关源码解析（七）限流插件初探
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      前面的文章中对处理流程探索的差不多了，今天来探索下限流插件:resilience4j
     </p>
-    <h2>
+    <h2 id="_2">
      示例运行
     </h2>
-    <h3>
+    <h3 id="_3">
      环境配置
     </h3>
     <p>
      启动下MySQL和redis
     </p>
     <p>
-     <pre>shell script
+     ```shell script
 docker run -dit --name redis -p 6379:6379 redis
-docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest</pre>
+docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
     </p>
-    <h3>
-     Soul-Admin启动及相关配置
-    </h3>
-    <p>
-     运行Soul-admin，进入管理界面：系统管理 --&gt; 插件管理 --&gt; resilience4j ，点击编辑，把它开启
-    </p>
-    <p>
-     进入管理界面的插件列表：resilience4j 添加选择器和规则，这里安装divide插件的匹配方式配的，让divide的/http前缀的接口都走限流（因为使用测试时官方本身自带的HTTP测试）
-    </p>
-    <p>
-     规则配置中：token filling number 要设置大于0，不然会报错
-    </p>
-    <p>
-     circuit enable 要设置为0，判断的时候走限流的逻辑
-    </p>
-    <p>
-     其他的：fallback uri 随便填个路径，其他的参数都可填1
-    </p>
-    <h3>
-     Soul-Bootstrap配置启动
-    </h3>
-    <p>
-     在Soul-Bootstrap中进入相关的依赖，大致如下：
-    </p>
-    <p>
-     ```xml
-    </p>
-    <!-- soul resilience4j plugin start-->
-    <p>
-     <dependency>
-      <groupid>
-       org.dromara
-      </groupid>
-      <artifactid>
-       soul-spring-boot-starter-plugin-resilience4j
-      </artifactid>
-      <version>
-       ${last.version}
-      </version>
-     </dependency>
-     <!-- soul resilience4j plugin end-->
-    </p>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>### Soul-Admin启动及相关配置
+<span class="ni">&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;</span>运行Soul-admin，进入管理界面：系统管理 --&gt; 插件管理 --&gt; resilience4j ，点击编辑，把它开启
+
+<span class="ni">&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;</span>进入管理界面的插件列表：resilience4j 添加选择器和规则，这里安装divide插件的匹配方式配的，让divide的/http前缀的接口都走限流（因为使用测试时官方本身自带的HTTP测试）
+
+<span class="ni">&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;</span>规则配置中：token filling number 要设置大于0，不然会报错
+
+<span class="ni">&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;</span>circuit enable 要设置为0，判断的时候走限流的逻辑
+
+<span class="ni">&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;</span>其他的：fallback uri 随便填个路径，其他的参数都可填1
+
+### Soul-Bootstrap配置启动
+<span class="ni">&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;</span>在Soul-Bootstrap中进入相关的依赖，大致如下：
+
+```xml
+<span class="c">&lt;!-- soul resilience4j plugin start--&gt;</span>
+  <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.dromara<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>soul-spring-boot-starter-plugin-resilience4j<span class="nt">&lt;/artifactId&gt;</span>
+       <span class="nt">&lt;version&gt;</span><span class="cp">${</span><span class="n">last</span><span class="o">.</span><span class="n">version</span><span class="cp">}</span><span class="nt">&lt;/version&gt;</span>
+  <span class="nt">&lt;/dependency&gt;</span>
+  <span class="c">&lt;!-- soul resilience4j plugin end--&gt;</span>
+</code></pre>
+    </div>
     <p>
      启动Soul-Bootstrap
     </p>
-    <h3>
+    <h3 id="http">
      HTTP示例启动
     </h3>
     <p>
@@ -129,125 +110,110 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
     <p>
      成功运行，下面开始源码debug
     </p>
-    <p>
-     <pre>json
-{
-    "id": "1111",
-    "name": "hello world findById"
-}</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="p">{</span>
+    <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"1111"</span><span class="p">,</span>
+    <span class="nt">"name"</span><span class="p">:</span> <span class="s2">"hello world findById"</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h2 id="debug">
      源码Debug
     </h2>
-    <h3>
+    <h3 id="_4">
      限流流程顺序跟踪确认
     </h3>
     <p>
      根据前面的文章，对处理流程基本上有个清晰的认识了，我们通过前面的调试，知道 RateLimiterPlugin 是继承 AbstractSoulPlugin ,那它就会走和路由匹配相关的逻辑，如下面对代码所示。匹配成功后才走 doExcute 限流逻辑
     </p>
-    <p>
-     ```java
-    # AbstractSoulPlugin
-    // 首先进行路由匹配
-    public Mono
-     <void>
-      execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-        String pluginName = named();
-        final PluginData pluginData = BaseDataCache.getInstance().obtainPluginData(pluginName);
-        if (pluginData != null &amp;&amp; pluginData.getEnabled()) {
-            final Collection
-      <selectordata>
-       selectors = BaseDataCache.getInstance().obtainSelectorData(pluginName);
-            if (CollectionUtils.isEmpty(selectors)) {
-                return CheckUtils.checkSelector(pluginName, exchange, chain);
-            }
-            final SelectorData selectorData = matchSelector(exchange, selectors);
-            if (Objects.isNull(selectorData)) {
-                if (PluginEnum.WAF.getName().equals(pluginName)) {
-                    return doExecute(exchange, chain, null, null);
-                }
-                return CheckUtils.checkSelector(pluginName, exchange, chain);
-            }
-            if (selectorData.getLoged()) {
-                log.info("{} selector success match , selector name :{}", pluginName, selectorData.getName());
-            }
-            final List
-       <ruledata>
-        rules = BaseDataCache.getInstance().obtainRuleData(selectorData.getId());
-            if (CollectionUtils.isEmpty(rules)) {
-                if (PluginEnum.WAF.getName().equals(pluginName)) {
-                    return doExecute(exchange, chain, null, null);
-                }
-                return CheckUtils.checkRule(pluginName, exchange, chain);
-            }
-            RuleData rule;
-            if (selectorData.getType() == SelectorTypeEnum.FULL_FLOW.getCode()) {
-                //get last
-                rule = rules.get(rules.size() - 1);
-            } else {
-                rule = matchRule(exchange, rules);
-            }
-            if (Objects.isNull(rule)) {
-                return CheckUtils.checkRule(pluginName, exchange, chain);
-            }
-            if (rule.getLoged()) {
-                log.info("{} rule success match ,rule name :{}", pluginName, rule.getName());
-            }
-            return doExecute(exchange, chain, selectorData, rule);
-        }
-        return chain.execute(exchange);
-    }
-       </ruledata>
-      </selectordata>
-     </void>
-    </p>
-    <pre><pre># RateLimiterPlugin
-// 匹配完成后走限流的逻辑
-protected Mono&lt;Void&gt; doExecute(final ServerWebExchange exchange, final SoulPluginChain chain, final SelectorData selector, final RuleData rule) {
-    final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-    assert soulContext != null;
-    // 这里更加字符串转成对象，所有规则哪里不能乱填
-    Resilience4JHandle resilience4JHandle = GsonUtils.getGson().fromJson(rule.getHandle(), Resilience4JHandle.class);
-    // 这里判断 Circle enable 是否为1 走 combined的逻辑，但我们这次想走 limit 的逻辑，所以要填0
-    if (resilience4JHandle.getCircuitEnable() == 1) {
-        return combined(exchange, chain, rule);
-    }
-    return rateLimiter(exchange, chain, rule);
-}
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">AbstractSoulPlugin</span>
+    <span class="c1">// 首先进行路由匹配</span>
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">pluginName</span> <span class="o">=</span> <span class="n">named</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">PluginData</span> <span class="n">pluginData</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainPluginData</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pluginData</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">pluginData</span><span class="p">.</span><span class="na">getEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">SelectorData</span><span class="o">&gt;</span> <span class="n">selectors</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainSelectorData</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">selectors</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">CheckUtils</span><span class="p">.</span><span class="na">checkSelector</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selectorData</span> <span class="o">=</span> <span class="n">matchSelector</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">selectors</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">selectorData</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">PluginEnum</span><span class="p">.</span><span class="na">WAF</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">pluginName</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="n">doExecute</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="n">CheckUtils</span><span class="p">.</span><span class="na">checkSelector</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">selectorData</span><span class="p">.</span><span class="na">getLoged</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"{} selector success match , selector name :{}"</span><span class="p">,</span> <span class="n">pluginName</span><span class="p">,</span> <span class="n">selectorData</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+            <span class="p">}</span>
+            <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">RuleData</span><span class="o">&gt;</span> <span class="n">rules</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainRuleData</span><span class="p">(</span><span class="n">selectorData</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">rules</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">PluginEnum</span><span class="p">.</span><span class="na">WAF</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">pluginName</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="n">doExecute</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="n">CheckUtils</span><span class="p">.</span><span class="na">checkRule</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">RuleData</span> <span class="n">rule</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">selectorData</span><span class="p">.</span><span class="na">getType</span><span class="p">()</span> <span class="o">==</span> <span class="n">SelectorTypeEnum</span><span class="p">.</span><span class="na">FULL_FLOW</span><span class="p">.</span><span class="na">getCode</span><span class="p">())</span> <span class="p">{</span>
+                <span class="c1">//get last</span>
+                <span class="n">rule</span> <span class="o">=</span> <span class="n">rules</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">rules</span><span class="p">.</span><span class="na">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="n">rule</span> <span class="o">=</span> <span class="n">matchRule</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">rules</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">rule</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">CheckUtils</span><span class="p">.</span><span class="na">checkRule</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">rule</span><span class="p">.</span><span class="na">getLoged</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"{} rule success match ,rule name :{}"</span><span class="p">,</span> <span class="n">pluginName</span><span class="p">,</span> <span class="n">rule</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="n">doExecute</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="n">selectorData</span><span class="p">,</span> <span class="n">rule</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
 
-// 到这有些复杂，看的不是太懂，只能继续跟下去
-private Mono&lt;Void&gt; rateLimiter(final ServerWebExchange exchange, final SoulPluginChain chain, final RuleData rule) {
-    return ratelimiterExecutor.run(
-            chain.execute(exchange), fallback(ratelimiterExecutor, exchange, null), Resilience4JBuilder.build(rule))
-            .onErrorResume(throwable -&gt; ratelimiterExecutor.withoutFallback(exchange, throwable));
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <span class="err">#</span> <span class="n">RateLimiterPlugin</span>
+    <span class="c1">// 匹配完成后走限流的逻辑</span>
+    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">doExecute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selector</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RuleData</span> <span class="n">rule</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="c1">// 这里更加字符串转成对象，所有规则哪里不能乱填</span>
+        <span class="n">Resilience4JHandle</span> <span class="n">resilience4JHandle</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getGson</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">rule</span><span class="p">.</span><span class="na">getHandle</span><span class="p">(),</span> <span class="n">Resilience4JHandle</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="c1">// 这里判断 Circle enable 是否为1 走 combined的逻辑，但我们这次想走 limit 的逻辑，所以要填0</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">resilience4JHandle</span><span class="p">.</span><span class="na">getCircuitEnable</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">combined</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="n">rule</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">rateLimiter</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="n">rule</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 到这有些复杂，看的不是太懂，只能继续跟下去</span>
+    <span class="kd">private</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">rateLimiter</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RuleData</span> <span class="n">rule</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">ratelimiterExecutor</span><span class="p">.</span><span class="na">run</span><span class="p">(</span>
+                <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">),</span> <span class="n">fallback</span><span class="p">(</span><span class="n">ratelimiterExecutor</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="kc">null</span><span class="p">),</span> <span class="n">Resilience4JBuilder</span><span class="p">.</span><span class="na">build</span><span class="p">(</span><span class="n">rule</span><span class="p">))</span>
+                <span class="p">.</span><span class="na">onErrorResume</span><span class="p">(</span><span class="n">throwable</span> <span class="o">-&gt;</span> <span class="n">ratelimiterExecutor</span><span class="p">.</span><span class="na">withoutFallback</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">throwable</span><span class="p">));</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      plugin前面代码还是看的懂，但rateLimiter开始就有些迷糊，流式编程的知识用上都看不懂了，但大致知道是进行限流逻辑
     </p>
-    <p>
-     ```java
-public class RateLimiterExecutor implements Executor {
-    </p>
-    <pre><pre>@Override
-public &lt;T&gt; Mono&lt;T&gt; run(final Mono&lt;T&gt; toRun, final Function&lt;Throwable, Mono&lt;T&gt;&gt; fallback, final Resilience4JConf conf) {
-    // 生成限流器
-    RateLimiter rateLimiter = Resilience4JRegistryFactory.rateLimiter(conf.getId(), conf.getRateLimiterConfig());
-    // 应该是在这触发的限流逻辑
-    Mono&lt;T&gt; to = toRun.transformDeferred(RateLimiterOperator.of(rateLimiter));
-    if (fallback != null) {
-        return to.onErrorResume(fallback);
-    }
-    return to;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RateLimiterExecutor</span> <span class="kd">implements</span> <span class="n">Executor</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">run</span><span class="p">(</span><span class="kd">final</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">toRun</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Function</span><span class="o">&lt;</span><span class="n">Throwable</span><span class="p">,</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="n">fallback</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Resilience4JConf</span> <span class="n">conf</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 生成限流器</span>
+        <span class="n">RateLimiter</span> <span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">Resilience4JRegistryFactory</span><span class="p">.</span><span class="na">rateLimiter</span><span class="p">(</span><span class="n">conf</span><span class="p">.</span><span class="na">getId</span><span class="p">(),</span> <span class="n">conf</span><span class="p">.</span><span class="na">getRateLimiterConfig</span><span class="p">());</span>
+        <span class="c1">// 应该是在这触发的限流逻辑</span>
+        <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">to</span> <span class="o">=</span> <span class="n">toRun</span><span class="p">.</span><span class="na">transformDeferred</span><span class="p">(</span><span class="n">RateLimiterOperator</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">rateLimiter</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fallback</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">to</span><span class="p">.</span><span class="na">onErrorResume</span><span class="p">(</span><span class="n">fallback</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">to</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续跟到上面那个类，我们看到了明显的生成限流器的逻辑，但有个让疑惑的是，因为返回的Mono，但没有看到明显的限流触发逻辑。在没有响应式编程的基础的时候感觉很懵，目前也没去定位真正的触发代码是在哪？但猜测是在上面注释中标注的那段触发的
     </p>
@@ -266,28 +232,28 @@ public &lt;T&gt; Mono&lt;T&gt; run(final Mono&lt;T&gt; toRun, final Function&lt;
     <p>
      重启发送请求，不断的跳断点，终于进入了一个限流器的类： AtomicRateLimiter ，大致如下
     </p>
-    <p>
-     <pre>java
-    # AtomicRateLimiter
-    public long reservePermission(final int permits) {
-        long timeoutInNanos = ((AtomicRateLimiter.State)this.state.get()).config.getTimeoutDuration().toNanos();
-        AtomicRateLimiter.State modifiedState = this.updateStateWithBackOff(permits, timeoutInNanos);
-        boolean canAcquireImmediately = modifiedState.nanosToWait &lt;= 0L;
-        if (canAcquireImmediately) {
-            this.publishRateLimiterEvent(true, permits);
-            return 0L;
-        } else {
-            boolean canAcquireInTime = timeoutInNanos &gt;= modifiedState.nanosToWait;
-            if (canAcquireInTime) {
-                this.publishRateLimiterEvent(true, permits);
-                return modifiedState.nanosToWait;
-            } else {
-                this.publishRateLimiterEvent(false, permits);
-                return -1L;
-            }
-        }
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">AtomicRateLimiter</span>
+    <span class="kd">public</span> <span class="kt">long</span> <span class="nf">reservePermission</span><span class="p">(</span><span class="kd">final</span> <span class="kt">int</span> <span class="n">permits</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">long</span> <span class="n">timeoutInNanos</span> <span class="o">=</span> <span class="p">((</span><span class="n">AtomicRateLimiter</span><span class="p">.</span><span class="na">State</span><span class="p">)</span><span class="k">this</span><span class="p">.</span><span class="na">state</span><span class="p">.</span><span class="na">get</span><span class="p">()).</span><span class="na">config</span><span class="p">.</span><span class="na">getTimeoutDuration</span><span class="p">().</span><span class="na">toNanos</span><span class="p">();</span>
+        <span class="n">AtomicRateLimiter</span><span class="p">.</span><span class="na">State</span> <span class="n">modifiedState</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">updateStateWithBackOff</span><span class="p">(</span><span class="n">permits</span><span class="p">,</span> <span class="n">timeoutInNanos</span><span class="p">);</span>
+        <span class="kt">boolean</span> <span class="n">canAcquireImmediately</span> <span class="o">=</span> <span class="n">modifiedState</span><span class="p">.</span><span class="na">nanosToWait</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="n">L</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">canAcquireImmediately</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">publishRateLimiterEvent</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="n">permits</span><span class="p">);</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="n">L</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="kt">boolean</span> <span class="n">canAcquireInTime</span> <span class="o">=</span> <span class="n">timeoutInNanos</span> <span class="o">&gt;=</span> <span class="n">modifiedState</span><span class="p">.</span><span class="na">nanosToWait</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">canAcquireInTime</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">publishRateLimiterEvent</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="n">permits</span><span class="p">);</span>
+                <span class="k">return</span> <span class="n">modifiedState</span><span class="p">.</span><span class="na">nanosToWait</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">publishRateLimiterEvent</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span> <span class="n">permits</span><span class="p">);</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1L</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      具体实现逻辑，不是我们此次关注的目的，此次是想看它在plugin中处理的流程顺序如何
     </p>
@@ -297,93 +263,87 @@ public &lt;T&gt; Mono&lt;T&gt; run(final Mono&lt;T&gt; toRun, final Function&lt;
     <p>
      通过debug，我们发现顺序和我们预期的基本一致：在进入 RateLimiterPlugin 插件执行的时候，执行的断点也到了限流器（AtomicRateLimiter),等限流器逻辑执行完毕，divide等插件才开始执行
     </p>
-    <h3>
+    <h3 id="mono">
      关于执行处罚和Mono的一些思考
     </h3>
     <p>
      我们看一下下面限流执行的代码：
     </p>
-    <p>
-     ```java
-public class RateLimiterExecutor implements Executor {
-    </p>
-    <pre><pre>@Override
-public &lt;T&gt; Mono&lt;T&gt; run(final Mono&lt;T&gt; toRun, final Function&lt;Throwable, Mono&lt;T&gt;&gt; fallback, final Resilience4JConf conf) {
-    // 生成限流器
-    RateLimiter rateLimiter = Resilience4JRegistryFactory.rateLimiter(conf.getId(), conf.getRateLimiterConfig());
-    // 应该是在这触发的限流逻辑
-    Mono&lt;T&gt; to = toRun.transformDeferred(RateLimiterOperator.of(rateLimiter));
-    if (fallback != null) {
-        return to.onErrorResume(fallback);
-    }
-    return to;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RateLimiterExecutor</span> <span class="kd">implements</span> <span class="n">Executor</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">run</span><span class="p">(</span><span class="kd">final</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">toRun</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Function</span><span class="o">&lt;</span><span class="n">Throwable</span><span class="p">,</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="n">fallback</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Resilience4JConf</span> <span class="n">conf</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 生成限流器</span>
+        <span class="n">RateLimiter</span> <span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">Resilience4JRegistryFactory</span><span class="p">.</span><span class="na">rateLimiter</span><span class="p">(</span><span class="n">conf</span><span class="p">.</span><span class="na">getId</span><span class="p">(),</span> <span class="n">conf</span><span class="p">.</span><span class="na">getRateLimiterConfig</span><span class="p">());</span>
+        <span class="c1">// 应该是在这触发的限流逻辑</span>
+        <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">to</span> <span class="o">=</span> <span class="n">toRun</span><span class="p">.</span><span class="na">transformDeferred</span><span class="p">(</span><span class="n">RateLimiterOperator</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">rateLimiter</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fallback</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">to</span><span class="p">.</span><span class="na">onErrorResume</span><span class="p">(</span><span class="n">fallback</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">to</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      返回的一个Mono
     </p>
     <p>
      我们再看看divide之类的,也是返回的Mono
     </p>
-    <p>
-     ```java
-public class DividePlugin extends AbstractSoulPlugin {
-    </p>
-    <pre><pre>@Override
-protected Mono&lt;Void&gt; doExecute(final ServerWebExchange exchange, final SoulPluginChain chain, final SelectorData selector, final RuleData rule) {
-    final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-    assert soulContext != null;
-    final DivideRuleHandle ruleHandle = GsonUtils.getInstance().fromJson(rule.getHandle(), DivideRuleHandle.class);
-    final List&lt;DivideUpstream&gt; upstreamList = UpstreamCacheManager.getInstance().findUpstreamListBySelectorId(selector.getId());
-    if (CollectionUtils.isEmpty(upstreamList)) {
-        log.error("divide upstream configuration error： {}", rule.toString());
-        Object error = SoulResultWrap.error(SoulResultEnum.CANNOT_FIND_URL.getCode(), SoulResultEnum.CANNOT_FIND_URL.getMsg(), null);
-        return WebFluxResultUtils.result(exchange, error);
-    }
-    final String ip = Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getAddress().getHostAddress();
-    DivideUpstream divideUpstream = LoadBalanceUtils.selector(upstreamList, ruleHandle.getLoadBalance(), ip);
-    if (Objects.isNull(divideUpstream)) {
-        log.error("divide has no upstream");
-        Object error = SoulResultWrap.error(SoulResultEnum.CANNOT_FIND_URL.getCode(), SoulResultEnum.CANNOT_FIND_URL.getMsg(), null);
-        return WebFluxResultUtils.result(exchange, error);
-    }
-    // set the http url
-    String domain = buildDomain(divideUpstream);
-    String realURL = buildRealURL(domain, soulContext, exchange);
-    exchange.getAttributes().put(Constants.HTTP_URL, realURL);
-    // set the http timeout
-    exchange.getAttributes().put(Constants.HTTP_TIME_OUT, ruleHandle.getTimeout());
-    exchange.getAttributes().put(Constants.HTTP_RETRY, ruleHandle.getRetry());
-    return chain.execute(exchange);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DividePlugin</span> <span class="kd">extends</span> <span class="n">AbstractSoulPlugin</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">doExecute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selector</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RuleData</span> <span class="n">rule</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="kd">final</span> <span class="n">DivideRuleHandle</span> <span class="n">ruleHandle</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">rule</span><span class="p">.</span><span class="na">getHandle</span><span class="p">(),</span> <span class="n">DivideRuleHandle</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">DivideUpstream</span><span class="o">&gt;</span> <span class="n">upstreamList</span> <span class="o">=</span> <span class="n">UpstreamCacheManager</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">findUpstreamListBySelectorId</span><span class="p">(</span><span class="n">selector</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">upstreamList</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">"divide upstream configuration error： {}"</span><span class="p">,</span> <span class="n">rule</span><span class="p">.</span><span class="na">toString</span><span class="p">());</span>
+            <span class="n">Object</span> <span class="n">error</span> <span class="o">=</span> <span class="n">SoulResultWrap</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">ip</span> <span class="o">=</span> <span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getRemoteAddress</span><span class="p">()).</span><span class="na">getAddress</span><span class="p">().</span><span class="na">getHostAddress</span><span class="p">();</span>
+        <span class="n">DivideUpstream</span> <span class="n">divideUpstream</span> <span class="o">=</span> <span class="n">LoadBalanceUtils</span><span class="p">.</span><span class="na">selector</span><span class="p">(</span><span class="n">upstreamList</span><span class="p">,</span> <span class="n">ruleHandle</span><span class="p">.</span><span class="na">getLoadBalance</span><span class="p">(),</span> <span class="n">ip</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">divideUpstream</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">"divide has no upstream"</span><span class="p">);</span>
+            <span class="n">Object</span> <span class="n">error</span> <span class="o">=</span> <span class="n">SoulResultWrap</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// set the http url</span>
+        <span class="n">String</span> <span class="n">domain</span> <span class="o">=</span> <span class="n">buildDomain</span><span class="p">(</span><span class="n">divideUpstream</span><span class="p">);</span>
+        <span class="n">String</span> <span class="n">realURL</span> <span class="o">=</span> <span class="n">buildRealURL</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">soulContext</span><span class="p">,</span> <span class="n">exchange</span><span class="p">);</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">HTTP_URL</span><span class="p">,</span> <span class="n">realURL</span><span class="p">);</span>
+        <span class="c1">// set the http timeout</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">HTTP_TIME_OUT</span><span class="p">,</span> <span class="n">ruleHandle</span><span class="p">.</span><span class="na">getTimeout</span><span class="p">());</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">HTTP_RETRY</span><span class="p">,</span> <span class="n">ruleHandle</span><span class="p">.</span><span class="na">getRetry</span><span class="p">());</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      再看看我们非常熟悉： SoulWebHandler
     </p>
-    <p>
-     <pre>java
-        public Mono&lt;Void&gt; execute(final ServerWebExchange exchange) {
-            return Mono.defer(() -&gt; {
-                if (this.index &lt; plugins.size()) {
-                    SoulPlugin plugin = plugins.get(this.index++);
-                    Boolean skip = plugin.skip(exchange);
-                    if (skip) {
-                        return this.execute(exchange);
-                    }
-                    return plugin.execute(exchange, this);
-                }
-                return Mono.empty();
-            });
-        }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>        <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">index</span> <span class="o">&lt;</span> <span class="n">plugins</span><span class="p">.</span><span class="na">size</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="n">SoulPlugin</span> <span class="n">plugin</span> <span class="o">=</span> <span class="n">plugins</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">index</span><span class="o">++</span><span class="p">);</span>
+                    <span class="n">Boolean</span> <span class="n">skip</span> <span class="o">=</span> <span class="n">plugin</span><span class="p">.</span><span class="na">skip</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">skip</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+                    <span class="p">}</span>
+                    <span class="k">return</span> <span class="n">plugin</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面函数中，通过英文，可以看到所有的Plugin都是返回一个Mono
     </p>
@@ -399,29 +359,26 @@ protected Mono&lt;Void&gt; doExecute(final ServerWebExchange exchange, final Sou
     <p>
      在类：HttpServerHandle ，找到很可疑的一段，猜测应该是这：
     </p>
-    <p>
-     ```java
-    public void onStateChange(Connection connection, State newState) {
-        if (newState == HttpServerState.REQUEST_RECEIVED) {
-            try {
-                if (log.isDebugEnabled()) {
-                    log.debug(ReactorNetty.format(connection.channel(), "Handler is being applied: {}"), new Object[]{this.handler});
-                }
-    </p>
-    <pre><pre>            HttpServerOperations ops = (HttpServerOperations)connection;
-            // 在这进行了发布和订阅，而handler.apply(ops, ops)会不断调用后面哪些plugin的逻辑
-            Mono.fromDirect((Publisher)this.handler.apply(ops, ops)).subscribe(ops.disposeSubscriber());
-        } catch (Throwable var4) {
-            log.error(ReactorNetty.format(connection.channel(), ""), var4);
-            connection.channel().close();
-        }
-    }
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStateChange</span><span class="p">(</span><span class="n">Connection</span> <span class="n">connection</span><span class="p">,</span> <span class="n">State</span> <span class="n">newState</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">newState</span> <span class="o">==</span> <span class="n">HttpServerState</span><span class="p">.</span><span class="na">REQUEST_RECEIVED</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">log</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="n">ReactorNetty</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">connection</span><span class="p">.</span><span class="na">channel</span><span class="p">(),</span> <span class="s">"Handler is being applied: {}"</span><span class="p">),</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="na">handler</span><span class="p">});</span>
+                <span class="p">}</span>
 
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+                <span class="n">HttpServerOperations</span> <span class="n">ops</span> <span class="o">=</span> <span class="p">(</span><span class="n">HttpServerOperations</span><span class="p">)</span><span class="n">connection</span><span class="p">;</span>
+                <span class="c1">// 在这进行了发布和订阅，而handler.apply(ops, ops)会不断调用后面哪些plugin的逻辑</span>
+                <span class="n">Mono</span><span class="p">.</span><span class="na">fromDirect</span><span class="p">((</span><span class="n">Publisher</span><span class="p">)</span><span class="k">this</span><span class="p">.</span><span class="na">handler</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">ops</span><span class="p">,</span> <span class="n">ops</span><span class="p">)).</span><span class="na">subscribe</span><span class="p">(</span><span class="n">ops</span><span class="p">.</span><span class="na">disposeSubscriber</span><span class="p">());</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var4</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">ReactorNetty</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">connection</span><span class="p">.</span><span class="na">channel</span><span class="p">(),</span> <span class="s">""</span><span class="p">),</span> <span class="n">var4</span><span class="p">);</span>
+                <span class="n">connection</span><span class="p">.</span><span class="na">channel</span><span class="p">().</span><span class="na">close</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      而限流的Mono是在divide之前，所以限流就先执行了，大致示意图如下：
     </p>
@@ -434,7 +391,7 @@ protected Mono&lt;Void&gt; doExecute(final ServerWebExchange exchange, final Sou
     <p>
      还没深入研究响应式编程，所以也有可能是错的
     </p>
-    <h3>
+    <h3 id="_5">
      疑问点
     </h3>
     <p>
@@ -446,27 +403,24 @@ protected Mono&lt;Void&gt; doExecute(final ServerWebExchange exchange, final Sou
     <p>
      也有可能是不熟悉Resilience4J,可能下面的代码中Resilience4JRegistryFactory本身实现了缓存复用
     </p>
-    <p>
-     ```java
-public class RateLimiterExecutor implements Executor {
-    </p>
-    <pre><pre>@Override
-public &lt;T&gt; Mono&lt;T&gt; run(final Mono&lt;T&gt; toRun, final Function&lt;Throwable, Mono&lt;T&gt;&gt; fallback, final Resilience4JConf conf) {
-    // 生成限流器
-    RateLimiter rateLimiter = Resilience4JRegistryFactory.rateLimiter(conf.getId(), conf.getRateLimiterConfig());
-    // 应该是在这触发的限流逻辑
-    Mono&lt;T&gt; to = toRun.transformDeferred(RateLimiterOperator.of(rateLimiter));
-    if (fallback != null) {
-        return to.onErrorResume(fallback);
-    }
-    return to;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RateLimiterExecutor</span> <span class="kd">implements</span> <span class="n">Executor</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">run</span><span class="p">(</span><span class="kd">final</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">toRun</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Function</span><span class="o">&lt;</span><span class="n">Throwable</span><span class="p">,</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="n">fallback</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Resilience4JConf</span> <span class="n">conf</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 生成限流器</span>
+        <span class="n">RateLimiter</span> <span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">Resilience4JRegistryFactory</span><span class="p">.</span><span class="na">rateLimiter</span><span class="p">(</span><span class="n">conf</span><span class="p">.</span><span class="na">getId</span><span class="p">(),</span> <span class="n">conf</span><span class="p">.</span><span class="na">getRateLimiterConfig</span><span class="p">());</span>
+        <span class="c1">// 应该是在这触发的限流逻辑</span>
+        <span class="n">Mono</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">to</span> <span class="o">=</span> <span class="n">toRun</span><span class="p">.</span><span class="na">transformDeferred</span><span class="p">(</span><span class="n">RateLimiterOperator</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">rateLimiter</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fallback</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">to</span><span class="p">.</span><span class="na">onErrorResume</span><span class="p">(</span><span class="n">fallback</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">to</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h2 id="_6">
      总结
     </h2>
     <p>
@@ -478,7 +432,7 @@ public &lt;T&gt; Mono&lt;T&gt; run(final Mono&lt;T&gt; toRun, final Function&lt;
     <p>
      最后提出了一些对限流器生成的一些优化疑问，看后面配置更新相关的分析的时候，是否能验证自己的猜想
     </p>
-    <h2>
+    <h2 id="_7">
      参考链接
     </h2>
     <ul>
@@ -493,10 +447,10 @@ public &lt;T&gt; Mono&lt;T&gt; run(final Mono&lt;T&gt; toRun, final Function&lt;
       </a>
      </li>
     </ul>
-    <h2>
+    <h2 id="soul_1">
      Soul网关源码分析文章列表
     </h2>
-    <h3>
+    <h3 id="github">
      Github
     </h3>
     <ul>
@@ -540,7 +494,7 @@ public &lt;T&gt; Mono&lt;T&gt; run(final Mono&lt;T&gt; toRun, final Function&lt;
       </p>
      </li>
     </ul>
-    <h3>
+    <h3 id="_8">
      掘金
     </h3>
     <ul>

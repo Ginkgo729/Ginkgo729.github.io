@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="_1">
      决策树之构造生成
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_2">
      参考说明
     </h2>
     <p>
@@ -60,66 +61,200 @@
       周志华：《机器学习》：第四章 决策树
      </li>
     </ul>
-    <h2>
+    <h2 id="_3">
      示例数据表格
     </h2>
     <p>
      文章所使用的数据集如下，来源于《数据分析实战45讲》17讲中
     </p>
-    <p>
-     |天气|温度|湿度|刮风|是否打篮球|
-|----|:--:|:--:|:--:|--------|
-|晴   |高  |中  |否  |否      |
-|晴   |高  |中  |是  |否      |
-|阴   |高  |高  |否  |是      |
-|小雨 |高  |高  |否  |是      |
-|小雨 |低  |高  |否  |否      |
-|晴天 |中  |中  |是  |是      |
-|阴天 |中  |高  |是  |否      |
-    </p>
-    <h2>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        天气
+       </th>
+       <th align="center">
+        温度
+       </th>
+       <th align="center">
+        湿度
+       </th>
+       <th align="center">
+        刮风
+       </th>
+       <th>
+        是否打篮球
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        晴
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        否
+       </td>
+       <td>
+        否
+       </td>
+      </tr>
+      <tr>
+       <td>
+        晴
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        是
+       </td>
+       <td>
+        否
+       </td>
+      </tr>
+      <tr>
+       <td>
+        阴
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        否
+       </td>
+       <td>
+        是
+       </td>
+      </tr>
+      <tr>
+       <td>
+        小雨
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        否
+       </td>
+       <td>
+        是
+       </td>
+      </tr>
+      <tr>
+       <td>
+        小雨
+       </td>
+       <td align="center">
+        低
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        否
+       </td>
+       <td>
+        否
+       </td>
+      </tr>
+      <tr>
+       <td>
+        晴天
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        是
+       </td>
+       <td>
+        是
+       </td>
+      </tr>
+      <tr>
+       <td>
+        阴天
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        是
+       </td>
+       <td>
+        否
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <h2 id="_4">
      相关概念阐述
     </h2>
-    <h3>
+    <h3 id="_5">
      决策树
     </h3>
     <p>
      以上面的表格数据为例，比如我们考虑要不要去打篮球，先看天气是不是阴天，是阴天的话，外面刮风没，没刮风我们就去，刮风就不去。决策树就是把上面我们判断背后的逻辑整理成一个结构图，也就是一个树状结构。
     </p>
-    <h3>
+    <h3 id="id3c45cart">
      ID3、C4.5、CART
     </h3>
     <p>
      在决策树构造中有三个著名算法：ID3、C4.5、CART，ID3算法计算的是信息增益，C4.5计算使用的是增益率、CART计算使用的是基尼系数，下面简单介绍下其算法，这里也不要求完全看懂，扫一眼有个印象就行，在后面的例子中有计算示例，回过头结合看应该就懂了。
     </p>
-    <h4>
+    <h4 id="_6">
      信息熵
     </h4>
     <p>
      在信息论中，随机离散事件的出现的概率存在不确定性，为了衡量这种信息的不确定性，信息学之父香农引入了信息熵的概念，并给出了计算信息熵的数学公式。
     </p>
-    <p>
-     <pre>Entopy(t)=-Σp(i|t)log2p(i|t)</pre>
-    </p>
-    <h4>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Entopy(t)=-Σp(i|t)log2p(i|t)</span>
+</code></pre>
+    </div>
+    <h4 id="_7">
      信息增益
     </h4>
     <p>
      信息增益指的是划分可以带来纯度的提高，信息熵的下降。它的计算公式是父亲节点的信息熵减去所有子节点的信息熵。信息增益的公式可以表示为：
     </p>
-    <p>
-     <pre>Gain(D,a)=Entropy(D)- Σ|Di|/|D|Entropy(Di)</pre>
-    </p>
-    <h4>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain(D,a)=Entropy(D)- Σ|Di|/|D|Entropy(Di)</span>
+</code></pre>
+    </div>
+    <h4 id="_8">
      信息增益率
     </h4>
     <p>
      信息增益率 = 信息增益 / 属性熵。属性熵，就是每种属性的信息熵，比如天气的属性熵的计算如下,天气有晴阴雨,各占3/7,2/7,2/7：
     </p>
-    <p>
-     <pre>H(天气)= -(3/7 * log2(3/7) + 2/7 * log2(2/7) + 2/7 * log2(2/7))</pre>
-    </p>
-    <h4>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">H(天气)= -(3/7 * log2(3/7) + 2/7 * log2(2/7) + 2/7 * log2(2/7)) </span>
+</code></pre>
+    </div>
+    <h4 id="_9">
      基尼系数
     </h4>
     <p>
@@ -137,16 +272,17 @@
     <p>
      基尼系数的计算公式如下:
     </p>
-    <p>
-     <pre>Gini = 1 – Σ (Pi)2 for i=1 to number of classes</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gini = 1 – Σ (Pi)2 for i=1 to number of classes</span>
+</code></pre>
+    </div>
+    <h2 id="_10">
      举例说明
     </h2>
     <p>
      下面是一个完整的决策树的构造生成过程，已完整开头所给的数据为例
     </p>
-    <h3>
+    <h3 id="_11">
      根节点的选择
     </h3>
     <p>
@@ -155,61 +291,122 @@
     <p>
      数据集中有7条数据，3个打篮球，4个不打篮球，不打篮球的概率为4/7,打篮球的概率为3/7,则根据信息熵的计算公式可以得到根节点的信息熵为：
     </p>
-    <p>
-     <pre>Ent(D)=-(4/7 * log2(4/7) + 3/7 * log2(3/7))=0.985</pre>
-    </p>
-    <h4>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Ent(D)=-(4/7 * log2(4/7) + 3/7 * log2(3/7))=0.985</span>
+</code></pre>
+    </div>
+    <h4 id="_12">
      天气
     </h4>
     <p>
      其数据表格如下:
     </p>
-    <p>
-     |天气状态|打篮球数量|不打篮球数量|总数|
-|-------|:------:|:---------:|---|
-|晴     |1        |2         |3  |
-|阴     |1        |1         |2  |
-|小雨   |1        |1         |2  |
-    </p>
-    <h5>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        天气状态
+       </th>
+       <th align="center">
+        打篮球数量
+       </th>
+       <th align="center">
+        不打篮球数量
+       </th>
+       <th>
+        总数
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        晴
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td>
+        3
+       </td>
+      </tr>
+      <tr>
+       <td>
+        阴
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td>
+        2
+       </td>
+      </tr>
+      <tr>
+       <td>
+        小雨
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td>
+        2
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <h5 id="_13">
      信息增益计算
     </h5>
     <p>
      如果将天气作为属性划分，分别会有三个叶节点：晴天、阴天、小雨，其中晴天2个不打篮球，1个打篮球；阴天1个打篮球，1个不打篮球；小雨1个打篮球，1个不打篮球，其对应相应的信息熵如下：
     </p>
-    <p>
-     <pre>D(晴天)=-(1/3 * log2(1/3) + 2/3 * log2(2/3)) = 0.981
-D(阴天)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0
-D(雨天)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">D(晴天)=-(1/3 * log2(1/3) + 2/3 * log2(2/3)) = 0.981</span>
+<span class="err">D(阴天)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</span>
+<span class="err">D(雨天)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</span>
+</code></pre>
+    </div>
     <p>
      在数据集中晴天有3条数据，阴天有2条数据，雨天有2条数据，对应的概率为3/7、2/7、2/7，那么作为子节点的归一化信息熵为：
     </p>
-    <p>
-     <pre>3/7 * 0.918 + 2/7 * 1.0 * 2/7 * 1.0 = 0.965</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">3/7 * 0.918 + 2/7 * 1.0 * 2/7 * 1.0 = 0.965</span>
+</code></pre>
+    </div>
     <p>
      其信息增益为：
     </p>
-    <p>
-     <pre>Gain(天气)=0.985 - 0.965 = 0.020</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain(天气)=0.985 - 0.965 = 0.020</span>
+</code></pre>
+    </div>
+    <h5 id="_14">
      信息增益率计算
     </h5>
     <p>
      天气有三个选择，晴天有3条数据，阴天有2条数据，雨天有2条数据，对应的概率为3/7、2/7、2/7，其对应的属性熵为：
     </p>
-    <p>
-     <pre>H(天气)=-(3/7 * log2(3/7) + 2/7 * log2(2/7) + 2/7 * log2(2/7)) = 1.556</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">H(天气)=-(3/7 * log2(3/7) + 2/7 * log2(2/7) + 2/7 * log2(2/7)) = 1.556</span>
+</code></pre>
+    </div>
     <p>
      则其信息增益率为：
     </p>
-    <p>
-     <pre>Gain_ratio(天气)=0.020/1.556=0.012</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain_ratio(天气)=0.020/1.556=0.012</span>
+</code></pre>
+    </div>
+    <h5 id="_15">
      基尼系数计算
     </h5>
     <ul>
@@ -226,58 +423,118 @@ D(雨天)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</pre>
       Gini(天气)=(3/7) * 4/9 + (2/7) * 0.5 + (2/7) * 0.5 = 4/21 + 1/7 + 1/7 = 10/21
      </li>
     </ul>
-    <h4>
+    <h4 id="_16">
      温度
     </h4>
     <p>
      其数据表格如下:
     </p>
-    <p>
-     |温度状态|打篮球数量|不打篮球数量|总数|
-|-------|:------:|:---------:|---|
-|高     |2        |2         |4  |
-|中     |1        |1         |2  |
-|低     |0        |1         |1  |
-    </p>
-    <h5>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        温度状态
+       </th>
+       <th align="center">
+        打篮球数量
+       </th>
+       <th align="center">
+        不打篮球数量
+       </th>
+       <th>
+        总数
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        高
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td>
+        4
+       </td>
+      </tr>
+      <tr>
+       <td>
+        中
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td>
+        2
+       </td>
+      </tr>
+      <tr>
+       <td>
+        低
+       </td>
+       <td align="center">
+        0
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td>
+        1
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <h5 id="_17">
      信息增益计算
     </h5>
     <p>
      各情况的信息熵如下：
     </p>
-    <p>
-     <pre>D(高)=-(2/4 * log2(2/4) + 2/4 * log2(2/4)) = 1.0
-D(中)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0
-D(低)=-(0/1 * log2(0/1) + 1/1 * log2(1/1)) = 0.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">D(高)=-(2/4 * log2(2/4) + 2/4 * log2(2/4)) = 1.0</span>
+<span class="err">D(中)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</span>
+<span class="err">D(低)=-(0/1 * log2(0/1) + 1/1 * log2(1/1)) = 0.0</span>
+</code></pre>
+    </div>
     <p>
      作为子节点的归一化信息熵为：
     </p>
-    <p>
-     <pre>4/7 * 1.0 + 2/7 * 1.0 * 1/7 * 0.0 = 0.857</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">4/7 * 1.0 + 2/7 * 1.0 * 1/7 * 0.0 = 0.857</span>
+</code></pre>
+    </div>
     <p>
      其信息增益为：
     </p>
-    <p>
-     <pre>Gain(温度)=0.985 - 0.857 = 0.128</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain(温度)=0.985 - 0.857 = 0.128</span>
+</code></pre>
+    </div>
+    <h5 id="_18">
      信息增益率计算
     </h5>
     <p>
      属性熵为：
     </p>
-    <p>
-     <pre>H(温度)=-(4/7 * log2(4/7) + 2/7 * log2(2/7) + 1/7 * log2(1/7)) = 1.378</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">H(温度)=-(4/7 * log2(4/7) + 2/7 * log2(2/7) + 1/7 * log2(1/7)) = 1.378</span>
+</code></pre>
+    </div>
     <p>
      则其信息增益率为：
     </p>
-    <p>
-     <pre>Gain_ratio(温度)=0.128/1.378=0.0928</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain_ratio(温度)=0.128/1.378=0.0928</span>
+</code></pre>
+    </div>
+    <h5 id="_19">
      基尼系数计算
     </h5>
     <ul>
@@ -294,56 +551,103 @@ D(低)=-(0/1 * log2(0/1) + 1/1 * log2(1/1)) = 0.0</pre>
       Gini(温度)=4/7 * 0.5 + 2/7 * 0.5 + 1/7 * 0 = 3/7
      </li>
     </ul>
-    <h4>
+    <h4 id="_20">
      湿度的基尼系数计算
     </h4>
     <p>
      其数据表格如下:
     </p>
-    <p>
-     |湿度状态|打篮球数量|不打篮球数量|总数|
-|-------|:------:|:---------:|---|
-|高     |2        |2         |4  |
-|中     |2        |1         |3  |
-    </p>
-    <h5>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        湿度状态
+       </th>
+       <th align="center">
+        打篮球数量
+       </th>
+       <th align="center">
+        不打篮球数量
+       </th>
+       <th>
+        总数
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        高
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td>
+        4
+       </td>
+      </tr>
+      <tr>
+       <td>
+        中
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td>
+        3
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <h5 id="_21">
      信息增益计算
     </h5>
     <p>
      各情况的信息熵如下：
     </p>
-    <p>
-     <pre>D(高)=-(2/4 * log2(2/4) + 2/4 * log2(2/4)) = 1.0
-D(中)=-(2/3 * log2(2/3) + 1/3 * log2(1/3)) = 0.918</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">D(高)=-(2/4 * log2(2/4) + 2/4 * log2(2/4)) = 1.0</span>
+<span class="err">D(中)=-(2/3 * log2(2/3) + 1/3 * log2(1/3)) = 0.918</span>
+</code></pre>
+    </div>
     <p>
      作为子节点的归一化信息熵为：
     </p>
-    <p>
-     <pre>4/7 * 1.0 + 3/7 * 0.918 = 0.964</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">4/7 * 1.0 + 3/7 * 0.918 = 0.964</span>
+</code></pre>
+    </div>
     <p>
      其信息增益为：
     </p>
-    <p>
-     <pre>Gain(湿度)=0.985 - 0.964 = 0.021</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain(湿度)=0.985 - 0.964 = 0.021</span>
+</code></pre>
+    </div>
+    <h5 id="_22">
      信息增益率计算
     </h5>
     <p>
      属性熵为：
     </p>
-    <p>
-     <pre>H(湿度)=-(4/7 * log2(4/7) + 3/7 * log2(3/7) = 0.985</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">H(湿度)=-(4/7 * log2(4/7) + 3/7 * log2(3/7) = 0.985</span>
+</code></pre>
+    </div>
     <p>
      则其信息增益率为：
     </p>
-    <p>
-     <pre>Gain_ratio(湿度)=0.021/0.985=0.021</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain_ratio(湿度)=0.021/0.985=0.021</span>
+</code></pre>
+    </div>
+    <h5 id="_23">
      基尼系数计算
     </h5>
     <ul>
@@ -357,56 +661,103 @@ D(中)=-(2/3 * log2(2/3) + 1/3 * log2(1/3)) = 0.918</pre>
       Gini(湿度)=(4/7) * 0.5 + (3/7) * 4/9 = 2/7 + 4/21 = 10/21 ~ 0.47619
      </li>
     </ul>
-    <h4>
+    <h4 id="_24">
      刮风的基尼系数计算
     </h4>
     <p>
      其数据表格如下:
     </p>
-    <p>
-     |刮风状态|打篮球数量|不打篮球数量|总数|
-|-------|:------:|:---------:|---|
-|是     |1        |2         |3  |
-|否     |2        |2         |4  |
-    </p>
-    <h5>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        刮风状态
+       </th>
+       <th align="center">
+        打篮球数量
+       </th>
+       <th align="center">
+        不打篮球数量
+       </th>
+       <th>
+        总数
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        是
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td>
+        3
+       </td>
+      </tr>
+      <tr>
+       <td>
+        否
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td>
+        4
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <h5 id="_25">
      信息增益计算
     </h5>
     <p>
      各情况的信息熵如下：
     </p>
-    <p>
-     <pre>D(是)=-(2/3 * log2(2/3) + 1/3 * log2(1/3)) = 0.918
-D(否)=-(2/4 * log2(2/4) + 2/4 * log2(2/4)) = 1.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">D(是)=-(2/3 * log2(2/3) + 1/3 * log2(1/3)) = 0.918</span>
+<span class="err">D(否)=-(2/4 * log2(2/4) + 2/4 * log2(2/4)) = 1.0</span>
+</code></pre>
+    </div>
     <p>
      作为子节点的归一化信息熵为：
     </p>
-    <p>
-     <pre>3/7 * 1.0 + 4/7 * 0.918 = 0.964</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">3/7 * 1.0 + 4/7 * 0.918 = 0.964</span>
+</code></pre>
+    </div>
     <p>
      其信息增益为：
     </p>
-    <p>
-     <pre>Gain(刮风)=0.985 - 0.964 = 0.021</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain(刮风)=0.985 - 0.964 = 0.021</span>
+</code></pre>
+    </div>
+    <h5 id="_26">
      信息增益率计算
     </h5>
     <p>
      属性熵为：
     </p>
-    <p>
-     <pre>H(刮风)=-(4/7 * log2(4/7) + 3/7 * log2(3/7) = 0.985</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">H(刮风)=-(4/7 * log2(4/7) + 3/7 * log2(3/7) = 0.985</span>
+</code></pre>
+    </div>
     <p>
      则其信息增益率为：
     </p>
-    <p>
-     <pre>Gain_ratio(刮风)=0.021/0.985=0.021</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain_ratio(刮风)=0.021/0.985=0.021</span>
+</code></pre>
+    </div>
+    <h5 id="_27">
      基尼系数计算
     </h5>
     <ul>
@@ -420,7 +771,7 @@ D(否)=-(2/4 * log2(2/4) + 2/4 * log2(2/4)) = 1.0</pre>
       Gini(刮风)=(4/7) * 0.5 + (3/7) * 4/9 = 2/7 + 4/21 = 10/21 ~ 0.47619
      </li>
     </ul>
-    <h4>
+    <h4 id="_28">
      根节点的选择
     </h4>
     <p>
@@ -491,78 +842,222 @@ D(否)=-(2/4 * log2(2/4) + 2/4 * log2(2/4)) = 1.0</pre>
       </ul>
      </li>
     </ul>
-    <h3>
+    <h3 id="_29">
      子节点温度高的选择
     </h3>
     <p>
      其剩下的数据集如下,温度不再进行下面的节点选择参与:
     </p>
-    <p>
-     |天气|温度（不参与此次分裂）|湿度|刮风|是否打篮球|
-|----|:--:|:--:|:--:|--------|
-|晴   |高  |中  |否  |否      |
-|晴   |高  |中  |是  |否      |
-|阴   |高  |高  |否  |是      |
-|小雨 |高  |高  |否  |是      |
-    </p>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        天气
+       </th>
+       <th align="center">
+        温度（不参与此次分裂）
+       </th>
+       <th align="center">
+        湿度
+       </th>
+       <th align="center">
+        刮风
+       </th>
+       <th>
+        是否打篮球
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        晴
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        否
+       </td>
+       <td>
+        否
+       </td>
+      </tr>
+      <tr>
+       <td>
+        晴
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        是
+       </td>
+       <td>
+        否
+       </td>
+      </tr>
+      <tr>
+       <td>
+        阴
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        否
+       </td>
+       <td>
+        是
+       </td>
+      </tr>
+      <tr>
+       <td>
+        小雨
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        否
+       </td>
+       <td>
+        是
+       </td>
+      </tr>
+     </tbody>
+    </table>
     <p>
      根据信息熵的计算公式可以得到子节点温度高的信息熵为：
     </p>
-    <p>
-     <pre>Ent(D)=-(2/4 * log2(2/4) + 2/4 * log2(2/4)) = 1.0</pre>
-    </p>
-    <h4>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Ent(D)=-(2/4 * log2(2/4) + 2/4 * log2(2/4)) = 1.0</span>
+</code></pre>
+    </div>
+    <h4 id="_30">
      天气
     </h4>
     <p>
      其数据表格如下:
     </p>
-    <p>
-     |天气状态|打篮球数量|不打篮球数量|总数|
-|-------|:------:|:---------:|---|
-|晴     |1        |1         |2  |
-|阴     |1        |0         |1  |
-|小雨   |1        |0         |1  |
-    </p>
-    <h5>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        天气状态
+       </th>
+       <th align="center">
+        打篮球数量
+       </th>
+       <th align="center">
+        不打篮球数量
+       </th>
+       <th>
+        总数
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        晴
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td>
+        2
+       </td>
+      </tr>
+      <tr>
+       <td>
+        阴
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td align="center">
+        0
+       </td>
+       <td>
+        1
+       </td>
+      </tr>
+      <tr>
+       <td>
+        小雨
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td align="center">
+        0
+       </td>
+       <td>
+        1
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <h5 id="_31">
      信息增益计算
     </h5>
     <p>
      相应的信息熵如下：
     </p>
-    <p>
-     <pre>D(晴天)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0
-D(阴天)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0
-D(雨天)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">D(晴天)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</span>
+<span class="err">D(阴天)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</span>
+<span class="err">D(雨天)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</span>
+</code></pre>
+    </div>
     <p>
      归一化信息熵为：
     </p>
-    <p>
-     <pre>2/4 * 1.0 + 1/4 * 0.0 * 1/4 * 0.0 = 0.5</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">2/4 * 1.0 + 1/4 * 0.0 * 1/4 * 0.0 = 0.5</span>
+</code></pre>
+    </div>
     <p>
      其信息增益为：
     </p>
-    <p>
-     <pre>Gain(天气)=1.0 - 0.5 = 0.5</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain(天气)=1.0 - 0.5 = 0.5</span>
+</code></pre>
+    </div>
+    <h5 id="_32">
      信息增益率计算
     </h5>
     <p>
      对应的属性熵为：
     </p>
-    <p>
-     <pre>H(天气)=-(2/4 * log2(2/4) + 1/4 * log2(1/4) + 1/4 * log2(1/4)) = 1.5</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">H(天气)=-(2/4 * log2(2/4) + 1/4 * log2(1/4) + 1/4 * log2(1/4)) = 1.5</span>
+</code></pre>
+    </div>
     <p>
      则其信息增益率为：
     </p>
-    <p>
-     <pre>Gain_ratio(天气)=0.5/1.5=0.33333</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain_ratio(天气)=0.5/1.5=0.33333</span>
+</code></pre>
+    </div>
+    <h5 id="_33">
      基尼系数计算
     </h5>
     <ul>
@@ -579,56 +1074,103 @@ D(雨天)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</pre>
       Gini(天气)=2/4 * 0.5 + 1/4 * 0 + 1/4 * 0 = 0.25
      </li>
     </ul>
-    <h4>
+    <h4 id="_34">
      湿度的基尼系数计算
     </h4>
     <p>
      其数据表格如下:
     </p>
-    <p>
-     |湿度状态|打篮球数量|不打篮球数量|总数|
-|-------|:------:|:---------:|---|
-|高     |2        |0         |2  |
-|中     |0        |2         |2  |
-    </p>
-    <h5>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        湿度状态
+       </th>
+       <th align="center">
+        打篮球数量
+       </th>
+       <th align="center">
+        不打篮球数量
+       </th>
+       <th>
+        总数
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        高
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td align="center">
+        0
+       </td>
+       <td>
+        2
+       </td>
+      </tr>
+      <tr>
+       <td>
+        中
+       </td>
+       <td align="center">
+        0
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td>
+        2
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <h5 id="_35">
      信息增益计算
     </h5>
     <p>
      各情况的信息熵如下：
     </p>
-    <p>
-     <pre>D(高)=-(2/2 * log2(2/2) + 0/2 * log2(0/2)) = 0.0
-D(中)=-(0/2 * log2(0/2) + 2/2 * log2(2/2)) = 0.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">D(高)=-(2/2 * log2(2/2) + 0/2 * log2(0/2)) = 0.0</span>
+<span class="err">D(中)=-(0/2 * log2(0/2) + 2/2 * log2(2/2)) = 0.0</span>
+</code></pre>
+    </div>
     <p>
      作为子节点的归一化信息熵为：
     </p>
-    <p>
-     <pre>2/4 * 0.0 + 2/4 * 0.0 = 0.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">2/4 * 0.0 + 2/4 * 0.0 = 0.0</span>
+</code></pre>
+    </div>
     <p>
      其信息增益为：
     </p>
-    <p>
-     <pre>Gain(湿度)=1.0 - 0.0 = 1.0</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain(湿度)=1.0 - 0.0 = 1.0</span>
+</code></pre>
+    </div>
+    <h5 id="_36">
      信息增益率计算
     </h5>
     <p>
      属性熵为：
     </p>
-    <p>
-     <pre>H(湿度)=-(2/4 * log2(2/4) + 2/4 * log2(2/4) = 1.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">H(湿度)=-(2/4 * log2(2/4) + 2/4 * log2(2/4) = 1.0</span>
+</code></pre>
+    </div>
     <p>
      则其信息增益率为：
     </p>
-    <p>
-     <pre>Gain_ratio(湿度)=1.0/1.0=1.0</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain_ratio(湿度)=1.0/1.0=1.0</span>
+</code></pre>
+    </div>
+    <h5 id="_37">
      基尼系数计算
     </h5>
     <ul>
@@ -642,56 +1184,103 @@ D(中)=-(0/2 * log2(0/2) + 2/2 * log2(2/2)) = 0.0</pre>
       Gini(湿度)=(2/4) * 0 + (2/4) * 0 = 0
      </li>
     </ul>
-    <h4>
+    <h4 id="_38">
      刮风计算
     </h4>
     <p>
      其数据表格如下:
     </p>
-    <p>
-     |刮风状态|打篮球数量|不打篮球数量|总数|
-|-------|:------:|:---------:|---|
-|是     |0        |1         |1  |
-|否     |2        |1         |3  |
-    </p>
-    <h5>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        刮风状态
+       </th>
+       <th align="center">
+        打篮球数量
+       </th>
+       <th align="center">
+        不打篮球数量
+       </th>
+       <th>
+        总数
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        是
+       </td>
+       <td align="center">
+        0
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td>
+        1
+       </td>
+      </tr>
+      <tr>
+       <td>
+        否
+       </td>
+       <td align="center">
+        2
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td>
+        3
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <h5 id="_39">
      信息增益计算
     </h5>
     <p>
      各情况的信息熵如下：
     </p>
-    <p>
-     <pre>D(是)=-(0/1 * log2(0/1) + 1/1 * log2(1/1)) = 0
-D(否)=-(2/3 * log2(2/3) + 1/3 * log2(1/3)) = 0.918</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">D(是)=-(0/1 * log2(0/1) + 1/1 * log2(1/1)) = 0</span>
+<span class="err">D(否)=-(2/3 * log2(2/3) + 1/3 * log2(1/3)) = 0.918</span>
+</code></pre>
+    </div>
     <p>
      作为子节点的归一化信息熵为：
     </p>
-    <p>
-     <pre>1/4 * 0.0 + 3/4 * 0.918 = 0.688</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">1/4 * 0.0 + 3/4 * 0.918 = 0.688</span>
+</code></pre>
+    </div>
     <p>
      其信息增益为：
     </p>
-    <p>
-     <pre>Gain(刮风)=1.0 - 0.688 = 0.312</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain(刮风)=1.0 - 0.688 = 0.312</span>
+</code></pre>
+    </div>
+    <h5 id="_40">
      信息增益率计算
     </h5>
     <p>
      属性熵为：
     </p>
-    <p>
-     <pre>H(刮风)=-(1/3 * log2(1/3) + 2/3 * log2(2/3) = 0.918</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">H(刮风)=-(1/3 * log2(1/3) + 2/3 * log2(2/3) = 0.918</span>
+</code></pre>
+    </div>
     <p>
      则其信息增益率为：
     </p>
-    <p>
-     <pre>Gain_ratio(刮风)=0.312/0.918=0.349</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain_ratio(刮风)=0.312/0.918=0.349</span>
+</code></pre>
+    </div>
+    <h5 id="_41">
      基尼系数计算
     </h5>
     <ul>
@@ -705,7 +1294,7 @@ D(否)=-(2/3 * log2(2/3) + 1/3 * log2(1/3)) = 0.918</pre>
       Gini(刮风)=(1/4) * 0 + (3/4) * 4/9 = 1/3 = 0.333333
      </li>
     </ul>
-    <h4>
+    <h4 id="_42">
      子节点温度高的选择
     </h4>
     <p>
@@ -775,74 +1364,173 @@ D(否)=-(2/3 * log2(2/3) + 1/3 * log2(1/3)) = 0.918</pre>
       </ul>
      </li>
     </ul>
-    <h3>
+    <h3 id="_43">
      子节点温度中的选择
     </h3>
     <p>
      其剩下的数据集如下,温度不再进行下面的节点选择参与:
     </p>
-    <p>
-     |天气|温度（不参与此次分裂）|湿度|刮风|是否打篮球|
-|----|:--:|:--:|:--:|--------|
-|晴天 |中  |中  |是  |是      |
-|阴天 |中  |高  |是  |否      |
-    </p>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        天气
+       </th>
+       <th align="center">
+        温度（不参与此次分裂）
+       </th>
+       <th align="center">
+        湿度
+       </th>
+       <th align="center">
+        刮风
+       </th>
+       <th>
+        是否打篮球
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        晴天
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        是
+       </td>
+       <td>
+        是
+       </td>
+      </tr>
+      <tr>
+       <td>
+        阴天
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        是
+       </td>
+       <td>
+        否
+       </td>
+      </tr>
+     </tbody>
+    </table>
     <p>
      根据信息熵的计算公式可以得到子节点温度高的信息熵为：
     </p>
-    <p>
-     <pre>Ent(D)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</pre>
-    </p>
-    <h4>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Ent(D)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</span>
+</code></pre>
+    </div>
+    <h4 id="_44">
      天气
     </h4>
     <p>
      其数据表格如下:
     </p>
-    <p>
-     |天气状态|打篮球数量|不打篮球数量|总数|
-|-------|:------:|:---------:|---|
-|晴     |1        |0         |1  |
-|阴     |0        |1         |1  |
-    </p>
-    <h5>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        天气状态
+       </th>
+       <th align="center">
+        打篮球数量
+       </th>
+       <th align="center">
+        不打篮球数量
+       </th>
+       <th>
+        总数
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        晴
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td align="center">
+        0
+       </td>
+       <td>
+        1
+       </td>
+      </tr>
+      <tr>
+       <td>
+        阴
+       </td>
+       <td align="center">
+        0
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td>
+        1
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <h5 id="_45">
      信息增益计算
     </h5>
     <p>
      相应的信息熵如下：
     </p>
-    <p>
-     <pre>D(晴天)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0
-D(阴天)=-(0/1 * log2(0/1) + 1/1 * log2(1/1)) = 0.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">D(晴天)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</span>
+<span class="err">D(阴天)=-(0/1 * log2(0/1) + 1/1 * log2(1/1)) = 0.0</span>
+</code></pre>
+    </div>
     <p>
      归一化信息熵为：
     </p>
-    <p>
-     <pre>1/2 * 0.0 + 1/2 * 0.0 = 0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">1/2 * 0.0 + 1/2 * 0.0 = 0</span>
+</code></pre>
+    </div>
     <p>
      其信息增益为：
     </p>
-    <p>
-     <pre>Gain(天气)=1.0 - 0 = 1.0</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain(天气)=1.0 - 0 = 1.0</span>
+</code></pre>
+    </div>
+    <h5 id="_46">
      信息增益率计算
     </h5>
     <p>
      对应的属性熵为：
     </p>
-    <p>
-     <pre>H(天气)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">H(天气)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</span>
+</code></pre>
+    </div>
     <p>
      则其信息增益率为：
     </p>
-    <p>
-     <pre>Gain_ratio(天气)=1.0/1.0=1.0</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain_ratio(天气)=1.0/1.0=1.0</span>
+</code></pre>
+    </div>
+    <h5 id="_47">
      基尼系数计算
     </h5>
     <ul>
@@ -856,56 +1544,103 @@ D(阴天)=-(0/1 * log2(0/1) + 1/1 * log2(1/1)) = 0.0</pre>
       Gini(天气)=1/2 * 0.0 + 1/2 * 0.0 = 0
      </li>
     </ul>
-    <h4>
+    <h4 id="_48">
      湿度的基尼系数计算
     </h4>
     <p>
      其数据表格如下:
     </p>
-    <p>
-     |湿度状态|打篮球数量|不打篮球数量|总数|
-|-------|:------:|:---------:|---|
-|高     |0        |1         |1  |
-|中     |1        |0         |1  |
-    </p>
-    <h5>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        湿度状态
+       </th>
+       <th align="center">
+        打篮球数量
+       </th>
+       <th align="center">
+        不打篮球数量
+       </th>
+       <th>
+        总数
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        高
+       </td>
+       <td align="center">
+        0
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td>
+        1
+       </td>
+      </tr>
+      <tr>
+       <td>
+        中
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td align="center">
+        0
+       </td>
+       <td>
+        1
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <h5 id="_49">
      信息增益计算
     </h5>
     <p>
      各情况的信息熵如下：
     </p>
-    <p>
-     <pre>D(高)=-(0/1 * log2(0/1) + 1/1 * log2(1/1)) = 0.0
-D(中)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">D(高)=-(0/1 * log2(0/1) + 1/1 * log2(1/1)) = 0.0</span>
+<span class="err">D(中)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</span>
+</code></pre>
+    </div>
     <p>
      作为子节点的归一化信息熵为：
     </p>
-    <p>
-     <pre>1/2 * 0.0 + 1/2 * 0.0 = 0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">1/2 * 0.0 + 1/2 * 0.0 = 0</span>
+</code></pre>
+    </div>
     <p>
      其信息增益为：
     </p>
-    <p>
-     <pre>Gain(湿度)=1.0 - 0.0 = 1.0</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain(湿度)=1.0 - 0.0 = 1.0</span>
+</code></pre>
+    </div>
+    <h5 id="_50">
      信息增益率计算
     </h5>
     <p>
      属性熵为：
     </p>
-    <p>
-     <pre>H(湿度)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">H(湿度)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</span>
+</code></pre>
+    </div>
     <p>
      则其信息增益率为：
     </p>
-    <p>
-     <pre>Gain_ratio(湿度)=1.0/1.0=1.0</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain_ratio(湿度)=1.0/1.0=1.0</span>
+</code></pre>
+    </div>
+    <h5 id="_51">
      基尼系数计算
     </h5>
     <ul>
@@ -919,54 +1654,88 @@ D(中)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</pre>
       Gini(湿度)=1/2 * 0.0 + 1/2 * 0.0 = 0
      </li>
     </ul>
-    <h4>
+    <h4 id="_52">
      刮风计算
     </h4>
     <p>
      其数据表格如下:
     </p>
-    <p>
-     |刮风状态|打篮球数量|不打篮球数量|总数|
-|-------|:------:|:---------:|---|
-|是     |1        |1         |2  |
-    </p>
-    <h5>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        刮风状态
+       </th>
+       <th align="center">
+        打篮球数量
+       </th>
+       <th align="center">
+        不打篮球数量
+       </th>
+       <th>
+        总数
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        是
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td align="center">
+        1
+       </td>
+       <td>
+        2
+       </td>
+      </tr>
+     </tbody>
+    </table>
+    <h5 id="_53">
      信息增益计算
     </h5>
     <p>
      各情况的信息熵如下：
     </p>
-    <p>
-     <pre>D(是)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">D(是)=-(1/2 * log2(1/2) + 1/2 * log2(1/2)) = 1.0</span>
+</code></pre>
+    </div>
     <p>
      作为子节点的归一化信息熵为：
     </p>
-    <p>
-     <pre>1/1 * 1.0 = 1.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">1/1 * 1.0 = 1.0</span>
+</code></pre>
+    </div>
     <p>
      其信息增益为：
     </p>
-    <p>
-     <pre>Gain(刮风)=1.0 - 1.0 = 0</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain(刮风)=1.0 - 1.0 = 0</span>
+</code></pre>
+    </div>
+    <h5 id="_54">
      信息增益率计算
     </h5>
     <p>
      属性熵为：
     </p>
-    <p>
-     <pre>H(刮风)=-(2/2 * log2(2/2) = 0.0</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">H(刮风)=-(2/2 * log2(2/2) = 0.0</span>
+</code></pre>
+    </div>
     <p>
      则其信息增益率为：
     </p>
-    <p>
-     <pre>Gain_ratio(刮风)=0/0 = 0</pre>
-    </p>
-    <h5>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">Gain_ratio(刮风)=0/0 = 0</span>
+</code></pre>
+    </div>
+    <h5 id="_55">
      基尼系数计算
     </h5>
     <ul>
@@ -977,7 +1746,7 @@ D(中)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</pre>
       Gini(刮风)=2/2 * 0.5 = 0.5
      </li>
     </ul>
-    <h4>
+    <h4 id="_56">
      子节点温度中的选择
     </h4>
     <p>
@@ -1055,7 +1824,7 @@ D(中)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</pre>
       </ul>
      </li>
     </ul>
-    <h3>
+    <h3 id="_57">
      最终的决策树
     </h3>
     <p>
@@ -1093,7 +1862,7 @@ D(中)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</pre>
       </ul>
      </li>
     </ul>
-    <h2>
+    <h2 id="_58">
      思考
     </h2>
     <p>
@@ -1102,7 +1871,7 @@ D(中)=-(1/1 * log2(1/1) + 0/1 * log2(0/1)) = 0.0</pre>
     <p>
      完整的构造整个决策树后，发现整个决策树的高度大于等于属性数量，感觉决策树应该是构造时间较长，但用于决策的时候很快，时间复杂度也就是O(n)
     </p>
-    <h2>
+    <h2 id="_59">
      话外
     </h2>
     <p>

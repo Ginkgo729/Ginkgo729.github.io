@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,210 +43,189 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="python3">
      Python3 常用记录
     </h1>
     <hr/>
-    <h2>
+    <h2 id="list">
      list
     </h2>
-    <p>
-     ```python
-    </p>
-    <h1>
-     extend() 函数用于在列表末尾一次性追加另一个序列中的多个值（用新列表扩展原来的列表）。
-    </h1>
-    <p>
-     list.extend(seq)
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># extend() 函数用于在列表末尾一次性追加另一个序列中的多个值（用新列表扩展原来的列表）。</span>
+<span class="nb">list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <h3 id="list-key-list">
      将 list 作为 key，并取默认值为空 list 再添加元素
     </h3>
-    <p>
-     <pre>python
-ansDict[tuple(count)] = ansDict.get(tuple(count), []) + [s]</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">ansDict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">count</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ansDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">count</span><span class="p">),</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">[</span><span class="n">s</span><span class="p">]</span>
+</code></pre>
+    </div>
+    <h3 id="list_1">
      list 作为队列
     </h3>
-    <p>
-     <pre>python
-list.pop(0)</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nb">list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <h3 id="list_2">
      list 作为栈
     </h3>
-    <p>
-     <pre>python
-list.pop()</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nb">list</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+</code></pre>
+    </div>
+    <h3 id="1-2-3-1-2-3">
      列表拼接:["1", "2", "3"] --&gt; "1-&gt;2-&gt;3"
     </h3>
-    <p>
-     <pre>python
-"-&gt;".join(["1", "2", "3"])</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="s2">"-&gt;"</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">"1"</span><span class="p">,</span> <span class="s2">"2"</span><span class="p">,</span> <span class="s2">"3"</span><span class="p">])</span>
+</code></pre>
+    </div>
+    <h3 id="_1">
      数组初始化
     </h3>
-    <p>
-     ```python
-    </p>
-    <h1>
-     一维
-    </h1>
-    <p>
-     parents = [i for i in range(0, len(M))]
-    </p>
-    <h1>
-     二维
-    </h1>
-    <p>
-     N = [[0]*10 for i in range(10)]
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># 一维</span>
+<span class="n">parents</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">M</span><span class="p">))]</span>
+
+<span class="c1"># 二维</span>
+<span class="n">N</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">10</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+</code></pre>
+    </div>
+    <h3 id="deque">
      双端队列：deque
     </h3>
-    <p>
-     <pre>python
-quque = deque([[start, 1]])
-node = quque.popleft()</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">quque</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([[</span><span class="n">start</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">node</span> <span class="o">=</span> <span class="n">quque</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+</code></pre>
+    </div>
+    <h2 id="dict">
      Dict
     </h2>
-    <h3>
+    <h3 id="list-key-list_1">
      将 list 作为 key，并取默认值为空 list 再添加元素
     </h3>
-    <p>
-     <pre>python
-ansDict[tuple(count)] = ansDict.get(tuple(count), []) + [s]</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">ansDict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">count</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ansDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">count</span><span class="p">),</span> <span class="p">[])</span> <span class="o">+</span> <span class="p">[</span><span class="n">s</span><span class="p">]</span>
+</code></pre>
+    </div>
+    <h3 id="dict-list">
      将 dict 作为二维 list 返回
     </h3>
-    <p>
-     <pre>python
-list(dict.values())</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</code></pre>
+    </div>
+    <h3 id="_2">
      列表统计构造哈希映射
     </h3>
-    <p>
-     <pre>python
-index = {element: i for i, element in enumerate(inorder)}</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">inorder</span><span class="p">)}</span>
+</code></pre>
+    </div>
+    <h3 id="_3">
      字典排序
     </h3>
-    <p>
-     <pre>sh
-sorted(dataOrigin.items(), key=lambda k: k[1], reverse=False)</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>sorted<span class="o">(</span>dataOrigin.items<span class="o">()</span>, <span class="nv">key</span><span class="o">=</span>lambda k: k<span class="o">[</span><span class="m">1</span><span class="o">]</span>, <span class="nv">reverse</span><span class="o">=</span>False<span class="o">)</span>
+</code></pre>
+    </div>
+    <h3 id="_4">
      列表字典排序
     </h3>
-    <p>
-     <pre>sh
-import operator
-x = [{'name':'Homer', 'age':39}, {'name':'Bart', 'age':10}]
-sorted_x = sorted(x, key=operator.itemgetter('age'),reverse=True) # True 是倒叙  默认是False
-print sorted_x</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>import operator
+<span class="nv">x</span> <span class="o">=</span> <span class="o">[{</span><span class="s1">'name'</span>:<span class="s1">'Homer'</span>, <span class="s1">'age'</span>:39<span class="o">}</span>, <span class="o">{</span><span class="s1">'name'</span>:<span class="s1">'Bart'</span>, <span class="s1">'age'</span>:10<span class="o">}]</span>
+<span class="nv">sorted_x</span> <span class="o">=</span> sorted<span class="o">(</span>x, <span class="nv">key</span><span class="o">=</span>operator.itemgetter<span class="o">(</span><span class="s1">'age'</span><span class="o">)</span>,reverse<span class="o">=</span>True<span class="o">)</span> <span class="c1"># True 是倒叙  默认是False</span>
+print sorted_x
+</code></pre>
+    </div>
+    <h3 id="_5">
      使用堆排序排序字典
     </h3>
-    <p>
-     <pre>python
-class Solution:
-    def topKFrequent(self, nums: List[int], k: int) -&gt; List[int]:
-        statistics = {}
-        for num in nums:
-            statistics[num] = statistics.get(num, 0) + 1
-        result = Counter(statistics).most_common(k)
-        ans = []
-        for key, value in result:
-            ans.append(key)
-        return ans</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">topKFrequent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="n">statistics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">nums</span><span class="p">:</span>
+            <span class="n">statistics</span><span class="p">[</span><span class="n">num</span><span class="p">]</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">statistics</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">ans</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ans</span>
+</code></pre>
+    </div>
+    <h2 id="string">
      String
     </h2>
-    <p>
-     ```python
-    </p>
-    <h1>
-     convert
-    </h1>
-    <p>
-     str='Runoob'
-print(str[::-1])
-    </p>
-    <p>
-     str='Runoob'
-print(''.join(reversed(str)))
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># convert</span>
+<span class="nb">str</span><span class="o">=</span><span class="s1">'Runoob'</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="nb">str</span><span class="o">=</span><span class="s1">'Runoob'</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="nb">str</span><span class="p">)))</span>
+</code></pre>
+    </div>
+    <h3 id="_6">
      字符转数字统计：
     </h3>
-    <p>
-     <pre>python
-count = [0] * 26
-count[ord(c) - ord('a')] += 1</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">count</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">26</span>
+<span class="n">count</span><span class="p">[</span><span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">-</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">'a'</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+</code></pre>
+    </div>
+    <h2 id="if">
      if
     </h2>
-    <p>
-     <pre>python
-i = 5 if a &gt; 7 else 0</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">i</span> <span class="o">=</span> <span class="mi">5</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="mi">7</span> <span class="k">else</span> <span class="mi">0</span>
+</code></pre>
+    </div>
+    <h2 id="_7">
      装饰器
     </h2>
-    <h3>
+    <h3 id="lru_cachenone">
      @lru_cache(None)
     </h3>
     <p>
      把耗时的函数的结果保存起来，避免传入相同的参数时重复计算
     </p>
-    <p>
-     <pre>python
-@lru_cache(None)
-def fib_with_cache(n):
-    if n &lt; 2:
-        return n
-    return fib_with_cache(n - 2) + fib_with_cache(n - 1)</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nd">@lru_cache</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">fib_with_cache</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">n</span>
+    <span class="k">return</span> <span class="n">fib_with_cache</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">fib_with_cache</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <h2 id="_8">
      其他
     </h2>
-    <h3>
+    <h3 id="_9">
      四则运算
     </h3>
-    <p>
-     <pre>python
-eval("1*2")</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nb">eval</span><span class="p">(</span><span class="s2">"1*2"</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <h3 id="_10">
      输入与进制转换
     </h3>
-    <p>
-     ```python
-print(int(input(), 16))
-    </p>
-    <p>
-     dec = int(input("输入数字："))
-print("十进制数为：", dec)
-print("转换为二进制为：", bin(dec))
-print("转换为八进制为：", oct(dec))
-print("转换为十六进制为：", hex(dec))
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(),</span> <span class="mi">16</span><span class="p">))</span>
+
+<span class="n">dec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">"输入数字："</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"十进制数为："</span><span class="p">,</span> <span class="n">dec</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"转换为二进制为："</span><span class="p">,</span> <span class="nb">bin</span><span class="p">(</span><span class="n">dec</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"转换为八进制为："</span><span class="p">,</span> <span class="nb">oct</span><span class="p">(</span><span class="n">dec</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"转换为十六进制为："</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">dec</span><span class="p">))</span>
+</code></pre>
+    </div>
    </article>
   </div>
   <!-- BG -->

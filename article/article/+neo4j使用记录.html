@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,53 +43,43 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="neo4j">
      Neo4j 使用记录
     </h1>
     <hr/>
-    <p>
-     ```sh
-First, you'll want our key:
-    </p>
-    <p>
-     cd /tmp
-wget http://debian.neo4j.org/neotechnology.gpg.key
-rpm --import neotechnology.gpg.key
-Then, you'll want to add our yum repo to /etc/yum.repos.d/neo4j.repo:
-    </p>
-    <p>
-     cat &lt;
-     <eof>
-      /etc/yum.repos.d/neo4j.repo
-[neo4j]
-name=Neo4j Yum Repo
-baseurl=http://yum.neo4j.org/stable
-enabled=1
-gpgcheck=1
-EOF
+    <div class="codehilite">
+     <pre><span></span><code>First, you<span class="s1">'ll want our key:</span>
+
+<span class="s1">cd /tmp</span>
+<span class="s1">wget http://debian.neo4j.org/neotechnology.gpg.key</span>
+<span class="s1">rpm --import neotechnology.gpg.key</span>
+<span class="s1">Then, you'</span>ll want to add our yum repo to /etc/yum.repos.d/neo4j.repo:
+
+cat <span class="s">&lt;&lt;EOF&gt;  /etc/yum.repos.d/neo4j.repo</span>
+<span class="s">[neo4j]</span>
+<span class="s">name=Neo4j Yum Repo</span>
+<span class="s">baseurl=http://yum.neo4j.org/stable</span>
+<span class="s">enabled=1</span>
+<span class="s">gpgcheck=1</span>
+<span class="s">EOF</span>
 Finally, install a package
-     </eof>
-    </p>
-    <p>
-     yum install neo4j-3.3.0
-    </p>
-    <p>
-     ./bin/neo4j-admin  dump --database=graph.db --to=/home/download/neo4j.dump
-/bin/neo4j-admin load --from=/home/download/neo4j.dump --database=graph.db --force
-    </p>
-    <p>
-     rm /var/lib/neo4j/data/dbms/auth
-/bin/neo4j-admin set-initial-password 123456
-    </p>
-    <p>
-     http://172.18.0.44:7474/browser/
-```
-    </p>
-    <p>
-     <pre>sh
-match(n) return n</pre>
-    </p>
-    <h2>
+
+yum install neo4j-3.3.0
+
+./bin/neo4j-admin  dump --database<span class="o">=</span>graph.db --to<span class="o">=</span>/home/download/neo4j.dump
+/bin/neo4j-admin load --from<span class="o">=</span>/home/download/neo4j.dump --database<span class="o">=</span>graph.db --force
+
+rm /var/lib/neo4j/data/dbms/auth
+/bin/neo4j-admin set-initial-password <span class="m">123456</span>
+
+http://172.18.0.44:7474/browser/
+</code></pre>
+    </div>
+    <div class="codehilite">
+     <pre><span></span><code>match<span class="o">(</span>n<span class="o">)</span> <span class="k">return</span> n
+</code></pre>
+    </div>
+    <h2 id="_1">
      参考链接
     </h2>
     <ul>

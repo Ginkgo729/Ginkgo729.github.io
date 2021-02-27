@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,17 +43,17 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="spring-cloud-gateway">
      Spring Cloud Gateway(四) 请求重试机制
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      简单分析Spring Cloud Gateway 的请求重试机制
     </p>
-    <h3>
+    <h3 id="_2">
      找到请求重试类
     </h3>
     <p>
@@ -61,51 +62,48 @@
     <p>
      根据其后缀 Factory，那它应该是和添加修改请求和响应的filter一样，都是定制化的
     </p>
-    <h3>
+    <h3 id="_3">
      重试配置加载
     </h3>
     <p>
      在测试过程中，重试的具体配置如下：
     </p>
-    <p>
-     ```java
-@SpringBootApplication
-public class Application {
-    </p>
-    <pre><pre>public static void main(String[] args) {
-    SpringApplication.run(Application.class, args);
-}
+    <div class="codehilite">
+     <pre><span></span><code><span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Application</span> <span class="p">{</span>
 
-@Bean
-public RouteLocator myRoutes(RouteLocatorBuilder builder) {
-    return builder.routes()
-            .route(p -&gt; p
-                    .path("/")
-                    .filters(f -&gt; f.addRequestParameter("test", "test")
-                            .addResponseHeader("return", "return")
-                            .retry(retryConsumer)
-                    )
-                    .uri("http://localhost:8082/"))
-            .build();
-}
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">SpringApplication</span><span class="p">.</span><span class="na">run</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="na">class</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="p">}</span>
 
-/**
- * 设置retry配置
- */
-private Consumer&lt;RetryGatewayFilterFactory.RetryConfig&gt; retryConsumer = retryConfig -&gt; {
-    retryConfig.setMethods(HttpMethod.values())
-            .setStatuses(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR)
-            .setRetries(3);
-};
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">RouteLocator</span> <span class="nf">myRoutes</span><span class="p">(</span><span class="n">RouteLocatorBuilder</span> <span class="n">builder</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">builder</span><span class="p">.</span><span class="na">routes</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">route</span><span class="p">(</span><span class="n">p</span> <span class="o">-&gt;</span> <span class="n">p</span>
+                        <span class="p">.</span><span class="na">path</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span>
+                        <span class="p">.</span><span class="na">filters</span><span class="p">(</span><span class="n">f</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="p">.</span><span class="na">addRequestParameter</span><span class="p">(</span><span class="s">"test"</span><span class="p">,</span> <span class="s">"test"</span><span class="p">)</span>
+                                <span class="p">.</span><span class="na">addResponseHeader</span><span class="p">(</span><span class="s">"return"</span><span class="p">,</span> <span class="s">"return"</span><span class="p">)</span>
+                                <span class="p">.</span><span class="na">retry</span><span class="p">(</span><span class="n">retryConsumer</span><span class="p">)</span>
+                        <span class="p">)</span>
+                        <span class="p">.</span><span class="na">uri</span><span class="p">(</span><span class="s">"http://localhost:8082/"</span><span class="p">))</span>
+                <span class="p">.</span><span class="na">build</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 设置retry配置</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="n">Consumer</span><span class="o">&lt;</span><span class="n">RetryGatewayFilterFactory</span><span class="p">.</span><span class="na">RetryConfig</span><span class="o">&gt;</span> <span class="n">retryConsumer</span> <span class="o">=</span> <span class="n">retryConfig</span> <span class="o">-&gt;</span> <span class="p">{</span>
+        <span class="n">retryConfig</span><span class="p">.</span><span class="na">setMethods</span><span class="p">(</span><span class="n">HttpMethod</span><span class="p">.</span><span class="na">values</span><span class="p">())</span>
+                <span class="p">.</span><span class="na">setStatuses</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="p">,</span> <span class="n">HttpStatus</span><span class="p">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">setRetries</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们在 RetryGatewayFilterFactory 的方法 apply 上打入断点，发现在程序在启动的过程中就开始进行配置
     </p>
-    <h3>
+    <h3 id="_4">
      重试流程
     </h3>
     <p>
@@ -120,13 +118,13 @@ private Consumer&lt;RetryGatewayFilterFactory.RetryConfig&gt; retryConsumer = re
     <p>
      这里不断的 debug，在 NettyRoutingFilter 中发生了连接错误，返回到了 RetryGatewayFilterFactory 。RetryGatewayFilterFactory中有相关的处理代码，大致如下：
     </p>
-    <p>
-     <pre>java
-Publisher&lt;Void&gt; publisher = chain.filter(exchange)
-                    // .log("retry-filter", Level.INFO)
-                    .doOnSuccess(aVoid -&gt; updateIteration(exchange))
-                    .doOnError(throwable -&gt; updateIteration(exchange));</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">Publisher</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="n">publisher</span> <span class="o">=</span> <span class="n">chain</span><span class="p">.</span><span class="na">filter</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span>
+                    <span class="c1">// .log("retry-filter", Level.INFO)</span>
+                    <span class="p">.</span><span class="na">doOnSuccess</span><span class="p">(</span><span class="n">aVoid</span> <span class="o">-&gt;</span> <span class="n">updateIteration</span><span class="p">(</span><span class="n">exchange</span><span class="p">))</span>
+                    <span class="p">.</span><span class="na">doOnError</span><span class="p">(</span><span class="n">throwable</span> <span class="o">-&gt;</span> <span class="n">updateIteration</span><span class="p">(</span><span class="n">exchange</span><span class="p">));</span>
+</code></pre>
+    </div>
     <p>
      在不断请求错误，则会跳回到 RouteToRequestUrlFilter
     </p>

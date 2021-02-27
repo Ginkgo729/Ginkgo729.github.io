@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="idea">
      IDEA 使用记录
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      插件类
     </h2>
     <ul>
@@ -87,7 +88,7 @@
       VisualVM Launcher：https://plugins.jetbrains.com/plugin/7115-visualvm-launcher，运行java程序的时候启动visualvm，方便查看jvm的情况 比如堆内存大小的分配某个对象占用了多大的内存，jvm 调优必备工具
      </li>
      <li>
-      MyBatisCodeHelperPro：https://plugins.jetbrains.com/plugin/9837-mybatisprehelperpro，mybatis代码自动生成插件，大部分单表操作的代码可自动生成 减少重复劳动 大幅提升效率
+      MyBatisCodeHelperPro：https://plugins.jetbrains.com/plugin/9837-mybatiscodehelperpro，mybatis代码自动生成插件，大部分单表操作的代码可自动生成 减少重复劳动 大幅提升效率
      </li>
      <li>
       Rainbow Brackets：https://plugins.jetbrains.com/plugin/10080-rainbow-brackets，彩虹颜色的括号 看着很舒服 敲代码效率变高
@@ -105,7 +106,7 @@
       SFTP:自己玩的时候，本地环境中服务器的代码同步
      </li>
     </ul>
-    <h3>
+    <h3 id="_2">
      插件下载官网
     </h3>
     <p>
@@ -118,32 +119,32 @@
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="lombok">
      Lombok
     </h4>
     <p>
      Java 语言，每次写实体类的时候都需要写一大堆的 setter，getter，如果 bean 中的属性一旦有修改、删除或增加时，需要重新生成或删除 get/set 等方法，给代码维护增加负担，这也是 Java 被诟病的一种原因。Lombok 则为我们解决了这些问题，使用了 lombok 的注解(@Setter,@Getter,@ToString,@@RequiredArgsConstructor,@EqualsAndHashCode 或@Data)之后，就不需要编写或生成 get/set 等方法，很大程度上减少了代码量，而且减少了代码维护的负担。
     </p>
-    <p>
-     <pre>java
-&lt;dependency&gt;
-          &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
-          &lt;artifactId&gt;lombok&lt;/artifactId&gt;
-&lt;/dependency&gt;</pre>
-    </p>
-    <p>
-     <pre>java
-@Setter
-@Getter
-@ToString
-@EqualsAndHashCode
-public class People {
-    private String name;
-    private int age;
-    private String male;
-}</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">&lt;</span><span class="n">dependency</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="n">groupId</span><span class="o">&gt;</span><span class="n">org</span><span class="p">.</span><span class="na">projectlombok</span><span class="o">&lt;/</span><span class="n">groupId</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="n">artifactId</span><span class="o">&gt;</span><span class="n">lombok</span><span class="o">&lt;/</span><span class="n">artifactId</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">dependency</span><span class="o">&gt;</span>
+</code></pre>
+    </div>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nd">@Setter</span>
+<span class="nd">@Getter</span>
+<span class="nd">@ToString</span>
+<span class="nd">@EqualsAndHashCode</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">People</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">name</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">age</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">male</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h2 id="_3">
      快捷键
     </h2>
     <ul>
@@ -157,7 +158,7 @@ public class People {
       Ctrl E：最近文件
      </li>
     </ul>
-    <h2>
+    <h2 id="_4">
      设置类
     </h2>
     <ul>

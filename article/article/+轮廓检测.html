@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,7 +43,7 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="_1">
      轮廓检测
     </h1>
     <hr/>
@@ -53,45 +54,24 @@
       </a>
      </em>
     </p>
-    <h2>
+    <h2 id="1">
      1.轮廓检测的简单使用
     </h2>
-    <p>
-     ```python
-    </p>
-    <h1>
-     使用读取相应的图像
-    </h1>
-    <p>
-     image = cv2.imread(image_path)
-    </p>
-    <h1>
-     对图像进行灰度化
-    </h1>
-    <p>
-     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    </p>
-    <h1>
-     这里请注意，在opencv3.2以后第一个参数就修改为了灰度图像，不是之前的阙值化的图像了
-    </h1>
-    <p>
-     image_contour, contour, hierarchy = cv2.findContours(image_gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    </p>
-    <h1>
-     绘制所以的轮廓
-    </h1>
-    <p>
-     image_draw = cv2.drawContours(image, contour, -1, (0, 255, 0), 3)
-    </p>
-    <h1>
-     显示图像
-    </h1>
-    <p>
-     cv2.imshow("draw",image)
-cv2.waitKey()
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># 使用读取相应的图像</span>
+<span class="n">image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+<span class="c1"># 对图像进行灰度化</span>
+<span class="n">image_gray</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+<span class="c1"># 这里请注意，在opencv3.2以后第一个参数就修改为了灰度图像，不是之前的阙值化的图像了</span>
+<span class="n">image_contour</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="n">hierarchy</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">findContours</span><span class="p">(</span><span class="n">image_gray</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">RETR_TREE</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CHAIN_APPROX_SIMPLE</span><span class="p">)</span>
+<span class="c1"># 绘制所以的轮廓</span>
+<span class="n">image_draw</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">drawContours</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">contour</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="c1"># 显示图像</span>
+<span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="n">image</span><span class="p">)</span>
+<span class="n">cv2</span><span class="o">.</span><span class="n">waitKey</span><span class="p">()</span>
+</code></pre>
+    </div>
+    <h2 id="2">
      2.参数讲解
     </h2>
    </article>

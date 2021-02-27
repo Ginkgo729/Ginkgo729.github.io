@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,7 +43,7 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="shardingsphere-raw-jdbc-narayana-xa">
      ShardingSphere RAW JDBC 分布式事务 Narayana XA 代码示例
     </h1>
     <hr/>
@@ -54,13 +55,13 @@
       </a>
      </em>
     </p>
-    <h2>
+    <h2 id="_1">
      代码简介
     </h2>
     <p>
      基于ShardingSphere的 Narayana XA实现一个简单的分布式事务应用demo
     </p>
-    <h3>
+    <h3 id="_2">
      环境配置
     </h3>
     <p>
@@ -69,14 +70,14 @@
     <p>
      ```shell script
     </p>
-    <h1>
+    <h1 id="mysql">
      启动两个mysql
     </h1>
     <p>
      docker run --name mysql11 -p 3311:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_ROOT_HOST=% -d mysql:5.7
 docker run --name mysql12 -p 3312:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_ROOT_HOST=% -d mysql:5.7
     </p>
-    <h1>
+    <h1 id="11demo_ds_0sql">
      在11上创建数据库demo_ds_0，运行下面的SQL语句初始化数据库和表
     </h1>
     <p>
@@ -88,7 +89,7 @@ use demo_ds_0;
 CREATE TABLE IF NOT EXISTS t_order_0 (order_id BIGINT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (order_id));
 CREATE TABLE IF NOT EXISTS t_order_1 (order_id BIGINT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (order_id));
     </p>
-    <h1>
+    <h1 id="12demo_ds_1sql">
      在12上创建数据库demo_ds_1，运行下面的SQL语句初始化数据库和表
     </h1>
     <p>
@@ -99,264 +100,245 @@ CREATE TABLE IF NOT EXISTS t_order_1 (order_id BIGINT NOT NULL, user_id INT NOT 
 use demo_ds_1;
 CREATE TABLE IF NOT EXISTS t_order_0 (order_id BIGINT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (order_id));
 CREATE TABLE IF NOT EXISTS t_order_1 (order_id BIGINT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (order_id));
-```
     </p>
-    <h3>
-     程序配置
-    </h3>
-    <h4>
-     Maven依赖
-    </h4>
-    <p>
-     核心依赖下面几个：
-    </p>
-    <p>
-     ```xml
-    </p>
-    <?xml version="1.0" encoding="UTF-8"?>
-    <p>
-     <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemalocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-      <modelversion>
-       4.0.0
-      </modelversion>
-     </project>
-    </p>
-    <pre><pre>&lt;groupId&gt;com.example&lt;/groupId&gt;
-&lt;artifactId&gt;demo&lt;/artifactId&gt;
-&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
-&lt;name&gt;transaction-2pc-xa-raw-jdbc-example&lt;/name&gt;
-&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+    <div class="codehilite">
+     <pre><span></span><code>### 程序配置
+#### Maven依赖
+<span class="ni">&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;</span>核心依赖下面几个：
 
-&lt;properties&gt;
-    &lt;java.version&gt;1.8&lt;/java.version&gt;
-&lt;/properties&gt;
+```xml
+<span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+         <span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
 
-&lt;dependencies&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;mysql&lt;/groupId&gt;
-        &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt; &lt;!-- Use 'netty-all' for 4.0 or above --&gt;
-        &lt;version&gt;8.0.14&lt;/version&gt;
-    &lt;/dependency&gt;
+    <span class="nt">&lt;groupId&gt;</span>com.example<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>demo<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;name&gt;</span>transaction-2pc-xa-raw-jdbc-example<span class="nt">&lt;/name&gt;</span>
+    <span class="nt">&lt;description&gt;</span>Demo project for Spring Boot<span class="nt">&lt;/description&gt;</span>
 
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.apache.shardingsphere&lt;/groupId&gt;
-        &lt;artifactId&gt;shardingsphere-jdbc-core&lt;/artifactId&gt;
-        &lt;version&gt;5.0.0-alpha&lt;/version&gt;
-    &lt;/dependency&gt;
+    <span class="nt">&lt;properties&gt;</span>
+        <span class="nt">&lt;java.version&gt;</span>1.8<span class="nt">&lt;/java.version&gt;</span>
+    <span class="nt">&lt;/properties&gt;</span>
 
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.apache.shardingsphere&lt;/groupId&gt;
-        &lt;artifactId&gt;shardingsphere-transaction-xa-core&lt;/artifactId&gt;
-        &lt;version&gt;5.0.0-alpha&lt;/version&gt;
-    &lt;/dependency&gt;
+    <span class="nt">&lt;dependencies&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>mysql<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>mysql-connector-java<span class="nt">&lt;/artifactId&gt;</span> <span class="c">&lt;!-- Use 'netty-all' for 4.0 or above --&gt;</span>
+            <span class="nt">&lt;version&gt;</span>8.0.14<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
 
-    &lt;!--    narayana xa config start  --&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.apache.shardingsphere&lt;/groupId&gt;
-        &lt;artifactId&gt;shardingsphere-transaction-xa-narayana&lt;/artifactId&gt;
-        &lt;version&gt;5.0.0-alpha&lt;/version&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.jboss.narayana.jta&lt;/groupId&gt;
-        &lt;artifactId&gt;jta&lt;/artifactId&gt;
-        &lt;version&gt;5.9.9.Final&lt;/version&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.jboss.narayana.jts&lt;/groupId&gt;
-        &lt;artifactId&gt;narayana-jts-integration&lt;/artifactId&gt;
-        &lt;version&gt;5.9.9.Final&lt;/version&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.jboss&lt;/groupId&gt;
-        &lt;artifactId&gt;jboss-transaction-spi&lt;/artifactId&gt;
-        &lt;version&gt;7.6.0.Final&lt;/version&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.jboss.logging&lt;/groupId&gt;
-        &lt;artifactId&gt;jboss-logging&lt;/artifactId&gt;
-        &lt;version&gt;3.4.1.Final&lt;/version&gt;
-    &lt;/dependency&gt;
-    &lt;!--    narayana xa config  end --&gt;
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.apache.shardingsphere<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>shardingsphere-jdbc-core<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>5.0.0-alpha<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
 
-    &lt;dependency&gt;
-        &lt;groupId&gt;com.zaxxer&lt;/groupId&gt;
-        &lt;artifactId&gt;HikariCP&lt;/artifactId&gt;
-        &lt;version&gt;2.2.5&lt;/version&gt;
-    &lt;/dependency&gt;
-&lt;/dependencies&gt;
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.apache.shardingsphere<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>shardingsphere-transaction-xa-core<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>5.0.0-alpha<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
 
-&lt;build&gt;
-    &lt;plugins&gt;
-        &lt;plugin&gt;
-            &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
-            &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
-            &lt;configuration&gt;
-                &lt;source&gt;7&lt;/source&gt;
-                &lt;target&gt;7&lt;/target&gt;
-            &lt;/configuration&gt;
-        &lt;/plugin&gt;
-    &lt;/plugins&gt;
-&lt;/build&gt;
-</pre></pre>
-    <p>
-    </p>
-    ```
-    <h3>
+        <span class="c">&lt;!--    narayana xa config start  --&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.apache.shardingsphere<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>shardingsphere-transaction-xa-narayana<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>5.0.0-alpha<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.jboss.narayana.jta<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>jta<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>5.9.9.Final<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.jboss.narayana.jts<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>narayana-jts-integration<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>5.9.9.Final<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.jboss<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>jboss-transaction-spi<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>7.6.0.Final<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.jboss.logging<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>jboss-logging<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>3.4.1.Final<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="c">&lt;!--    narayana xa config  end --&gt;</span>
+
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>com.zaxxer<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>HikariCP<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>2.2.5<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;/dependencies&gt;</span>
+
+    <span class="nt">&lt;build&gt;</span>
+        <span class="nt">&lt;plugins&gt;</span>
+            <span class="nt">&lt;plugin&gt;</span>
+                <span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+                <span class="nt">&lt;artifactId&gt;</span>maven-compiler-plugin<span class="nt">&lt;/artifactId&gt;</span>
+                <span class="nt">&lt;configuration&gt;</span>
+                    <span class="nt">&lt;source&gt;</span>7<span class="nt">&lt;/source&gt;</span>
+                    <span class="nt">&lt;target&gt;</span>7<span class="nt">&lt;/target&gt;</span>
+                <span class="nt">&lt;/configuration&gt;</span>
+            <span class="nt">&lt;/plugin&gt;</span>
+        <span class="nt">&lt;/plugins&gt;</span>
+    <span class="nt">&lt;/build&gt;</span>
+
+<span class="nt">&lt;/project&gt;</span>
+</code></pre>
+    </div>
+    <h3 id="shardingsphere">
      shardingSphere数据库配置文件
     </h3>
     <p>
      如上面的docker数据库配置，这里设置了两个数据库，各自有两张表
     </p>
-    <p>
-     ```yaml
-dataSources:
-  ds_0: !!com.zaxxer.hikari.HikariDataSource
-    driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcUrl: jdbc:mysql://localhost:3311/demo_ds_0?serverTimezone=UTC&amp;useUnipre=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true
-    username: root
-    password: root
-    autoCommit: false
-  ds_1: !!com.zaxxer.hikari.HikariDataSource
-    driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcUrl: jdbc:mysql://localhost:3312/demo_ds_1?serverTimezone=UTC&amp;useUnipre=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true
-    username: root
-    password: root
-    autoCommit: false
-    </p>
-    <p>
-     rules:
-- !SHARDING
-  tables:
-    t_order:
-      actualDataNodes: ds_${0..1}.t_order_${0..1}
-      databaseStrategy:
-        standard:
-          shardingColumn: user_id
-          shardingAlgorithmName: database_inline
-      tableStrategy:
-        standard:
-          shardingColumn: order_id
-          shardingAlgorithmName: t_order_inline
-  bindingTables:
-    - t_order
-    </p>
-    <p>
-     shardingAlgorithms:
-    database_inline:
-      type: INLINE
-      props:
-        algorithm-expression: ds_${user_id % 2}
-    t_order_inline:
-      type: INLINE
-      props:
-        algorithm-expression: t_order_${order_id % 2}
-    </p>
-    <p>
-     props:
-  sql-show: true
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nt">dataSources</span><span class="p">:</span>
+  <span class="nt">ds_0</span><span class="p">:</span> <span class="kt">!!com.zaxxer.hikari.HikariDataSource</span>
+    <span class="nt">driverClassName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">com.mysql.cj.jdbc.Driver</span>
+    <span class="nt">jdbcUrl</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://localhost:3311/demo_ds_0?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</span>
+    <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">autoCommit</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">ds_1</span><span class="p">:</span> <span class="kt">!!com.zaxxer.hikari.HikariDataSource</span>
+    <span class="nt">driverClassName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">com.mysql.cj.jdbc.Driver</span>
+    <span class="nt">jdbcUrl</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://localhost:3312/demo_ds_1?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</span>
+    <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">autoCommit</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">rules</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="kt">!SHARDING</span>
+  <span class="nt">tables</span><span class="p">:</span>
+    <span class="nt">t_order</span><span class="p">:</span>
+      <span class="nt">actualDataNodes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ds_${0..1}.t_order_${0..1}</span>
+      <span class="nt">databaseStrategy</span><span class="p">:</span>
+        <span class="nt">standard</span><span class="p">:</span>
+          <span class="nt">shardingColumn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">user_id</span>
+          <span class="nt">shardingAlgorithmName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">database_inline</span>
+      <span class="nt">tableStrategy</span><span class="p">:</span>
+        <span class="nt">standard</span><span class="p">:</span>
+          <span class="nt">shardingColumn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">order_id</span>
+          <span class="nt">shardingAlgorithmName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">t_order_inline</span>
+  <span class="nt">bindingTables</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">t_order</span>
+
+  <span class="nt">shardingAlgorithms</span><span class="p">:</span>
+    <span class="nt">database_inline</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">INLINE</span>
+      <span class="nt">props</span><span class="p">:</span>
+        <span class="nt">algorithm-expression</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ds_${user_id % 2}</span>
+    <span class="nt">t_order_inline</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">INLINE</span>
+      <span class="nt">props</span><span class="p">:</span>
+        <span class="nt">algorithm-expression</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">t_order_${order_id % 2}</span>
+
+<span class="nt">props</span><span class="p">:</span>
+  <span class="nt">sql-show</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre>
+    </div>
+    <h3 id="_3">
      主程序
     </h3>
     <p>
      暴力直接的原生测试，代码如下：
     </p>
-    <p>
-     ```java
-package com.example.demo;
-    </p>
-    <p>
-     import org.apache.shardingsphere.driver.api.yaml.YamlShardingSphereDataSourceFactory;
-import org.apache.shardingsphere.transaction.core.TransactionType;
-import org.apache.shardingsphere.transaction.core.TransactionTypeHolder;
-    </p>
-    <p>
-     import javax.sql.DataSource;
-import java.io.File;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-    </p>
-    <p>
-     public class Transaction2pcXaRawJdbcExampleApplication {
-    </p>
-    <pre><pre>/**
- * 第一次插入数据正常运行成功
- * 第二次插入数据由于主键冲突，导致回滚
- */
-public static void main(String[] args) throws IOException, SQLException {
-    DataSource dataSource = getShardingDatasource();
-    cleanupData(dataSource);
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo</span><span class="p">;</span>
 
-    TransactionTypeHolder.set(TransactionType.XA);
+<span class="kn">import</span> <span class="nn">org.apache.shardingsphere.driver.api.yaml.YamlShardingSphereDataSourceFactory</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.shardingsphere.transaction.core.TransactionType</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.shardingsphere.transaction.core.TransactionTypeHolder</span><span class="p">;</span>
 
-    Connection conn = dataSource.getConnection();
-    String sql = "insert into t_order (user_id, order_id) VALUES (?, ?);";
+<span class="kn">import</span> <span class="nn">javax.sql.DataSource</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.Connection</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.PreparedStatement</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.Statement</span><span class="p">;</span>
 
-    System.out.println("First XA Start insert data");
-    try (PreparedStatement statement = conn.prepareStatement(sql)) {
-        conn.setAutoCommit(false);
-        for (int i = 1; i &lt; 11; i++) {
-            statement.setLong(1, i);
-            statement.setLong(2, i);
-            statement.executeUpdate();
-        }
-        conn.commit();
-    }
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Transaction2pcXaRawJdbcExampleApplication</span> <span class="p">{</span>
 
-    System.out.println("First XA insert successful");
+    <span class="cm">/**</span>
+<span class="cm">     * 第一次插入数据正常运行成功</span>
+<span class="cm">     * 第二次插入数据由于主键冲突，导致回滚</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">IOException</span><span class="p">,</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">DataSource</span> <span class="n">dataSource</span> <span class="o">=</span> <span class="n">getShardingDatasource</span><span class="p">();</span>
+        <span class="n">cleanupData</span><span class="p">(</span><span class="n">dataSource</span><span class="p">);</span>
 
-    // 设置id+5，如果设置XA事务成功，则所有的数据都不会插入
-    // 设置id+5，如果设置XA事务不成功，则id大于10的数据就会插入到数据库
-    // 程序运行完毕后，查看数据库，没有id大于10的数据，所以XA设置成功
-    System.out.println("Second XA Start insert data");
-    try (PreparedStatement statement = conn.prepareStatement(sql)) {
-        conn.setAutoCommit(false);
-        for (int i = 1; i &lt; 11; i++) {
-            statement.setLong(1, i+5);
-            statement.setLong(2, i+5);
-            statement.executeUpdate();
-        }
-        conn.commit();
-    } catch (Exception e) {
-        System.out.println("Second XA insert failed");
-        conn.rollback();
-    } finally {
-        conn.close();
-    }
-    System.out.println("Second XA insert successful");
-}
+        <span class="n">TransactionTypeHolder</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">TransactionType</span><span class="p">.</span><span class="na">XA</span><span class="p">);</span>
 
-private static void cleanupData(DataSource dataSource) {
-    System.out.println("Delete all Data");
-    try (Connection conn = dataSource.getConnection(); Statement statement = conn.createStatement()) {
-        statement.execute("delete from t_order;");
-        conn.commit();
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    System.out.println("Delete all Data successful");
-}
+        <span class="n">Connection</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">dataSource</span><span class="p">.</span><span class="na">getConnection</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"insert into t_order (user_id, order_id) VALUES (?, ?);"</span><span class="p">;</span>
 
-/**
- * 生成DataSource，文件路径自行替换
- * @return
- * @throws IOException
- * @throws SQLException
- */
-static private DataSource getShardingDatasource() throws IOException, SQLException {
-    String fileName = "F:\\Code\\Java\\JAVA-000\\homework\\shardingSphere-jdbc-example\\transaction-example\\transaction-2pc-xa-raw-jdbc-example\\src\\main\\resources\\sharding-databases-tables.yaml";
-    File yamlFile = new File(fileName);
-    return YamlShardingSphereDataSourceFactory.createDataSource(yamlFile);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"First XA Start insert data"</span><span class="p">);</span>
+        <span class="k">try</span> <span class="p">(</span><span class="n">PreparedStatement</span> <span class="n">statement</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="na">prepareStatement</span><span class="p">(</span><span class="n">sql</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">conn</span><span class="p">.</span><span class="na">setAutoCommit</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">11</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">statement</span><span class="p">.</span><span class="na">setLong</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+                <span class="n">statement</span><span class="p">.</span><span class="na">setLong</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+                <span class="n">statement</span><span class="p">.</span><span class="na">executeUpdate</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="n">conn</span><span class="p">.</span><span class="na">commit</span><span class="p">();</span>
+        <span class="p">}</span>
+
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"First XA insert successful"</span><span class="p">);</span>
+
+        <span class="c1">// 设置id+5，如果设置XA事务成功，则所有的数据都不会插入</span>
+        <span class="c1">// 设置id+5，如果设置XA事务不成功，则id大于10的数据就会插入到数据库</span>
+        <span class="c1">// 程序运行完毕后，查看数据库，没有id大于10的数据，所以XA设置成功</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"Second XA Start insert data"</span><span class="p">);</span>
+        <span class="k">try</span> <span class="p">(</span><span class="n">PreparedStatement</span> <span class="n">statement</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="na">prepareStatement</span><span class="p">(</span><span class="n">sql</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">conn</span><span class="p">.</span><span class="na">setAutoCommit</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+            <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">11</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">statement</span><span class="p">.</span><span class="na">setLong</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">5</span><span class="p">);</span>
+                <span class="n">statement</span><span class="p">.</span><span class="na">setLong</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">5</span><span class="p">);</span>
+                <span class="n">statement</span><span class="p">.</span><span class="na">executeUpdate</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="n">conn</span><span class="p">.</span><span class="na">commit</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"Second XA insert failed"</span><span class="p">);</span>
+            <span class="n">conn</span><span class="p">.</span><span class="na">rollback</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+            <span class="n">conn</span><span class="p">.</span><span class="na">close</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"Second XA insert successful"</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">cleanupData</span><span class="p">(</span><span class="n">DataSource</span> <span class="n">dataSource</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"Delete all Data"</span><span class="p">);</span>
+        <span class="k">try</span> <span class="p">(</span><span class="n">Connection</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">dataSource</span><span class="p">.</span><span class="na">getConnection</span><span class="p">();</span> <span class="n">Statement</span> <span class="n">statement</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="na">createStatement</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">statement</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="s">"delete from t_order;"</span><span class="p">);</span>
+            <span class="n">conn</span><span class="p">.</span><span class="na">commit</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">SQLException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">e</span><span class="p">.</span><span class="na">printStackTrace</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"Delete all Data successful"</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 生成DataSource，文件路径自行替换</span>
+<span class="cm">     * @return</span>
+<span class="cm">     * @throws IOException</span>
+<span class="cm">     * @throws SQLException</span>
+<span class="cm">     */</span>
+    <span class="kd">static</span> <span class="kd">private</span> <span class="n">DataSource</span> <span class="nf">getShardingDatasource</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">IOException</span><span class="p">,</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">fileName</span> <span class="o">=</span> <span class="s">"F:\\Code\\Java\\JAVA-000\\homework\\shardingSphere-jdbc-example\\transaction-example\\transaction-2pc-xa-raw-jdbc-example\\src\\main\\resources\\sharding-databases-tables.yaml"</span><span class="p">;</span>
+        <span class="n">File</span> <span class="n">yamlFile</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="p">(</span><span class="n">fileName</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">YamlShardingSphereDataSourceFactory</span><span class="p">.</span><span class="na">createDataSource</span><span class="p">(</span><span class="n">yamlFile</span><span class="p">);</span>
+    <span class="p">}</span>
+
+<span class="p">}</span>
+</code></pre>
+    </div>
    </article>
   </div>
   <!-- BG -->

@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,122 +43,93 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="python-mongodb">
      Python MongoDB
     </h1>
     <hr/>
-    <h2>
+    <h2 id="code">
      Code
     </h2>
-    <h3>
+    <h3 id="_1">
      基本使用
     </h3>
-    <p>
-     ```python
-    </p>
-    <h1>
-     !/usr/bin/env python
-    </h1>
-    <h1>
-     @Time    : 2018/11/19 11:46
-    </h1>
-    <h1>
-     @Author  : LiuWei
-    </h1>
-    <h1>
-     @Site    :
-    </h1>
-    <h1>
-     @File    : MongoDBUtil.py
-    </h1>
-    <h1>
-     @Software: PyCharm
-    </h1>
-    <h1>
-     -
-     <em>
-      - coding: utf-8 -
-     </em>
-     -
-    </h1>
-    <p>
-     import pymongo
-    </p>
-    <p>
-     class MongoDBUtil:
-    __client = None
-    __db = None
-    __col = None
-    </p>
-    <pre><pre>@staticmethod
-def connect():
-    if MongoDBUtil.__client is None:
-        MongoDBUtil.__client = pymongo.MongoClient("mongodb://172.18.0.24:27017/")
-        MongoDBUtil.__db = MongoDBUtil.__client["attack_packets"]
-        MongoDBUtil.__col = MongoDBUtil.__db["attack"]
-        print("Connected!")
+    <div class="codehilite">
+     <pre><span></span><code><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># @Time    : 2018/11/19 11:46</span>
+<span class="c1"># @Author  : LiuWei</span>
+<span class="c1"># @Site    : </span>
+<span class="c1"># @File    : MongoDBUtil.py</span>
+<span class="c1"># @Software: PyCharm</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">pymongo</span>
 
-@staticmethod
-def insert_one(data):
-    if MongoDBUtil.__client is None:
-        MongoDBUtil.connect()
-    ret = MongoDBUtil.__col.insert_one(data)
-    print(ret)
 
-@staticmethod
-def find_one():
-    if MongoDBUtil.__client is None:
-        MongoDBUtil.connect()
-    ret = MongoDBUtil.__col.find_one()
-    # print(ret)
+<span class="k">class</span> <span class="nc">MongoDBUtil</span><span class="p">:</span>
+    <span class="n">__client</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">__db</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">__col</span> <span class="o">=</span> <span class="kc">None</span>
 
-@staticmethod
-def close():
-    MongoDBUtil.__client.close()
-    print("Close MongoDB")
-</pre></pre>
-    <p>
-     if
-     <strong>
-      name
-     </strong>
-     == "
-     <strong>
-      main
-     </strong>
-     ":
-    # client = pymongo.MongoClient("mongodb://172.18.0.24:27017/")
-    MongoDBUtil.connect()
-    MongoDBUtil.insert_one({"data": "test"})
-    MongoDBUtil.find_one()
-    MongoDBUtil.close()
-```
-    </p>
-    <h3>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">connect</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">__client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">__client</span> <span class="o">=</span> <span class="n">pymongo</span><span class="o">.</span><span class="n">MongoClient</span><span class="p">(</span><span class="s2">"mongodb://172.18.0.24:27017/"</span><span class="p">)</span>
+            <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">__db</span> <span class="o">=</span> <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">__client</span><span class="p">[</span><span class="s2">"attack_packets"</span><span class="p">]</span>
+            <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">__col</span> <span class="o">=</span> <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">__db</span><span class="p">[</span><span class="s2">"attack"</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Connected!"</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">insert_one</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">__client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">__col</span><span class="o">.</span><span class="n">insert_one</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">find_one</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">__client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">__col</span><span class="o">.</span><span class="n">find_one</span><span class="p">()</span>
+        <span class="c1"># print(ret)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">close</span><span class="p">():</span>
+        <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">__client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Close MongoDB"</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="c1"># client = pymongo.MongoClient("mongodb://172.18.0.24:27017/")</span>
+    <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+    <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">insert_one</span><span class="p">({</span><span class="s2">"data"</span><span class="p">:</span> <span class="s2">"test"</span><span class="p">})</span>
+    <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">find_one</span><span class="p">()</span>
+    <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre>
+    </div>
+    <h3 id="objectid">
      ObjectId处理
     </h3>
-    <p>
-     <pre>python
-from bson.objectid import ObjectId
-a = ObjectId('55717c9eb2c983c127000000')
-a.generation_time.timetuple()</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">from</span> <span class="nn">bson.objectid</span> <span class="kn">import</span> <span class="n">ObjectId</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">ObjectId</span><span class="p">(</span><span class="s1">'55717c9eb2c983c127000000'</span><span class="p">)</span>
+<span class="n">a</span><span class="o">.</span><span class="n">generation_time</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()</span> 
+</code></pre>
+    </div>
+    <h3 id="_2">
      统计
     </h3>
-    <p>
-     <pre>python
-results = db.datasets.find({"test_set":"abc"}).sort("abc",pymongo.DESCENDING).skip((page-1)*num).limit(num)
-results_count = results.count()</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">results</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s2">"test_set"</span><span class="p">:</span><span class="s2">"abc"</span><span class="p">})</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s2">"abc"</span><span class="p">,</span><span class="n">pymongo</span><span class="o">.</span><span class="n">DESCENDING</span><span class="p">)</span><span class="o">.</span><span class="n">skip</span><span class="p">((</span><span class="n">page</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">num</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+<span class="n">results_count</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre>
+    </div>
+    <h3 id="_3">
      去重
     </h3>
-    <p>
-     <pre>python
-tags = db.mycoll.find({"category": "movie"}).distinct("tags")</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">tags</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">mycoll</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s2">"category"</span><span class="p">:</span> <span class="s2">"movie"</span><span class="p">})</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="s2">"tags"</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <h2 id="_4">
      参考链接
     </h2>
     <ul>

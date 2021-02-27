@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,61 +43,39 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="spring-cloud-gateway">
      Spring Cloud Gateway 克隆配置
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      工程构建
     </h2>
     <p>
      下载工程到本地
     </p>
-    <p>
-     ```bash
-    </p>
-    <h1>
-     先去github fork项目到自己的repo，然后克隆到自己本地
-    </h1>
-    <p>
-     git clone --depth=1 https://github.com/lw1243925457/spring-cloud-gateway.git
-    </p>
-    <h1>
-     切换
-    </h1>
-    <p>
-     cd spring-cloud-gateway
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># 先去github fork项目到自己的repo，然后克隆到自己本地</span>
+git clone --depth<span class="o">=</span><span class="m">1</span> https://github.com/lw1243925457/spring-cloud-gateway.git
+
+<span class="c1"># 切换</span>
+<span class="nb">cd</span> spring-cloud-gateway
 git fetch origin v2.2.6.RELEASE:v2.2.6.RELEASE
 git checkout v2.2.6.RELEASE
-```
-    </p>
+</code></pre>
+    </div>
     <p>
      在依赖安装的时候（为了快速，使用的阿里云）可能会遇到依赖找不到的问题，如下面两个，解决方法指定 version，配置如下：
     </p>
-    <p>
-     ```bash
-     <groupid>
-      org.prehaus.mojo
-     </groupid>
-     <artifactid>
-      flatten-maven-plugin
-     </artifactid>
-     <version>
-      1.2.5
-     </version>
-    </p>
-    <p>
-     <artifactid>
-      kotlin-maven-plugin
-     </artifactid>
-     <groupid>
-      org.jetbrains.kotlin
-     </groupid>
-     <version>
-      1.4.30-M1
-     </version>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>&lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+&lt;artifactId&gt;flatten-maven-plugin&lt;/artifactId&gt;
+&lt;version&gt;1.2.5&lt;/version&gt;
+
+&lt;artifactId&gt;kotlin-maven-plugin&lt;/artifactId&gt;
+&lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+&lt;version&gt;1.4.30-M1&lt;/version&gt;
+</code></pre>
+    </div>
     <p>
      正常运行 spring-cloud-gateway-sample，正常访问网页：http://httpbin.org/
     </p>

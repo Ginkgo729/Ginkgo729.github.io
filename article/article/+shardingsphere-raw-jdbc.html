@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="shardingsphere-raw-jdbc">
      ShardingSphere Raw JDBC 主从示例
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      总览
     </h2>
     <p>
@@ -66,7 +67,7 @@
       4.测试
      </li>
     </ul>
-    <h3>
+    <h3 id="maven">
      配置Maven依赖
     </h3>
     <p>
@@ -76,217 +77,197 @@
      </a>
      ，自定查找添加吧
     </p>
-    <p>
-     <pre>java
-&lt;dependency&gt;
-    &lt;groupId&gt;org.apache.shardingsphere&lt;/groupId&gt;
-    &lt;artifactId&gt;shardingsphere-jdbc-core&lt;/artifactId&gt;
-    &lt;version&gt;5.0.0-alpha&lt;/version&gt;
-&lt;/dependency&gt;</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">&lt;</span><span class="n">dependency</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">groupId</span><span class="o">&gt;</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">shardingsphere</span><span class="o">&lt;/</span><span class="n">groupId</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">artifactId</span><span class="o">&gt;</span><span class="n">shardingsphere</span><span class="o">-</span><span class="n">jdbc</span><span class="o">-</span><span class="n">core</span><span class="o">&lt;/</span><span class="n">artifactId</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">version</span><span class="o">&gt;</span><span class="mf">5.0.0</span><span class="o">-</span><span class="n">alpha</span><span class="o">&lt;/</span><span class="n">version</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">dependency</span><span class="o">&gt;</span>
+</code></pre>
+    </div>
+    <h3 id="applicationproperties">
      application.properties文件写入
     </h3>
     <p>
      写入主从库的相关配置
     </p>
-    <p>
-     ```java
-    </p>
-    <h1>
-     读写分离 - 数据库框架版本 2.0 ShardingSphere-jdbc 5.0.0-alpha
-    </h1>
-    <p>
-     sharding.jdbc.datasource.names=master,slave0,slave1
-    </p>
-    <p>
-     sharding.jdbc.datasource.ds-master.driver-class-name=com.mysql.jdbc.Driver
-sharding.jdbc.datasource.ds-master.url=jdbc:mysql://localhost:3306/test?serverTimezone=UTC&amp;useUnipre=true\
-  &amp;characterEncoding=utf-8\
-  &amp;useSSL=false&amp;allowPublicKeyRetrieval=true
-sharding.jdbc.datasource.ds-master.username=root
-sharding.jdbc.datasource.ds-master.password=root
-    </p>
-    <p>
-     sharding.jdbc.datasource.ds-slave0.driver-class-name=com.mysql.jdbc.Driver
-sharding.jdbc.datasource.ds-slave0.url=jdbc:mysql://localhost:3309/test?serverTimezone=UTC&amp;useUnipre=true\
-  &amp;characterEncoding=utf-8\
-  &amp;useSSL=false&amp;allowPublicKeyRetrieval=true
-sharding.jdbc.datasource.ds-slave0.username=root
-sharding.jdbc.datasource.ds-slave0.password=root
-    </p>
-    <p>
-     sharding.jdbc.datasource.ds-slave1.driver-class-name=com.mysql.jdbc.Driver
-sharding.jdbc.datasource.ds-slave1.url=jdbc:mysql://localhost:3310/test?serverTimezone=UTC&amp;useUnipre=true&amp;characterEncoding=utf-8\
-  &amp;useSSL=false&amp;allowPublicKeyRetrieval=true
-sharding.jdbc.datasource.ds-slave1.username=root
-sharding.jdbc.datasource.ds-slave1.password=root
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">#</span> <span class="n">读写分离</span> <span class="o">-</span> <span class="n">数据库框架版本</span> <span class="mf">2.0</span> <span class="n">ShardingSphere</span><span class="o">-</span><span class="n">jdbc</span> <span class="mf">5.0.0</span><span class="o">-</span><span class="n">alpha</span>
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">names</span><span class="o">=</span><span class="n">master</span><span class="p">,</span><span class="n">slave0</span><span class="p">,</span><span class="n">slave1</span>
+
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">master</span><span class="p">.</span><span class="na">driver</span><span class="o">-</span><span class="n">class</span><span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">com</span><span class="p">.</span><span class="na">mysql</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">Driver</span>
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">master</span><span class="p">.</span><span class="na">url</span><span class="o">=</span><span class="n">jdbc</span><span class="p">:</span><span class="n">mysql</span><span class="p">:</span><span class="c1">//localhost:3306/test?serverTimezone=UTC&amp;useUnicode=true\</span>
+  <span class="o">&amp;</span><span class="n">characterEncoding</span><span class="o">=</span><span class="n">utf</span><span class="o">-</span><span class="mi">8</span><span class="err">\</span>
+  <span class="o">&amp;</span><span class="n">useSSL</span><span class="o">=</span><span class="kc">false</span><span class="o">&amp;</span><span class="n">allowPublicKeyRetrieval</span><span class="o">=</span><span class="kc">true</span>
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">master</span><span class="p">.</span><span class="na">username</span><span class="o">=</span><span class="n">root</span>
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">master</span><span class="p">.</span><span class="na">password</span><span class="o">=</span><span class="n">root</span>
+
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">slave0</span><span class="p">.</span><span class="na">driver</span><span class="o">-</span><span class="n">class</span><span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">com</span><span class="p">.</span><span class="na">mysql</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">Driver</span>
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">slave0</span><span class="p">.</span><span class="na">url</span><span class="o">=</span><span class="n">jdbc</span><span class="p">:</span><span class="n">mysql</span><span class="p">:</span><span class="c1">//localhost:3309/test?serverTimezone=UTC&amp;useUnicode=true\</span>
+  <span class="o">&amp;</span><span class="n">characterEncoding</span><span class="o">=</span><span class="n">utf</span><span class="o">-</span><span class="mi">8</span><span class="err">\</span>
+  <span class="o">&amp;</span><span class="n">useSSL</span><span class="o">=</span><span class="kc">false</span><span class="o">&amp;</span><span class="n">allowPublicKeyRetrieval</span><span class="o">=</span><span class="kc">true</span>
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">slave0</span><span class="p">.</span><span class="na">username</span><span class="o">=</span><span class="n">root</span>
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">slave0</span><span class="p">.</span><span class="na">password</span><span class="o">=</span><span class="n">root</span>
+
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">slave1</span><span class="p">.</span><span class="na">driver</span><span class="o">-</span><span class="n">class</span><span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">com</span><span class="p">.</span><span class="na">mysql</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">Driver</span>
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">slave1</span><span class="p">.</span><span class="na">url</span><span class="o">=</span><span class="n">jdbc</span><span class="p">:</span><span class="n">mysql</span><span class="p">:</span><span class="c1">//localhost:3310/test?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf-8\</span>
+  <span class="o">&amp;</span><span class="n">useSSL</span><span class="o">=</span><span class="kc">false</span><span class="o">&amp;</span><span class="n">allowPublicKeyRetrieval</span><span class="o">=</span><span class="kc">true</span>
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">slave1</span><span class="p">.</span><span class="na">username</span><span class="o">=</span><span class="n">root</span>
+<span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">slave1</span><span class="p">.</span><span class="na">password</span><span class="o">=</span><span class="n">root</span>
+</code></pre>
+    </div>
+    <h3 id="shardingmasterslavedatasource">
      ShardingMasterSlaveDataSource编写
     </h3>
     <p>
      这里默认使用HikariDataSource,思路主要是生成各个主从库的链接，放到Sharding中，代码中也有说明，总体比较简单：
     </p>
-    <p>
-     ```java
-package com.example.demo.shardingsphere.raw.jdbc;
-    </p>
-    <p>
-     import com.zaxxer.hikari.HikariDataSource;
-import io.shardingsphere.api.config.MasterSlaveRuleConfiguration;
-import io.shardingsphere.shardingjdbc.api.MasterSlaveDataSourceFactory;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
-    </p>
-    <p>
-     import javax.sql.DataSource;
-import java.sql.SQLException;
-import java.util.*;
-    </p>
-    <p>
-     /*
-     <em>
-      * @author lw
-     </em>
-     /
-@Slf4j
-@Component
-public class ShardingMasterSlaveDataSource {
-    </p>
-    <pre><pre>private final String DRIVER = ".driver-class-name";
-private final String URL = ".url";
-private final String USERNAME = ".username";
-private final String PASSWORD = ".password";
-private final String DBS = "sharding.jdbc.datasource.names";
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo.shardingsphere.raw.jdbc</span><span class="p">;</span>
 
-@Autowired
-private Environment environment;
+<span class="kn">import</span> <span class="nn">com.zaxxer.hikari.HikariDataSource</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.shardingsphere.api.config.MasterSlaveRuleConfiguration</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.shardingsphere.shardingjdbc.api.MasterSlaveDataSourceFactory</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.core.env.Environment</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Component</span><span class="p">;</span>
 
-DataSource createDataSource() throws SQLException {
-    // 获取数据库列表
-    String[] dbs = Objects.requireNonNull(environment.getProperty(DBS)).split(",");
-    log.info("DBS::" + Arrays.toString(dbs));
+<span class="kn">import</span> <span class="nn">javax.sql.DataSource</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="p">;</span>
 
-    // 设置主从，约定第一个为主，其他为从
-    MasterSlaveRuleConfiguration configuration = new MasterSlaveRuleConfiguration(dbs[0], dbs[0],
-            Arrays.asList(Arrays.copyOfRange(dbs, 1, dbs.length)));
-    log.info("ShardingMasterSlaveDataSource master :: " + configuration.getMasterDataSourceName());
-    log.info("ShardingMasterSlaveDataSource slave :: " + configuration.getSlaveDataSourceNames());
+<span class="cm">/**</span>
+<span class="cm"> * @author lw</span>
+<span class="cm"> */</span>
+<span class="nd">@Slf4j</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ShardingMasterSlaveDataSource</span> <span class="p">{</span>
 
-    // 设置打印SQL语句，查看主从配置和切换是否成功
-    Properties properties = new Properties();
-    properties.setProperty("sql.show", "true");
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">DRIVER</span> <span class="o">=</span> <span class="s">".driver-class-name"</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">URL</span> <span class="o">=</span> <span class="s">".url"</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">USERNAME</span> <span class="o">=</span> <span class="s">".username"</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">PASSWORD</span> <span class="o">=</span> <span class="s">".password"</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">DBS</span> <span class="o">=</span> <span class="s">"sharding.jdbc.datasource.names"</span><span class="p">;</span>
 
-    return MasterSlaveDataSourceFactory.createDataSource(createDataSourceMap(dbs), configuration, new HashMap&lt;&gt;(0),
-            properties);
-}
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="n">Environment</span> <span class="n">environment</span><span class="p">;</span>
 
-/**
- * 返回DataSource列表
- */
-private Map&lt;String, DataSource&gt; createDataSourceMap(String[] dbs) {
-    Map&lt;String, DataSource&gt; result = new HashMap&lt;&gt;(dbs.length);
-    for (String db: dbs) {
-        log.info("Create data source ::" + db);
-        result.put(db, createDataSource("sharding.jdbc.datasource.ds-" + db));
-    }
-    return result;
-}
+    <span class="n">DataSource</span> <span class="nf">createDataSource</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="c1">// 获取数据库列表</span>
+        <span class="n">String</span><span class="o">[]</span> <span class="n">dbs</span> <span class="o">=</span> <span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">environment</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="n">DBS</span><span class="p">)).</span><span class="na">split</span><span class="p">(</span><span class="s">","</span><span class="p">);</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"DBS::"</span> <span class="o">+</span> <span class="n">Arrays</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">dbs</span><span class="p">));</span>
 
-private DataSource createDataSource(String prefix) {
-    log.info(DRIVER + "::" + environment.getProperty(prefix + DRIVER));
-    log.info(URL + "::" + environment.getProperty(prefix + URL));
-    log.info(USERNAME + "::" + environment.getProperty(prefix + USERNAME));
-    log.info(PASSWORD + "::" + environment.getProperty(prefix + PASSWORD));
+        <span class="c1">// 设置主从，约定第一个为主，其他为从</span>
+        <span class="n">MasterSlaveRuleConfiguration</span> <span class="n">configuration</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MasterSlaveRuleConfiguration</span><span class="p">(</span><span class="n">dbs</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">,</span> <span class="n">dbs</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">,</span>
+                <span class="n">Arrays</span><span class="p">.</span><span class="na">asList</span><span class="p">(</span><span class="n">Arrays</span><span class="p">.</span><span class="na">copyOfRange</span><span class="p">(</span><span class="n">dbs</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dbs</span><span class="p">.</span><span class="na">length</span><span class="p">)));</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"ShardingMasterSlaveDataSource master :: "</span> <span class="o">+</span> <span class="n">configuration</span><span class="p">.</span><span class="na">getMasterDataSourceName</span><span class="p">());</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"ShardingMasterSlaveDataSource slave :: "</span> <span class="o">+</span> <span class="n">configuration</span><span class="p">.</span><span class="na">getSlaveDataSourceNames</span><span class="p">());</span>
 
-    HikariDataSource dataSource = new HikariDataSource();
-    dataSource.setDriverClassName(environment.getProperty(prefix + DRIVER));
-    dataSource.setJdbcUrl(environment.getProperty(prefix + URL));
-    dataSource.setUsername(environment.getProperty(prefix + USERNAME));
-    dataSource.setPassword(environment.getProperty(prefix + PASSWORD));
-    return dataSource;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h3>
+        <span class="c1">// 设置打印SQL语句，查看主从配置和切换是否成功</span>
+        <span class="n">Properties</span> <span class="n">properties</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="p">();</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">"sql.show"</span><span class="p">,</span> <span class="s">"true"</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="n">MasterSlaveDataSourceFactory</span><span class="p">.</span><span class="na">createDataSource</span><span class="p">(</span><span class="n">createDataSourceMap</span><span class="p">(</span><span class="n">dbs</span><span class="p">),</span> <span class="n">configuration</span><span class="p">,</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+                <span class="n">properties</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 返回DataSource列表</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">DataSource</span><span class="o">&gt;</span> <span class="nf">createDataSourceMap</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">dbs</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">DataSource</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">dbs</span><span class="p">.</span><span class="na">length</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">db</span><span class="p">:</span> <span class="n">dbs</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"Create data source ::"</span> <span class="o">+</span> <span class="n">db</span><span class="p">);</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">createDataSource</span><span class="p">(</span><span class="s">"sharding.jdbc.datasource.ds-"</span> <span class="o">+</span> <span class="n">db</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">DataSource</span> <span class="nf">createDataSource</span><span class="p">(</span><span class="n">String</span> <span class="n">prefix</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="n">DRIVER</span> <span class="o">+</span> <span class="s">"::"</span> <span class="o">+</span> <span class="n">environment</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">DRIVER</span><span class="p">));</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="n">URL</span> <span class="o">+</span> <span class="s">"::"</span> <span class="o">+</span> <span class="n">environment</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">URL</span><span class="p">));</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="n">USERNAME</span> <span class="o">+</span> <span class="s">"::"</span> <span class="o">+</span> <span class="n">environment</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">USERNAME</span><span class="p">));</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="n">PASSWORD</span> <span class="o">+</span> <span class="s">"::"</span> <span class="o">+</span> <span class="n">environment</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">PASSWORD</span><span class="p">));</span>
+
+        <span class="n">HikariDataSource</span> <span class="n">dataSource</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HikariDataSource</span><span class="p">();</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setDriverClassName</span><span class="p">(</span><span class="n">environment</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">DRIVER</span><span class="p">));</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setJdbcUrl</span><span class="p">(</span><span class="n">environment</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">URL</span><span class="p">));</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setUsername</span><span class="p">(</span><span class="n">environment</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">USERNAME</span><span class="p">));</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setPassword</span><span class="p">(</span><span class="n">environment</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">PASSWORD</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">dataSource</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="_2">
      测试
     </h3>
     <p>
      直接生写SQL了，就不结合ORM之类的了，这里是通过日志看出是否生效的，日志大致如下
     </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">Rule</span> <span class="n">Type</span><span class="p">:</span> <span class="n">master</span><span class="o">-</span><span class="n">slave</span>
+<span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">SQL</span><span class="p">:</span> <span class="n">select</span> <span class="o">*</span> <span class="n">from</span> <span class="n">stores</span> <span class="n">limit</span> <span class="mi">5</span> <span class="p">:::</span> <span class="n">DataSources</span><span class="p">:</span> <span class="n">slave0</span>
+<span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">Rule</span> <span class="n">Type</span><span class="p">:</span> <span class="n">master</span><span class="o">-</span><span class="n">slave</span>
+<span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">SQL</span><span class="p">:</span> <span class="n">select</span> <span class="o">*</span> <span class="n">from</span> <span class="n">stores</span> <span class="n">limit</span> <span class="mi">5</span> <span class="p">:::</span> <span class="n">DataSources</span><span class="p">:</span> <span class="n">slave1</span>
+<span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">Rule</span> <span class="n">Type</span><span class="p">:</span> <span class="n">master</span><span class="o">-</span><span class="n">slave</span>
+<span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">SQL</span><span class="p">:</span> <span class="n">insert</span> <span class="n">into</span> <span class="nf">stores</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span> <span class="n">VALUES</span> <span class="p">(</span><span class="s">"name103"</span><span class="p">,</span> <span class="s">"description103"</span><span class="p">);</span> <span class="p">:::</span> <span class="n">DataSources</span><span class="p">:</span> <span class="n">master</span>
+<span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">Rule</span> <span class="n">Type</span><span class="p">:</span> <span class="n">master</span><span class="o">-</span><span class="n">slave</span>
+<span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">SQL</span><span class="p">:</span> <span class="n">select</span> <span class="o">*</span> <span class="n">from</span> <span class="n">stores</span> <span class="n">limit</span> <span class="mi">5</span> <span class="p">:::</span> <span class="n">DataSources</span><span class="p">:</span> <span class="n">master</span>
+</code></pre>
+    </div>
     <p>
-     <pre>java
-Sharding-Sphere-SQL                      : Rule Type: master-slave
-Sharding-Sphere-SQL                      : SQL: select * from stores limit 5 ::: DataSources: slave0
-Sharding-Sphere-SQL                      : Rule Type: master-slave
-Sharding-Sphere-SQL                      : SQL: select * from stores limit 5 ::: DataSources: slave1
-Sharding-Sphere-SQL                      : Rule Type: master-slave
-Sharding-Sphere-SQL                      : SQL: insert into stores (name, description) VALUES ("name103", "description103"); ::: DataSources: master
-Sharding-Sphere-SQL                      : Rule Type: master-slave
-Sharding-Sphere-SQL                      : SQL: select * from stores limit 5 ::: DataSources: master</pre>
      代码如下：
     </p>
-    <p>
-     ```java
-package com.example.demo.shardingsphere.raw.jdbc;
-    </p>
-    <p>
-     import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
-    </p>
-    <p>
-     import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-    </p>
-    <p>
-     @Slf4j
-@SpringBootTest
-@ExtendWith(SpringExtension.class)
-public class ShardingMasterSlaveDataSourceTest {
-    </p>
-    <pre><pre>@Autowired
-ShardingMasterSlaveDataSource shardingMasterSlaveDataSource;
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo.shardingsphere.raw.jdbc</span><span class="p">;</span>
 
-/**
- * 运行后从日志可以看出主从之间的切换和从库负载均衡
- */
-@Test @Transactional
-public void test() throws SQLException {
-    DataSource dataSource = shardingMasterSlaveDataSource.createDataSource();
-    log.info("ShardingMasterSlaveDataSource info::" + dataSource.getConnection().getMetaData().getURL());
+<span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.jupiter.api.Test</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.jupiter.api.extension.ExtendWith</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.test.context.SpringBootTest</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.test.context.junit.jupiter.SpringExtension</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.transaction.annotation.Transactional</span><span class="p">;</span>
 
-    Connection conn = dataSource.getConnection();
-    Statement statement = conn.createStatement();
+<span class="kn">import</span> <span class="nn">javax.sql.DataSource</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.Connection</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.Statement</span><span class="p">;</span>
 
-    String sql = "select * from stores limit 5";
-    statement.execute(sql);
-    statement.execute(sql);
+<span class="nd">@Slf4j</span>
+<span class="nd">@SpringBootTest</span>
+<span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">SpringExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ShardingMasterSlaveDataSourceTest</span> <span class="p">{</span>
 
-    sql = "insert into stores (name, description) VALUES (\"name103\", \"description103\");";
-    statement.execute(sql);
+    <span class="nd">@Autowired</span>
+    <span class="n">ShardingMasterSlaveDataSource</span> <span class="n">shardingMasterSlaveDataSource</span><span class="p">;</span>
 
-    sql = "select * from stores limit 5";
-    statement.execute(sql);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="cm">/**</span>
+<span class="cm">     * 运行后从日志可以看出主从之间的切换和从库负载均衡</span>
+<span class="cm">     */</span>
+    <span class="nd">@Test</span> <span class="nd">@Transactional</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">DataSource</span> <span class="n">dataSource</span> <span class="o">=</span> <span class="n">shardingMasterSlaveDataSource</span><span class="p">.</span><span class="na">createDataSource</span><span class="p">();</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"ShardingMasterSlaveDataSource info::"</span> <span class="o">+</span> <span class="n">dataSource</span><span class="p">.</span><span class="na">getConnection</span><span class="p">().</span><span class="na">getMetaData</span><span class="p">().</span><span class="na">getURL</span><span class="p">());</span>
+
+        <span class="n">Connection</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">dataSource</span><span class="p">.</span><span class="na">getConnection</span><span class="p">();</span>
+        <span class="n">Statement</span> <span class="n">statement</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="na">createStatement</span><span class="p">();</span>
+
+        <span class="n">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"select * from stores limit 5"</span><span class="p">;</span>
+        <span class="n">statement</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">);</span>
+        <span class="n">statement</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">);</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s">"insert into stores (name, description) VALUES (\"name103\", \"description103\");"</span><span class="p">;</span>
+        <span class="n">statement</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">);</span>
+
+        <span class="n">sql</span> <span class="o">=</span> <span class="s">"select * from stores limit 5"</span><span class="p">;</span>
+        <span class="n">statement</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
    </article>
   </div>
   <!-- BG -->

@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,7 +43,7 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="kafka-sasl">
      Kafka SASL 安全验证
     </h1>
     <hr/>
@@ -51,293 +52,207 @@
       操作都在相应的软件安装目录下
      </em>
     </p>
-    <h2>
+    <h2 id="_1">
      配置文件编写
     </h2>
-    <h3>
+    <h3 id="kafka-server-jaasconf">
      服务配置文件kafka-server-jaas.conf
     </h3>
-    <p>
-     ```sh
-vim config/kafka-server-jaas.conf
-    </p>
-    <h1>
-     add
-    </h1>
-    <p>
-     KafkaServer {
+    <div class="codehilite">
+     <pre><span></span><code>vim config/kafka-server-jaas.conf
+
+<span class="c1"># add</span>
+KafkaServer <span class="o">{</span>
     org.apache.kafka.common.security.plain.PlainLoginModule required
-    username="admin"
-    password="admin"
-    user_admin="admin"
-    user_alice="alice";
-};
-    </p>
-    <p>
-     KafkaClient {
+    <span class="nv">username</span><span class="o">=</span><span class="s2">"admin"</span>
+    <span class="nv">password</span><span class="o">=</span><span class="s2">"admin"</span>
+    <span class="nv">user_admin</span><span class="o">=</span><span class="s2">"admin"</span>
+    <span class="nv">user_alice</span><span class="o">=</span><span class="s2">"alice"</span><span class="p">;</span>
+<span class="o">}</span><span class="p">;</span>
+
+KafkaClient <span class="o">{</span>
   org.apache.kafka.common.security.plain.PlainLoginModule required
-  username="alice"
-  password="alice";
-};
-```
-    </p>
-    <h3>
+  <span class="nv">username</span><span class="o">=</span><span class="s2">"alice"</span>
+  <span class="nv">password</span><span class="o">=</span><span class="s2">"alice"</span><span class="p">;</span>
+<span class="o">}</span><span class="p">;</span>
+</code></pre>
+    </div>
+    <h3 id="serverproperties">
      启动配置文件server.properties
     </h3>
-    <p>
-     ```sh
-cp config/server.properties config/sasl-server.properties
-    </p>
-    <p>
-     vim config/sasl-server.properties
-    </p>
-    <h1>
-     在末尾添加
-    </h1>
-    <h1>
-     遇到外网端口不放连接的情况,需要直接判断外网ip和对应的开发的外网端口,好像topic自动创建会失效
-    </h1>
-    <p>
-     advertised.listeners=SASL_PLAINTEXT://10.0.0.51:9092
-listeners=SASL_PLAINTEXT://10.0.0.51:9092
-security.inter.broker.protocol=SASL_PLAINTEXT
-sasl.mechanism.inter.broker.protocol=PLAIN
-sasl.enabled.mechanisms=PLAIN
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>cp config/server.properties config/sasl-server.properties
+
+vim config/sasl-server.properties
+
+<span class="c1"># 在末尾添加</span>
+<span class="c1"># 遇到外网端口不放连接的情况,需要直接判断外网ip和对应的开发的外网端口,好像topic自动创建会失效</span>
+advertised.listeners<span class="o">=</span>SASL_PLAINTEXT://10.0.0.51:9092
+<span class="nv">listeners</span><span class="o">=</span>SASL_PLAINTEXT://10.0.0.51:9092
+security.inter.broker.protocol<span class="o">=</span>SASL_PLAINTEXT
+sasl.mechanism.inter.broker.protocol<span class="o">=</span>PLAIN
+sasl.enabled.mechanisms<span class="o">=</span>PLAIN
+</code></pre>
+    </div>
+    <h3 id="kafka-server-startsh">
      启动文件kafka-server-start.sh
     </h3>
-    <p>
-     ```sh
-cp bin/kafka-server-start.sh bin/sasl-kafka-server-start.sh
+    <div class="codehilite">
+     <pre><span></span><code>cp bin/kafka-server-start.sh bin/sasl-kafka-server-start.sh
 vim bin/sasl-kafka-server-start.sh
-    </p>
-    <h1>
-     change the line from
-    </h1>
-    <p>
-     if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
-    export KAFKA_HEAP_OPTS="-Xmx1G -Xms1G"
-fi
-    </p>
-    <h1>
-     to
-    </h1>
-    <p>
-     if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
-    export KAFKA_HEAP_OPTS="-Xmx1G -Xms1G -Djava.security.auth.login.config=$base_dir/../config/kafka-server-jaas.conf"
-fi
-```
-    </p>
-    <h3>
+
+<span class="c1"># change the line from</span>
+<span class="k">if</span> <span class="o">[</span> <span class="s2">"x</span><span class="nv">$KAFKA_HEAP_OPTS</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"x"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">export</span> <span class="nv">KAFKA_HEAP_OPTS</span><span class="o">=</span><span class="s2">"-Xmx1G -Xms1G"</span>
+<span class="k">fi</span>
+
+<span class="c1"># to</span>
+<span class="k">if</span> <span class="o">[</span> <span class="s2">"x</span><span class="nv">$KAFKA_HEAP_OPTS</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"x"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">export</span> <span class="nv">KAFKA_HEAP_OPTS</span><span class="o">=</span><span class="s2">"-Xmx1G -Xms1G -Djava.security.auth.login.config=</span><span class="nv">$base_dir</span><span class="s2">/../config/kafka-server-jaas.conf"</span>
+<span class="k">fi</span>
+</code></pre>
+    </div>
+    <h3 id="_2">
      生产者相关文件修改
     </h3>
-    <h4>
+    <h4 id="_3">
      新建生产者客户端配置文件
     </h4>
-    <p>
-     ```sh
-vim ./config/jaas-kafka-client.conf
-    </p>
-    <p>
-     KafkaClient {
+    <div class="codehilite">
+     <pre><span></span><code>vim ./config/jaas-kafka-client.conf
+
+KafkaClient <span class="o">{</span>
   org.apache.kafka.common.security.plain.PlainLoginModule required
-  username="alice"
-  password="alice";
-};
-```
-    </p>
-    <h3>
+  <span class="nv">username</span><span class="o">=</span><span class="s2">"alice"</span>
+  <span class="nv">password</span><span class="o">=</span><span class="s2">"alice"</span><span class="p">;</span>
+<span class="o">}</span><span class="p">;</span>
+</code></pre>
+    </div>
+    <h3 id="_4">
      生产者配置文件修改
     </h3>
-    <p>
-     ```sh
-cp ./config/producer.properties ./config/sasl-producer.properties
+    <div class="codehilite">
+     <pre><span></span><code>cp ./config/producer.properties ./config/sasl-producer.properties
 vim ./config/sasl-producer.properties
-    </p>
-    <h1>
-     修改bootstrap.servers
-    </h1>
-    <p>
-     bootstrap.servers=10.0.0.51:9092
-    </p>
-    <h1>
-     在末尾添加
-    </h1>
-    <p>
-     security.protocol=SASL_PLAINTEXT
-sasl.mechanism=PLAIN
-```
-    </p>
-    <h4>
+
+<span class="c1">#修改bootstrap.servers</span>
+bootstrap.servers<span class="o">=</span><span class="m">10</span>.0.0.51:9092
+
+<span class="c1"># 在末尾添加</span>
+security.protocol<span class="o">=</span>SASL_PLAINTEXT
+sasl.mechanism<span class="o">=</span>PLAIN
+</code></pre>
+    </div>
+    <h4 id="_5">
      生产者启动脚本修改
     </h4>
-    <p>
-     ```sh
-cp ./bin/kafka-console-producer.sh ./bin/sasl-kafka-console-producer.sh
+    <div class="codehilite">
+     <pre><span></span><code>cp ./bin/kafka-console-producer.sh ./bin/sasl-kafka-console-producer.sh
 vim ./bin/sasl-kafka-console-producer.sh
-    </p>
-    <h1>
-     modifiy below
-    </h1>
-    <p>
-     if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
-    export KAFKA_HEAP_OPTS="-Xmx512M"
- fi
- exec $(dirname $0)/kafka-run-class.sh kafka.tools.ConsoleProducer "$@"
-    </p>
-    <h1>
-     to
-    </h1>
-    <p>
-     if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
-    export KAFKA_HEAP_OPTS="-Xmx512M"
- fi
- exec $(dirname $0)/kafka-run-class.sh -Djava.security.auth.login.config=$(dirname $0)/../config/jaas-kafka-client.conf kafka.tools.ConsoleProducer "$@"
-```
-    </p>
-    <h3>
+
+<span class="c1"># modifiy below</span>
+ <span class="k">if</span> <span class="o">[</span> <span class="s2">"x</span><span class="nv">$KAFKA_HEAP_OPTS</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"x"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">export</span> <span class="nv">KAFKA_HEAP_OPTS</span><span class="o">=</span><span class="s2">"-Xmx512M"</span>
+ <span class="k">fi</span>
+ <span class="nb">exec</span> <span class="k">$(</span>dirname <span class="nv">$0</span><span class="k">)</span>/kafka-run-class.sh kafka.tools.ConsoleProducer <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span>
+
+<span class="c1"># to</span>
+ <span class="k">if</span> <span class="o">[</span> <span class="s2">"x</span><span class="nv">$KAFKA_HEAP_OPTS</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"x"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">export</span> <span class="nv">KAFKA_HEAP_OPTS</span><span class="o">=</span><span class="s2">"-Xmx512M"</span>
+ <span class="k">fi</span>
+ <span class="nb">exec</span> <span class="k">$(</span>dirname <span class="nv">$0</span><span class="k">)</span>/kafka-run-class.sh -Djava.security.auth.login.config<span class="o">=</span><span class="k">$(</span>dirname <span class="nv">$0</span><span class="k">)</span>/../config/jaas-kafka-client.conf kafka.tools.ConsoleProducer <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span>
+</code></pre>
+    </div>
+    <h3 id="_6">
      消费者相关修改
     </h3>
-    <h4>
+    <h4 id="_7">
      新建生产者客户端配置文件
     </h4>
-    <p>
-     ```sh
-vim ./config/jaas-kafka-consumer.conf
-    </p>
-    <p>
-     KafkaServer {
+    <div class="codehilite">
+     <pre><span></span><code>vim ./config/jaas-kafka-consumer.conf
+
+KafkaServer <span class="o">{</span>
     org.apache.kafka.common.security.plain.PlainLoginModule required
-    username="admin"
-    password="admin"
-    user_admin="admin"
-    user_alice="alice";
-};
-    </p>
-    <p>
-     KafkaClient {
+    <span class="nv">username</span><span class="o">=</span><span class="s2">"admin"</span>
+    <span class="nv">password</span><span class="o">=</span><span class="s2">"admin"</span>
+    <span class="nv">user_admin</span><span class="o">=</span><span class="s2">"admin"</span>
+    <span class="nv">user_alice</span><span class="o">=</span><span class="s2">"alice"</span><span class="p">;</span>
+<span class="o">}</span><span class="p">;</span>
+
+KafkaClient <span class="o">{</span>
   org.apache.kafka.common.security.plain.PlainLoginModule required
-  username="alice"
-  password="alice";
-};
-```
-    </p>
-    <h4>
+  <span class="nv">username</span><span class="o">=</span><span class="s2">"alice"</span>
+  <span class="nv">password</span><span class="o">=</span><span class="s2">"alice"</span><span class="p">;</span>
+<span class="o">}</span><span class="p">;</span>
+</code></pre>
+    </div>
+    <h4 id="_8">
      新建消费者配置文件
     </h4>
-    <p>
-     ```sh
-cp ./config/consumer.properties ./config/sasl-consumer.properties
+    <div class="codehilite">
+     <pre><span></span><code>cp ./config/consumer.properties ./config/sasl-consumer.properties
 vim ./config/sasl-consumer.properties
-    </p>
-    <h1>
-     修改bootstrap.servers
-    </h1>
-    <p>
-     bootstrap.servers=10.0.0.51:9092
-    </p>
-    <h1>
-     末尾添加
-    </h1>
-    <p>
-     security.protocol=SASL_PLAINTEXT
-sasl.mechanism=PLAIN
-```
-    </p>
-    <h4>
+
+<span class="c1">#修改bootstrap.servers</span>
+bootstrap.servers<span class="o">=</span><span class="m">10</span>.0.0.51:9092
+
+<span class="c1"># 末尾添加</span>
+security.protocol<span class="o">=</span>SASL_PLAINTEXT
+sasl.mechanism<span class="o">=</span>PLAIN
+</code></pre>
+    </div>
+    <h4 id="_9">
      消费者启动脚本修改
     </h4>
-    <p>
-     ```sh
-cp ./bin/kafka-console-consumer.sh ./bin/sasl-kafka-console-consumer.sh
+    <div class="codehilite">
+     <pre><span></span><code>cp ./bin/kafka-console-consumer.sh ./bin/sasl-kafka-console-consumer.sh
 vim ./bin/sasl-kafka-console-consumer.sh
-    </p>
-    <h1>
-     modifiy below
-    </h1>
-    <p>
-     if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
-   export KAFKA_HEAP_OPTS="-Xmx512M"
-fi
-exec $(dirname $0)/kafka-run-class.sh kafka.tools.ConsoleConsumer "$@"
-    </p>
-    <h1>
-     to
-    </h1>
-    <p>
-     if [ "x$KAFKA_HEAP_OPTS" = "x" ]; then
-   export KAFKA_HEAP_OPTS="-Xmx512M"
-fi
-exec $(dirname $0)/kafka-run-class.sh -Djava.security.auth.login.config=$(dirname $0)/../config/jaas-kafka-consumer.conf kafka.tools.ConsoleConsumer "$@"
- ```
-    </p>
-    <h2>
-     集群配置
-    </h2>
-    <p>
-     可以复制整个zookeeper和kafka的文件夹,修改配置文件的中kafka配置文件的broken.id和zookeeper的myid文件内容
-    </p>
-    <h2>
-     安全验证后使用的生产和消费命令
-    </h2>
-    <ul>
-     <li>
-      <p>
-       /usr/local/kafka/bin/sasl-kafka-server-start.sh -daemon /usr/local/kafka/config/sasl-server.properties
-      </p>
-     </li>
-     <li>
-      <p>
-       /usr/local/kafka/bin/sasl-kafka-console-producer.sh --broker-list 172.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092 --topic test --producer.config /usr/local/kafka/config/sasl-producer.properties
-      </p>
-     </li>
-     <li>
-      <p>
-       /usr/local/kafka/bin/sasl-kafka-console-consumer.sh --bootstrap-server 172.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092 --topic test --consumer.config /usr/local/kafka/config/sasl-consumer.properties
-      </p>
-     </li>
-     <li>
-      <p>
-       /usr/local/kafka/bin/kafka-topics.sh --list --zookeeper 172.19.104.18:2181,172.19.104.19:2181,172.19.104.21:2181
-      </p>
-     </li>
-     <li>
-      <p>
-       /usr/local/kafka/bin/kafka-topics.sh --create --zookeeper 172.19.104.18:2181,172.19.104.19:2181,172.19.104.21:2181 --topic test1 --replication-factor 2 --partitions 3
-      </p>
-     </li>
-    </ul>
-    <h2>
-     编程调用
-    </h2>
-    <h3>
-     Python
-    </h3>
-    <p>
-     ```python
-    </p>
-    <h1>
-     消费者
-    </h1>
-    <p>
-     consumer = KafkaConsumer(bootstrap_servers='172.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092', security_protocol="SASL_PLAINTEXT", sasl_mechanism='PLAIN', sasl_plain_username='alice', sasl_plain_password='alice')
-consumer.subscribe(["test"])
-for msg in consumer:
-    print(str(msg[6], encoding="utf-8"))
-    </p>
-    <h1>
-     生产者
-    </h1>
-    <p>
-     producer = KafkaProducer(bootstrap_servers='172.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092', security_protocol="SASL_PLAINTEXT", sasl_mechanism='PLAIN', sasl_plain_username='alice', sasl_plain_password='alice')
-msg = {"test": "test"}
-producer.send("test", bytes(str(msg).replace("'", '"'), "utf-8"))
-time.sleep(1)
-```
-    </p>
-    <h3>
+
+<span class="c1"># modifiy below</span>
+<span class="k">if</span> <span class="o">[</span> <span class="s2">"x</span><span class="nv">$KAFKA_HEAP_OPTS</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"x"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+   <span class="nb">export</span> <span class="nv">KAFKA_HEAP_OPTS</span><span class="o">=</span><span class="s2">"-Xmx512M"</span>
+<span class="k">fi</span>
+<span class="nb">exec</span> <span class="k">$(</span>dirname <span class="nv">$0</span><span class="k">)</span>/kafka-run-class.sh kafka.tools.ConsoleConsumer <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span>
+
+<span class="c1"># to</span>
+<span class="k">if</span> <span class="o">[</span> <span class="s2">"x</span><span class="nv">$KAFKA_HEAP_OPTS</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"x"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+   <span class="nb">export</span> <span class="nv">KAFKA_HEAP_OPTS</span><span class="o">=</span><span class="s2">"-Xmx512M"</span>
+<span class="k">fi</span>
+<span class="nb">exec</span> <span class="k">$(</span>dirname <span class="nv">$0</span><span class="k">)</span>/kafka-run-class.sh -Djava.security.auth.login.config<span class="o">=</span><span class="k">$(</span>dirname <span class="nv">$0</span><span class="k">)</span>/../config/jaas-kafka-consumer.conf kafka.tools.ConsoleConsumer <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span>
+ <span class="sb">```</span>
+
+<span class="c1">## 集群配置</span>
+可以复制整个zookeeper和kafka的文件夹,修改配置文件的中kafka配置文件的broken.id和zookeeper的myid文件内容
+
+<span class="c1">## 安全验证后使用的生产和消费命令</span>
+- /usr/local/kafka/bin/sasl-kafka-server-start.sh -daemon /usr/local/kafka/config/sasl-server.properties
+
+- /usr/local/kafka/bin/sasl-kafka-console-producer.sh --broker-list <span class="m">172</span>.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092 --topic <span class="nb">test</span> --producer.config /usr/local/kafka/config/sasl-producer.properties
+
+- /usr/local/kafka/bin/sasl-kafka-console-consumer.sh --bootstrap-server <span class="m">172</span>.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092 --topic <span class="nb">test</span> --consumer.config /usr/local/kafka/config/sasl-consumer.properties
+
+- /usr/local/kafka/bin/kafka-topics.sh --list --zookeeper <span class="m">172</span>.19.104.18:2181,172.19.104.19:2181,172.19.104.21:2181
+
+- /usr/local/kafka/bin/kafka-topics.sh --create --zookeeper <span class="m">172</span>.19.104.18:2181,172.19.104.19:2181,172.19.104.21:2181 --topic test1 --replication-factor <span class="m">2</span> --partitions <span class="m">3</span>
+
+<span class="c1">## 编程调用</span>
+<span class="c1">### Python</span>
+<span class="sb">```</span>python
+<span class="c1"># 消费者</span>
+<span class="nv">consumer</span> <span class="o">=</span> KafkaConsumer<span class="o">(</span><span class="nv">bootstrap_servers</span><span class="o">=</span><span class="s1">'172.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092'</span>, <span class="nv">security_protocol</span><span class="o">=</span><span class="s2">"SASL_PLAINTEXT"</span>, <span class="nv">sasl_mechanism</span><span class="o">=</span><span class="s1">'PLAIN'</span>, <span class="nv">sasl_plain_username</span><span class="o">=</span><span class="s1">'alice'</span>, <span class="nv">sasl_plain_password</span><span class="o">=</span><span class="s1">'alice'</span><span class="o">)</span>
+consumer.subscribe<span class="o">([</span><span class="s2">"test"</span><span class="o">])</span>
+<span class="k">for</span> msg in consumer:
+    print<span class="o">(</span>str<span class="o">(</span>msg<span class="o">[</span><span class="m">6</span><span class="o">]</span>, <span class="nv">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="o">))</span>
+
+<span class="c1"># 生产者</span>
+<span class="nv">producer</span> <span class="o">=</span> KafkaProducer<span class="o">(</span><span class="nv">bootstrap_servers</span><span class="o">=</span><span class="s1">'172.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092'</span>, <span class="nv">security_protocol</span><span class="o">=</span><span class="s2">"SASL_PLAINTEXT"</span>, <span class="nv">sasl_mechanism</span><span class="o">=</span><span class="s1">'PLAIN'</span>, <span class="nv">sasl_plain_username</span><span class="o">=</span><span class="s1">'alice'</span>, <span class="nv">sasl_plain_password</span><span class="o">=</span><span class="s1">'alice'</span><span class="o">)</span>
+<span class="nv">msg</span> <span class="o">=</span> <span class="o">{</span><span class="s2">"test"</span>: <span class="s2">"test"</span><span class="o">}</span>
+producer.send<span class="o">(</span><span class="s2">"test"</span>, bytes<span class="o">(</span>str<span class="o">(</span>msg<span class="o">)</span>.replace<span class="o">(</span><span class="s2">"'"</span>, <span class="s1">'"'</span><span class="o">)</span>, <span class="s2">"utf-8"</span><span class="o">))</span>
+time.sleep<span class="o">(</span><span class="m">1</span><span class="o">)</span>
+</code></pre>
+    </div>
+    <h3 id="java">
      Java
     </h3>
     <p>
@@ -345,64 +260,56 @@ time.sleep(1)
       kafka_server_jaas.conf kafka_client_jaas.conf是上面新建文件：jaas-kafka-client.conf jaas-kafka-consumer.conf的复制，对应的原理是将kafka验证文件进行加载读取即可
      </em>
     </p>
-    <p>
-     ```java
-    /**
-     <em>
-      * 生成特定Topic的消费者并返回(为了避免消息丢失，采用手动提交位移方式）
-     * @param topic
-     * @param groupName
-     * @return
-     </em>
-     /
-    public static KafkaConsumer
-     <string, string="">
-      createConsumer(String topic, String groupName) {
-        logger.info("Create kafka consumer");
-        Properties properties = new Properties();
-        properties.put("bootstrap.servers", Holder.get("kafka.host"));
-        properties.put("group.id", groupName);
-        properties.put("enable.auto.commit", "true");
-        properties.put("auto.commit.interval.ms", "1000");
-        properties.put("auto.offset.reset", "latest");
-        properties.put("session.timeout.ms", "30000");
-        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        System.setProperty("java.security.auth.login.config", "conf/kafka_server_jaas.conf");
-        properties.put("security.protocol", "SASL_PLAINTEXT");
-        properties.put("sasl.mechanism", "PLAIN");
-     </string,>
-    </p>
-    <pre><pre>    KafkaConsumer&lt;String, String&gt; kafkaConsumer = new KafkaConsumer&lt;String, String&gt;(properties);
-    kafkaConsumer.subscribe(Arrays.asList(topic));
-    return kafkaConsumer;
-}
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="cm">/***</span>
+<span class="cm">     * 生成特定Topic的消费者并返回(为了避免消息丢失，采用手动提交位移方式）</span>
+<span class="cm">     * @param topic</span>
+<span class="cm">     * @param groupName</span>
+<span class="cm">     * @return</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="nf">createConsumer</span><span class="p">(</span><span class="n">String</span> <span class="n">topic</span><span class="p">,</span> <span class="n">String</span> <span class="n">groupName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"Create kafka consumer"</span><span class="p">);</span>
+        <span class="n">Properties</span> <span class="n">properties</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="p">();</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"bootstrap.servers"</span><span class="p">,</span> <span class="n">Holder</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"kafka.host"</span><span class="p">));</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"group.id"</span><span class="p">,</span> <span class="n">groupName</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"enable.auto.commit"</span><span class="p">,</span> <span class="s">"true"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"auto.commit.interval.ms"</span><span class="p">,</span> <span class="s">"1000"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"auto.offset.reset"</span><span class="p">,</span> <span class="s">"latest"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"session.timeout.ms"</span><span class="p">,</span> <span class="s">"30000"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"key.deserializer"</span><span class="p">,</span> <span class="s">"org.apache.kafka.common.serialization.StringDeserializer"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"value.deserializer"</span><span class="p">,</span> <span class="s">"org.apache.kafka.common.serialization.StringDeserializer"</span><span class="p">);</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">"java.security.auth.login.config"</span><span class="p">,</span> <span class="s">"conf/kafka_server_jaas.conf"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"security.protocol"</span><span class="p">,</span> <span class="s">"SASL_PLAINTEXT"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"sasl.mechanism"</span><span class="p">,</span> <span class="s">"PLAIN"</span><span class="p">);</span>
 
-/***
- * 生成生产者并返回
- * @return
- */
-public static KafkaProducer&lt;String, String&gt; createProducer() {
-    logger.info("Create kafka producer");
-    Properties properties = new Properties();
-    properties.put("bootstrap.servers", Holder.get("kafka.host"));
-    properties.put("acks", "all");
-    properties.put("retries", 0);
-    properties.put("batch.size", 16384);
-    properties.put("linger.ms", 1);
-    properties.put("buffer.memory", 33554432);
-    properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-    properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-    System.setProperty("java.security.auth.login.config", "conf/kafka_client_jaas.conf");
-    properties.put("security.protocol", "SASL_PLAINTEXT");
-    properties.put("sasl.mechanism", "PLAIN");
-    return new KafkaProducer&lt;String, String&gt;(properties);
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
-    <h2>
+        <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">kafkaConsumer</span> <span class="o">=</span> <span class="k">new</span> <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span><span class="p">(</span><span class="n">properties</span><span class="p">);</span>
+        <span class="n">kafkaConsumer</span><span class="p">.</span><span class="na">subscribe</span><span class="p">(</span><span class="n">Arrays</span><span class="p">.</span><span class="na">asList</span><span class="p">(</span><span class="n">topic</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">kafkaConsumer</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/***</span>
+<span class="cm">     * 生成生产者并返回</span>
+<span class="cm">     * @return</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">KafkaProducer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="nf">createProducer</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"Create kafka producer"</span><span class="p">);</span>
+        <span class="n">Properties</span> <span class="n">properties</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="p">();</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"bootstrap.servers"</span><span class="p">,</span> <span class="n">Holder</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">"kafka.host"</span><span class="p">));</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"acks"</span><span class="p">,</span> <span class="s">"all"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"retries"</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"batch.size"</span><span class="p">,</span> <span class="mi">16384</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"linger.ms"</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"buffer.memory"</span><span class="p">,</span> <span class="mi">33554432</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"key.serializer"</span><span class="p">,</span> <span class="s">"org.apache.kafka.common.serialization.StringSerializer"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"value.serializer"</span><span class="p">,</span> <span class="s">"org.apache.kafka.common.serialization.StringSerializer"</span><span class="p">);</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">"java.security.auth.login.config"</span><span class="p">,</span> <span class="s">"conf/kafka_client_jaas.conf"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"security.protocol"</span><span class="p">,</span> <span class="s">"SASL_PLAINTEXT"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"sasl.mechanism"</span><span class="p">,</span> <span class="s">"PLAIN"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">KafkaProducer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span><span class="p">(</span><span class="n">properties</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
+    <h2 id="_10">
      参考链接
     </h2>
     <ul>

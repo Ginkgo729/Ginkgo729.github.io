@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soul">
      Soul 源码解析（二）代码初步运行
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
@@ -56,7 +57,7 @@
      </a>
      ,这部分跑一下Soul网关的示例
     </p>
-    <h3>
+    <h3 id="_2">
      过程记录
     </h3>
     <p>
@@ -68,48 +69,44 @@
     <p>
      ```shell script
     </p>
-    <h1>
+    <h1 id="fork">
      fork 代码到自己的参考
     </h1>
-    <h1>
+    <h1 id="_3">
      拉取代码到本地
     </h1>
     <p>
      git clone xxxxxx
     </p>
-    <h1>
+    <h1 id="soulpr">
      如果你经常要给soul提交PR，进行学习研究时候建立一个新的专属分支，避免改动后还要改回来，新分支也可尽情改动
     </h1>
     <p>
      git checkout -b read 避免污染原来的代码，影响后面的提交
     </p>
-    <h1>
+    <h1 id="_4">
      编译测试相关
     </h1>
     <p>
      F:\Software\apache-maven-3.6.3\bin\mvn.cmd clean install
-     <pre>-Dmaven.javadoc.skip</pre>
+     <code>
+      -Dmaven.javadoc.skip
+     </code>
      =true
-     <pre>-Dmaven.test.skip</pre>
+     <code>
+      -Dmaven.test.skip
+     </code>
      =true
-```
     </p>
-    <p>
-     Soul Admin 需要数据，我们简单使用docker 启动一个
-    </p>
-    <p>
-     ```shell script
-    </p>
-    <h1>
-     docker 启动一个mysql数据库,密码123456
-    </h1>
-    <h1>
-     如果之前运行过soul，重新删除数据库，让其重建，因为后面有改动数据库
-    </h1>
-    <p>
-     docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">Soul</span> <span class="k">Admin</span> <span class="err">需要数据，我们简单使用</span><span class="n">docker</span> <span class="err">启动一个</span>
+
+<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="o">#</span> <span class="n">docker</span> <span class="err">启动一个</span><span class="n">mysql数据库</span><span class="p">,</span><span class="err">密码</span><span class="mi">123456</span>
+<span class="o">#</span> <span class="err">如果之前运行过</span><span class="n">soul</span><span class="err">，重新删除数据库，让其重建，因为后面有改动数据库</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="c1">--name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest</span>
+</code></pre>
+    </div>
     <p>
      soul admin 修改配置文件中数据库相关信息
     </p>

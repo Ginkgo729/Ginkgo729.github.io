@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="supervisor">
      Supervisor 使用
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      功能
     </h2>
     <ul>
@@ -63,153 +64,88 @@
       提供网页管理方式
      </li>
     </ul>
-    <h2>
+    <h2 id="_2">
      使用方式
     </h2>
-    <p>
-     ```sh
-yum -y install epel-release
+    <div class="codehilite">
+     <pre><span></span><code>yum -y install epel-release
 yum install python-pip -y
-    </p>
-    <h1>
-     安装
-    </h1>
-    <p>
-     pip install supervisor
-    </p>
-    <h1>
-     启动
-    </h1>
-    <p>
-     supervisord
-    </p>
-    <h1>
-     操作相应的程序
-    </h1>
-    <p>
-     supervisorctl
-    </p>
-    <h1>
-     会出现类似下面的内容
-    </h1>
-    <p>
-     [root@app-s2-3 ~]# supervisorctl
-corelationAnalysis               RUNNING   pid 2912, uptime 1096 days, 17:27:32
-pcl_simulate                     RUNNING   pid 2913, uptime 1096 days, 17:27:32
+
+<span class="c1"># 安装</span>
+pip install supervisor
+
+<span class="c1"># 启动</span>
+supervisord
+
+<span class="c1"># 操作相应的程序</span>
+supervisorctl
+
+<span class="c1"># 会出现类似下面的内容</span>
+<span class="o">[</span>root@app-s2-3 ~<span class="o">]</span><span class="c1"># supervisorctl</span>
+corelationAnalysis               RUNNING   pid <span class="m">2912</span>, uptime <span class="m">1096</span> days, <span class="m">17</span>:27:32
+pcl_simulate                     RUNNING   pid <span class="m">2913</span>, uptime <span class="m">1096</span> days, <span class="m">17</span>:27:32
 supervisor&gt;
-    </p>
-    <h1>
-     然后启动，停止，重启某程序
-    </h1>
-    <p>
-     start|stop|restart pcl_simulate
-    </p>
-    <h1>
-     也可以通过网页操作
-    </h1>
-    <p>
-     http://服务器地址:9001
-```
-    </p>
-    <h2>
+
+<span class="c1"># 然后启动，停止，重启某程序</span>
+start<span class="p">|</span>stop<span class="p">|</span>restart pcl_simulate
+
+<span class="c1"># 也可以通过网页操作</span>
+http://服务器地址:9001
+</code></pre>
+    </div>
+    <h2 id="_3">
      配置说明
     </h2>
-    <p>
-     ```
-    </p>
-    <h1>
-     如果找不到配置文件，可以使用下面的命令进行生成
-    </h1>
-    <p>
-     echo_supervisord_conf &gt; /etc/supervisord.conf
-    </p>
-    <h1>
-     配置文件 /etc/supervisord.conf，更多详细使用文件中有说明
-    </h1>
-    <h1>
-     在文件的末尾或任意位置，写入下面的配置内容即可命名，以关联分析代码为例
-    </h1>
-    <h1>
-     给程序命名
-    </h1>
-    <p>
-     [program:corelationAnalysis]
-    </p>
-    <h1>
-     执行程序所需要的命令
-    </h1>
-    <p>
-     command=/opt/anaconda34/bin/python3.6 /home/project/pcl_match/pcl_match_ae_classify_dog.py
-    </p>
-    <h1>
-     是否自动启动（当supervisor运行时自动运行）
-    </h1>
-    <p>
-     autostart=true
-    </p>
-    <h1>
-     日志文件写入位置
-    </h1>
-    <p>
-     stdout_logfile=/var/log/nssas/pcl_match_ae_classify_dog.log
-    </p>
-    <h1>
-     日志文件最大设置
-    </h1>
-    <p>
-     stdout_logfile_maxbytes=10MB
-    </p>
-    <h1>
-     日志文件备份文件数量设置
-    </h1>
-    <p>
-     stdout_logfile_backups=1     ; # of stdout logfile backups (0 means none, default 10)
-redirect_stderr=true          ; redirect proc stderr to stdout (default false)
-    </p>
-    <h1>
-     定义错误输出
-    </h1>
-    <p>
-     ;stderr_logfile=/a/path        ; stderr log path, NONE for none; default AUTO
-;stderr_logfile_maxbytes=1MB   ; max # logfile bytes b4 rotation (default 50MB)
-;stderr_logfile_backups=10     ; # of stderr logfile backups (0 means none, default 10)
-    </p>
-    <h1>
-     设置运行上面的command命令之前需要进入的文件夹目录
-    </h1>
-    <p>
-     ;directory=/tmp                ; directory to cwd to before exec (def no cwd)
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">#</span> <span class="err">如果找不到配置文件，可以使用下面的命令进行生成</span>
+<span class="n">echo_supervisord_conf</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">supervisord</span><span class="p">.</span><span class="n">conf</span>
+
+<span class="o">#</span> <span class="err">配置文件</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">supervisord</span><span class="p">.</span><span class="n">conf</span><span class="err">，更多详细使用文件中有说明</span>
+
+<span class="o">#</span> <span class="err">在文件的末尾或任意位置，写入下面的配置内容即可命名，以关联分析代码为例</span>
+<span class="o">#</span> <span class="err">给程序命名</span>
+<span class="p">[</span><span class="n">program</span><span class="p">:</span><span class="n">corelationAnalysis</span><span class="p">]</span>
+<span class="o">#</span> <span class="err">执行程序所需要的命令</span>
+<span class="n">command</span><span class="o">=/</span><span class="n">opt</span><span class="o">/</span><span class="n">anaconda34</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">python3</span><span class="p">.</span><span class="mi">6</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">pcl_match</span><span class="o">/</span><span class="n">pcl_match_ae_classify_dog</span><span class="p">.</span><span class="n">py</span>
+<span class="o">#</span> <span class="err">是否自动启动（当</span><span class="n">supervisor运行时自动运行</span><span class="err">）</span>
+<span class="n">autostart</span><span class="o">=</span><span class="k">true</span>
+<span class="o">#</span> <span class="err">日志文件写入位置</span>
+<span class="n">stdout_logfile</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">nssas</span><span class="o">/</span><span class="n">pcl_match_ae_classify_dog</span><span class="p">.</span><span class="n">log</span>
+<span class="o">#</span> <span class="err">日志文件最大设置</span>
+<span class="n">stdout_logfile_maxbytes</span><span class="o">=</span><span class="mi">10</span><span class="n">MB</span>
+<span class="o">#</span> <span class="err">日志文件备份文件数量设置</span>
+<span class="n">stdout_logfile_backups</span><span class="o">=</span><span class="mi">1</span>     <span class="p">;</span> <span class="o">#</span> <span class="k">of</span> <span class="k">stdout</span> <span class="n">logfile</span> <span class="n">backups</span> <span class="p">(</span><span class="mi">0</span> <span class="n">means</span> <span class="k">none</span><span class="p">,</span> <span class="k">default</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">redirect_stderr</span><span class="o">=</span><span class="k">true</span>          <span class="p">;</span> <span class="n">redirect</span> <span class="n">proc</span> <span class="n">stderr</span> <span class="k">to</span> <span class="k">stdout</span> <span class="p">(</span><span class="k">default</span> <span class="k">false</span><span class="p">)</span>
+<span class="o">#</span> <span class="err">定义错误输出</span>
+<span class="p">;</span><span class="n">stderr_logfile</span><span class="o">=/</span><span class="n">a</span><span class="o">/</span><span class="n">path</span>        <span class="p">;</span> <span class="n">stderr</span> <span class="n">log</span> <span class="n">path</span><span class="p">,</span> <span class="k">NONE</span> <span class="k">for</span> <span class="k">none</span><span class="p">;</span> <span class="k">default</span> <span class="n">AUTO</span>
+<span class="p">;</span><span class="n">stderr_logfile_maxbytes</span><span class="o">=</span><span class="mi">1</span><span class="n">MB</span>   <span class="p">;</span> <span class="k">max</span> <span class="o">#</span> <span class="n">logfile</span> <span class="n">bytes</span> <span class="n">b4</span> <span class="n">rotation</span> <span class="p">(</span><span class="k">default</span> <span class="mi">50</span><span class="n">MB</span><span class="p">)</span>
+<span class="p">;</span><span class="n">stderr_logfile_backups</span><span class="o">=</span><span class="mi">10</span>     <span class="p">;</span> <span class="o">#</span> <span class="k">of</span> <span class="n">stderr</span> <span class="n">logfile</span> <span class="n">backups</span> <span class="p">(</span><span class="mi">0</span> <span class="n">means</span> <span class="k">none</span><span class="p">,</span> <span class="k">default</span> <span class="mi">10</span><span class="p">)</span>
+<span class="o">#</span> <span class="err">设置运行上面的</span><span class="n">command命令之前需要进入的文件夹目录</span>
+<span class="p">;</span><span class="n">directory</span><span class="o">=/</span><span class="n">tmp</span>                <span class="p">;</span> <span class="n">directory</span> <span class="k">to</span> <span class="n">cwd</span> <span class="k">to</span> <span class="k">before</span> <span class="k">exec</span> <span class="p">(</span><span class="n">def</span> <span class="k">no</span> <span class="n">cwd</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <h2 id="_4">
      开机自动重启设置
     </h2>
-    <p>
-     ```
-    </p>
-    <h1>
-     编辑 /etc/rc.local 文件
-    </h1>
-    <p>
-     chmod a+x /etc/rc.local
-    </p>
-    <h1>
-     在文件中加入下面的内容
-    </h1>
-    <p>
-     /usr/bin/supervisord -c /etc/supervisord.conf
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">#</span> <span class="err">编辑</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">rc</span><span class="p">.</span><span class="k">local</span> <span class="err">文件</span>
+
+<span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">rc</span><span class="p">.</span><span class="k">local</span>
+
+<span class="o">#</span> <span class="err">在文件中加入下面的内容</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">supervisord</span> <span class="o">-</span><span class="k">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">supervisord</span><span class="p">.</span><span class="n">conf</span>
+</code></pre>
+    </div>
+    <h2 id="_5">
      多配置文件
     </h2>
     <p>
      同include的机制，在最后开启include，并添加自己的配置文件路径，在自己的配置文件中只需要写program部分
     </p>
-    <h2>
+    <h2 id="_6">
      问题
     </h2>
-    <h3>
+    <h3 id="python">
      启动Python程序日志无输出问题
     </h3>
     <p>

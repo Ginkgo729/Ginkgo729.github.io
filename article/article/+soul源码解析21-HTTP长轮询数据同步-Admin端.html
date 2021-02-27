@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,17 +43,17 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soulhttp-admin">
      Soul网关源码解析（二十一）HTTP长轮询数据同步-Admin端
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      本篇文章来探索Soul网关Admin中的HTTP长轮询数据同步流程
     </p>
-    <h2>
+    <h2 id="_2">
      概览
     </h2>
     <p>
@@ -81,151 +82,133 @@
     <p>
      最后想找出事件发布到更新的流程，踩了点坑，不是很顺利，但感受到了HTTP长轮询数据同步和Websocket、Zookeeper、Nacos有些区别，实现更加复杂一些
     </p>
-    <h2>
+    <h2 id="debug">
      源码Debug
     </h2>
-    <h3>
+    <h3 id="_3">
      寻找切入点
     </h3>
     <p>
      找到第十四篇中HTTP同步需要使用的两个接口位置，代码大致如下：
     </p>
-    <p>
-     ```java
-@RequestMapping("/configs")
-public class ConfigController {
-    </p>
-    <pre><pre>@Resource
-private HttpLongPollingDataChangedListener longPollingListener;
+    <div class="codehilite">
+     <pre><span></span><code><span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">"/configs"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConfigController</span> <span class="p">{</span>
 
-// 数据获取
-@GetMapping("/fetch")
-public SoulAdminResult fetchConfigs(@NotNull final String[] groupKeys) {
-    Map&lt;String, ConfigData&lt;?&gt;&gt; result = Maps.newHashMap();
-    for (String groupKey : groupKeys) {
-        ConfigData&lt;?&gt; data = longPollingListener.fetchConfig(ConfigGroupEnum.valueOf(groupKey));
-        result.put(groupKey, data);
-    }
-    return SoulAdminResult.success(SoulResultMessage.SUCCESS, result);
-}
+    <span class="nd">@Resource</span>
+    <span class="kd">private</span> <span class="n">HttpLongPollingDataChangedListener</span> <span class="n">longPollingListener</span><span class="p">;</span>
 
-// 数据变化监听
-@PostMapping(value = "/listener")
-public void listener(final HttpServletRequest request, final HttpServletResponse response) {
-    longPollingListener.doLongPolling(request, response);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h3>
+    <span class="c1">// 数据获取</span>
+    <span class="nd">@GetMapping</span><span class="p">(</span><span class="s">"/fetch"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">SoulAdminResult</span> <span class="nf">fetchConfigs</span><span class="p">(</span><span class="nd">@NotNull</span> <span class="kd">final</span> <span class="n">String</span><span class="o">[]</span> <span class="n">groupKeys</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">ConfigData</span><span class="o">&lt;?&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">Maps</span><span class="p">.</span><span class="na">newHashMap</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">groupKey</span> <span class="p">:</span> <span class="n">groupKeys</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">ConfigData</span><span class="o">&lt;?&gt;</span> <span class="n">data</span> <span class="o">=</span> <span class="n">longPollingListener</span><span class="p">.</span><span class="na">fetchConfig</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">groupKey</span><span class="p">));</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">groupKey</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">SoulAdminResult</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">SoulResultMessage</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 数据变化监听</span>
+    <span class="nd">@PostMapping</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"/listener"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">listener</span><span class="p">(</span><span class="kd">final</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">longPollingListener</span><span class="p">.</span><span class="na">doLongPolling</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="configsfetch">
      数据获取解析：/configs/fetch
     </h3>
     <p>
      首先来看下数据获取接口，我们看到其直接获取各个类型的data后返回
     </p>
-    <p>
-     ```java
-@RequestMapping("/configs")
-public class ConfigController {
-    </p>
-    <pre><pre>@GetMapping("/fetch")
-public SoulAdminResult fetchConfigs(@NotNull final String[] groupKeys) {
-    Map&lt;String, ConfigData&lt;?&gt;&gt; result = Maps.newHashMap();
-    for (String groupKey : groupKeys) {
-        ConfigData&lt;?&gt; data = longPollingListener.fetchConfig(ConfigGroupEnum.valueOf(groupKey));
-        result.put(groupKey, data);
-    }
-    return SoulAdminResult.success(SoulResultMessage.SUCCESS, result);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">"/configs"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConfigController</span> <span class="p">{</span>
+
+    <span class="nd">@GetMapping</span><span class="p">(</span><span class="s">"/fetch"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">SoulAdminResult</span> <span class="nf">fetchConfigs</span><span class="p">(</span><span class="nd">@NotNull</span> <span class="kd">final</span> <span class="n">String</span><span class="o">[]</span> <span class="n">groupKeys</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">ConfigData</span><span class="o">&lt;?&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">Maps</span><span class="p">.</span><span class="na">newHashMap</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">groupKey</span> <span class="p">:</span> <span class="n">groupKeys</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">ConfigData</span><span class="o">&lt;?&gt;</span> <span class="n">data</span> <span class="o">=</span> <span class="n">longPollingListener</span><span class="p">.</span><span class="na">fetchConfig</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">groupKey</span><span class="p">));</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">groupKey</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">SoulAdminResult</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">SoulResultMessage</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们接着来看下 fetchConfig这个函数，看到是根据类型从本地Cache中获取数据返回
     </p>
-    <p>
-     ```java
-public abstract class AbstractDataChangedListener implements DataChangedListener, InitializingBean {
-    protected static final ConcurrentMap
-     <string, configdatacache="">
-      CACHE = new ConcurrentHashMap&lt;&gt;();
-     </string,>
-    </p>
-    <pre><pre>public ConfigData&lt;?&gt; fetchConfig(final ConfigGroupEnum groupKey) {
-    ConfigDataCache config = CACHE.get(groupKey.name());
-    switch (groupKey) {
-        case APP_AUTH:
-            List&lt;AppAuthData&gt; appAuthList = GsonUtils.getGson().fromJson(config.getJson(), new TypeToken&lt;List&lt;AppAuthData&gt;&gt;() {
-            }.getType());
-            return new ConfigData&lt;&gt;(config.getMd5(), config.getLastModifyTime(), appAuthList);
-        case PLUGIN:
-            List&lt;PluginData&gt; pluginList = GsonUtils.getGson().fromJson(config.getJson(), new TypeToken&lt;List&lt;PluginData&gt;&gt;() {
-            }.getType());
-            return new ConfigData&lt;&gt;(config.getMd5(), config.getLastModifyTime(), pluginList);
-        case RULE:
-            List&lt;RuleData&gt; ruleList = GsonUtils.getGson().fromJson(config.getJson(), new TypeToken&lt;List&lt;RuleData&gt;&gt;() {
-            }.getType());
-            return new ConfigData&lt;&gt;(config.getMd5(), config.getLastModifyTime(), ruleList);
-        case SELECTOR:
-            List&lt;SelectorData&gt; selectorList = GsonUtils.getGson().fromJson(config.getJson(), new TypeToken&lt;List&lt;SelectorData&gt;&gt;() {
-            }.getType());
-            return new ConfigData&lt;&gt;(config.getMd5(), config.getLastModifyTime(), selectorList);
-        case META_DATA:
-            List&lt;MetaData&gt; metaList = GsonUtils.getGson().fromJson(config.getJson(), new TypeToken&lt;List&lt;MetaData&gt;&gt;() {
-            }.getType());
-            return new ConfigData&lt;&gt;(config.getMd5(), config.getLastModifyTime(), metaList);
-        default:
-            throw new IllegalStateException("Unexpected groupKey: " + groupKey);
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">AbstractDataChangedListener</span> <span class="kd">implements</span> <span class="n">DataChangedListener</span><span class="p">,</span> <span class="n">InitializingBean</span> <span class="p">{</span>
+    <span class="kd">protected</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">ConcurrentMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">ConfigDataCache</span><span class="o">&gt;</span> <span class="n">CACHE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ConcurrentHashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+    <span class="kd">public</span> <span class="n">ConfigData</span><span class="o">&lt;?&gt;</span> <span class="n">fetchConfig</span><span class="p">(</span><span class="kd">final</span> <span class="n">ConfigGroupEnum</span> <span class="n">groupKey</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">ConfigDataCache</span> <span class="n">config</span> <span class="o">=</span> <span class="n">CACHE</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">groupKey</span><span class="p">.</span><span class="na">name</span><span class="p">());</span>
+        <span class="k">switch</span> <span class="p">(</span><span class="n">groupKey</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">case</span> <span class="n">APP_AUTH</span><span class="p">:</span>
+                <span class="n">List</span><span class="o">&lt;</span><span class="n">AppAuthData</span><span class="o">&gt;</span> <span class="n">appAuthList</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getGson</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getJson</span><span class="p">(),</span> <span class="k">new</span> <span class="n">TypeToken</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">AppAuthData</span><span class="o">&gt;&gt;</span><span class="p">()</span> <span class="p">{</span>
+                <span class="p">}.</span><span class="na">getType</span><span class="p">());</span>
+                <span class="k">return</span> <span class="k">new</span> <span class="n">ConfigData</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getMd5</span><span class="p">(),</span> <span class="n">config</span><span class="p">.</span><span class="na">getLastModifyTime</span><span class="p">(),</span> <span class="n">appAuthList</span><span class="p">);</span>
+            <span class="k">case</span> <span class="n">PLUGIN</span><span class="p">:</span>
+                <span class="n">List</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">pluginList</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getGson</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getJson</span><span class="p">(),</span> <span class="k">new</span> <span class="n">TypeToken</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;&gt;</span><span class="p">()</span> <span class="p">{</span>
+                <span class="p">}.</span><span class="na">getType</span><span class="p">());</span>
+                <span class="k">return</span> <span class="k">new</span> <span class="n">ConfigData</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getMd5</span><span class="p">(),</span> <span class="n">config</span><span class="p">.</span><span class="na">getLastModifyTime</span><span class="p">(),</span> <span class="n">pluginList</span><span class="p">);</span>
+            <span class="k">case</span> <span class="n">RULE</span><span class="p">:</span>
+                <span class="n">List</span><span class="o">&lt;</span><span class="n">RuleData</span><span class="o">&gt;</span> <span class="n">ruleList</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getGson</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getJson</span><span class="p">(),</span> <span class="k">new</span> <span class="n">TypeToken</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">RuleData</span><span class="o">&gt;&gt;</span><span class="p">()</span> <span class="p">{</span>
+                <span class="p">}.</span><span class="na">getType</span><span class="p">());</span>
+                <span class="k">return</span> <span class="k">new</span> <span class="n">ConfigData</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getMd5</span><span class="p">(),</span> <span class="n">config</span><span class="p">.</span><span class="na">getLastModifyTime</span><span class="p">(),</span> <span class="n">ruleList</span><span class="p">);</span>
+            <span class="k">case</span> <span class="n">SELECTOR</span><span class="p">:</span>
+                <span class="n">List</span><span class="o">&lt;</span><span class="n">SelectorData</span><span class="o">&gt;</span> <span class="n">selectorList</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getGson</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getJson</span><span class="p">(),</span> <span class="k">new</span> <span class="n">TypeToken</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">SelectorData</span><span class="o">&gt;&gt;</span><span class="p">()</span> <span class="p">{</span>
+                <span class="p">}.</span><span class="na">getType</span><span class="p">());</span>
+                <span class="k">return</span> <span class="k">new</span> <span class="n">ConfigData</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getMd5</span><span class="p">(),</span> <span class="n">config</span><span class="p">.</span><span class="na">getLastModifyTime</span><span class="p">(),</span> <span class="n">selectorList</span><span class="p">);</span>
+            <span class="k">case</span> <span class="n">META_DATA</span><span class="p">:</span>
+                <span class="n">List</span><span class="o">&lt;</span><span class="n">MetaData</span><span class="o">&gt;</span> <span class="n">metaList</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getGson</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getJson</span><span class="p">(),</span> <span class="k">new</span> <span class="n">TypeToken</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">MetaData</span><span class="o">&gt;&gt;</span><span class="p">()</span> <span class="p">{</span>
+                <span class="p">}.</span><span class="na">getType</span><span class="p">());</span>
+                <span class="k">return</span> <span class="k">new</span> <span class="n">ConfigData</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getMd5</span><span class="p">(),</span> <span class="n">config</span><span class="p">.</span><span class="na">getLastModifyTime</span><span class="p">(),</span> <span class="n">metaList</span><span class="p">);</span>
+            <span class="k">default</span><span class="p">:</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalStateException</span><span class="p">(</span><span class="s">"Unexpected groupKey: "</span> <span class="o">+</span> <span class="n">groupKey</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们去看一下Cache，发现更新函数只能更新 md5 和 时间，json是初始化传入的。这里暂时放过
     </p>
-    <p>
-     ```java
-public class ConfigDataCache {
-    </p>
-    <pre><pre>protected synchronized void update(final String md5, final long lastModifyTime) {
-    this.md5 = md5;
-    this.lastModifyTime = lastModifyTime;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConfigDataCache</span> <span class="p">{</span>
+
+    <span class="kd">protected</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">md5</span><span class="p">,</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">lastModifyTime</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">md5</span> <span class="o">=</span> <span class="n">md5</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">lastModifyTime</span> <span class="o">=</span> <span class="n">lastModifyTime</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      通过上面的分析，我们知道了fetch接口是直接返回全量时间的，也就是只要调用这个接口，五种类型的数据都会发送过去，数据量还挺大的
     </p>
-    <h3>
+    <h3 id="configslistener">
      /configs/listener
     </h3>
     <p>
      接下来看看监听接口，一看就比较奇怪，没有返回值
     </p>
-    <p>
-     ```java
-@RequestMapping("/configs")
-public class ConfigController {
-    </p>
-    <pre><pre>@PostMapping(value = "/listener")
-public void listener(final HttpServletRequest request, final HttpServletResponse response) {
-    longPollingListener.doLongPolling(request, response);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">"/configs"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConfigController</span> <span class="p">{</span>
+
+    <span class="nd">@PostMapping</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"/listener"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">listener</span><span class="p">(</span><span class="kd">final</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">longPollingListener</span><span class="p">.</span><span class="na">doLongPolling</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      抱着好奇心继续看doLongPolling函数
     </p>
@@ -235,106 +218,100 @@ public void listener(final HttpServletRequest request, final HttpServletResponse
     <p>
      如果没有发送变化，会开启一个线程进行等待，具体内容下面在看
     </p>
-    <p>
-     ```java
-public class HttpLongPollingDataChangedListener extends AbstractDataChangedListener {
-    </p>
-    <pre><pre>public void doLongPolling(final HttpServletRequest request, final HttpServletResponse response) {
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpLongPollingDataChangedListener</span> <span class="kd">extends</span> <span class="n">AbstractDataChangedListener</span> <span class="p">{</span>
 
-    // compare group md5
-    List&lt;ConfigGroupEnum&gt; changedGroup = compareChangedGroup(request);
-    String clientIp = getRemoteIp(request);
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">doLongPolling</span><span class="p">(</span><span class="kd">final</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="p">)</span> <span class="p">{</span>
 
-    // response immediately.
-    if (CollectionUtils.isNotEmpty(changedGroup)) {
-        this.generateResponse(response, changedGroup);
-        log.info("send response with the changed group, ip={}, group={}", clientIp, changedGroup);
-        return;
-    }
+        <span class="c1">// compare group md5</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">ConfigGroupEnum</span><span class="o">&gt;</span> <span class="n">changedGroup</span> <span class="o">=</span> <span class="n">compareChangedGroup</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+        <span class="n">String</span> <span class="n">clientIp</span> <span class="o">=</span> <span class="n">getRemoteIp</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
 
-    // listen for configuration changed.
-    final AsyncContext asyncContext = request.startAsync();
+        <span class="c1">// response immediately.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">changedGroup</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">generateResponse</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">changedGroup</span><span class="p">);</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"send response with the changed group, ip={}, group={}"</span><span class="p">,</span> <span class="n">clientIp</span><span class="p">,</span> <span class="n">changedGroup</span><span class="p">);</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
 
-    // AsyncContext.settimeout() does not timeout properly, so you have to control it yourself
-    asyncContext.setTimeout(0L);
+        <span class="c1">// listen for configuration changed.</span>
+        <span class="kd">final</span> <span class="n">AsyncContext</span> <span class="n">asyncContext</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">startAsync</span><span class="p">();</span>
 
-    // block client's thread.
-    scheduler.execute(new LongPollingClient(asyncContext, clientIp, HttpConstants.SERVER_MAX_HOLD_TIMEOUT));
-}
+        <span class="c1">// AsyncContext.settimeout() does not timeout properly, so you have to control it yourself</span>
+        <span class="n">asyncContext</span><span class="p">.</span><span class="na">setTimeout</span><span class="p">(</span><span class="mi">0</span><span class="n">L</span><span class="p">);</span>
 
-// Bootstrap端传过来的应该是它最新的MD5，如果其中有一个类型MD5是新的，那就好添加到group中，如果group不为空，则直接返回
-private List&lt;ConfigGroupEnum&gt; compareChangedGroup(final HttpServletRequest request) {
-    List&lt;ConfigGroupEnum&gt; changedGroup = new ArrayList&lt;&gt;(ConfigGroupEnum.values().length);
-    for (ConfigGroupEnum group : ConfigGroupEnum.values()) {
-        // md5,lastModifyTime
-        String[] params = StringUtils.split(request.getParameter(group.name()), ',');
-        if (params == null || params.length != 2) {
-            throw new SoulException("group param invalid:" + request.getParameter(group.name()));
-        }
-        String clientMd5 = params[0];
-        long clientModifyTime = NumberUtils.toLong(params[1]);
-        ConfigDataCache serverCache = CACHE.get(group.name());
-        // do check.
-        if (this.checkCacheDelayAndUpdate(serverCache, clientMd5, clientModifyTime)) {
-            changedGroup.add(group);
-        }
-    }
-    return changedGroup;
-}
+        <span class="c1">// block client's thread.</span>
+        <span class="n">scheduler</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="k">new</span> <span class="n">LongPollingClient</span><span class="p">(</span><span class="n">asyncContext</span><span class="p">,</span> <span class="n">clientIp</span><span class="p">,</span> <span class="n">HttpConstants</span><span class="p">.</span><span class="na">SERVER_MAX_HOLD_TIMEOUT</span><span class="p">));</span>
+    <span class="p">}</span>
 
-private void generateResponse(final HttpServletResponse response, final List&lt;ConfigGroupEnum&gt; changedGroups) {
-    try {
-        response.setHeader("Pragma", "no-cache");
-        response.setDateHeader("Expires", 0);
-        response.setHeader("Cache-Control", "no-cache,no-store");
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(HttpServletResponse.SC_OK);
-        // 学到了新的技能，response直接自己能调用
-        response.getWriter().println(GsonUtils.getInstance().toJson(SoulAdminResult.success(SoulResultMessage.SUCCESS, changedGroups)));
-    } catch (IOException ex) {
-        log.error("Sending response failed.", ex);
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="c1">// Bootstrap端传过来的应该是它最新的MD5，如果其中有一个类型MD5是新的，那就好添加到group中，如果group不为空，则直接返回</span>
+    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ConfigGroupEnum</span><span class="o">&gt;</span> <span class="nf">compareChangedGroup</span><span class="p">(</span><span class="kd">final</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">ConfigGroupEnum</span><span class="o">&gt;</span> <span class="n">changedGroup</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">values</span><span class="p">().</span><span class="na">length</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">ConfigGroupEnum</span> <span class="n">group</span> <span class="p">:</span> <span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">values</span><span class="p">())</span> <span class="p">{</span>
+            <span class="c1">// md5,lastModifyTime</span>
+            <span class="n">String</span><span class="o">[]</span> <span class="n">params</span> <span class="o">=</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">split</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getParameter</span><span class="p">(</span><span class="n">group</span><span class="p">.</span><span class="na">name</span><span class="p">()),</span> <span class="sc">','</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">params</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">params</span><span class="p">.</span><span class="na">length</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="n">SoulException</span><span class="p">(</span><span class="s">"group param invalid:"</span> <span class="o">+</span> <span class="n">request</span><span class="p">.</span><span class="na">getParameter</span><span class="p">(</span><span class="n">group</span><span class="p">.</span><span class="na">name</span><span class="p">()));</span>
+            <span class="p">}</span>
+            <span class="n">String</span> <span class="n">clientMd5</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">;</span>
+            <span class="kt">long</span> <span class="n">clientModifyTime</span> <span class="o">=</span> <span class="n">NumberUtils</span><span class="p">.</span><span class="na">toLong</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">);</span>
+            <span class="n">ConfigDataCache</span> <span class="n">serverCache</span> <span class="o">=</span> <span class="n">CACHE</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">group</span><span class="p">.</span><span class="na">name</span><span class="p">());</span>
+            <span class="c1">// do check.</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">checkCacheDelayAndUpdate</span><span class="p">(</span><span class="n">serverCache</span><span class="p">,</span> <span class="n">clientMd5</span><span class="p">,</span> <span class="n">clientModifyTime</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">changedGroup</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">group</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">changedGroup</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">generateResponse</span><span class="p">(</span><span class="kd">final</span> <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="p">,</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ConfigGroupEnum</span><span class="o">&gt;</span> <span class="n">changedGroups</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">response</span><span class="p">.</span><span class="na">setHeader</span><span class="p">(</span><span class="s">"Pragma"</span><span class="p">,</span> <span class="s">"no-cache"</span><span class="p">);</span>
+            <span class="n">response</span><span class="p">.</span><span class="na">setDateHeader</span><span class="p">(</span><span class="s">"Expires"</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+            <span class="n">response</span><span class="p">.</span><span class="na">setHeader</span><span class="p">(</span><span class="s">"Cache-Control"</span><span class="p">,</span> <span class="s">"no-cache,no-store"</span><span class="p">);</span>
+            <span class="n">response</span><span class="p">.</span><span class="na">setContentType</span><span class="p">(</span><span class="n">MediaType</span><span class="p">.</span><span class="na">APPLICATION_JSON_VALUE</span><span class="p">);</span>
+            <span class="n">response</span><span class="p">.</span><span class="na">setStatus</span><span class="p">(</span><span class="n">HttpServletResponse</span><span class="p">.</span><span class="na">SC_OK</span><span class="p">);</span>
+            <span class="c1">// 学到了新的技能，response直接自己能调用</span>
+            <span class="n">response</span><span class="p">.</span><span class="na">getWriter</span><span class="p">().</span><span class="na">println</span><span class="p">(</span><span class="n">GsonUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">toJson</span><span class="p">(</span><span class="n">SoulAdminResult</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">SoulResultMessage</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">,</span> <span class="n">changedGroups</span><span class="p">)));</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">IOException</span> <span class="n">ex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">"Sending response failed."</span><span class="p">,</span> <span class="n">ex</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们来看下那个线程任务
     </p>
     <p>
      看着好像是启动了一个定时的任务，时间到了就返回数据，这里细节不太清楚，先放过
     </p>
-    <p>
-     ```java
-public class HttpLongPollingDataChangedListener extends AbstractDataChangedListener {
-    </p>
-    <pre><pre>class LongPollingClient implements Runnable {
-    @Override
-    public void run() {
-        this.asyncTimeoutFuture = scheduler.schedule(() -&gt; {
-            clients.remove(LongPollingClient.this);
-            List&lt;ConfigGroupEnum&gt; changedGroups = compareChangedGroup((HttpServletRequest) asyncContext.getRequest());
-            sendResponse(changedGroups);
-        }, timeoutTime, TimeUnit.MILLISECONDS);
-        clients.add(this);
-    }
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpLongPollingDataChangedListener</span> <span class="kd">extends</span> <span class="n">AbstractDataChangedListener</span> <span class="p">{</span>
 
-    void sendResponse(final List&lt;ConfigGroupEnum&gt; changedGroups) {
-        // cancel scheduler
-        if (null != asyncTimeoutFuture) {
-            asyncTimeoutFuture.cancel(false);
-        }
-        generateResponse((HttpServletResponse) asyncContext.getResponse(), changedGroups);
-        asyncContext.complete();
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="kd">class</span> <span class="nc">LongPollingClient</span> <span class="kd">implements</span> <span class="n">Runnable</span> <span class="p">{</span>
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">asyncTimeoutFuture</span> <span class="o">=</span> <span class="n">scheduler</span><span class="p">.</span><span class="na">schedule</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">clients</span><span class="p">.</span><span class="na">remove</span><span class="p">(</span><span class="n">LongPollingClient</span><span class="p">.</span><span class="na">this</span><span class="p">);</span>
+                <span class="n">List</span><span class="o">&lt;</span><span class="n">ConfigGroupEnum</span><span class="o">&gt;</span> <span class="n">changedGroups</span> <span class="o">=</span> <span class="n">compareChangedGroup</span><span class="p">((</span><span class="n">HttpServletRequest</span><span class="p">)</span> <span class="n">asyncContext</span><span class="p">.</span><span class="na">getRequest</span><span class="p">());</span>
+                <span class="n">sendResponse</span><span class="p">(</span><span class="n">changedGroups</span><span class="p">);</span>
+            <span class="p">},</span> <span class="n">timeoutTime</span><span class="p">,</span> <span class="n">TimeUnit</span><span class="p">.</span><span class="na">MILLISECONDS</span><span class="p">);</span>
+            <span class="n">clients</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="kt">void</span> <span class="nf">sendResponse</span><span class="p">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ConfigGroupEnum</span><span class="o">&gt;</span> <span class="n">changedGroups</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// cancel scheduler</span>
+            <span class="k">if</span> <span class="p">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">asyncTimeoutFuture</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">asyncTimeoutFuture</span><span class="p">.</span><span class="na">cancel</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">generateResponse</span><span class="p">((</span><span class="n">HttpServletResponse</span><span class="p">)</span> <span class="n">asyncContext</span><span class="p">.</span><span class="na">getResponse</span><span class="p">(),</span> <span class="n">changedGroups</span><span class="p">);</span>
+            <span class="n">asyncContext</span><span class="p">.</span><span class="na">complete</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      通过的上面的分析，我们知道了一个数据变化监听的大致流程：
     </p>
@@ -352,7 +329,7 @@ public class HttpLongPollingDataChangedListener extends AbstractDataChangedListe
     <p>
      它有个asyncContext,如果超时了会返回空吗？
     </p>
-    <h3>
+    <h3 id="cache">
      事件发布：Cache更新
     </h3>
     <p>
@@ -361,203 +338,185 @@ public class HttpLongPollingDataChangedListener extends AbstractDataChangedListe
     <p>
      首先我们在上面的本地缓存更新函数中打上断点，查看其调用栈，但非常的可惜，根本没有触发......非常的奇怪
     </p>
-    <p>
-     ```java
-public class ConfigDataCache {
-    </p>
-    <pre><pre>protected synchronized void update(final String md5, final long lastModifyTime) {
-    this.md5 = md5;
-    this.lastModifyTime = lastModifyTime;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConfigDataCache</span> <span class="p">{</span>
+
+    <span class="kd">protected</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">md5</span><span class="p">,</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">lastModifyTime</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">md5</span> <span class="o">=</span> <span class="n">md5</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">lastModifyTime</span> <span class="o">=</span> <span class="n">lastModifyTime</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们查看日志，找到我们刚才在后台页面中更新的事件日志
     </p>
-    <p>
-     <pre>text
-o.d.s.a.l.AbstractDataChangedListener    : update config cache[PLUGIN], old: {group='PLUGIN', md5='5e40806d61fedeaf4f20be6a61c43991', lastModifyTime=1611713809914}, updated: {group='PLUGIN', md5='9166fd41ff37951bd871025178ebfac3', lastModifyTime=1611713823241}</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>o.d.s.a.l.AbstractDataChangedListener    : update config cache[PLUGIN], old: {group='PLUGIN', md5='5e40806d61fedeaf4f20be6a61c43991', lastModifyTime=1611713809914}, updated: {group='PLUGIN', md5='9166fd41ff37951bd871025178ebfac3', lastModifyTime=1611713823241}
+</code></pre>
+    </div>
     <p>
      根据日志，我们定位到相应的类和函数。需要注意的是，我们直接重启也能进入断点
     </p>
     <p>
      从下面的代码中可以看出，已经收到了变化的数据，然后更新本地缓存
     </p>
-    <p>
-     <pre>java
-public abstract class AbstractDataChangedListener implements DataChangedListener, InitializingBean {
-    protected &lt;T&gt; void updateCache(final ConfigGroupEnum group, final List&lt;T&gt; data) {
-        String json = GsonUtils.getInstance().toJson(data);
-        ConfigDataCache newVal = new ConfigDataCache(group.name(), json, Md5Utils.md5(json), System.currentTimeMillis());
-        // 更新本地缓存
-        ConfigDataCache oldVal = CACHE.put(newVal.getGroup(), newVal);
-        log.info("update config cache[{}], old: {}, updated: {}", group, oldVal, newVal);
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">AbstractDataChangedListener</span> <span class="kd">implements</span> <span class="n">DataChangedListener</span><span class="p">,</span> <span class="n">InitializingBean</span> <span class="p">{</span>
+    <span class="kd">protected</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="nf">updateCache</span><span class="p">(</span><span class="kd">final</span> <span class="n">ConfigGroupEnum</span> <span class="n">group</span><span class="p">,</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">toJson</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+        <span class="n">ConfigDataCache</span> <span class="n">newVal</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ConfigDataCache</span><span class="p">(</span><span class="n">group</span><span class="p">.</span><span class="na">name</span><span class="p">(),</span> <span class="n">json</span><span class="p">,</span> <span class="n">Md5Utils</span><span class="p">.</span><span class="na">md5</span><span class="p">(</span><span class="n">json</span><span class="p">),</span> <span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">());</span>
+        <span class="c1">// 更新本地缓存</span>
+        <span class="n">ConfigDataCache</span> <span class="n">oldVal</span> <span class="o">=</span> <span class="n">CACHE</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">newVal</span><span class="p">.</span><span class="na">getGroup</span><span class="p">(),</span> <span class="n">newVal</span><span class="p">);</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"update config cache[{}], old: {}, updated: {}"</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">oldVal</span><span class="p">,</span> <span class="n">newVal</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们跟踪其调用栈，触发了下面代码中的Cache更新函数
     </p>
     <p>
      然后来到一个奇怪的afterPropertiesSet
     </p>
-    <p>
-     ```java
-public class HttpLongPollingDataChangedListener extends AbstractDataChangedListener {
-    protected void updatePluginCache() {
-        this.updateCache(ConfigGroupEnum.APP_AUTH, appAuthService.listAll());
-    }
-    </p>
-    <pre><pre>// Admin重启后就触发，根据下面的内容，可以看出这就是一个初始化的函数，得到数据刷新本地缓存
-public final void afterPropertiesSet() {
-    updateAppAuthCache();
-    updatePluginCache();
-    updateRuleCache();
-    updateSelectorCache();
-    updateMetaDataCache();
-    afterInitialize();
-}
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpLongPollingDataChangedListener</span> <span class="kd">extends</span> <span class="n">AbstractDataChangedListener</span> <span class="p">{</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">updatePluginCache</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">updateCache</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">APP_AUTH</span><span class="p">,</span> <span class="n">appAuthService</span><span class="p">.</span><span class="na">listAll</span><span class="p">());</span>
+    <span class="p">}</span>
 
-// 这个线程启动了一个任务，定时周期执行指定的任务
-protected void afterInitialize() {
-    long syncInterval = httpSyncProperties.getRefreshInterval().toMillis();
-    // Periodically check the data for changes and update the cache
-    scheduler.scheduleWithFixedDelay(() -&gt; {
-        log.info("http sync strategy refresh config start.");
-        try {
-            this.refreshLocalCache();
-            log.info("http sync strategy refresh config success.");
-        } catch (Exception e) {
-            log.error("http sync strategy refresh config error!", e);
-        }
-    }, syncInterval, syncInterval, TimeUnit.MILLISECONDS);
-    log.info("http sync strategy refresh interval: {}ms", syncInterval);
-}
+    <span class="c1">// Admin重启后就触发，根据下面的内容，可以看出这就是一个初始化的函数，得到数据刷新本地缓存</span>
+    <span class="kd">public</span> <span class="kd">final</span> <span class="kt">void</span> <span class="nf">afterPropertiesSet</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">updateAppAuthCache</span><span class="p">();</span>
+        <span class="n">updatePluginCache</span><span class="p">();</span>
+        <span class="n">updateRuleCache</span><span class="p">();</span>
+        <span class="n">updateSelectorCache</span><span class="p">();</span>
+        <span class="n">updateMetaDataCache</span><span class="p">();</span>
+        <span class="n">afterInitialize</span><span class="p">();</span>
+    <span class="p">}</span>
 
-private void refreshLocalCache() {
-    this.updateAppAuthCache();
-    this.updatePluginCache();
-    this.updateRuleCache();
-    this.updateSelectorCache();
-    this.updateMetaDataCache();
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="c1">// 这个线程启动了一个任务，定时周期执行指定的任务</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">afterInitialize</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kt">long</span> <span class="n">syncInterval</span> <span class="o">=</span> <span class="n">httpSyncProperties</span><span class="p">.</span><span class="na">getRefreshInterval</span><span class="p">().</span><span class="na">toMillis</span><span class="p">();</span>
+        <span class="c1">// Periodically check the data for changes and update the cache</span>
+        <span class="n">scheduler</span><span class="p">.</span><span class="na">scheduleWithFixedDelay</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"http sync strategy refresh config start."</span><span class="p">);</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">refreshLocalCache</span><span class="p">();</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"http sync strategy refresh config success."</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">"http sync strategy refresh config error!"</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">},</span> <span class="n">syncInterval</span><span class="p">,</span> <span class="n">syncInterval</span><span class="p">,</span> <span class="n">TimeUnit</span><span class="p">.</span><span class="na">MILLISECONDS</span><span class="p">);</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"http sync strategy refresh interval: {}ms"</span><span class="p">,</span> <span class="n">syncInterval</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">refreshLocalCache</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">updateAppAuthCache</span><span class="p">();</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">updatePluginCache</span><span class="p">();</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">updateRuleCache</span><span class="p">();</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">updateSelectorCache</span><span class="p">();</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">updateMetaDataCache</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面的函数中，我们发现它是初始化的操作，进行本地缓存的更新
     </p>
     <p>
      在上面的探索中，还是没有找到事件发布之类的流程，我们直接在HttpLongPollingDataChangedListener的下面函数中打上断点，然后在后台改变插件状态
     </p>
-    <p>
-     <pre>java
-public class HttpLongPollingDataChangedListener extends AbstractDataChangedListener {
-    @Override
-    protected void afterPluginChanged(final List&lt;PluginData&gt; changed, final DataEventTypeEnum eventType) {
-        scheduler.execute(new DataChangeTask(ConfigGroupEnum.PLUGIN));
-    }
-}</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpLongPollingDataChangedListener</span> <span class="kd">extends</span> <span class="n">AbstractDataChangedListener</span> <span class="p">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">afterPluginChanged</span><span class="p">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">changed</span><span class="p">,</span> <span class="kd">final</span> <span class="n">DataEventTypeEnum</span> <span class="n">eventType</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">scheduler</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="k">new</span> <span class="n">DataChangeTask</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">PLUGIN</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      execute后面再看，跟踪调用栈来到下面的代码
     </p>
     <p>
      可以看到是先更新缓存，然后再执行后面afterPluginChanged的execute，调用栈后面就是熟悉的：DataChangedEventDispatcher：：onApplicationEvent、PluginServiceImpl：：createOrUpdate、PluginController：：updatePlugin，这里就不再赘述了
     </p>
-    <p>
-     ```java
-public abstract class AbstractDataChangedListener implements DataChangedListener, InitializingBean {
-        @Override
-    public void onPluginChanged(final List
-     <plugindata>
-      changed, final DataEventTypeEnum eventType) {
-        if (CollectionUtils.isEmpty(changed)) {
-            return;
-        }
-        this.updatePluginCache();
-        this.afterPluginChanged(changed, eventType);
-    }
-     </plugindata>
-    </p>
-    <pre><pre>protected void updatePluginCache() {
-    this.updateCache(ConfigGroupEnum.PLUGIN, pluginService.listAll());
-}
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">AbstractDataChangedListener</span> <span class="kd">implements</span> <span class="n">DataChangedListener</span><span class="p">,</span> <span class="n">InitializingBean</span> <span class="p">{</span>
+        <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPluginChanged</span><span class="p">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">changed</span><span class="p">,</span> <span class="kd">final</span> <span class="n">DataEventTypeEnum</span> <span class="n">eventType</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">changed</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">updatePluginCache</span><span class="p">();</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">afterPluginChanged</span><span class="p">(</span><span class="n">changed</span><span class="p">,</span> <span class="n">eventType</span><span class="p">);</span>
+    <span class="p">}</span>
 
-protected &lt;T&gt; void updateCache(final ConfigGroupEnum group, final List&lt;T&gt; data) {
-    String json = GsonUtils.getInstance().toJson(data);
-    ConfigDataCache newVal = new ConfigDataCache(group.name(), json, Md5Utils.md5(json), System.currentTimeMillis());
-    ConfigDataCache oldVal = CACHE.put(newVal.getGroup(), newVal);
-    log.info("update config cache[{}], old: {}, updated: {}", group, oldVal, newVal);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">updatePluginCache</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">updateCache</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">PLUGIN</span><span class="p">,</span> <span class="n">pluginService</span><span class="p">.</span><span class="na">listAll</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="kd">protected</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="nf">updateCache</span><span class="p">(</span><span class="kd">final</span> <span class="n">ConfigGroupEnum</span> <span class="n">group</span><span class="p">,</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">toJson</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+        <span class="n">ConfigDataCache</span> <span class="n">newVal</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ConfigDataCache</span><span class="p">(</span><span class="n">group</span><span class="p">.</span><span class="na">name</span><span class="p">(),</span> <span class="n">json</span><span class="p">,</span> <span class="n">Md5Utils</span><span class="p">.</span><span class="na">md5</span><span class="p">(</span><span class="n">json</span><span class="p">),</span> <span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">());</span>
+        <span class="n">ConfigDataCache</span> <span class="n">oldVal</span> <span class="o">=</span> <span class="n">CACHE</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">newVal</span><span class="p">.</span><span class="na">getGroup</span><span class="p">(),</span> <span class="n">newVal</span><span class="p">);</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"update config cache[{}], old: {}, updated: {}"</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">oldVal</span><span class="p">,</span> <span class="n">newVal</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们来看一下execute函数的具体细节：
     </p>
-    <p>
-     ```java
-public class HttpLongPollingDataChangedListener extends AbstractDataChangedListener {
-    class DataChangeTask implements Runnable {
-    </p>
-    <pre><pre>    @Override
-    public void run() {
-        // 遍历所有的client，然后发送变化的groupKey（数据类型）
-        for (Iterator&lt;LongPollingClient&gt; iter = clients.iterator(); iter.hasNext();) {
-            LongPollingClient client = iter.next();
-            iter.remove();
-            client.sendResponse(Collections.singletonList(groupKey));
-            log.info("send response with the changed group,ip={}, group={}, changeTime={}", client.ip, groupKey, changeTime);
-        }
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpLongPollingDataChangedListener</span> <span class="kd">extends</span> <span class="n">AbstractDataChangedListener</span> <span class="p">{</span>
+    <span class="kd">class</span> <span class="nc">DataChangeTask</span> <span class="kd">implements</span> <span class="n">Runnable</span> <span class="p">{</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="p">()</span> <span class="p">{</span>
+            <span class="c1">// 遍历所有的client，然后发送变化的groupKey（数据类型）</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">LongPollingClient</span><span class="o">&gt;</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">clients</span><span class="p">.</span><span class="na">iterator</span><span class="p">();</span> <span class="n">iter</span><span class="p">.</span><span class="na">hasNext</span><span class="p">();)</span> <span class="p">{</span>
+                <span class="n">LongPollingClient</span> <span class="n">client</span> <span class="o">=</span> <span class="n">iter</span><span class="p">.</span><span class="na">next</span><span class="p">();</span>
+                <span class="n">iter</span><span class="p">.</span><span class="na">remove</span><span class="p">();</span>
+                <span class="n">client</span><span class="p">.</span><span class="na">sendResponse</span><span class="p">(</span><span class="n">Collections</span><span class="p">.</span><span class="na">singletonList</span><span class="p">(</span><span class="n">groupKey</span><span class="p">));</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"send response with the changed group,ip={}, group={}, changeTime={}"</span><span class="p">,</span> <span class="n">client</span><span class="p">.</span><span class="na">ip</span><span class="p">,</span> <span class="n">groupKey</span><span class="p">,</span> <span class="n">changeTime</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面的线程中启动任务，循环遍历client列表，进行响应的发送，感觉和前面的定时监听任务有关，我们在回过头看看那段代码：
     </p>
-    <p>
-     ```java
-public class HttpLongPollingDataChangedListener extends AbstractDataChangedListener {
-    </p>
-    <pre><pre>class LongPollingClient implements Runnable {
-    @Override
-    public void run() {
-        this.asyncTimeoutFuture = scheduler.schedule(() -&gt; {
-            // 先将client从列表中移除
-            clients.remove(LongPollingClient.this);
-            List&lt;ConfigGroupEnum&gt; changedGroups = compareChangedGroup((HttpServletRequest) asyncContext.getRequest());
-            sendResponse(changedGroups);
-        }, timeoutTime, TimeUnit.MILLISECONDS);
-        // 超时后将其加入列表中？
-        clients.add(this);
-    }
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpLongPollingDataChangedListener</span> <span class="kd">extends</span> <span class="n">AbstractDataChangedListener</span> <span class="p">{</span>
 
-    void sendResponse(final List&lt;ConfigGroupEnum&gt; changedGroups) {
-        // cancel scheduler
-        if (null != asyncTimeoutFuture) {
-            asyncTimeoutFuture.cancel(false);
-        }
-        generateResponse((HttpServletResponse) asyncContext.getResponse(), changedGroups);
-        asyncContext.complete();
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="kd">class</span> <span class="nc">LongPollingClient</span> <span class="kd">implements</span> <span class="n">Runnable</span> <span class="p">{</span>
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">asyncTimeoutFuture</span> <span class="o">=</span> <span class="n">scheduler</span><span class="p">.</span><span class="na">schedule</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="c1">// 先将client从列表中移除</span>
+                <span class="n">clients</span><span class="p">.</span><span class="na">remove</span><span class="p">(</span><span class="n">LongPollingClient</span><span class="p">.</span><span class="na">this</span><span class="p">);</span>
+                <span class="n">List</span><span class="o">&lt;</span><span class="n">ConfigGroupEnum</span><span class="o">&gt;</span> <span class="n">changedGroups</span> <span class="o">=</span> <span class="n">compareChangedGroup</span><span class="p">((</span><span class="n">HttpServletRequest</span><span class="p">)</span> <span class="n">asyncContext</span><span class="p">.</span><span class="na">getRequest</span><span class="p">());</span>
+                <span class="n">sendResponse</span><span class="p">(</span><span class="n">changedGroups</span><span class="p">);</span>
+            <span class="p">},</span> <span class="n">timeoutTime</span><span class="p">,</span> <span class="n">TimeUnit</span><span class="p">.</span><span class="na">MILLISECONDS</span><span class="p">);</span>
+            <span class="c1">// 超时后将其加入列表中？</span>
+            <span class="n">clients</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="kt">void</span> <span class="nf">sendResponse</span><span class="p">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ConfigGroupEnum</span><span class="o">&gt;</span> <span class="n">changedGroups</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// cancel scheduler</span>
+            <span class="k">if</span> <span class="p">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">asyncTimeoutFuture</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">asyncTimeoutFuture</span><span class="p">.</span><span class="na">cancel</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">generateResponse</span><span class="p">((</span><span class="n">HttpServletResponse</span><span class="p">)</span> <span class="n">asyncContext</span><span class="p">.</span><span class="na">getResponse</span><span class="p">(),</span> <span class="n">changedGroups</span><span class="p">);</span>
+            <span class="n">asyncContext</span><span class="p">.</span><span class="na">complete</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      猜测流程是这样的：
     </p>
@@ -579,7 +538,7 @@ public class HttpLongPollingDataChangedListener extends AbstractDataChangedListe
       </p>
      </li>
     </ul>
-    <h2>
+    <h2 id="_4">
      总结
     </h2>
     <p>
@@ -617,23 +576,20 @@ public class HttpLongPollingDataChangedListener extends AbstractDataChangedListe
     <p>
      此外还有一个可能可以提PR的点，下面的函数似乎是没有用的(而且也没有搜索到那里使用，初始化和更新数据都没有能触发），在更新缓存的过程中基本都是new一个新的。也不排除其他地方有，但目前是没有找到，如果能确认的话，可以提一个PR进行删除
     </p>
-    <p>
-     ```java
-public class ConfigDataCache {
-    </p>
-    <pre><pre>protected synchronized void update(final String md5, final long lastModifyTime) {
-    this.md5 = md5;
-    this.lastModifyTime = lastModifyTime;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ConfigDataCache</span> <span class="p">{</span>
+
+    <span class="kd">protected</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">md5</span><span class="p">,</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">lastModifyTime</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">md5</span> <span class="o">=</span> <span class="n">md5</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">lastModifyTime</span> <span class="o">=</span> <span class="n">lastModifyTime</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h2 id="soul">
      Soul网关源码解析文章列表
     </h2>
-    <h3>
+    <h3 id="_5">
      掘金
     </h3>
     <ul>

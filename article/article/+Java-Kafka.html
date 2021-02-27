@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,134 +43,115 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="java-kafka">
      Java Kafka 简单示例
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      Java kafka 简单代码示例
     </p>
-    <h3>
+    <h3 id="maven">
      maven依赖配置
     </h3>
-    <p>
-     ```java
-    </p>
-    <!-- kafka -->
-    <p>
-     <dependency>
-      <groupid>
-       org.apache.kafka
-      </groupid>
-      <artifactid>
-       kafka-clients
-      </artifactid>
-      <version>
-       0.11.0.0
-      </version>
-     </dependency>
-     ```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">&lt;!--</span> <span class="n">kafka</span> <span class="o">--&gt;</span>
+<span class="o">&lt;</span><span class="n">dependency</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">groupId</span><span class="o">&gt;</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">kafka</span><span class="o">&lt;/</span><span class="n">groupId</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">artifactId</span><span class="o">&gt;</span><span class="n">kafka</span><span class="o">-</span><span class="n">clients</span><span class="o">&lt;/</span><span class="n">artifactId</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">version</span><span class="o">&gt;</span><span class="mf">0.11.0.0</span><span class="o">&lt;/</span><span class="n">version</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">dependency</span><span class="o">&gt;</span>
+</code></pre>
+    </div>
+    <h3 id="kakfa">
      kakfa生产和消费者生成
     </h3>
-    <p>
-     ```java
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-    </p>
-    <p>
-     import java.util.*;
-    </p>
-    <p>
-     /*
-     <em>
-      * @author lw1243925457
-     </em>
-     /
-public class KafkaUtil {
-    </p>
-    <pre><pre>public static KafkaConsumer&lt;String, String&gt; createConsumer(String servers, String topic) {
-    Properties properties = new Properties();
-    properties.put("bootstrap.servers", servers);
-    properties.put("group.id", "group-1");
-    properties.put("enable.auto.commit", "false");
-    properties.put("auto.commit.interval.ms", "1000");
-    properties.put("auto.offset.reset", "earliest");
-    properties.put("session.timeout.ms", "30000");
-    properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-    properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">import</span> <span class="nn">org.apache.kafka.clients.consumer.ConsumerRecord</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.kafka.clients.consumer.ConsumerRecords</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.kafka.clients.consumer.KafkaConsumer</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.kafka.clients.producer.KafkaProducer</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.kafka.clients.producer.ProducerRecord</span><span class="p">;</span>
 
-    KafkaConsumer&lt;String, String&gt; kafkaConsumer = new KafkaConsumer&lt;String, String&gt;(properties);
-    kafkaConsumer.subscribe(Arrays.asList(topic));
-    return kafkaConsumer;
-}
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="p">;</span>
 
-public static void readMessage(KafkaConsumer&lt;String, String&gt; kafkaConsumer, int timeout) {
-    while (true) {
-        ConsumerRecords&lt;String, String&gt; records = kafkaConsumer.poll(timeout);
-        for (ConsumerRecord&lt;String, String&gt; record : records) {
-            String value = record.value();
-            kafkaConsumer.commitAsync();
-            System.out.println(value);
-        }
-    }
-}
+<span class="cm">/**</span>
+<span class="cm"> * @author lw1243925457</span>
+<span class="cm"> */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">KafkaUtil</span> <span class="p">{</span>
 
-public static KafkaProducer&lt;String, String&gt; createProducer(String servers) {
-    Properties properties = new Properties();
-    properties.put("bootstrap.servers", servers);
-    properties.put("acks", "all");
-    properties.put("retries", 0);
-    properties.put("batch.size", 16384);
-    properties.put("linger.ms", 1);
-    properties.put("buffer.memory", 33554432);
-    properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-    properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-    return new KafkaProducer&lt;String, String&gt;(properties);
-}
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="nf">createConsumer</span><span class="p">(</span><span class="n">String</span> <span class="n">servers</span><span class="p">,</span> <span class="n">String</span> <span class="n">topic</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Properties</span> <span class="n">properties</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="p">();</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"bootstrap.servers"</span><span class="p">,</span> <span class="n">servers</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"group.id"</span><span class="p">,</span> <span class="s">"group-1"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"enable.auto.commit"</span><span class="p">,</span> <span class="s">"false"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"auto.commit.interval.ms"</span><span class="p">,</span> <span class="s">"1000"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"auto.offset.reset"</span><span class="p">,</span> <span class="s">"earliest"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"session.timeout.ms"</span><span class="p">,</span> <span class="s">"30000"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"key.deserializer"</span><span class="p">,</span> <span class="s">"org.apache.kafka.common.serialization.StringDeserializer"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"value.deserializer"</span><span class="p">,</span> <span class="s">"org.apache.kafka.common.serialization.StringDeserializer"</span><span class="p">);</span>
 
-public static void send(KafkaProducer&lt;String, String&gt; producer, String topic, String message) {
-    producer.send(new ProducerRecord&lt;String, String&gt;(topic, message));
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h3>
+        <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">kafkaConsumer</span> <span class="o">=</span> <span class="k">new</span> <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span><span class="p">(</span><span class="n">properties</span><span class="p">);</span>
+        <span class="n">kafkaConsumer</span><span class="p">.</span><span class="na">subscribe</span><span class="p">(</span><span class="n">Arrays</span><span class="p">.</span><span class="na">asList</span><span class="p">(</span><span class="n">topic</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">kafkaConsumer</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">readMessage</span><span class="p">(</span><span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">kafkaConsumer</span><span class="p">,</span> <span class="kt">int</span> <span class="n">timeout</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">while</span> <span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">ConsumerRecords</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">kafkaConsumer</span><span class="p">.</span><span class="na">poll</span><span class="p">(</span><span class="n">timeout</span><span class="p">);</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">ConsumerRecord</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">record</span> <span class="p">:</span> <span class="n">records</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">String</span> <span class="n">value</span> <span class="o">=</span> <span class="n">record</span><span class="p">.</span><span class="na">value</span><span class="p">();</span>
+                <span class="n">kafkaConsumer</span><span class="p">.</span><span class="na">commitAsync</span><span class="p">();</span>
+                <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">KafkaProducer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="nf">createProducer</span><span class="p">(</span><span class="n">String</span> <span class="n">servers</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Properties</span> <span class="n">properties</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="p">();</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"bootstrap.servers"</span><span class="p">,</span> <span class="n">servers</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"acks"</span><span class="p">,</span> <span class="s">"all"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"retries"</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"batch.size"</span><span class="p">,</span> <span class="mi">16384</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"linger.ms"</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"buffer.memory"</span><span class="p">,</span> <span class="mi">33554432</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"key.serializer"</span><span class="p">,</span> <span class="s">"org.apache.kafka.common.serialization.StringSerializer"</span><span class="p">);</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"value.serializer"</span><span class="p">,</span> <span class="s">"org.apache.kafka.common.serialization.StringSerializer"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">KafkaProducer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span><span class="p">(</span><span class="n">properties</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">send</span><span class="p">(</span><span class="n">KafkaProducer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">producer</span><span class="p">,</span> <span class="n">String</span> <span class="n">topic</span><span class="p">,</span> <span class="n">String</span> <span class="n">message</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">producer</span><span class="p">.</span><span class="na">send</span><span class="p">(</span><span class="k">new</span> <span class="n">ProducerRecord</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">message</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="_2">
      运行
     </h3>
-    <p>
-     ```java
-public class Main {
-    </p>
-    <pre><pre>public static void main(String[] args) {
-    String servers = "localhost:9092,localhost:9093,localhost:9094";
-    String topic = "TestTopic";
-    String message = "test";
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Main</span> <span class="p">{</span>
 
-    KafkaProducer&lt;String, String&gt; producer = KafkaUtil.createProducer(servers);
-    KafkaUtil.send(producer, topic, message);
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">servers</span> <span class="o">=</span> <span class="s">"localhost:9092,localhost:9093,localhost:9094"</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">topic</span> <span class="o">=</span> <span class="s">"TestTopic"</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">message</span> <span class="o">=</span> <span class="s">"test"</span><span class="p">;</span>
 
-    KafkaConsumer&lt;String, String&gt; consumer = KafkaUtil.createConsumer(servers, topic);
-    KafkaUtil.readMessage(consumer, 100);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h2>
+        <span class="n">KafkaProducer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">producer</span> <span class="o">=</span> <span class="n">KafkaUtil</span><span class="p">.</span><span class="na">createProducer</span><span class="p">(</span><span class="n">servers</span><span class="p">);</span>
+        <span class="n">KafkaUtil</span><span class="p">.</span><span class="na">send</span><span class="p">(</span><span class="n">producer</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">message</span><span class="p">);</span>
+
+        <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">consumer</span> <span class="o">=</span> <span class="n">KafkaUtil</span><span class="p">.</span><span class="na">createConsumer</span><span class="p">(</span><span class="n">servers</span><span class="p">,</span> <span class="n">topic</span><span class="p">);</span>
+        <span class="n">KafkaUtil</span><span class="p">.</span><span class="na">readMessage</span><span class="p">(</span><span class="n">consumer</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h2 id="_3">
      使用心得
     </h2>
-    <h3>
+    <h3 id="_4">
      总是读取最老的消息
     </h3>
     <p>
@@ -186,7 +168,7 @@ public class Main {
       none:topic各分区都存在已提交的offset时，从offset后开始消费；只要有一个分区不存在已提交的offset，则抛出异常
      </li>
     </ul>
-    <h2>
+    <h2 id="_5">
      参考链接
     </h2>
     <ul>

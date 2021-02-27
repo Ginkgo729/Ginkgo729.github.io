@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,28 +43,26 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="linux">
      Linux 时间校准
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      命令
     </h2>
-    <p>
-     ```
-tzselect
-export TZ='Asia/Shanghai'
-source ~/.bashrc
-rm -f /etc/localtime
-ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-timedatectl set-timezone 'Asia/Shanghai'
-    </p>
-    <p>
-     yum -y install ntp
-/usr/sbin/ntpdate -u cn.pool.ntp.org
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">tzselect</span>
+<span class="n">export</span> <span class="n">TZ</span><span class="o">=</span><span class="s1">'Asia/Shanghai'</span>
+<span class="k">source</span> <span class="o">~/</span><span class="p">.</span><span class="n">bashrc</span>
+<span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="k">localtime</span>
+<span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="k">share</span><span class="o">/</span><span class="n">zoneinfo</span><span class="o">/</span><span class="n">Asia</span><span class="o">/</span><span class="n">Shanghai</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="k">localtime</span>
+<span class="n">timedatectl</span> <span class="k">set</span><span class="o">-</span><span class="n">timezone</span> <span class="s1">'Asia/Shanghai'</span>
+
+<span class="n">yum</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">ntp</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">ntpdate</span> <span class="o">-</span><span class="n">u</span> <span class="n">cn</span><span class="p">.</span><span class="n">pool</span><span class="p">.</span><span class="n">ntp</span><span class="p">.</span><span class="n">org</span>
+</code></pre>
+    </div>
+    <h2 id="_2">
      参考链接
     </h2>
     <ul>

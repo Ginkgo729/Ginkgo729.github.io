@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soul-http">
      Soul 源码解析（三）HTTP请求处理概览
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
@@ -56,7 +57,7 @@
      </a>
      的配置，这次debug下请求处理的大致路径,验证网关模型的路径
     </p>
-    <h2>
+    <h2 id="_2">
      概览
     </h2>
     <p>
@@ -68,286 +69,258 @@
     <p>
      还有就是如何将响应返回给客户端
     </p>
-    <h2>
+    <h2 id="debug">
      源码Debug
     </h2>
-    <h4>
+    <h4 id="_3">
      查看运行日志，寻找切入点
     </h4>
     <p>
      上篇中我们配置了 Divide 插件，让 http://localhost:9195 ,转发到了后台服务器 http://localhost:8082 上，首先不打断点运行，查看运行日志，找一个切入点：
     </p>
     <p>
-     <pre>shell script
+     ```shell script
 o.d.soul.plugin.base.AbstractSoulPlugin  : divide selector success match , selector name :neety8082
 o.d.soul.plugin.base.AbstractSoulPlugin  : divide selector success match , selector name :neety8082
-o.d.s.plugin.httpclient.WebClientPlugin  : The request urlPath is http://localhost:8082, retryTimes is 1</pre>
+o.d.s.plugin.httpclient.WebClientPlugin  : The request urlPath is http://localhost:8082, retryTimes is 1
     </p>
-    <p>
-     上面的日志中一个比较明显的 divide 相关的日志，是 AbstractSoulPlugin 打印出来的，win下双击shift，搜索 AbstractSoulPlugin 进入，发现是一个接口，IDEA左边向下的箭头查看它的实现，发现有一个熟系的 DividePlugin 实现类，点击进入，在一个明显的 doExecute 函数上打上断点，发起请求：http://localhost:9195
-    </p>
-    <p>
-     通过函数调用栈，发送调用的是 SoulWebHandler ，从下面的函数中可以大致看出这是一个循环遍历，遍历 plugins 进行操作
-    </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; execute(final ServerWebExchange exchange) {
-            return Mono.defer(() -&gt; {
-                if (this.index &lt; plugins.size()) {
-                    SoulPlugin plugin = plugins.get(this.index++);
-                    Boolean skip = plugin.skip(exchange);
-                    if (skip) {
-                        return this.execute(exchange);
-                    }
-                    return plugin.execute(exchange, this);
-                }
-                return Mono.empty();
-            });
-        }</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">上面的日志中一个比较明显的</span> <span class="n">divide</span> <span class="err">相关的日志，是</span> <span class="n">AbstractSoulPlugin</span> <span class="err">打印出来的，</span><span class="n">win下双击shift</span><span class="err">，搜索</span> <span class="n">AbstractSoulPlugin</span> <span class="err">进入，发现是一个接口，</span><span class="n">IDEA左边向下的箭头查看它的实现</span><span class="err">，发现有一个熟系的</span> <span class="n">DividePlugin</span> <span class="err">实现类，点击进入，在一个明显的</span> <span class="n">doExecute</span> <span class="err">函数上打上断点，发起请求：</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">9195</span>
+
+<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">通过函数调用栈，发送调用的是</span> <span class="n">SoulWebHandler</span> <span class="err">，从下面的函数中可以大致看出这是一个循环遍历，遍历</span> <span class="n">plugins</span> <span class="err">进行操作</span>
+
+<span class="o">```</span><span class="n">java</span>
+    <span class="k">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="k">execute</span><span class="p">(</span><span class="k">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="err">{</span>
+            <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="n">defer</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="err">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">.</span><span class="k">index</span> <span class="o">&lt;</span> <span class="n">plugins</span><span class="p">.</span><span class="k">size</span><span class="p">())</span> <span class="err">{</span>
+                    <span class="n">SoulPlugin</span> <span class="n">plugin</span> <span class="o">=</span> <span class="n">plugins</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">this</span><span class="p">.</span><span class="k">index</span><span class="o">++</span><span class="p">);</span>
+                    <span class="nb">Boolean</span> <span class="n">skip</span> <span class="o">=</span> <span class="n">plugin</span><span class="p">.</span><span class="n">skip</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">skip</span><span class="p">)</span> <span class="err">{</span>
+                        <span class="k">return</span> <span class="n">this</span><span class="p">.</span><span class="k">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+                    <span class="err">}</span>
+                    <span class="k">return</span> <span class="n">plugin</span><span class="p">.</span><span class="k">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">this</span><span class="p">);</span>
+                <span class="err">}</span>
+                <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span>
+            <span class="err">}</span><span class="p">);</span>
+        <span class="err">}</span>
+</code></pre>
+    </div>
+    <h3 id="_4">
      跟踪调用栈
     </h3>
     <p>
      再次往前看调用栈，发送 SoulWebHandler 调用了 SoulWebHandler 的 execute
     </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; handle(@NonNull final ServerWebExchange exchange) {
-        MetricsTrackerFacade.getInstance().counterInc(MetricsLabelEnum.REQUEST_TOTAL.getName());
-        Optional&lt;HistogramMetricsTrackerDelegate&gt; startTimer = MetricsTrackerFacade.getInstance().histogramStartTimer(MetricsLabelEnum.REQUEST_LATENCY.getName());
-        // new DefaultSoulPluginChain(plugins).execute(exchange) 明显的调用关系
-        return new DefaultSoulPluginChain(plugins).execute(exchange).subscribeOn(scheduler)
-                .doOnSuccess(t -&gt; startTimer.ifPresent(time -&gt; MetricsTrackerFacade.getInstance().histogramObserveDuration(time)));
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="nd">@NonNull</span> <span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">MetricsTrackerFacade</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">counterInc</span><span class="p">(</span><span class="n">MetricsLabelEnum</span><span class="p">.</span><span class="na">REQUEST_TOTAL</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+        <span class="n">Optional</span><span class="o">&lt;</span><span class="n">HistogramMetricsTrackerDelegate</span><span class="o">&gt;</span> <span class="n">startTimer</span> <span class="o">=</span> <span class="n">MetricsTrackerFacade</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">histogramStartTimer</span><span class="p">(</span><span class="n">MetricsLabelEnum</span><span class="p">.</span><span class="na">REQUEST_LATENCY</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+        <span class="c1">// new DefaultSoulPluginChain(plugins).execute(exchange) 明显的调用关系</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">DefaultSoulPluginChain</span><span class="p">(</span><span class="n">plugins</span><span class="p">).</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">).</span><span class="na">subscribeOn</span><span class="p">(</span><span class="n">scheduler</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">doOnSuccess</span><span class="p">(</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">startTimer</span><span class="p">.</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">time</span> <span class="o">-&gt;</span> <span class="n">MetricsTrackerFacade</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">histogramObserveDuration</span><span class="p">(</span><span class="n">time</span><span class="p">)));</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      再往前发现看不懂了，没用明显的函数传递关系，我们在上面的函数打上端口，重启程序，再次发送请求
     </p>
     <p>
      断点进来后，查看调用栈，发送调用上面函数的是 DefaultWebFilterChain
     </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; filter(ServerWebExchange exchange) {
-        return Mono.defer(() -&gt; {
-            // 当下面都为null的时候进行调用
-            return this.currentFilter != null &amp;&amp; this.chain != null ? this.invokeFilter(this.currentFilter, this.chain, exchange) : this.handler.handle(exchange);
-        });
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">filter</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="c1">// 当下面都为null的时候进行调用</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">currentFilter</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="na">chain</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="na">invokeFilter</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">currentFilter</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">chain</span><span class="p">,</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="na">handler</span><span class="p">.</span><span class="na">handle</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      再往前查看，调用栈又看不懂了，再次在上面的函数打上断点，重启，发请求，下面就直接写类和相关函数，有特别的地方就加点说明
     </p>
     <p>
      来到 FilteringWebHandler
     </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; handle(ServerWebExchange exchange) {
-        return this.chain.filter(exchange);
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">chain</span><span class="p">.</span><span class="na">filter</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续来到 WebHandlerDecorator
     </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; handle(ServerWebExchange exchange) {
-        return this.delegate.handle(exchange);
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">delegate</span><span class="p">.</span><span class="na">handle</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      来到 ExceptionHandlingWebHandler
     </p>
-    <p>
-     ```java
-public Mono
-     <void>
-      handle(ServerWebExchange exchange) {
-        Mono completion;
-        try {
-            // 在这进行调用
-            completion = super.handle(exchange);
-        } catch (Throwable var5) {
-            completion = Mono.error(var5);
-        }
-     </void>
-    </p>
-    <pre><pre>    WebExceptionHandler handler;
-    for(Iterator var3 = this.exceptionHandlers.iterator(); var3.hasNext(); completion = completion.onErrorResume((ex) -&gt; {
-        return handler.handle(exchange, ex);
-    })) {
-        handler = (WebExceptionHandler)var3.next();
-    }
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Mono</span> <span class="n">completion</span><span class="p">;</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="c1">// 在这进行调用</span>
+            <span class="n">completion</span> <span class="o">=</span> <span class="kd">super</span><span class="p">.</span><span class="na">handle</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var5</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">completion</span> <span class="o">=</span> <span class="n">Mono</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">var5</span><span class="p">);</span>
+        <span class="p">}</span>
 
-    return completion;
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+        <span class="n">WebExceptionHandler</span> <span class="n">handler</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">Iterator</span> <span class="n">var3</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">exceptionHandlers</span><span class="p">.</span><span class="na">iterator</span><span class="p">();</span> <span class="n">var3</span><span class="p">.</span><span class="na">hasNext</span><span class="p">();</span> <span class="n">completion</span> <span class="o">=</span> <span class="n">completion</span><span class="p">.</span><span class="na">onErrorResume</span><span class="p">((</span><span class="n">ex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">handler</span><span class="p">.</span><span class="na">handle</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">ex</span><span class="p">);</span>
+        <span class="p">}))</span> <span class="p">{</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="p">(</span><span class="n">WebExceptionHandler</span><span class="p">)</span><span class="n">var3</span><span class="p">.</span><span class="na">next</span><span class="p">();</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">completion</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续来到 HttpWebHandlerAdapter ，这个类有点关键，看到在前面一直传递的变量：exchange，exchange在这个类中生成，传递给后面的函数进行调用，而且是使用response和request生成的
     </p>
-    <p>
-     ```java
-    public Mono
-     <void>
-      handle(ServerHttpRequest request, ServerHttpResponse response) {
-        if (this.forwardedHeaderTransformer != null) {
-            request = this.forwardedHeaderTransformer.apply(request);
-        }
-     </void>
-    </p>
-    <pre><pre>    // 重点变量 exchange 的生成
-    ServerWebExchange exchange = this.createExchange(request, response);
-    LogFormatUtils.traceDebug(logger, (traceOn) -&gt; {
-        return exchange.getLogPrefix() + this.formatRequest(exchange.getRequest()) + (traceOn ? ", headers=" + this.formatHeaders(exchange.getRequest().getHeaders()) : "");
-    });
-    // this.getDelegate().handle(exchange)
-    // 通过debug可以看到 getDelete 得到的是 ExceptionHandlingWebHandler，那调用就是在这
-    Mono var10000 = this.getDelegate().handle(exchange).doOnSuccess((aVoid) -&gt; {
-        this.logResponse(exchange);
-    }).onErrorResume((ex) -&gt; {
-        return this.handleUnresolvedError(exchange, ex);
-    });
-    response.getClass();
-    return var10000.then(Mono.defer(response::setComplete));
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="n">ServerHttpResponse</span> <span class="n">response</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">forwardedHeaderTransformer</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">forwardedHeaderTransformer</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 重点变量 exchange 的生成</span>
+        <span class="n">ServerWebExchange</span> <span class="n">exchange</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">createExchange</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">);</span>
+        <span class="n">LogFormatUtils</span><span class="p">.</span><span class="na">traceDebug</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="p">(</span><span class="n">traceOn</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getLogPrefix</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="na">formatRequest</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">())</span> <span class="o">+</span> <span class="p">(</span><span class="n">traceOn</span> <span class="o">?</span> <span class="s">", headers="</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="na">formatHeaders</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getHeaders</span><span class="p">())</span> <span class="p">:</span> <span class="s">""</span><span class="p">);</span>
+        <span class="p">});</span>
+        <span class="c1">// this.getDelegate().handle(exchange)</span>
+        <span class="c1">// 通过debug可以看到 getDelete 得到的是 ExceptionHandlingWebHandler，那调用就是在这</span>
+        <span class="n">Mono</span> <span class="n">var10000</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getDelegate</span><span class="p">().</span><span class="na">handle</span><span class="p">(</span><span class="n">exchange</span><span class="p">).</span><span class="na">doOnSuccess</span><span class="p">((</span><span class="n">aVoid</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">logResponse</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+        <span class="p">}).</span><span class="na">onErrorResume</span><span class="p">((</span><span class="n">ex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">handleUnresolvedError</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">ex</span><span class="p">);</span>
+        <span class="p">});</span>
+        <span class="n">response</span><span class="p">.</span><span class="na">getClass</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">var10000</span><span class="p">.</span><span class="na">then</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(</span><span class="n">response</span><span class="p">::</span><span class="n">setComplete</span><span class="p">));</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续走到 ReactiveWebServerApplicationContext
     </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; handle(ServerHttpRequest request, ServerHttpResponse response) {
-            return this.handler.handle(request, response);
-        }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="n">ServerHttpResponse</span> <span class="n">response</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">handler</span><span class="p">.</span><span class="na">handle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">);</span>
+        <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续走到 ReactorHttpHandlerAdapter
     </p>
-    <p>
-     ```java
-    public Mono
-     <void>
-      apply(HttpServerRequest reactorRequest, HttpServerResponse reactorResponse) {
-        NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());
-     </void>
-    </p>
-    <pre><pre>    try {
-        // exchange 需要的 request 和 response 的生成
-        ReactorServerHttpRequest request = new ReactorServerHttpRequest(reactorRequest, bufferFactory);
-        ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory);
-        if (request.getMethod() == HttpMethod.HEAD) {
-            response = new HttpHeadResponseDecorator((ServerHttpResponse)response);
-        }
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">apply</span><span class="p">(</span><span class="n">HttpServerRequest</span> <span class="n">reactorRequest</span><span class="p">,</span> <span class="n">HttpServerResponse</span> <span class="n">reactorResponse</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">NettyDataBufferFactory</span> <span class="n">bufferFactory</span> <span class="o">=</span> <span class="k">new</span> <span class="n">NettyDataBufferFactory</span><span class="p">(</span><span class="n">reactorResponse</span><span class="p">.</span><span class="na">alloc</span><span class="p">());</span>
 
-        return this.httpHandler.handle(request, (ServerHttpResponse)response).doOnError((ex) -&gt; {
-            logger.trace(request.getLogPrefix() + "Failed to complete: " + ex.getMessage());
-        }).doOnSuccess((aVoid) -&gt; {
-            logger.trace(request.getLogPrefix() + "Handling completed");
-        });
-    } catch (URISyntaxException var6) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Failed to get request URI: " + var6.getMessage());
-        }
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="c1">// exchange 需要的 request 和 response 的生成</span>
+            <span class="n">ReactorServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReactorServerHttpRequest</span><span class="p">(</span><span class="n">reactorRequest</span><span class="p">,</span> <span class="n">bufferFactory</span><span class="p">);</span>
+            <span class="n">ServerHttpResponse</span> <span class="n">response</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReactorServerHttpResponse</span><span class="p">(</span><span class="n">reactorResponse</span><span class="p">,</span> <span class="n">bufferFactory</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getMethod</span><span class="p">()</span> <span class="o">==</span> <span class="n">HttpMethod</span><span class="p">.</span><span class="na">HEAD</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HttpHeadResponseDecorator</span><span class="p">((</span><span class="n">ServerHttpResponse</span><span class="p">)</span><span class="n">response</span><span class="p">);</span>
+            <span class="p">}</span>
 
-        reactorResponse.status(HttpResponseStatus.BAD_REQUEST);
-        return Mono.empty();
-    }
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">httpHandler</span><span class="p">.</span><span class="na">handle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="p">(</span><span class="n">ServerHttpResponse</span><span class="p">)</span><span class="n">response</span><span class="p">).</span><span class="na">doOnError</span><span class="p">((</span><span class="n">ex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getLogPrefix</span><span class="p">()</span> <span class="o">+</span> <span class="s">"Failed to complete: "</span> <span class="o">+</span> <span class="n">ex</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+            <span class="p">}).</span><span class="na">doOnSuccess</span><span class="p">((</span><span class="n">aVoid</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getLogPrefix</span><span class="p">()</span> <span class="o">+</span> <span class="s">"Handling completed"</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">URISyntaxException</span> <span class="n">var6</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">logger</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"Failed to get request URI: "</span> <span class="o">+</span> <span class="n">var6</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+            <span class="p">}</span>
+
+            <span class="n">reactorResponse</span><span class="p">.</span><span class="na">status</span><span class="p">(</span><span class="n">HttpResponseStatus</span><span class="p">.</span><span class="na">BAD_REQUEST</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续走到 HttpServerHandle
     </p>
-    <p>
-     ```java
-    public void onStateChange(Connection connection, State newState) {
-        if (newState == HttpServerState.REQUEST_RECEIVED) {
-            try {
-                if (log.isDebugEnabled()) {
-                    log.debug(ReactorNetty.format(connection.channel(), "Handler is being applied: {}"), new Object[]{this.handler});
-                }
-    </p>
-    <pre><pre>            HttpServerOperations ops = (HttpServerOperations)connection;
-            Mono.fromDirect((Publisher)this.handler.apply(ops, ops)).subscribe(ops.disposeSubscriber());
-        } catch (Throwable var4) {
-            log.error(ReactorNetty.format(connection.channel(), ""), var4);
-            connection.channel().close();
-        }
-    }
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStateChange</span><span class="p">(</span><span class="n">Connection</span> <span class="n">connection</span><span class="p">,</span> <span class="n">State</span> <span class="n">newState</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">newState</span> <span class="o">==</span> <span class="n">HttpServerState</span><span class="p">.</span><span class="na">REQUEST_RECEIVED</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">log</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="n">ReactorNetty</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">connection</span><span class="p">.</span><span class="na">channel</span><span class="p">(),</span> <span class="s">"Handler is being applied: {}"</span><span class="p">),</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="na">handler</span><span class="p">});</span>
+                <span class="p">}</span>
 
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+                <span class="n">HttpServerOperations</span> <span class="n">ops</span> <span class="o">=</span> <span class="p">(</span><span class="n">HttpServerOperations</span><span class="p">)</span><span class="n">connection</span><span class="p">;</span>
+                <span class="n">Mono</span><span class="p">.</span><span class="na">fromDirect</span><span class="p">((</span><span class="n">Publisher</span><span class="p">)</span><span class="k">this</span><span class="p">.</span><span class="na">handler</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">ops</span><span class="p">,</span> <span class="n">ops</span><span class="p">)).</span><span class="na">subscribe</span><span class="p">(</span><span class="n">ops</span><span class="p">.</span><span class="na">disposeSubscriber</span><span class="p">());</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var4</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">ReactorNetty</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">connection</span><span class="p">.</span><span class="na">channel</span><span class="p">(),</span> <span class="s">""</span><span class="p">),</span> <span class="n">var4</span><span class="p">);</span>
+                <span class="n">connection</span><span class="p">.</span><span class="na">channel</span><span class="p">().</span><span class="na">close</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续走到 TcpServerBind
     </p>
-    <p>
-     ```java
-        public void onStateChange(Connection connection, State newState) {
-            if (newState == State.DISCONNECTING &amp;&amp; connection.channel().isActive() &amp;&amp; !connection.isPersistent()) {
-                connection.dispose();
-            }
-    </p>
-    <pre><pre>        this.childObs.onStateChange(connection, newState);
-    }
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStateChange</span><span class="p">(</span><span class="n">Connection</span> <span class="n">connection</span><span class="p">,</span> <span class="n">State</span> <span class="n">newState</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">newState</span> <span class="o">==</span> <span class="n">State</span><span class="p">.</span><span class="na">DISCONNECTING</span> <span class="o">&amp;&amp;</span> <span class="n">connection</span><span class="p">.</span><span class="na">channel</span><span class="p">().</span><span class="na">isActive</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">connection</span><span class="p">.</span><span class="na">isPersistent</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">connection</span><span class="p">.</span><span class="na">dispose</span><span class="p">();</span>
+            <span class="p">}</span>
+
+            <span class="k">this</span><span class="p">.</span><span class="na">childObs</span><span class="p">.</span><span class="na">onStateChange</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">newState</span><span class="p">);</span>
+        <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      走到了很关键的一个： HttpServerOperations ，下面这个函数的 ctx 和 msg 也太熟悉不过了，明显的 netty 的 handler处理，请求入口
     </p>
-    <p>
-     ```java
-    protected void onInboundNext(ChannelHandlerContext ctx, Object msg) {
-        if (msg instanceof HttpRequest) {
-            try {
-                // 调用
-                this.listener().onStateChange(this, HttpServerState.REQUEST_RECEIVED);
-            } catch (Exception var4) {
-                this.onInboundError(var4);
-                ReferenceCountUtil.release(msg);
-                return;
-            }
-    </p>
-    <pre><pre>        if (msg instanceof FullHttpRequest) {
-            super.onInboundNext(ctx, msg);
-            if (this.isHttp2()) {
-                this.onInboundComplete();
-            }
-        }
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onInboundNext</span><span class="p">(</span><span class="n">ChannelHandlerContext</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">Object</span> <span class="n">msg</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">msg</span> <span class="k">instanceof</span> <span class="n">HttpRequest</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="c1">// 调用</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">listener</span><span class="p">().</span><span class="na">onStateChange</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">HttpServerState</span><span class="p">.</span><span class="na">REQUEST_RECEIVED</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">var4</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">onInboundError</span><span class="p">(</span><span class="n">var4</span><span class="p">);</span>
+                <span class="n">ReferenceCountUtil</span><span class="p">.</span><span class="na">release</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
 
-    } else {
-        if (msg instanceof HttpContent) {
-            if (msg != LastHttpContent.EMPTY_LAST_CONTENT) {
-                super.onInboundNext(ctx, msg);
-            }
+            <span class="k">if</span> <span class="p">(</span><span class="n">msg</span> <span class="k">instanceof</span> <span class="n">FullHttpRequest</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">super</span><span class="p">.</span><span class="na">onInboundNext</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">isHttp2</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="k">this</span><span class="p">.</span><span class="na">onInboundComplete</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
 
-            if (msg instanceof LastHttpContent) {
-                this.onInboundComplete();
-            }
-        } else {
-            super.onInboundNext(ctx, msg);
-        }
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">msg</span> <span class="k">instanceof</span> <span class="n">HttpContent</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">msg</span> <span class="o">!=</span> <span class="n">LastHttpContent</span><span class="p">.</span><span class="na">EMPTY_LAST_CONTENT</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kd">super</span><span class="p">.</span><span class="na">onInboundNext</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+                <span class="p">}</span>
 
-    }
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+                <span class="k">if</span> <span class="p">(</span><span class="n">msg</span> <span class="k">instanceof</span> <span class="n">LastHttpContent</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">this</span><span class="p">.</span><span class="na">onInboundComplete</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="kd">super</span><span class="p">.</span><span class="na">onInboundNext</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+            <span class="p">}</span>
+
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      这个时候走到头了，我们跳出来看一看，梳理一下目前所得，发现我们搞清楚了一个请求接受，然后到 divide 的处理过程，梳理下大致如下：
     </p>
@@ -389,28 +362,28 @@ public Mono
       DividePlugin ：plugin具体处理
      </li>
     </ul>
-    <h3>
+    <h3 id="debug_1">
      逐步debug相关细节
     </h3>
     <p>
      这个时候参考网关模型，发现路由匹配之类的没有看到，没办法，细节部分没有清楚的就是: SoulWebHandler ,它的plugin调用的部分没有细看，于是我们进行如下的函数的debug，进入各个函数的调用（进入subscribe之类的时候就跳出来，点击进入下一个断点，IDEA debug左上角的箭头）
     </p>
-    <p>
-     <pre>java
-        public Mono&lt;Void&gt; execute(final ServerWebExchange exchange) {
-            return Mono.defer(() -&gt; {
-                if (this.index &lt; plugins.size()) {
-                    SoulPlugin plugin = plugins.get(this.index++);
-                    Boolean skip = plugin.skip(exchange);
-                    if (skip) {
-                        return this.execute(exchange);
-                    }
-                    return plugin.execute(exchange, this);
-                }
-                return Mono.empty();
-            });
-        }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>        <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">index</span> <span class="o">&lt;</span> <span class="n">plugins</span><span class="p">.</span><span class="na">size</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="n">SoulPlugin</span> <span class="n">plugin</span> <span class="o">=</span> <span class="n">plugins</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">index</span><span class="o">++</span><span class="p">);</span>
+                    <span class="n">Boolean</span> <span class="n">skip</span> <span class="o">=</span> <span class="n">plugin</span><span class="p">.</span><span class="na">skip</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">skip</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+                    <span class="p">}</span>
+                    <span class="k">return</span> <span class="n">plugin</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们逐步调试上面的那个函数，查看变量： plugins，内容大致如下，后面false和true是变量 skip。发现是true就不执行，看函数也能大致猜的到,各个插件的skip情况如下：
     </p>
@@ -464,154 +437,148 @@ public Mono
     <p>
      我们调试进入前几个plugin都是没有执行到下面代码中的if，在 divide plugin 执行了，我们跟着进入看看，看到了疑似路由匹配的 rules，还有 match，猜测这是路由匹配相关
     </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-        String pluginName = named();
-        final PluginData pluginData = BaseDataCache.getInstance().obtainPluginData(pluginName);
-        if (pluginData != null &amp;&amp; pluginData.getEnabled()) {
-            final Collection&lt;SelectorData&gt; selectors = BaseDataCache.getInstance().obtainSelectorData(pluginName);
-            if (CollectionUtils.isEmpty(selectors)) {
-                return handleSelectorIsNull(pluginName, exchange, chain);
-            }
-            final SelectorData selectorData = matchSelector(exchange, selectors);
-            if (Objects.isNull(selectorData)) {
-                return handleSelectorIsNull(pluginName, exchange, chain);
-            }
-            selectorLog(selectorData, pluginName);
-            final List&lt;RuleData&gt; rules = BaseDataCache.getInstance().obtainRuleData(selectorData.getId());
-            if (CollectionUtils.isEmpty(rules)) {
-                return handleRuleIsNull(pluginName, exchange, chain);
-            }
-            RuleData rule;
-            if (selectorData.getType() == SelectorTypeEnum.FULL_FLOW.getCode()) {
-                //get last
-                rule = rules.get(rules.size() - 1);
-            } else {
-                // divide plugin 执行到这步，在rules，发现我们配置的规则，猜测这里是路由匹配
-                rule = matchRule(exchange, rules);
-            }
-            if (Objects.isNull(rule)) {
-                return handleRuleIsNull(pluginName, exchange, chain);
-            }
-            ruleLog(rule, pluginName);
-            return doExecute(exchange, chain, selectorData, rule);
-        }
-        return chain.execute(exchange);
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">pluginName</span> <span class="o">=</span> <span class="n">named</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">PluginData</span> <span class="n">pluginData</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainPluginData</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pluginData</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">pluginData</span><span class="p">.</span><span class="na">getEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">SelectorData</span><span class="o">&gt;</span> <span class="n">selectors</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainSelectorData</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">selectors</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">handleSelectorIsNull</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selectorData</span> <span class="o">=</span> <span class="n">matchSelector</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">selectors</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">selectorData</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">handleSelectorIsNull</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">selectorLog</span><span class="p">(</span><span class="n">selectorData</span><span class="p">,</span> <span class="n">pluginName</span><span class="p">);</span>
+            <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">RuleData</span><span class="o">&gt;</span> <span class="n">rules</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainRuleData</span><span class="p">(</span><span class="n">selectorData</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">rules</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">handleRuleIsNull</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">RuleData</span> <span class="n">rule</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">selectorData</span><span class="p">.</span><span class="na">getType</span><span class="p">()</span> <span class="o">==</span> <span class="n">SelectorTypeEnum</span><span class="p">.</span><span class="na">FULL_FLOW</span><span class="p">.</span><span class="na">getCode</span><span class="p">())</span> <span class="p">{</span>
+                <span class="c1">//get last</span>
+                <span class="n">rule</span> <span class="o">=</span> <span class="n">rules</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">rules</span><span class="p">.</span><span class="na">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="c1">// divide plugin 执行到这步，在rules，发现我们配置的规则，猜测这里是路由匹配</span>
+                <span class="n">rule</span> <span class="o">=</span> <span class="n">matchRule</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">rules</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">rule</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">handleRuleIsNull</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">ruleLog</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">pluginName</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">doExecute</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="n">selectorData</span><span class="p">,</span> <span class="n">rule</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续debug，进入： WebClientPlugin ，看到了疑似发送请求给后台服务器，相关代码如下：
     </p>
-    <p>
-     ```java
-    public Mono
-     <void>
-      execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-        assert soulContext != null;
-        String urlPath = exchange.getAttribute(Constants.HTTP_URL);
-        if (StringUtils.isEmpty(urlPath)) {
-            Object error = SoulResultWrap.error(SoulResultEnum.CANNOT_FIND_URL.getCode(), SoulResultEnum.CANNOT_FIND_URL.getMsg(), null);
-            return WebFluxResultUtils.result(exchange, error);
-        }
-        long timeout = (long) Optional.ofNullable(exchange.getAttribute(Constants.HTTP_TIME_OUT)).orElse(3000L);
-        int retryTimes = (int) Optional.ofNullable(exchange.getAttribute(Constants.HTTP_RETRY)).orElse(0);
-        log.info("The request urlPath is {}, retryTimes is {}", urlPath, retryTimes);
-        HttpMethod method = HttpMethod.valueOf(exchange.getRequest().getMethodValue());
-        WebClient.RequestBodySpec requestBodySpec = webClient.method(method).uri(urlPath);
-        return handleRequestBody(requestBodySpec, exchange, timeout, retryTimes, chain);
-    }
-     </void>
-    </p>
-    <pre><pre>private Mono&lt;Void&gt; handleRequestBody(final WebClient.RequestBodySpec requestBodySpec,
-                                     final ServerWebExchange exchange,
-                                     final long timeout,
-                                     final int retryTimes,
-                                     final SoulPluginChain chain) {
-    // 下面这段代码太想前端的 ajax 调用了，猜测这是 请求发送
-    return requestBodySpec.headers(httpHeaders -&gt; {
-        httpHeaders.addAll(exchange.getRequest().getHeaders());
-        httpHeaders.remove(HttpHeaders.HOST);
-    })
-            .contentType(buildMediaType(exchange))
-            .body(BodyInserters.fromDataBuffers(exchange.getRequest().getBody()))
-            .exchange()
-            .doOnError(e -&gt; log.error(e.getMessage()))
-            .timeout(Duration.ofMillis(timeout))
-            .retryWhen(Retry.onlyIf(x -&gt; x.exception() instanceof ConnectTimeoutException)
-                .retryMax(retryTimes)
-                .backoff(Backoff.exponential(Duration.ofMillis(200), Duration.ofSeconds(20), 2, true)))
-            .flatMap(e -&gt; doNext(e, exchange, chain));
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">urlPath</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">HTTP_URL</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">urlPath</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">Object</span> <span class="n">error</span> <span class="o">=</span> <span class="n">SoulResultWrap</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kt">long</span> <span class="n">timeout</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span><span class="p">)</span> <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">HTTP_TIME_OUT</span><span class="p">)).</span><span class="na">orElse</span><span class="p">(</span><span class="mi">3000L</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">retryTimes</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">HTTP_RETRY</span><span class="p">)).</span><span class="na">orElse</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"The request urlPath is {}, retryTimes is {}"</span><span class="p">,</span> <span class="n">urlPath</span><span class="p">,</span> <span class="n">retryTimes</span><span class="p">);</span>
+        <span class="n">HttpMethod</span> <span class="n">method</span> <span class="o">=</span> <span class="n">HttpMethod</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getMethodValue</span><span class="p">());</span>
+        <span class="n">WebClient</span><span class="p">.</span><span class="na">RequestBodySpec</span> <span class="n">requestBodySpec</span> <span class="o">=</span> <span class="n">webClient</span><span class="p">.</span><span class="na">method</span><span class="p">(</span><span class="n">method</span><span class="p">).</span><span class="na">uri</span><span class="p">(</span><span class="n">urlPath</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">handleRequestBody</span><span class="p">(</span><span class="n">requestBodySpec</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">retryTimes</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+    <span class="p">}</span>
 
-}
+    <span class="kd">private</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handleRequestBody</span><span class="p">(</span><span class="kd">final</span> <span class="n">WebClient</span><span class="p">.</span><span class="na">RequestBodySpec</span> <span class="n">requestBodySpec</span><span class="p">,</span>
+                                         <span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span>
+                                         <span class="kd">final</span> <span class="kt">long</span> <span class="n">timeout</span><span class="p">,</span>
+                                         <span class="kd">final</span> <span class="kt">int</span> <span class="n">retryTimes</span><span class="p">,</span>
+                                         <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 下面这段代码太想前端的 ajax 调用了，猜测这是 请求发送</span>
+        <span class="k">return</span> <span class="n">requestBodySpec</span><span class="p">.</span><span class="na">headers</span><span class="p">(</span><span class="n">httpHeaders</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="n">httpHeaders</span><span class="p">.</span><span class="na">addAll</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getHeaders</span><span class="p">());</span>
+            <span class="n">httpHeaders</span><span class="p">.</span><span class="na">remove</span><span class="p">(</span><span class="n">HttpHeaders</span><span class="p">.</span><span class="na">HOST</span><span class="p">);</span>
+        <span class="p">})</span>
+                <span class="p">.</span><span class="na">contentType</span><span class="p">(</span><span class="n">buildMediaType</span><span class="p">(</span><span class="n">exchange</span><span class="p">))</span>
+                <span class="p">.</span><span class="na">body</span><span class="p">(</span><span class="n">BodyInserters</span><span class="p">.</span><span class="na">fromDataBuffers</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getBody</span><span class="p">()))</span>
+                <span class="p">.</span><span class="na">exchange</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">doOnError</span><span class="p">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">()))</span>
+                <span class="p">.</span><span class="na">timeout</span><span class="p">(</span><span class="n">Duration</span><span class="p">.</span><span class="na">ofMillis</span><span class="p">(</span><span class="n">timeout</span><span class="p">))</span>
+                <span class="p">.</span><span class="na">retryWhen</span><span class="p">(</span><span class="n">Retry</span><span class="p">.</span><span class="na">onlyIf</span><span class="p">(</span><span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span><span class="p">.</span><span class="na">exception</span><span class="p">()</span> <span class="k">instanceof</span> <span class="n">ConnectTimeoutException</span><span class="p">)</span>
+                    <span class="p">.</span><span class="na">retryMax</span><span class="p">(</span><span class="n">retryTimes</span><span class="p">)</span>
+                    <span class="p">.</span><span class="na">backoff</span><span class="p">(</span><span class="n">Backoff</span><span class="p">.</span><span class="na">exponential</span><span class="p">(</span><span class="n">Duration</span><span class="p">.</span><span class="na">ofMillis</span><span class="p">(</span><span class="mi">200</span><span class="p">),</span> <span class="n">Duration</span><span class="p">.</span><span class="na">ofSeconds</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">true</span><span class="p">)))</span>
+                <span class="p">.</span><span class="na">flatMap</span><span class="p">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">doNext</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">));</span>
 
-private Mono&lt;Void&gt; doNext(final ClientResponse res, final ServerWebExchange exchange, final SoulPluginChain chain) {
-    if (res.statusCode().is2xxSuccessful()) {
-        exchange.getAttributes().put(Constants.CLIENT_RESPONSE_RESULT_TYPE, ResultEnum.SUCCESS.getName());
-    } else {
-        exchange.getAttributes().put(Constants.CLIENT_RESPONSE_RESULT_TYPE, ResultEnum.ERROR.getName());
-    }
-    exchange.getAttributes().put(Constants.CLIENT_RESPONSE_ATTR, res);
-    return chain.execute(exchange);
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">doNext</span><span class="p">(</span><span class="kd">final</span> <span class="n">ClientResponse</span> <span class="n">res</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">res</span><span class="p">.</span><span class="na">statusCode</span><span class="p">().</span><span class="na">is2xxSuccessful</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CLIENT_RESPONSE_RESULT_TYPE</span><span class="p">,</span> <span class="n">ResultEnum</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CLIENT_RESPONSE_RESULT_TYPE</span><span class="p">,</span> <span class="n">ResultEnum</span><span class="p">.</span><span class="na">ERROR</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CLIENT_RESPONSE_ATTR</span><span class="p">,</span> <span class="n">res</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续进入，来到： WebClientResponsePlugin ，发现疑似 response 返回给客户端的代码
     </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-        return chain.execute(exchange).then(Mono.defer(() -&gt; {
-            ServerHttpResponse response = exchange.getResponse();
-            ClientResponse clientResponse = exchange.getAttribute(Constants.CLIENT_RESPONSE_ATTR);
-            if (Objects.isNull(clientResponse)
-                    || response.getStatusCode() == HttpStatus.BAD_GATEWAY
-                    || response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR) {
-                Object error = SoulResultWrap.error(SoulResultEnum.SERVICE_RESULT_ERROR.getCode(), SoulResultEnum.SERVICE_RESULT_ERROR.getMsg(), null);
-                return WebFluxResultUtils.result(exchange, error);
-            }
-            if (response.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT) {
-                Object error = SoulResultWrap.error(SoulResultEnum.SERVICE_TIMEOUT.getCode(), SoulResultEnum.SERVICE_TIMEOUT.getMsg(), null);
-                return WebFluxResultUtils.result(exchange, error);
-            }
-            response.setStatusCode(clientResponse.statusCode());
-            response.getCookies().putAll(clientResponse.cookies());
-            response.getHeaders().putAll(clientResponse.headers().asHttpHeaders());
-            // 疑似响应返回
-            return response.writeWith(clientResponse.body(BodyExtractors.toDataBuffers()));
-        }));
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">).</span><span class="na">then</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="n">ServerHttpResponse</span> <span class="n">response</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getResponse</span><span class="p">();</span>
+            <span class="n">ClientResponse</span> <span class="n">clientResponse</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CLIENT_RESPONSE_ATTR</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">clientResponse</span><span class="p">)</span>
+                    <span class="o">||</span> <span class="n">response</span><span class="p">.</span><span class="na">getStatusCode</span><span class="p">()</span> <span class="o">==</span> <span class="n">HttpStatus</span><span class="p">.</span><span class="na">BAD_GATEWAY</span>
+                    <span class="o">||</span> <span class="n">response</span><span class="p">.</span><span class="na">getStatusCode</span><span class="p">()</span> <span class="o">==</span> <span class="n">HttpStatus</span><span class="p">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">Object</span> <span class="n">error</span> <span class="o">=</span> <span class="n">SoulResultWrap</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">SERVICE_RESULT_ERROR</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">SERVICE_RESULT_ERROR</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+                <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="na">getStatusCode</span><span class="p">()</span> <span class="o">==</span> <span class="n">HttpStatus</span><span class="p">.</span><span class="na">GATEWAY_TIMEOUT</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">Object</span> <span class="n">error</span> <span class="o">=</span> <span class="n">SoulResultWrap</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">SERVICE_TIMEOUT</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">SERVICE_TIMEOUT</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+                <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">response</span><span class="p">.</span><span class="na">setStatusCode</span><span class="p">(</span><span class="n">clientResponse</span><span class="p">.</span><span class="na">statusCode</span><span class="p">());</span>
+            <span class="n">response</span><span class="p">.</span><span class="na">getCookies</span><span class="p">().</span><span class="na">putAll</span><span class="p">(</span><span class="n">clientResponse</span><span class="p">.</span><span class="na">cookies</span><span class="p">());</span>
+            <span class="n">response</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">putAll</span><span class="p">(</span><span class="n">clientResponse</span><span class="p">.</span><span class="na">headers</span><span class="p">().</span><span class="na">asHttpHeaders</span><span class="p">());</span>
+            <span class="c1">// 疑似响应返回</span>
+            <span class="k">return</span> <span class="n">response</span><span class="p">.</span><span class="na">writeWith</span><span class="p">(</span><span class="n">clientResponse</span><span class="p">.</span><span class="na">body</span><span class="p">(</span><span class="n">BodyExtractors</span><span class="p">.</span><span class="na">toDataBuffers</span><span class="p">()));</span>
+        <span class="p">}));</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      经过一通调试，感觉 DividePlugin 、WebClientPlugin 、 WebClientResponsePlugin 非常的可疑，我们取消所有的断点，然后对他们三个打上断点进行调试
     </p>
     <p>
      首先对 DividePlugin 进行测试，我们发送一个没有配置的请求 http://localhost:9195/get ,发送后一路debug下来，发现返回结果如下：
     </p>
-    <p>
-     <pre>json
-{
-    "pre": -107,
-    "message": "Can not find selector, please check your configuration!",
-    "data": null
-}</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="p">{</span>
+    <span class="nt">"code"</span><span class="p">:</span> <span class="mi">-107</span><span class="p">,</span>
+    <span class="nt">"message"</span><span class="p">:</span> <span class="s2">"Can not find selector, please check your configuration!"</span><span class="p">,</span>
+    <span class="nt">"data"</span><span class="p">:</span> <span class="kc">null</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      符合我们的预期，我们看下相关的代码，后面还测试了配置不正确的，发现都会进入下面的调用函数：
     </p>
-    <p>
-     <pre>java
-    public static Mono&lt;Void&gt; result(final ServerWebExchange exchange, final Object result) {
-        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        // 这个exchange.getResponse().writeWith 很前面看到基本一样，可以猜测soul里面估计都是这样返回响应的
-        return exchange.getResponse().writeWith(Mono.just(exchange.getResponse()
-                .bufferFactory().wrap(Objects.requireNonNull(JsonUtils.toJson(result)).getBytes())));
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">result</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Object</span> <span class="n">result</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getResponse</span><span class="p">().</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">setContentType</span><span class="p">(</span><span class="n">MediaType</span><span class="p">.</span><span class="na">APPLICATION_JSON</span><span class="p">);</span>
+        <span class="c1">// 这个exchange.getResponse().writeWith 很前面看到基本一样，可以猜测soul里面估计都是这样返回响应的</span>
+        <span class="k">return</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getResponse</span><span class="p">().</span><span class="na">writeWith</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">just</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getResponse</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">bufferFactory</span><span class="p">().</span><span class="na">wrap</span><span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">JsonUtils</span><span class="p">.</span><span class="na">toJson</span><span class="p">(</span><span class="n">result</span><span class="p">)).</span><span class="na">getBytes</span><span class="p">())));</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续测试正确的请求，WebClientPlugin 经过上面的分析和根据函数大致代码判断，handleRequestBody 发送请求，doNext 可以收到请求结果，我们在 doNext上打上断点，发现果然在后台服务端收到了请求（自己写的netty服务，并打印日志），验证我们这里是请求发送的猜想
     </p>
@@ -624,14 +591,14 @@ private Mono&lt;Void&gt; doNext(final ClientResponse res, final ServerWebExchang
     <p>
      在类： DefaultWebFilterChain 中有这么一点循环调用，代码如下：
     </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; filter(ServerWebExchange exchange) {
-        return Mono.defer(() -&gt; {
-            return this.currentFilter != null &amp;&amp; this.chain != null ? this.invokeFilter(this.currentFilter, this.chain, exchange) : this.handler.handle(exchange);
-        });
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">filter</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">currentFilter</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="na">chain</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="na">invokeFilter</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">currentFilter</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">chain</span><span class="p">,</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="na">handler</span><span class="p">.</span><span class="na">handle</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们查看其相关类有下面几个，进入相应的类看了看，大致如下：
     </p>
@@ -655,7 +622,7 @@ private Mono&lt;Void&gt; doNext(final ClientResponse res, final ServerWebExchang
     <p>
      得到了健康检查之类的直接在 HealthFilter 中返回，文件上传大小限制功能也在 filter 中，其他的不太清楚，但不影响大局
     </p>
-    <h2>
+    <h2 id="_5">
      总结
     </h2>
     <p>
@@ -701,13 +668,13 @@ private Mono&lt;Void&gt; doNext(final ClientResponse res, final ServerWebExchang
     <p>
      请求和响应的处理也是在 plugins 进行处理的
     </p>
-    <h2>
+    <h2 id="soul">
      Soul网关源码解析文章列表
     </h2>
-    <h3>
+    <h3 id="_6">
      掘金
     </h3>
-    <h4>
+    <h4 id="_7">
      了解与初步运行
     </h4>
     <ul>
@@ -722,7 +689,7 @@ private Mono&lt;Void&gt; doNext(final ClientResponse res, final ServerWebExchang
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="_8">
      请求处理流程解析
     </h4>
     <ul>
@@ -772,7 +739,7 @@ private Mono&lt;Void&gt; doNext(final ClientResponse res, final ServerWebExchang
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="_9">
      数据同步解析
     </h4>
     <ul>
@@ -832,7 +799,7 @@ private Mono&lt;Void&gt; doNext(final ClientResponse res, final ServerWebExchang
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="soul-client">
      Soul-Client模块
     </h4>
     <ul>
@@ -852,7 +819,7 @@ private Mono&lt;Void&gt; doNext(final ClientResponse res, final ServerWebExchang
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="_10">
      总览
     </h4>
     <ul>
@@ -862,7 +829,7 @@ private Mono&lt;Void&gt; doNext(final ClientResponse res, final ServerWebExchang
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="_11">
      番外
     </h4>
     <ul>

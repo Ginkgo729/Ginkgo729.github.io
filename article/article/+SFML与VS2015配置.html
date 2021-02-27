@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="sfml-vs2015">
      SFML 与 VS2015 的安装配置
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      一、下载
     </h2>
     <p>
@@ -55,19 +56,19 @@
       https://www.sfml-dev.org/tutorials/2.4/start-vc.php
      </a>
     </p>
-    <h2>
+    <h2 id="_2">
      二、解压安装
     </h2>
     <p>
      把下载下来的相应安装包解压至任意文件下（看你心情，想放哪就放哪，但需要记住你放的位置），本教程将其解压至 C:\Program Files\SFML，然后呢？嗯，这样就完成了，是不是很简单！因为下载的这个是已经被别人编译好的版本了，我们不用自己再重新编译了，直接用就行的。
     </p>
-    <h2>
+    <h2 id="_3">
      三、环境变量的配置
     </h2>
     <p>
      将 C:\Program Files\SFML\SFML-2.4.2\bin 添加到系统的环境变量中，这个怎么添加网上有很多的教程，照着弄就行了。记得添加完成以后要重启或者注销计算机才行，不然也用不了
     </p>
-    <h2>
+    <h2 id="vs2015">
      四、VS2015 的相应配置
     </h2>
     <ul>
@@ -110,47 +111,39 @@
       </ul>
      </li>
     </ul>
-    <h2>
+    <h2 id="_4">
      五、测试是否配置成功
     </h2>
     <p>
      上面基本配置完成了，接下来用一个测试程序来运行一下成功没有，把下面的代码复制粘贴到新建的 main.cpp 文件中，直接按 Ctrl+F5 运行，如果看到一个绿色的圆就说明配置完成了
     </p>
-    <p>
-     ```c++
-    </p>
-    <h1>
-     include
-     <sfml graphics.hpp="">
-     </sfml>
-    </h1>
-    <p>
-     int main()
-{
-    sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
-    </p>
-    <pre><pre>while (window.isOpen())
-{
-    sf::Event event;
-    while (window.pollEvent(event))
-    {
-        if (event.type == sf::Event::Closed)
-            window.close();
-    }
+    <div class="codehilite">
+     <pre><span></span><code><span class="cp">#include</span> <span class="cpf">&lt;SFML/Graphics.hpp&gt;</span><span class="cp"></span>
 
-    window.clear();
-    window.draw(shape);
-    window.display();
-}
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">sf</span><span class="o">::</span><span class="n">RenderWindow</span> <span class="n">window</span><span class="p">(</span><span class="n">sf</span><span class="o">::</span><span class="n">VideoMode</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="s">"SFML works!"</span><span class="p">);</span>
+    <span class="n">sf</span><span class="o">::</span><span class="n">CircleShape</span> <span class="n">shape</span><span class="p">(</span><span class="mf">100.f</span><span class="p">);</span>
+    <span class="n">shape</span><span class="p">.</span><span class="n">setFillColor</span><span class="p">(</span><span class="n">sf</span><span class="o">::</span><span class="n">Color</span><span class="o">::</span><span class="n">Green</span><span class="p">);</span>
 
-return 0;
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="k">while</span> <span class="p">(</span><span class="n">window</span><span class="p">.</span><span class="n">isOpen</span><span class="p">())</span>
+    <span class="p">{</span>
+        <span class="n">sf</span><span class="o">::</span><span class="n">Event</span> <span class="n">event</span><span class="p">;</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">window</span><span class="p">.</span><span class="n">pollEvent</span><span class="p">(</span><span class="n">event</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">sf</span><span class="o">::</span><span class="n">Event</span><span class="o">::</span><span class="n">Closed</span><span class="p">)</span>
+                <span class="n">window</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+        <span class="p">}</span>
+
+        <span class="n">window</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+        <span class="n">window</span><span class="p">.</span><span class="n">draw</span><span class="p">(</span><span class="n">shape</span><span class="p">);</span>
+        <span class="n">window</span><span class="p">.</span><span class="n">display</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
    </article>
   </div>
   <!-- BG -->

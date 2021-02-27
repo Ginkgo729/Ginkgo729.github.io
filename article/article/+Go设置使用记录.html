@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,37 +43,34 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="go">
      Go设置使用记录
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      常用编译命令
     </h2>
-    <p>
-     ```bash
-go run xxx.go
-    </p>
-    <p>
-     go build
-    </p>
-    <p>
-     go mod init xxxx
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code>go run xxx.go
+
+go build
+
+go mod init xxxx
+</code></pre>
+    </div>
+    <h2 id="_2">
      国内源切换
     </h2>
     <p>
      Go 1.13 及以上（推荐）
 打开你的终端并执行
     </p>
-    <p>
-     <pre>bash
-$ go env -w GO111MODULE=on
-$ go env -w GOPROXY=https://goproxy.cn,direct</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code>$ go env -w <span class="nv">GO111MODULE</span><span class="o">=</span>on
+$ go env -w <span class="nv">GOPROXY</span><span class="o">=</span>https://goproxy.cn,direct
+</code></pre>
+    </div>
+    <h2 id="_3">
      参考链接
     </h2>
     <ul>

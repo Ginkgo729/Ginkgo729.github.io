@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,17 +43,17 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soul">
      Soul网关源码解析（十）自定义简单插件编写
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      综合前面所分析的插件处理流程相关知识，此次我们来编写自定义的插件：统计请求在插件链中的经历时长
     </p>
-    <h2>
+    <h2 id="_2">
      编写准备
     </h2>
     <p>
@@ -61,24 +62,21 @@
     <p>
      我们查看下 plugins 的值，发现global也在里面，也就是所有的plugin都是在里面
     </p>
-    <p>
-     ```java
-public class SoulConfiguration {
-    </p>
-    <pre><pre>@Bean("webHandler")
-public SoulWebHandler soulWebHandler(final ObjectProvider&lt;List&lt;SoulPlugin&gt;&gt; plugins) {
-    List&lt;SoulPlugin&gt; pluginList = plugins.getIfAvailable(Collections::emptyList);
-    // global plugin 也在里面
-    final List&lt;SoulPlugin&gt; soulPlugins = pluginList.stream()
-            .sorted(Comparator.comparingInt(SoulPlugin::getOrder)).collect(Collectors.toList());
-    soulPlugins.forEach(soulPlugin -&gt; log.info("load plugin:[{}] [{}]", soulPlugin.named(), soulPlugin.getClass().getName()));
-    return new SoulWebHandler(soulPlugins);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SoulConfiguration</span> <span class="p">{</span>
+
+    <span class="nd">@Bean</span><span class="p">(</span><span class="s">"webHandler"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">SoulWebHandler</span> <span class="nf">soulWebHandler</span><span class="p">(</span><span class="kd">final</span> <span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">SoulPlugin</span><span class="o">&gt;&gt;</span> <span class="n">plugins</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">SoulPlugin</span><span class="o">&gt;</span> <span class="n">pluginList</span> <span class="o">=</span> <span class="n">plugins</span><span class="p">.</span><span class="na">getIfAvailable</span><span class="p">(</span><span class="n">Collections</span><span class="p">::</span><span class="n">emptyList</span><span class="p">);</span>
+        <span class="c1">// global plugin 也在里面</span>
+        <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">SoulPlugin</span><span class="o">&gt;</span> <span class="n">soulPlugins</span> <span class="o">=</span> <span class="n">pluginList</span><span class="p">.</span><span class="na">stream</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">sorted</span><span class="p">(</span><span class="n">Comparator</span><span class="p">.</span><span class="na">comparingInt</span><span class="p">(</span><span class="n">SoulPlugin</span><span class="p">::</span><span class="n">getOrder</span><span class="p">)).</span><span class="na">collect</span><span class="p">(</span><span class="n">Collectors</span><span class="p">.</span><span class="na">toList</span><span class="p">());</span>
+        <span class="n">soulPlugins</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">soulPlugin</span> <span class="o">-&gt;</span> <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"load plugin:[{}] [{}]"</span><span class="p">,</span> <span class="n">soulPlugin</span><span class="p">.</span><span class="na">named</span><span class="p">(),</span> <span class="n">soulPlugin</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">()));</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">SoulWebHandler</span><span class="p">(</span><span class="n">soulPlugins</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面的调用栈已经中断了，一直翻不到什么有用的东西，换换思路，我们在 globalPlugin 构造函数上打上断点，重启
     </p>
@@ -88,21 +86,18 @@ public SoulWebHandler soulWebHandler(final ObjectProvider&lt;List&lt;SoulPlugin&
     <p>
      我们查看下 globalPlugin 构造函数的调用触发上一节，发现是下面这个： GlobalPluginConfiguration
     </p>
-    <p>
-     ```java
-@Configuration
-@ConditionalOnClass(GlobalPlugin.class)
-public class GlobalPluginConfiguration {
-    </p>
-    <pre><pre>@Bean
-public SoulPlugin globalPlugin(final SoulContextBuilder soulContextBuilder) {
-    return new GlobalPlugin(soulContextBuilder);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="nd">@Configuration</span>
+<span class="nd">@ConditionalOnClass</span><span class="p">(</span><span class="n">GlobalPlugin</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">GlobalPluginConfiguration</span> <span class="p">{</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">SoulPlugin</span> <span class="nf">globalPlugin</span><span class="p">(</span><span class="kd">final</span> <span class="n">SoulContextBuilder</span> <span class="n">soulContextBuilder</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">GlobalPlugin</span><span class="p">(</span><span class="n">soulContextBuilder</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们仔细看看这个类，它是Spring Configuration，生成bean后注入进去，后面Spring会自己进行操作装配之类
     </p>
@@ -123,7 +118,7 @@ public SoulPlugin globalPlugin(final SoulContextBuilder soulContextBuilder) {
       2.写一个自定义插件的Spring配置，注入进去
      </li>
     </ul>
-    <h2>
+    <h2 id="_3">
      自定义插件编写
     </h2>
     <p>
@@ -132,7 +127,7 @@ public SoulPlugin globalPlugin(final SoulContextBuilder soulContextBuilder) {
     <p>
      PS：时间有点小紧张，研究规范编写也伤时间，下次一定
     </p>
-    <h3>
+    <h3 id="_4">
      工程结构
     </h3>
     <p>
@@ -149,20 +144,21 @@ public SoulPlugin globalPlugin(final SoulContextBuilder soulContextBuilder) {
     <p>
      目录结构大致如下：直接在源码的Soul-Bootstrap模块下
     </p>
-    <p>
-     <pre>├─src
-│  ├─main
-│  │  ├─java
-│  │  │  └─org
-│  │  │      └─dromara
-│  │  │          └─soul
-│  │  │              └─bootstrap
-│  │  │                  ├─configuration : 放入自定义插件配置
-│  │  │                  ├─filter
-│  │  │                  └─plugin ：放入自定义插件
-│  │  └─resources</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">├─src</span>
+<span class="err">│  ├─main</span>
+<span class="err">│  │  ├─java</span>
+<span class="err">│  │  │  └─org</span>
+<span class="err">│  │  │      └─dromara</span>
+<span class="err">│  │  │          └─soul</span>
+<span class="err">│  │  │              └─bootstrap</span>
+<span class="err">│  │  │                  ├─configuration : 放入自定义插件配置</span>
+<span class="err">│  │  │                  ├─filter</span>
+<span class="err">│  │  │                  └─plugin ：放入自定义插件</span>
+<span class="err">│  │  └─resources</span>
+</code></pre>
+    </div>
+    <h3 id="_5">
      自定义插件编写
     </h3>
     <p>
@@ -180,76 +176,68 @@ public SoulPlugin globalPlugin(final SoulContextBuilder soulContextBuilder) {
     <p>
      这样，一个自定义插件就写好了，大致代码如下：
     </p>
-    <p>
-     ```java
-import lombok.extern.slf4j.Slf4j;
-import org.dromara.soul.plugin.api.SoulPlugin;
-import org.dromara.soul.plugin.api.SoulPluginChain;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
-    </p>
-    <p>
-     @Slf4j
-public class TimeRecordPlugin implements SoulPlugin {
-    </p>
-    <pre><pre>private final String TIME_RECORD = "time_record";
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.dromara.soul.plugin.api.SoulPlugin</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.dromara.soul.plugin.api.SoulPluginChain</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.server.ServerWebExchange</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">reactor.core.publisher.Mono</span><span class="p">;</span>
 
-@Override
-public Mono&lt;Void&gt; execute(ServerWebExchange exchange, SoulPluginChain chain) {
-    exchange.getAttributes().put(TIME_RECORD, System.currentTimeMillis());
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TimeRecordPlugin</span> <span class="kd">implements</span> <span class="n">SoulPlugin</span> <span class="p">{</span>
 
-    return chain.execute(exchange).then(Mono.defer(() -&gt; {
-        Long startTime = exchange.getAttribute(TIME_RECORD);
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">TIME_RECORD</span> <span class="o">=</span> <span class="s">"time_record"</span><span class="p">;</span>
 
-        if (startTime == null) {
-            log.info("Get start time error");
-            return Mono.empty();
-        }
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">TIME_RECORD</span><span class="p">,</span> <span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">());</span>
 
-        long timeRecord = System.currentTimeMillis() - startTime;
-        log.info("Plugin time record: " + timeRecord + " ms");
-        return Mono.empty();
-    }));
-}
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">).</span><span class="na">then</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="n">Long</span> <span class="n">startTime</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">TIME_RECORD</span><span class="p">);</span>
 
-@Override
-public int getOrder() {
-    return -1;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h3>
+            <span class="k">if</span> <span class="p">(</span><span class="n">startTime</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"Get start time error"</span><span class="p">);</span>
+                <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+            <span class="p">}</span>
+
+            <span class="kt">long</span> <span class="n">timeRecord</span> <span class="o">=</span> <span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">()</span> <span class="o">-</span> <span class="n">startTime</span><span class="p">;</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"Plugin time record: "</span> <span class="o">+</span> <span class="n">timeRecord</span> <span class="o">+</span> <span class="s">" ms"</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+        <span class="p">}));</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getOrder</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="_6">
      自定义插件配置
     </h3>
     <p>
      灰常的简单，我们不需要任何东西，所以没有啥参数传入，直接new一个返回即可，代码如下：
     </p>
-    <p>
-     ```java
-import org.dromara.soul.bootstrap.plugin.TimeRecordPlugin;
-import org.dromara.soul.plugin.api.SoulPlugin;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-    </p>
-    <p>
-     @Configuration
-@ConditionalOnClass(TimeRecordPlugin.class)
-public class TimeRecordConfiguration {
-    </p>
-    <pre><pre>@Bean
-public SoulPlugin timeRecordPlugin() {
-    return new TimeRecordPlugin();
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">import</span> <span class="nn">org.dromara.soul.bootstrap.plugin.TimeRecordPlugin</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.dromara.soul.plugin.api.SoulPlugin</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.autoconfigure.condition.ConditionalOnClass</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Bean</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Configuration</span><span class="p">;</span>
+
+<span class="nd">@Configuration</span>
+<span class="nd">@ConditionalOnClass</span><span class="p">(</span><span class="n">TimeRecordPlugin</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TimeRecordConfiguration</span> <span class="p">{</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">SoulPlugin</span> <span class="nf">timeRecordPlugin</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">TimeRecordPlugin</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="_7">
      运行测试
     </h3>
     <p>
@@ -262,7 +250,8 @@ public SoulPlugin timeRecordPlugin() {
      查看日志，看到明显自定义插件的日志打印，NICE！
     </p>
     <p>
-     <pre>shell script
+     <code>
+      shell script
 o.d.s.plugin.httpclient.WebClientPlugin  : The request urlPath is http://192.168.101.104:8188/order/findById?id=1111, retryTimes is 0
 o.d.s.bootstrap.plugin.TimeRecordPlugin  : Plugin time record: 9 ms
 o.d.soul.plugin.base.AbstractSoulPlugin  : resilience4j selector success match , selector name :http_limiter
@@ -270,9 +259,10 @@ o.d.soul.plugin.base.AbstractSoulPlugin  : resilience4j rule success match , rul
 o.d.soul.plugin.base.AbstractSoulPlugin  : divide selector success match , selector name :/http
 o.d.soul.plugin.base.AbstractSoulPlugin  : divide rule success match , rule name :/http/order/findById
 o.d.s.plugin.httpclient.WebClientPlugin  : The request urlPath is http://192.168.101.104:8188/order/findById?id=1111, retryTimes is 0
-o.d.s.bootstrap.plugin.TimeRecordPlugin  : Plugin time record: 10 ms</pre>
+o.d.s.bootstrap.plugin.TimeRecordPlugin  : Plugin time record: 10 ms
+     </code>
     </p>
-    <h2>
+    <h2 id="_8">
      总结
     </h2>
     <p>
@@ -287,10 +277,10 @@ o.d.s.bootstrap.plugin.TimeRecordPlugin  : Plugin time record: 10 ms</pre>
     <p>
      有兴趣的老哥可以尝试写一下，还是挺有意思的，哈哈
     </p>
-    <h2>
+    <h2 id="soul_1">
      Soul网关源码分析文章列表
     </h2>
-    <h3>
+    <h3 id="github">
      Github
     </h3>
     <ul>
@@ -349,7 +339,7 @@ o.d.s.bootstrap.plugin.TimeRecordPlugin  : Plugin time record: 10 ms</pre>
       </p>
      </li>
     </ul>
-    <h3>
+    <h3 id="_9">
      掘金
     </h3>
     <ul>

@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,7 +43,7 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soul-http">
      Soul网关源码解析番外篇（一） HTTP参数请求错误
     </h1>
     <hr/>
@@ -51,16 +52,16 @@
       共同作者：石立 萧 *
      </li>
     </ul>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      在Soul网关2.2.1版本源码阅读中，遇到了HTTP请求加上参数返回404的错误，此篇文章基于此进行探索
     </p>
-    <h2>
+    <h2 id="bug">
      Bug复现
     </h2>
-    <h3>
+    <h3 id="_2">
      相关环境配置
     </h3>
     <p>
@@ -69,51 +70,34 @@
     <p>
      ```shell script
     </p>
-    <h1>
+    <h1 id="_3">
      加速拉取
     </h1>
     <p>
      git clone https://github.com.cnpmjs.org/lw1243925457/soul.git
     </p>
-    <h1>
+    <h1 id="221">
      切换到2.2.1版本
     </h1>
     <p>
      git fetch origin 2.2.1:2.2.1
 git checkout 2.2.1
-```
     </p>
-    <p>
-     如果之前运行过Soul网关的，需要清理下数据库，这里删除原来的soul数据库，让2.2.1版本自己重新建立一个
-    </p>
-    <p>
-     ```shell script
-    </p>
-    <h1>
-     使用docker启动mysql
-    </h1>
-    <p>
-     docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
-    </p>
-    <h1>
-     重启，需要删除soul数据库，然后让程序自己重建
-    </h1>
-    <p>
-     docker restart mysql
-    </p>
-    <h1>
-     使用命令登录，删除原来的数据库
-    </h1>
-    <p>
-     docker exec -ti mysql mysql -u root -p
-    </p>
-    <blockquote>
-     <p>
-      drop database soul;
-```
-     </p>
-    </blockquote>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">如果之前运行过</span><span class="n">Soul网关的</span><span class="err">，需要清理下数据库，这里删除原来的</span><span class="n">soul数据库</span><span class="err">，让</span><span class="mi">2</span><span class="p">.</span><span class="mi">2</span><span class="p">.</span><span class="mi">1</span><span class="err">版本自己重新建立一个</span>
+
+<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="o">#</span> <span class="err">使用</span><span class="n">docker启动mysql</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="c1">--name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:latest</span>
+
+<span class="o">#</span> <span class="err">重启，需要删除</span><span class="n">soul数据库</span><span class="err">，然后让程序自己重建</span>
+<span class="n">docker</span> <span class="k">restart</span> <span class="n">mysql</span>
+<span class="o">#</span> <span class="err">使用命令登录，删除原来的数据库</span>
+<span class="n">docker</span> <span class="k">exec</span> <span class="o">-</span><span class="n">ti</span> <span class="n">mysql</span> <span class="n">mysql</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="o">-</span><span class="n">p</span>
+<span class="o">&gt;</span> <span class="k">drop</span> <span class="k">database</span> <span class="n">soul</span><span class="p">;</span>
+</code></pre>
+    </div>
+    <h3 id="souladmin">
      Soul——Admin启动
     </h3>
     <p>
@@ -123,7 +107,7 @@ git checkout 2.2.1
      修改mysql用户和密码： root root
     </p>
     <p>
-     修改链接配置：jdbc:mysql://localhost:3306/soul?useUnipre=true&amp;characterEncoding=utf-8&amp;allowPublicKeyRetrieval=true&amp;&amp;useSSL=false
+     修改链接配置：jdbc:mysql://localhost:3306/soul?useUnicode=true&amp;characterEncoding=utf-8&amp;allowPublicKeyRetrieval=true&amp;&amp;useSSL=false
     </p>
     <p>
      启动soul-admin --&gt; SoulAdminBootstrap
@@ -131,31 +115,31 @@ git checkout 2.2.1
     <p>
      如果出现SelectorTypeEnum相关的错误，请切换到jdk8
     </p>
-    <h3>
+    <h3 id="soul-bootstrap">
      启动Soul-Bootstrap
     </h3>
     <p>
      启动soul-bootstrap --&gt; SoulBootstrapApplication
     </p>
-    <h3>
+    <h3 id="http-test">
      启动HTTP test
     </h3>
     <p>
      首先右键soul-test根目录下的pom.xml，选择 add as maven project,导入工程
     可能会出现依赖错误，将其版本替换为2.2.1，大致如下：
     </p>
-    <p>
-     <pre>xml
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.dromara&lt;/groupId&gt;
-            &lt;artifactId&gt;soul-spring-boot-starter-client-springmvc&lt;/artifactId&gt;
-            &lt;version&gt;2.2.1&lt;/version&gt;
-        &lt;/dependency&gt;</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.dromara<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>soul-spring-boot-starter-client-springmvc<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>2.2.1<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+</code></pre>
+    </div>
     <p>
      启动soul-test --&gt; soul-test-http --&gt; SoulTestHttpApplication
     </p>
-    <h3>
+    <h3 id="_4">
      请求复现
     </h3>
     <p>
@@ -164,185 +148,174 @@ git checkout 2.2.1
     <p>
      访问问题链接： http://localhost:9195/http/order/findById?id=1 ，可以看到出现了404
     </p>
-    <p>
-     <pre>json
-{
-    "timestamp": "2021-01-18T02:18:19.557+0000",
-    "path": "/",
-    "status": 404,
-    "error": "Not Found",
-    "message": null,
-    "requestId": "84752141"
-}</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="p">{</span>
+    <span class="nt">"timestamp"</span><span class="p">:</span> <span class="s2">"2021-01-18T02:18:19.557+0000"</span><span class="p">,</span>
+    <span class="nt">"path"</span><span class="p">:</span> <span class="s2">"/"</span><span class="p">,</span>
+    <span class="nt">"status"</span><span class="p">:</span> <span class="mi">404</span><span class="p">,</span>
+    <span class="nt">"error"</span><span class="p">:</span> <span class="s2">"Not Found"</span><span class="p">,</span>
+    <span class="nt">"message"</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">"requestId"</span><span class="p">:</span> <span class="s2">"84752141"</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      直接访问： http://localhost:8187/order/findById?id=11 ，正常的
     </p>
-    <p>
-     <pre>json
-{
-    "id": "11",
-    "name": "hello world findById"
-}</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="p">{</span>
+    <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"11"</span><span class="p">,</span>
+    <span class="nt">"name"</span><span class="p">:</span> <span class="s2">"hello world findById"</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      OK，到这问题基本复现，下面开始debug
     </p>
-    <h2>
+    <h2 id="debug">
      源码Debug
     </h2>
-    <h3>
+    <h3 id="_5">
      查看日志进行切入
     </h3>
     <p>
      根据老哥的提示，我们也看到了这个问题请求的相关日志，大致如下
     </p>
-    <p>
-     <pre>xml
-o.d.soul.plugin.base.AbstractSoulPlugin  : divide selector success match , selector name :/http
+    <div class="codehilite">
+     <pre><span></span><code>o.d.soul.plugin.base.AbstractSoulPlugin  : divide selector success match , selector name :/http
 o.d.soul.plugin.base.AbstractSoulPlugin  : divide rule success match ,rule name :/http/order/findById
-o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is :http://192.168.101.104:8187?id=1111</pre>
-    </p>
+o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is :http://192.168.101.104:8187?id=1111
+</code></pre>
+    </div>
     <p>
      最后一句urlpath非常的诡异，完整路径不对。我们就直接看下这个类： WebClientPlugin
     </p>
-    <p>
-     <pre>java
-    # WebClientPlugin
-    public Mono&lt;Void&gt; execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-        assert soulContext != null;
-        # 在这里debug看到取出来的路径是： http://192.168.101.104:8187?id=1111
-        String urlPath = exchange.getAttribute(Constants.HTTP_URL);
-        if (StringUtils.isEmpty(urlPath)) {
-            Object error = SoulResultWarp.error(SoulResultEnum.CANNOT_FIND_URL.getCode(), SoulResultEnum.CANNOT_FIND_URL.getMsg(), null);
-            return WebFluxResultUtils.result(exchange, error);
-        }
-        long timeout = (long) Optional.ofNullable(exchange.getAttribute(Constants.HTTP_TIME_OUT)).orElse(3000L);
-        log.info("you request,The resulting urlPath is :{}", urlPath);
-        HttpMethod method = HttpMethod.valueOf(exchange.getRequest().getMethodValue());
-        WebClient.RequestBodySpec requestBodySpec = webClient.method(method).uri(urlPath);
-        return handleRequestBody(requestBodySpec, exchange, timeout, chain);
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">WebClientPlugin</span>
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="err">#</span> <span class="n">在这里debug看到取出来的路径是</span><span class="err">：</span> <span class="n">http</span><span class="p">:</span><span class="c1">//192.168.101.104:8187?id=1111</span>
+        <span class="n">String</span> <span class="n">urlPath</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">HTTP_URL</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">urlPath</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">Object</span> <span class="n">error</span> <span class="o">=</span> <span class="n">SoulResultWarp</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kt">long</span> <span class="n">timeout</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span><span class="p">)</span> <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">HTTP_TIME_OUT</span><span class="p">)).</span><span class="na">orElse</span><span class="p">(</span><span class="mi">3000L</span><span class="p">);</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"you request,The resulting urlPath is :{}"</span><span class="p">,</span> <span class="n">urlPath</span><span class="p">);</span>
+        <span class="n">HttpMethod</span> <span class="n">method</span> <span class="o">=</span> <span class="n">HttpMethod</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getMethodValue</span><span class="p">());</span>
+        <span class="n">WebClient</span><span class="p">.</span><span class="na">RequestBodySpec</span> <span class="n">requestBodySpec</span> <span class="o">=</span> <span class="n">webClient</span><span class="p">.</span><span class="na">method</span><span class="p">(</span><span class="n">method</span><span class="p">).</span><span class="na">uri</span><span class="p">(</span><span class="n">urlPath</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">handleRequestBody</span><span class="p">(</span><span class="n">requestBodySpec</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面这个类中，可以看到就是单纯取路径，我们需要跟踪这个路径的来源
     </p>
-    <h3>
+    <h3 id="divide">
      Divide查看
     </h3>
     <p>
      在前面几篇分析中，我们知道divide plugin 是进行路由配置，并写入真实路径到exchange中的，我们去 DividePlugin 看看
     </p>
-    <p>
-     ```java
-    # DividePlugin
-    protected Mono
-     <void>
-      doExecute(final ServerWebExchange exchange, final SoulPluginChain chain, final SelectorData selector, final RuleData rule) {
-        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-        assert soulContext != null;
-        final DivideRuleHandle ruleHandle = GsonUtils.getInstance().fromJson(rule.getHandle(), DivideRuleHandle.class);
-        final List
-      <divideupstream>
-       upstreamList = UpstreamCacheManager.getInstance().findUpstreamListBySelectorId(selector.getId());
-        if (CollectionUtils.isEmpty(upstreamList)) {
-            LOGGER.error("divide upstream configuration error：{}", rule.toString());
-            Object error = SoulResultWarp.error(SoulResultEnum.CANNOT_FIND_URL.getCode(), SoulResultEnum.CANNOT_FIND_URL.getMsg(), null);
-            return WebFluxResultUtils.result(exchange, error);
-        }
-        final String ip = Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getAddress().getHostAddress();
-        DivideUpstream divideUpstream = LoadBalanceUtils.selector(upstreamList, ruleHandle.getLoadBalance(), ip);
-        if (Objects.isNull(divideUpstream)) {
-            LOGGER.error("divide has no upstream");
-            Object error = SoulResultWarp.error(SoulResultEnum.CANNOT_FIND_URL.getCode(), SoulResultEnum.CANNOT_FIND_URL.getMsg(), null);
-            return WebFluxResultUtils.result(exchange, error);
-        }
-        //设置一下 http url : http://192.168.101.104:8187
-        String domain = buildDomain(divideUpstream);
-        // 在这设置realURL，进去看看这个函数
-        String realURL = buildRealURL(domain, soulContext, exchange);
-        // 放入exchange中
-        exchange.getAttributes().put(Constants.HTTP_URL, realURL);
-        exchange.getAttributes().put(Constants.HTTP_TIME_OUT, ruleHandle.getTimeout());
-        return chain.execute(exchange);
-    }
-      </divideupstream>
-     </void>
-    </p>
-    <pre><pre>private String buildRealURL(final String domain, final SoulContext soulContext, final ServerWebExchange exchange) {
-    String path = domain;
-    // 在这取url，但通过debug发现，它确实是null
-    final String rewriteURI = (String) exchange.getAttributes().get(Constants.REWRITE_URI);
-    if (StringUtils.isNoneBlank(rewriteURI)) {
-        path = path + rewriteURI;
-    } else {
-        // 然后又进到这进行取，发现也是null
-        final String realUrl = soulContext.getRealUrl();
-        if (StringUtils.isNoneBlank(realUrl)) {
-            path = path + realUrl;
-        }
-    }
-    String query = exchange.getRequest().getURI().getQuery();
-    if (StringUtils.isNoneBlank(query)) {
-        return path + "?" + query;
-    }
-    return path;
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">DividePlugin</span>
+    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">doExecute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selector</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RuleData</span> <span class="n">rule</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="kd">final</span> <span class="n">DivideRuleHandle</span> <span class="n">ruleHandle</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">rule</span><span class="p">.</span><span class="na">getHandle</span><span class="p">(),</span> <span class="n">DivideRuleHandle</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">DivideUpstream</span><span class="o">&gt;</span> <span class="n">upstreamList</span> <span class="o">=</span> <span class="n">UpstreamCacheManager</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">findUpstreamListBySelectorId</span><span class="p">(</span><span class="n">selector</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">upstreamList</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">LOGGER</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">"divide upstream configuration error：{}"</span><span class="p">,</span> <span class="n">rule</span><span class="p">.</span><span class="na">toString</span><span class="p">());</span>
+            <span class="n">Object</span> <span class="n">error</span> <span class="o">=</span> <span class="n">SoulResultWarp</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">ip</span> <span class="o">=</span> <span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getRemoteAddress</span><span class="p">()).</span><span class="na">getAddress</span><span class="p">().</span><span class="na">getHostAddress</span><span class="p">();</span>
+        <span class="n">DivideUpstream</span> <span class="n">divideUpstream</span> <span class="o">=</span> <span class="n">LoadBalanceUtils</span><span class="p">.</span><span class="na">selector</span><span class="p">(</span><span class="n">upstreamList</span><span class="p">,</span> <span class="n">ruleHandle</span><span class="p">.</span><span class="na">getLoadBalance</span><span class="p">(),</span> <span class="n">ip</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">divideUpstream</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">LOGGER</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">"divide has no upstream"</span><span class="p">);</span>
+            <span class="n">Object</span> <span class="n">error</span> <span class="o">=</span> <span class="n">SoulResultWarp</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">CANNOT_FIND_URL</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">//设置一下 http url : http://192.168.101.104:8187</span>
+        <span class="n">String</span> <span class="n">domain</span> <span class="o">=</span> <span class="n">buildDomain</span><span class="p">(</span><span class="n">divideUpstream</span><span class="p">);</span>
+        <span class="c1">// 在这设置realURL，进去看看这个函数</span>
+        <span class="n">String</span> <span class="n">realURL</span> <span class="o">=</span> <span class="n">buildRealURL</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">soulContext</span><span class="p">,</span> <span class="n">exchange</span><span class="p">);</span>
+        <span class="c1">// 放入exchange中</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">HTTP_URL</span><span class="p">,</span> <span class="n">realURL</span><span class="p">);</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">HTTP_TIME_OUT</span><span class="p">,</span> <span class="n">ruleHandle</span><span class="p">.</span><span class="na">getTimeout</span><span class="p">());</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">String</span> <span class="nf">buildRealURL</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">domain</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">path</span> <span class="o">=</span> <span class="n">domain</span><span class="p">;</span>
+        <span class="c1">// 在这取url，但通过debug发现，它确实是null</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">rewriteURI</span> <span class="o">=</span> <span class="p">(</span><span class="n">String</span><span class="p">)</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">REWRITE_URI</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNoneBlank</span><span class="p">(</span><span class="n">rewriteURI</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">rewriteURI</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// 然后又进到这进行取，发现也是null</span>
+            <span class="kd">final</span> <span class="n">String</span> <span class="n">realUrl</span> <span class="o">=</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getRealUrl</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNoneBlank</span><span class="p">(</span><span class="n">realUrl</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">realUrl</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="n">String</span> <span class="n">query</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getURI</span><span class="p">().</span><span class="na">getQuery</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNoneBlank</span><span class="p">(</span><span class="n">query</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">path</span> <span class="o">+</span> <span class="s">"?"</span> <span class="o">+</span> <span class="n">query</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">path</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面的分析中，发现取出来的都是null，而且没有看到url的设置之类的操作，divide竟然也是单纯的取值
     </p>
-    <h3>
+    <h3 id="url">
      URL设置探索
     </h3>
     <p>
      那我们需要继续探索url的是怎么设置进去的，通过上面的分析，目前有两者设置url的方式，如下面两段代码：
     </p>
-    <p>
-     <pre>java
-final String rewriteURI = (String) exchange.getAttributes().get(Constants.REWRITE_URI);
-final String realUrl = soulContext.getRealUrl();</pre>
-    </p>
-    <h4>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">final</span> <span class="n">String</span> <span class="n">rewriteURI</span> <span class="o">=</span> <span class="p">(</span><span class="n">String</span><span class="p">)</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">REWRITE_URI</span><span class="p">);</span>
+<span class="kd">final</span> <span class="n">String</span> <span class="n">realUrl</span> <span class="o">=</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getRealUrl</span><span class="p">();</span>
+</code></pre>
+    </div>
+    <h4 id="exchangegetattributesgetconstantsrewrite_uri">
      exchange.getAttributes().get(Constants.REWRITE_URI) 方式探索
     </h4>
     <p>
      我们类比响应的设置方式，可以得到第一种URL设置的方式大致如下：
     </p>
-    <p>
-     ```java
-exchange.getAttributes().put(Constants.CLIENT_RESPONSE_RESULT_TYPE, ResultEnum.SUCCESS.getName());
-    </p>
-    <p>
-     // 可以得到放Constants.REWRITE_URI的大致代码如下：
-exchange.getAttributes().put(Constants.REWRITE_URI
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CLIENT_RESPONSE_RESULT_TYPE</span><span class="p">,</span> <span class="n">ResultEnum</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+
+<span class="c1">// 可以得到放Constants.REWRITE_URI的大致代码如下：</span>
+<span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">REWRITE_URI</span>
+</code></pre>
+    </div>
     <p>
      然后使用全局搜索：ctrl+shift+r ，exchange.getAttributes().put(Constants.REWRITE_URI
     </p>
-    <p>
-     <pre>java
-    # RewritePlugin
-    protected Mono&lt;Void&gt; doExecute(final ServerWebExchange exchange, final SoulPluginChain chain, final SelectorData selector, final RuleData rule) {
-        String handle = rule.getHandle();
-        final RewriteHandle rewriteHandle = GsonUtils.getInstance().fromJson(handle, RewriteHandle.class);
-        if (Objects.isNull(rewriteHandle) || StringUtils.isBlank(rewriteHandle.getRewriteURI())) {
-            log.error("uri rewrite rule can not configuration：{}", handle);
-            return chain.execute(exchange);
-        }
-        exchange.getAttributes().put(Constants.REWRITE_URI, rewriteHandle.getRewriteURI());
-        return chain.execute(exchange);
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">RewritePlugin</span>
+    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">doExecute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selector</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RuleData</span> <span class="n">rule</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">handle</span> <span class="o">=</span> <span class="n">rule</span><span class="p">.</span><span class="na">getHandle</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">RewriteHandle</span> <span class="n">rewriteHandle</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">RewriteHandle</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">rewriteHandle</span><span class="p">)</span> <span class="o">||</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">isBlank</span><span class="p">(</span><span class="n">rewriteHandle</span><span class="p">.</span><span class="na">getRewriteURI</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">"uri rewrite rule can not configuration：{}"</span><span class="p">,</span> <span class="n">handle</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">REWRITE_URI</span><span class="p">,</span> <span class="n">rewriteHandle</span><span class="p">.</span><span class="na">getRewriteURI</span><span class="p">());</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      搜索到唯一一处有这个代码的类： RewritePlugin ,然后我们打断点，然后并不能进入这个逻辑，查看控制台，它是关闭的。那就先放着，看第二种设置方式
     </p>
-    <h3>
+    <h3 id="soulcontextgetrealurl">
      soulContext.getRealUrl() 的设置探索
     </h3>
     <p>
@@ -351,126 +324,123 @@ exchange.getAttributes().put(Constants.REWRITE_URI
     <p>
      我们进行搜索，也成功的找到了唯一的一处代码，在类 DefaultSoulContextBuilder 中，大致如下：
     </p>
-    <p>
-     <pre>java
-    # DefaultSoulContextBuilder
-    private void setSoulContextByHttp(final SoulContext soulContext, final String path) {
-        String contextPath = "/";
-        String[] splitList = StringUtils.split(path, "/");
-        if (splitList.length != 0) {
-            contextPath = contextPath.concat(splitList[0]);
-        }
-        String realUrl = path.substring(contextPath.length());
-        soulContext.setContextPath(contextPath);
-        soulContext.setModule(contextPath);
-        soulContext.setMethod(realUrl);
-        // 设置url
-        soulContext.setRealUrl(realUrl);
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">DefaultSoulContextBuilder</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setSoulContextByHttp</span><span class="p">(</span><span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span><span class="p">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">path</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">contextPath</span> <span class="o">=</span> <span class="s">"/"</span><span class="p">;</span>
+        <span class="n">String</span><span class="o">[]</span> <span class="n">splitList</span> <span class="o">=</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">split</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">"/"</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">splitList</span><span class="p">.</span><span class="na">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">contextPath</span> <span class="o">=</span> <span class="n">contextPath</span><span class="p">.</span><span class="na">concat</span><span class="p">(</span><span class="n">splitList</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">String</span> <span class="n">realUrl</span> <span class="o">=</span> <span class="n">path</span><span class="p">.</span><span class="na">substring</span><span class="p">(</span><span class="n">contextPath</span><span class="p">.</span><span class="na">length</span><span class="p">());</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setContextPath</span><span class="p">(</span><span class="n">contextPath</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setModule</span><span class="p">(</span><span class="n">contextPath</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setMethod</span><span class="p">(</span><span class="n">realUrl</span><span class="p">);</span>
+        <span class="c1">// 设置url</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setRealUrl</span><span class="p">(</span><span class="n">realUrl</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们在这个函数上打上断点，然而非常不幸的是，也没有进入。瞬间头上？？？？？？？，这是怎么肥事啊，都没设置
     </p>
     <p>
      不抛弃不放弃，咱继续。看到realURL是从path来的，我们继续往上追求其来源，发现调用的是同一个类的下面这个函数 transform ,再上一层是 build
     </p>
-    <p>
-     ```java
-    # DefaultSoulContextBuilder
-    private SoulContext transform(final ServerHttpRequest request, final MetaData metaData) {
-        final String appKey = request.getHeaders().getFirst(Constants.APP_KEY);
-        final String sign = request.getHeaders().getFirst(Constants.SIGN);
-        final String timestamp = request.getHeaders().getFirst(Constants.TIMESTAMP);
-        SoulContext soulContext = new SoulContext();
-        String path = request.getURI().getPath();
-        soulContext.setPath(path);
-        if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) {
-            if (RpcTypeEnum.SPRING_CLOUD.getName().equals(metaData.getRpcType())) {
-                setSoulContextByHttp(soulContext, path);
-                soulContext.setRpcType(metaData.getRpcType());
-            } else {
-                setSoulContextByDubbo(soulContext, metaData);
-            }
-        } else {
-            setSoulContextByHttp(soulContext, path);
-            soulContext.setRpcType(RpcTypeEnum.HTTP.getName());
-        }
-        soulContext.setAppKey(appKey);
-        soulContext.setSign(sign);
-        soulContext.setTimestamp(timestamp);
-        soulContext.setStartDateTime(LocalDateTime.now());
-        Optional.ofNullable(request.getMethod()).ifPresent(httpMethod -&gt; soulContext.setHttpMethod(httpMethod.name()));
-        return soulContext;
-    }
-    </p>
-    <pre><pre>public SoulContext build(final ServerWebExchange exchange) {
-    final ServerHttpRequest request = exchange.getRequest();
-    String path = request.getURI().getPath();
-    MetaData metaData = MetaDataCache.getInstance().obtain(path);
-    if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) {
-        exchange.getAttributes().put(Constants.META_DATA, metaData);
-    }
-    return transform(request, metaData);
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">DefaultSoulContextBuilder</span>
+    <span class="kd">private</span> <span class="n">SoulContext</span> <span class="nf">transform</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">appKey</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">APP_KEY</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">sign</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SIGN</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">TIMESTAMP</span><span class="p">);</span>
+        <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SoulContext</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">path</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getURI</span><span class="p">().</span><span class="na">getPath</span><span class="p">();</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setPath</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">nonNull</span><span class="p">(</span><span class="n">metaData</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">metaData</span><span class="p">.</span><span class="na">getEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">SPRING_CLOUD</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">()))</span> <span class="p">{</span>
+                <span class="n">setSoulContextByHttp</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+                <span class="n">soulContext</span><span class="p">.</span><span class="na">setRpcType</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">());</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="n">setSoulContextByDubbo</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">metaData</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">setSoulContextByHttp</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+            <span class="n">soulContext</span><span class="p">.</span><span class="na">setRpcType</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setAppKey</span><span class="p">(</span><span class="n">appKey</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setSign</span><span class="p">(</span><span class="n">sign</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setTimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setStartDateTime</span><span class="p">(</span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">());</span>
+        <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getMethod</span><span class="p">()).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">httpMethod</span> <span class="o">-&gt;</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">setHttpMethod</span><span class="p">(</span><span class="n">httpMethod</span><span class="p">.</span><span class="na">name</span><span class="p">()));</span>
+        <span class="k">return</span> <span class="n">soulContext</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="n">SoulContext</span> <span class="nf">build</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">path</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getURI</span><span class="p">().</span><span class="na">getPath</span><span class="p">();</span>
+        <span class="n">MetaData</span> <span class="n">metaData</span> <span class="o">=</span> <span class="n">MetaDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtain</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">nonNull</span><span class="p">(</span><span class="n">metaData</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">metaData</span><span class="p">.</span><span class="na">getEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">META_DATA</span><span class="p">,</span> <span class="n">metaData</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">transform</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">metaData</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在build函数上打上断点，感谢老天，成功进入，通过调用栈发现，竟然是熟悉的 GlobalPlugin 进行调用的
     </p>
-    <p>
-     <pre>java
-    # GlobalPlugin
-    public Mono&lt;Void&gt; execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-        final ServerHttpRequest request = exchange.getRequest();
-        final HttpHeaders headers = request.getHeaders();
-        final String upgrade = headers.getFirst("Upgrade");
-        SoulContext soulContext;
-        if (StringUtils.isBlank(upgrade) || !"websocket".equals(upgrade)) {
-            soulContext = builder.build(exchange);
-        } else {
-            final MultiValueMap&lt;String, String&gt; queryParams = request.getQueryParams();
-            soulContext = transformMap(queryParams);
-        }
-        exchange.getAttributes().put(Constants.CONTEXT, soulContext);
-        return chain.execute(exchange);
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">upgrade</span> <span class="o">=</span> <span class="n">headers</span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="s">"Upgrade"</span><span class="p">);</span>
+        <span class="n">SoulContext</span> <span class="n">soulContext</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isBlank</span><span class="p">(</span><span class="n">upgrade</span><span class="p">)</span> <span class="o">||</span> <span class="o">!</span><span class="s">"websocket"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">upgrade</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">soulContext</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="kd">final</span> <span class="n">MultiValueMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">queryParams</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getQueryParams</span><span class="p">();</span>
+            <span class="n">soulContext</span> <span class="o">=</span> <span class="n">transformMap</span><span class="p">(</span><span class="n">queryParams</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">,</span> <span class="n">soulContext</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在下面的函数打上端口，逐步debug。在下面注释的地方可以看到：我们的是HTTP请求，但竟然走到Dubbo的逻辑里面去，这非常的不对劲
     </p>
-    <p>
-     <pre>java
-    private SoulContext transform(final ServerHttpRequest request, final MetaData metaData) {
-        // http://127.0.0.1:9195/http/order/findById?id=1111
-        final String appKey = request.getHeaders().getFirst(Constants.APP_KEY);
-        final String sign = request.getHeaders().getFirst(Constants.SIGN);
-        final String timestamp = request.getHeaders().getFirst(Constants.TIMESTAMP);
-        SoulContext soulContext = new SoulContext();
-        String path = request.getURI().getPath();
-        soulContext.setPath(path);
-        // 下面这个就神了，判断直接进到了setSoulContextByDubbo
-        if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) {
-            if (RpcTypeEnum.SPRING_CLOUD.getName().equals(metaData.getRpcType())) {
-                setSoulContextByHttp(soulContext, path);
-                soulContext.setRpcType(metaData.getRpcType());
-            } else {
-                // 应该是进到HTTP的，估计就这出错了
-                setSoulContextByDubbo(soulContext, metaData);
-            }
-        } else {
-            setSoulContextByHttp(soulContext, path);
-            soulContext.setRpcType(RpcTypeEnum.HTTP.getName());
-        }
-        soulContext.setAppKey(appKey);
-        soulContext.setSign(sign);
-        soulContext.setTimestamp(timestamp);
-        soulContext.setStartDateTime(LocalDateTime.now());
-        Optional.ofNullable(request.getMethod()).ifPresent(httpMethod -&gt; soulContext.setHttpMethod(httpMethod.name()));
-        return soulContext;
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">private</span> <span class="n">SoulContext</span> <span class="nf">transform</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// http://127.0.0.1:9195/http/order/findById?id=1111</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">appKey</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">APP_KEY</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">sign</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SIGN</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">TIMESTAMP</span><span class="p">);</span>
+        <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SoulContext</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">path</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getURI</span><span class="p">().</span><span class="na">getPath</span><span class="p">();</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setPath</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+        <span class="c1">// 下面这个就神了，判断直接进到了setSoulContextByDubbo</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">nonNull</span><span class="p">(</span><span class="n">metaData</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">metaData</span><span class="p">.</span><span class="na">getEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">SPRING_CLOUD</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">()))</span> <span class="p">{</span>
+                <span class="n">setSoulContextByHttp</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+                <span class="n">soulContext</span><span class="p">.</span><span class="na">setRpcType</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">());</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="c1">// 应该是进到HTTP的，估计就这出错了</span>
+                <span class="n">setSoulContextByDubbo</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">metaData</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">setSoulContextByHttp</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+            <span class="n">soulContext</span><span class="p">.</span><span class="na">setRpcType</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setAppKey</span><span class="p">(</span><span class="n">appKey</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setSign</span><span class="p">(</span><span class="n">sign</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setTimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setStartDateTime</span><span class="p">(</span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">());</span>
+        <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getMethod</span><span class="p">()).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">httpMethod</span> <span class="o">-&gt;</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">setHttpMethod</span><span class="p">(</span><span class="n">httpMethod</span><span class="p">.</span><span class="na">name</span><span class="p">()));</span>
+        <span class="k">return</span> <span class="n">soulContext</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们使用下面的diff工具，看看最新版本的代码和目前版本有什么区别：
     </p>
@@ -490,55 +460,55 @@ exchange.getAttributes().put(Constants.REWRITE_URI
     <p>
      我们将代码修改一下，将HTTP设置为默认处理，代码大致如下：
     </p>
-    <p>
-     <pre>java
-    private SoulContext transform(final ServerHttpRequest request, final MetaData metaData) {
-        final String appKey = request.getHeaders().getFirst(Constants.APP_KEY);
-        final String sign = request.getHeaders().getFirst(Constants.SIGN);
-        final String timestamp = request.getHeaders().getFirst(Constants.TIMESTAMP);
-        SoulContext soulContext = new SoulContext();
-        String path = request.getURI().getPath();
-        soulContext.setPath(path);
-        // 还可以从metadata入手，这里就从类型判断入手
-        if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) {
-            if (RpcTypeEnum.SPRING_CLOUD.getName().equals(metaData.getRpcType())) {
-                setSoulContextByHttp(soulContext, path);
-                soulContext.setRpcType(metaData.getRpcType());
-            } else if (RpcTypeEnum.DUBBO.getName().equals(metaData.getRpcType())) {
-                setSoulContextByDubbo(soulContext, metaData);
-            } else {
-                setSoulContextByHttp(soulContext, path);
-                soulContext.setRpcType(RpcTypeEnum.HTTP.getName());
-            }
-        } else {
-            setSoulContextByHttp(soulContext, path);
-            soulContext.setRpcType(RpcTypeEnum.HTTP.getName());
-        }
-        soulContext.setAppKey(appKey);
-        soulContext.setSign(sign);
-        soulContext.setTimestamp(timestamp);
-        soulContext.setStartDateTime(LocalDateTime.now());
-        Optional.ofNullable(request.getMethod()).ifPresent(httpMethod -&gt; soulContext.setHttpMethod(httpMethod.name()));
-        return soulContext;
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">private</span> <span class="n">SoulContext</span> <span class="nf">transform</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">appKey</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">APP_KEY</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">sign</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SIGN</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">TIMESTAMP</span><span class="p">);</span>
+        <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SoulContext</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">path</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getURI</span><span class="p">().</span><span class="na">getPath</span><span class="p">();</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setPath</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+        <span class="c1">// 还可以从metadata入手，这里就从类型判断入手</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">nonNull</span><span class="p">(</span><span class="n">metaData</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">metaData</span><span class="p">.</span><span class="na">getEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">SPRING_CLOUD</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">()))</span> <span class="p">{</span>
+                <span class="n">setSoulContextByHttp</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+                <span class="n">soulContext</span><span class="p">.</span><span class="na">setRpcType</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">());</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">DUBBO</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">()))</span> <span class="p">{</span>
+                <span class="n">setSoulContextByDubbo</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">metaData</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="n">setSoulContextByHttp</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+                <span class="n">soulContext</span><span class="p">.</span><span class="na">setRpcType</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">setSoulContextByHttp</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+            <span class="n">soulContext</span><span class="p">.</span><span class="na">setRpcType</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setAppKey</span><span class="p">(</span><span class="n">appKey</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setSign</span><span class="p">(</span><span class="n">sign</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setTimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setStartDateTime</span><span class="p">(</span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">());</span>
+        <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getMethod</span><span class="p">()).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">httpMethod</span> <span class="o">-&gt;</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">setHttpMethod</span><span class="p">(</span><span class="n">httpMethod</span><span class="p">.</span><span class="na">name</span><span class="p">()));</span>
+        <span class="k">return</span> <span class="n">soulContext</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      重启，发送请求： http://127.0.0.1:9195/http/order/findById?id=1111 ，OK，非常感人的成功了
     </p>
-    <p>
-     <pre>json
-{
-    "id": "1111",
-    "name": "hello world findById"
-}</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="p">{</span>
+    <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"1111"</span><span class="p">,</span>
+    <span class="nt">"name"</span><span class="p">:</span> <span class="s2">"hello world findById"</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      到这，我们成功的定位并修复了这个错误（虽然没有啥用，但开心啊）
     </p>
     <p>
      这个bug的修复还可以从if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) 这端逻辑入手，需要跟踪一下metadata，这里就不展开讲，搞的话又是一篇番外
     </p>
-    <h2>
+    <h2 id="_6">
      总结
     </h2>
     <p>
@@ -556,10 +526,10 @@ exchange.getAttributes().put(Constants.REWRITE_URI
     <p>
      <img alt="" src="./picture/Soulprocessfirst.png"/>
     </p>
-    <h2>
+    <h2 id="soul">
      Soul网关源码分析文章列表
     </h2>
-    <h3>
+    <h3 id="github">
      Github
     </h3>
     <ul>
@@ -594,7 +564,7 @@ exchange.getAttributes().put(Constants.REWRITE_URI
       </a>
      </li>
     </ul>
-    <h3>
+    <h3 id="_7">
      掘金
     </h3>
     <ul>

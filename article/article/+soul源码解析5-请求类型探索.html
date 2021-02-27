@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,30 +43,30 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soul">
      Soul网关源码解析（五）请求类型探索
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      在上几篇文章中分析了请求的处理流程，HTTP和RPC请求处理是互斥的，通过请求类型来判断，这篇文章来探索下请求类型的前世今生
     </p>
-    <h2>
+    <h2 id="_2">
      源码分析
     </h2>
     <p>
      通过前面的分析，通过请求类型判断是否进入这个plugin进行执行，大致如下：
     </p>
-    <p>
-     <pre>java
-    public Boolean skip(final ServerWebExchange exchange) {
-        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-        return !Objects.equals(Objects.requireNonNull(soulContext).getRpcType(), RpcTypeEnum.HTTP.getName());
-    }</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">soulContext</span><span class="p">).</span><span class="na">getRpcType</span><span class="p">(),</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="plugin-skip">
      Plugin Skip 函数
     </h3>
     <p>
@@ -74,313 +75,296 @@
     <p>
      DividePlugin,判断是不是HTTP
     </p>
-    <p>
-     <pre>java
-    public Boolean skip(final ServerWebExchange exchange) {
-        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-        return !Objects.equals(Objects.requireNonNull(soulContext).getRpcType(), RpcTypeEnum.HTTP.getName());
-    }`</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">soulContext</span><span class="p">).</span><span class="na">getRpcType</span><span class="p">(),</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+    <span class="p">}</span><span class="err">`</span>
+</code></pre>
+    </div>
     <p>
      WebClientPlugin,是HTTP或者SPRING_CLOUD
     </p>
-    <p>
-     <pre>java
-    public Boolean skip(final ServerWebExchange exchange) {
-        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-        assert soulContext != null;
-        return !Objects.equals(RpcTypeEnum.HTTP.getName(), soulContext.getRpcType())
-                &amp;&amp; !Objects.equals(RpcTypeEnum.SPRING_CLOUD.getName(), soulContext.getRpcType());
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">())</span>
+                <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">SPRING_CLOUD</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">());</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      WebsocketPlugin,是WEB_SOCKET
     </p>
-    <p>
-     <pre>java
-    public Boolean skip(final ServerWebExchange exchange) {
-        final SoulContext body = exchange.getAttribute(Constants.CONTEXT);
-        return !Objects.equals(Objects.requireNonNull(body).getRpcType(), RpcTypeEnum.WEB_SOCKET.getName());
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">body</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">body</span><span class="p">).</span><span class="na">getRpcType</span><span class="p">(),</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">WEB_SOCKET</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      AlibabaDubboPlugin,类型是DUBBO
     </p>
-    <p>
-     <pre>java
-    public Boolean skip(final ServerWebExchange exchange) {
-        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-        assert soulContext != null;
-        return !Objects.equals(soulContext.getRpcType(), RpcTypeEnum.DUBBO.getName());
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">(),</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">DUBBO</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      WebClientResponsePlugin，类型是HTTP或者SPRING_CLOUD
     </p>
-    <p>
-     <pre>java
-    public Boolean skip(final ServerWebExchange exchange) {
-        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-        assert soulContext != null;
-        return !Objects.equals(RpcTypeEnum.HTTP.getName(), soulContext.getRpcType())
-                &amp;&amp; !Objects.equals(RpcTypeEnum.SPRING_CLOUD.getName(), soulContext.getRpcType());
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">())</span>
+                <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">SPRING_CLOUD</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">());</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      DubboResponsePlugin，类型是DUBBO
     </p>
-    <p>
-     <pre>java
-    public Boolean skip(final ServerWebExchange exchange) {
-        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-        assert soulContext != null;
-        return !Objects.equals(soulContext.getRpcType(), RpcTypeEnum.DUBBO.getName());
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">(),</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">DUBBO</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      两个类型看着有点怪，有时候转不过弯了，需要注意
     </p>
-    <h3>
+    <h3 id="_3">
      源码追踪
     </h3>
     <p>
      我们看下取类似相关的代码，大致如下：
     </p>
-    <p>
-     <pre>java
-final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-soulContext.getRpcType()</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+<span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">()</span>
+</code></pre>
+    </div>
     <p>
      看看将响应放到exchange中的代码，可以猜测到把Constants.CONTEXT放到exchange的大致代码：
     </p>
-    <p>
-     ```java
-exchange.getAttributes().put(Constants.CLIENT_RESPONSE_RESULT_TYPE, ResultEnum.SUCCESS.getName());
-    </p>
-    <p>
-     // 可以得到放Constants.CONTEXT的大致代码如下：
-exchange.getAttributes().put(Constants.CONTEXT,
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CLIENT_RESPONSE_RESULT_TYPE</span><span class="p">,</span> <span class="n">ResultEnum</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+
+<span class="c1">// 可以得到放Constants.CONTEXT的大致代码如下：</span>
+<span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">,</span>
+</code></pre>
+    </div>
     <p>
      在IDEA中使用ctrl+shift+R，全局搜索，发现在 GlobalPlugin 中有嫌疑代码：
     </p>
-    <p>
-     ```java
-    # GlobalPlugin
-    </p>
-    <pre><pre>public Mono&lt;Void&gt; execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-    final ServerHttpRequest request = exchange.getRequest();
-    final HttpHeaders headers = request.getHeaders();
-    final String upgrade = headers.getFirst("Upgrade");
-    SoulContext soulContext;
-    if (StringUtils.isBlank(upgrade) || !"websocket".equals(upgrade)) {
-        // 对SoulContext进行操作
-        soulContext = builder.build(exchange);
-    } else {
-        final MultiValueMap&lt;String, String&gt; queryParams = request.getQueryParams();
-        // 对SoulContext进行操作
-        soulContext = transformMap(queryParams);
-    }
-    // 更新SoulContext
-    exchange.getAttributes().put(Constants.CONTEXT, soulContext);
-    return chain.execute(exchange);
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
+
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">upgrade</span> <span class="o">=</span> <span class="n">headers</span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="s">"Upgrade"</span><span class="p">);</span>
+        <span class="n">SoulContext</span> <span class="n">soulContext</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isBlank</span><span class="p">(</span><span class="n">upgrade</span><span class="p">)</span> <span class="o">||</span> <span class="o">!</span><span class="s">"websocket"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">upgrade</span><span class="p">))</span> <span class="p">{</span>
+            <span class="c1">// 对SoulContext进行操作</span>
+            <span class="n">soulContext</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="kd">final</span> <span class="n">MultiValueMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">queryParams</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getQueryParams</span><span class="p">();</span>
+            <span class="c1">// 对SoulContext进行操作</span>
+            <span class="n">soulContext</span> <span class="o">=</span> <span class="n">transformMap</span><span class="p">(</span><span class="n">queryParams</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// 更新SoulContext</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">,</span> <span class="n">soulContext</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      有两处嫌疑：build和transformMap，我们在看看build函数具体细节
     </p>
-    <p>
-     ```java
-    # DefaultSoulContextBuilder build(exchange)
-    </p>
-    <pre><pre>public SoulContext build(final ServerWebExchange exchange) {
-    final ServerHttpRequest request = exchange.getRequest();
-    String path = request.getURI().getPath();
-    // 根据path得到一些元数据
-    MetaData metaData = MetaDataCache.getInstance().obtain(path);
-    if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) {
-        exchange.getAttributes().put(Constants.META_DATA, metaData);
-    }
-    // 再看下去
-    return transform(request, metaData);
-}
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">DefaultSoulContextBuilder</span> <span class="nf">build</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span>
 
-private SoulContext transform(final ServerHttpRequest request, final MetaData metaData) {
-    final String appKey = request.getHeaders().getFirst(Constants.APP_KEY);
-    final String sign = request.getHeaders().getFirst(Constants.SIGN);
-    final String timestamp = request.getHeaders().getFirst(Constants.TIMESTAMP);
-    SoulContext soulContext = new SoulContext();
-    String path = request.getURI().getPath();
-    soulContext.setPath(path);
-    // 下面都是判断，而且是基于metaData的判断，猜测是在路由注册的时候就携带了相关的类型信息，而且默认是HTTP
-    if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) {
-        if (RpcTypeEnum.SPRING_CLOUD.getName().equals(metaData.getRpcType())) {
-            setSoulContextByHttp(soulContext, path);
-            soulContext.setRpcType(metaData.getRpcType());
-        } else if (RpcTypeEnum.DUBBO.getName().equals(metaData.getRpcType())) {
-            setSoulContextByDubbo(soulContext, metaData);
-        } else if (RpcTypeEnum.SOFA.getName().equals(metaData.getRpcType())) {
-            setSoulContextBySofa(soulContext, metaData);
-        } else if (RpcTypeEnum.TARS.getName().equals(metaData.getRpcType())) {
-            setSoulContextByTars(soulContext, metaData);
-        } else {
-            setSoulContextByHttp(soulContext, path);
-            soulContext.setRpcType(RpcTypeEnum.HTTP.getName());
-        }
-    } else {
-        setSoulContextByHttp(soulContext, path);
-        soulContext.setRpcType(RpcTypeEnum.HTTP.getName());
-    }
-    soulContext.setAppKey(appKey);
-    soulContext.setSign(sign);
-    soulContext.setTimestamp(timestamp);
-    soulContext.setStartDateTime(LocalDateTime.now());
-    Optional.ofNullable(request.getMethod()).ifPresent(httpMethod -&gt; soulContext.setHttpMethod(httpMethod.name()));
-    return soulContext;
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <span class="kd">public</span> <span class="n">SoulContext</span> <span class="nf">build</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">path</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getURI</span><span class="p">().</span><span class="na">getPath</span><span class="p">();</span>
+        <span class="c1">// 根据path得到一些元数据</span>
+        <span class="n">MetaData</span> <span class="n">metaData</span> <span class="o">=</span> <span class="n">MetaDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtain</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">nonNull</span><span class="p">(</span><span class="n">metaData</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">metaData</span><span class="p">.</span><span class="na">getEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">META_DATA</span><span class="p">,</span> <span class="n">metaData</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// 再看下去</span>
+        <span class="k">return</span> <span class="n">transform</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">metaData</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">SoulContext</span> <span class="nf">transform</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">appKey</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">APP_KEY</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">sign</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SIGN</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">TIMESTAMP</span><span class="p">);</span>
+        <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SoulContext</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">path</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getURI</span><span class="p">().</span><span class="na">getPath</span><span class="p">();</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setPath</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+        <span class="c1">// 下面都是判断，而且是基于metaData的判断，猜测是在路由注册的时候就携带了相关的类型信息，而且默认是HTTP</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">nonNull</span><span class="p">(</span><span class="n">metaData</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">metaData</span><span class="p">.</span><span class="na">getEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">SPRING_CLOUD</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">()))</span> <span class="p">{</span>
+                <span class="n">setSoulContextByHttp</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+                <span class="n">soulContext</span><span class="p">.</span><span class="na">setRpcType</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">());</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">DUBBO</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">()))</span> <span class="p">{</span>
+                <span class="n">setSoulContextByDubbo</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">metaData</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">SOFA</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">()))</span> <span class="p">{</span>
+                <span class="n">setSoulContextBySofa</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">metaData</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">TARS</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">()))</span> <span class="p">{</span>
+                <span class="n">setSoulContextByTars</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">metaData</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="n">setSoulContextByHttp</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+                <span class="n">soulContext</span><span class="p">.</span><span class="na">setRpcType</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">setSoulContextByHttp</span><span class="p">(</span><span class="n">soulContext</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+            <span class="n">soulContext</span><span class="p">.</span><span class="na">setRpcType</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setAppKey</span><span class="p">(</span><span class="n">appKey</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setSign</span><span class="p">(</span><span class="n">sign</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setTimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">);</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setStartDateTime</span><span class="p">(</span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">());</span>
+        <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getMethod</span><span class="p">()).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">httpMethod</span> <span class="o">-&gt;</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">setHttpMethod</span><span class="p">(</span><span class="n">httpMethod</span><span class="p">.</span><span class="na">name</span><span class="p">()));</span>
+        <span class="k">return</span> <span class="n">soulContext</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      类型是从MetaData中取出来的，我们详细去看看类： MetaDataCache
     </p>
-    <p>
-     ```java
-    # MetaDataCache
-    </p>
-    <pre><pre>// 从Map中取出数据
-public MetaData obtain(final String path) {
-    MetaData metaData = META_DATA_MAP.get(path);
-    if (Objects.isNull(metaData)) {
-        String key = META_DATA_MAP.keySet().stream().filter(k -&gt; PathMatchUtils.match(k, path)).findFirst().orElse("");
-        return META_DATA_MAP.get(key);
-    }
-    return metaData;
-}
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">MetaDataCache</span>
 
-// 这个函数是存放数据的，我们在这个函数打上断点，看看调用栈
-public void cache(final MetaData data) {
-    META_DATA_MAP.put(data.getPath(), data);
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <span class="c1">// 从Map中取出数据</span>
+    <span class="kd">public</span> <span class="n">MetaData</span> <span class="nf">obtain</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">path</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">MetaData</span> <span class="n">metaData</span> <span class="o">=</span> <span class="n">META_DATA_MAP</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">metaData</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">String</span> <span class="n">key</span> <span class="o">=</span> <span class="n">META_DATA_MAP</span><span class="p">.</span><span class="na">keySet</span><span class="p">().</span><span class="na">stream</span><span class="p">().</span><span class="na">filter</span><span class="p">(</span><span class="n">k</span> <span class="o">-&gt;</span> <span class="n">PathMatchUtils</span><span class="p">.</span><span class="na">match</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">path</span><span class="p">)).</span><span class="na">findFirst</span><span class="p">().</span><span class="na">orElse</span><span class="p">(</span><span class="s">""</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">META_DATA_MAP</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">metaData</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 这个函数是存放数据的，我们在这个函数打上断点，看看调用栈</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">cache</span><span class="p">(</span><span class="kd">final</span> <span class="n">MetaData</span> <span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">META_DATA_MAP</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="na">getPath</span><span class="p">(),</span> <span class="n">data</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面的 cache 函数打上端口，它应该是启动的时候初始化的，我们打上断点以后重启Bootstrap程序，调用栈的相关类和函数如下：
     </p>
-    <p>
-     ```java
-    # MetaDataAllSubscriber ，再往上看
-    public void onSubscribe(final MetaData metaData) {
-        MetaDataCache.getInstance().cache(metaData);
-    }
-    </p>
-    <pre><pre># MetaDataHandler ，再往上看
-protected void doRefresh(final List&lt;MetaData&gt; dataList) {
-    metaDataSubscribers.forEach(MetaDataSubscriber::refresh);
-    dataList.forEach(metaData -&gt; metaDataSubscribers.forEach(metaDataSubscriber -&gt; metaDataSubscriber.onSubscribe(metaData)));
-}
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">MetaDataAllSubscriber</span> <span class="err">，</span><span class="n">再往上看</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onSubscribe</span><span class="p">(</span><span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">MetaDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">cache</span><span class="p">(</span><span class="n">metaData</span><span class="p">);</span>
+    <span class="p">}</span>
 
-# AbstractDataHandler ，这里看到datalist是从json转过来的，继续往上差
-public void handle(final String json, final String eventType) {
-    List&lt;T&gt; dataList = convert(json);
-    if (CollectionUtils.isNotEmpty(dataList)) {
-        DataEventTypeEnum eventTypeEnum = DataEventTypeEnum.acquireByName(eventType);
-        switch (eventTypeEnum) {
-            case REFRESH:
-            case MYSELF:
-                doRefresh(dataList);
-                break;
-            case UPDATE:
-            case CREATE:
-                doUpdate(dataList);
-                break;
-            case DELETE:
-                doDelete(dataList);
-                break;
-            default:
-                break;
-        }
-    }
-}
+    <span class="err">#</span> <span class="n">MetaDataHandler</span> <span class="err">，</span><span class="n">再往上看</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">doRefresh</span><span class="p">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">MetaData</span><span class="o">&gt;</span> <span class="n">dataList</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">metaDataSubscribers</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">MetaDataSubscriber</span><span class="p">::</span><span class="n">refresh</span><span class="p">);</span>
+        <span class="n">dataList</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">metaData</span> <span class="o">-&gt;</span> <span class="n">metaDataSubscribers</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">metaDataSubscriber</span> <span class="o">-&gt;</span> <span class="n">metaDataSubscriber</span><span class="p">.</span><span class="na">onSubscribe</span><span class="p">(</span><span class="n">metaData</span><span class="p">)));</span>
+    <span class="p">}</span>
 
-# WebsocketDataHandler ，到了websocket相关的，继续往上
-public void executor(final ConfigGroupEnum type, final String json, final String eventType) {
-    ENUM_MAP.get(type).handle(json, eventType);
-}
+    <span class="err">#</span> <span class="n">AbstractDataHandler</span> <span class="err">，</span><span class="n">这里看到datalist是从json转过来的</span><span class="err">，</span><span class="n">继续往上差</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">handle</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">json</span><span class="p">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">eventType</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">dataList</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">json</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">dataList</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">DataEventTypeEnum</span> <span class="n">eventTypeEnum</span> <span class="o">=</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">acquireByName</span><span class="p">(</span><span class="n">eventType</span><span class="p">);</span>
+            <span class="k">switch</span> <span class="p">(</span><span class="n">eventTypeEnum</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">case</span> <span class="n">REFRESH</span><span class="p">:</span>
+                <span class="k">case</span> <span class="n">MYSELF</span><span class="p">:</span>
+                    <span class="n">doRefresh</span><span class="p">(</span><span class="n">dataList</span><span class="p">);</span>
+                    <span class="k">break</span><span class="p">;</span>
+                <span class="k">case</span> <span class="n">UPDATE</span><span class="p">:</span>
+                <span class="k">case</span> <span class="n">CREATE</span><span class="p">:</span>
+                    <span class="n">doUpdate</span><span class="p">(</span><span class="n">dataList</span><span class="p">);</span>
+                    <span class="k">break</span><span class="p">;</span>
+                <span class="k">case</span> <span class="n">DELETE</span><span class="p">:</span>
+                    <span class="n">doDelete</span><span class="p">(</span><span class="n">dataList</span><span class="p">);</span>
+                    <span class="k">break</span><span class="p">;</span>
+                <span class="k">default</span><span class="p">:</span>
+                    <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-# SoulWebsocketClient ，到这就查到来源了，从websocket获取过来的
-private void handleResult(final String result) {
-    WebsocketData websocketData = GsonUtils.getInstance().fromJson(result, WebsocketData.class);
-    ConfigGroupEnum groupEnum = ConfigGroupEnum.acquireByName(websocketData.getGroupType());
-    String eventType = websocketData.getEventType();
-    String json = GsonUtils.getInstance().toJson(websocketData.getData());
-    websocketDataHandler.executor(groupEnum, json, eventType);
-}
+    <span class="err">#</span> <span class="n">WebsocketDataHandler</span> <span class="err">，</span><span class="n">到了websocket相关的</span><span class="err">，</span><span class="n">继续往上</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">executor</span><span class="p">(</span><span class="kd">final</span> <span class="n">ConfigGroupEnum</span> <span class="n">type</span><span class="p">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">json</span><span class="p">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">eventType</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">ENUM_MAP</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">type</span><span class="p">).</span><span class="na">handle</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="n">eventType</span><span class="p">);</span>
+    <span class="p">}</span>
 
-public void onMessage(final String result) {
-    // 最终源头，从websocket获取得到的
-    handleResult(result);
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <span class="err">#</span> <span class="n">SoulWebsocketClient</span> <span class="err">，</span><span class="n">到这就查到来源了</span><span class="err">，</span><span class="n">从websocket获取过来的</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">handleResult</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">result</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">WebsocketData</span> <span class="n">websocketData</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">WebsocketData</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="n">ConfigGroupEnum</span> <span class="n">groupEnum</span> <span class="o">=</span> <span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">acquireByName</span><span class="p">(</span><span class="n">websocketData</span><span class="p">.</span><span class="na">getGroupType</span><span class="p">());</span>
+        <span class="n">String</span> <span class="n">eventType</span> <span class="o">=</span> <span class="n">websocketData</span><span class="p">.</span><span class="na">getEventType</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">toJson</span><span class="p">(</span><span class="n">websocketData</span><span class="p">.</span><span class="na">getData</span><span class="p">());</span>
+        <span class="n">websocketDataHandler</span><span class="p">.</span><span class="na">executor</span><span class="p">(</span><span class="n">groupEnum</span><span class="p">,</span> <span class="n">json</span><span class="p">,</span> <span class="n">eventType</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onMessage</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">result</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 最终源头，从websocket获取得到的</span>
+        <span class="n">handleResult</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们查看下 result 是个什么都行，内容大致如下（太长了，删了一些）：可以看到每个路径都有配置，并且都是RPCType这个属性，那我们基本就找到了，类型是客户端注册的时候自己传入的！
     </p>
-    <p>
-     <pre>json
-{
-    "groupType": "META_DATA",
-    "eventType": "REFRESH",
-    "data": [{
-        "id": "1349889526699433984",
-        "appName": "sofa",
-        "path": "/sofa/insert",
-        "rpcType": "sofa",
-        "serviceName": "org.dromara.soul.examples.dubbo.api.service.DubboTestService",
-        "methodName": "insert",
-        "parameterTypes": "org.dromara.soul.examples.dubbo.api.entity.DubboTest",
-        "rpcExt": "{\"loadbalance\":\"hash\",\"retries\":3,\"timeout\":-1}",
-        "enabled": true
-    }, {
-        "id": "1350625956049108992",
-        "appName": "dubbo",
-        "path": "/dubbo/findAll",
-        "rpcType": "dubbo",
-        "serviceName": "org.dromara.soul.examples.dubbo.api.service.DubboTestService",
-        "methodName": "findAll",
-        "rpcExt": "{\"group\":\"\",\"version\":\"\",\"loadbalance\":\"random\",\"retries\":2,\"timeout\":10000,\"url\":\"\"}",
-        "enabled": true
-    }]
-}</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="p">{</span>
+    <span class="nt">"groupType"</span><span class="p">:</span> <span class="s2">"META_DATA"</span><span class="p">,</span>
+    <span class="nt">"eventType"</span><span class="p">:</span> <span class="s2">"REFRESH"</span><span class="p">,</span>
+    <span class="nt">"data"</span><span class="p">:</span> <span class="p">[{</span>
+        <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"1349889526699433984"</span><span class="p">,</span>
+        <span class="nt">"appName"</span><span class="p">:</span> <span class="s2">"sofa"</span><span class="p">,</span>
+        <span class="nt">"path"</span><span class="p">:</span> <span class="s2">"/sofa/insert"</span><span class="p">,</span>
+        <span class="nt">"rpcType"</span><span class="p">:</span> <span class="s2">"sofa"</span><span class="p">,</span>
+        <span class="nt">"serviceName"</span><span class="p">:</span> <span class="s2">"org.dromara.soul.examples.dubbo.api.service.DubboTestService"</span><span class="p">,</span>
+        <span class="nt">"methodName"</span><span class="p">:</span> <span class="s2">"insert"</span><span class="p">,</span>
+        <span class="nt">"parameterTypes"</span><span class="p">:</span> <span class="s2">"org.dromara.soul.examples.dubbo.api.entity.DubboTest"</span><span class="p">,</span>
+        <span class="nt">"rpcExt"</span><span class="p">:</span> <span class="s2">"{\"loadbalance\":\"hash\",\"retries\":3,\"timeout\":-1}"</span><span class="p">,</span>
+        <span class="nt">"enabled"</span><span class="p">:</span> <span class="kc">true</span>
+    <span class="p">},</span> <span class="p">{</span>
+        <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"1350625956049108992"</span><span class="p">,</span>
+        <span class="nt">"appName"</span><span class="p">:</span> <span class="s2">"dubbo"</span><span class="p">,</span>
+        <span class="nt">"path"</span><span class="p">:</span> <span class="s2">"/dubbo/findAll"</span><span class="p">,</span>
+        <span class="nt">"rpcType"</span><span class="p">:</span> <span class="s2">"dubbo"</span><span class="p">,</span>
+        <span class="nt">"serviceName"</span><span class="p">:</span> <span class="s2">"org.dromara.soul.examples.dubbo.api.service.DubboTestService"</span><span class="p">,</span>
+        <span class="nt">"methodName"</span><span class="p">:</span> <span class="s2">"findAll"</span><span class="p">,</span>
+        <span class="nt">"rpcExt"</span><span class="p">:</span> <span class="s2">"{\"group\":\"\",\"version\":\"\",\"loadbalance\":\"random\",\"retries\":2,\"timeout\":10000,\"url\":\"\"}"</span><span class="p">,</span>
+        <span class="nt">"enabled"</span><span class="p">:</span> <span class="kc">true</span>
+    <span class="p">}]</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      看下另外一个transformMap，看看它的请求类型是怎么来的
     </p>
-    <p>
-     ```java
-    # GlobalPlugin
-    </p>
-    <pre><pre>private SoulContext transformMap(final MultiValueMap&lt;String, String&gt; queryParams) {
-    SoulContext soulContext = new SoulContext();
-    soulContext.setModule(queryParams.getFirst(Constants.MODULE));
-    soulContext.setMethod(queryParams.getFirst(Constants.METHOD));
-    soulContext.setRpcType(queryParams.getFirst(Constants.RPC_TYPE));
-    return soulContext;
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
+
+    <span class="kd">private</span> <span class="n">SoulContext</span> <span class="nf">transformMap</span><span class="p">(</span><span class="kd">final</span> <span class="n">MultiValueMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">queryParams</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SoulContext</span><span class="p">();</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setModule</span><span class="p">(</span><span class="n">queryParams</span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">MODULE</span><span class="p">));</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setMethod</span><span class="p">(</span><span class="n">queryParams</span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">METHOD</span><span class="p">));</span>
+        <span class="n">soulContext</span><span class="p">.</span><span class="na">setRpcType</span><span class="p">(</span><span class="n">queryParams</span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">RPC_TYPE</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">soulContext</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      queryParams是从 request 取得的，那应该不是初始化配置来的了，看看 GlobalPlugin 前面的类有没有对其进行处理了
     </p>
@@ -485,28 +469,28 @@ public void onMessage(final String result) {
     <p>
      在回去看看 GlobalPlugin，我们仔细看看判断，发现一个有趣的逻辑：判断为空或者不为websocket，那是不是下面那个就是websocket？
     </p>
-    <p>
-     <pre>java
-    # GlobalPlugin
-    public Mono&lt;Void&gt; execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-        final ServerHttpRequest request = exchange.getRequest();
-        final HttpHeaders headers = request.getHeaders();
-        final String upgrade = headers.getFirst("Upgrade");
-        SoulContext soulContext;
-        // 它这判断为空获取不为websocket，那是不是下面那个就是websocket？
-        if (StringUtils.isBlank(upgrade) || !"websocket".equals(upgrade)) {
-            // 对SoulContext进行操作
-            soulContext = builder.build(exchange);
-        } else {
-            final MultiValueMap&lt;String, String&gt; queryParams = request.getQueryParams();
-            // 对SoulContext进行操作
-            soulContext = transformMap(queryParams);
-        }
-        // 更新SoulContext
-        exchange.getAttributes().put(Constants.CONTEXT, soulContext);
-        return chain.execute(exchange);
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">upgrade</span> <span class="o">=</span> <span class="n">headers</span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="s">"Upgrade"</span><span class="p">);</span>
+        <span class="n">SoulContext</span> <span class="n">soulContext</span><span class="p">;</span>
+        <span class="c1">// 它这判断为空获取不为websocket，那是不是下面那个就是websocket？</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isBlank</span><span class="p">(</span><span class="n">upgrade</span><span class="p">)</span> <span class="o">||</span> <span class="o">!</span><span class="s">"websocket"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">upgrade</span><span class="p">))</span> <span class="p">{</span>
+            <span class="c1">// 对SoulContext进行操作</span>
+            <span class="n">soulContext</span> <span class="o">=</span> <span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="kd">final</span> <span class="n">MultiValueMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">queryParams</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getQueryParams</span><span class="p">();</span>
+            <span class="c1">// 对SoulContext进行操作</span>
+            <span class="n">soulContext</span> <span class="o">=</span> <span class="n">transformMap</span><span class="p">(</span><span class="n">queryParams</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// 更新SoulContext</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">,</span> <span class="n">soulContext</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      于是我们找个websocket测试一下，下面websocket的测试攻击和websocket的官方说明文档：
     </p>
@@ -528,37 +512,31 @@ public void onMessage(final String result) {
     <p>
      断点来到 filter 的 WebSocketParamFilter ,看到了非常可疑的代码
     </p>
-    <p>
-     ```java
-    # WebSocketParamFilter
-    protected Mono
-     <boolean>
-      doFilter(final ServerWebExchange exchange, final WebFilterChain chain) {
-        final ServerHttpRequest request = exchange.getRequest();
-        final HttpHeaders headers = request.getHeaders();
-        // 进入debug，查看其值为 websocket
-        final String upgrade = headers.getFirst("Upgrade");
-        if (StringUtils.isNoneBlank(upgrade) &amp;&amp; RpcTypeEnum.WEB_SOCKET.getName().equals(upgrade)) {
-            return Mono.just(verify(request.getQueryParams()));
-        }
-        return Mono.just(true);
-    }
-     </boolean>
-    </p>
-    <pre><pre>// 下面这个判断是直接从请求里面取出来的
-private Boolean verify(final MultiValueMap&lt;String, String&gt; queryParams) {
-    return !StringUtils.isBlank(queryParams.getFirst(Constants.MODULE))
-            &amp;&amp; !StringUtils.isBlank(queryParams.getFirst(Constants.METHOD))
-            &amp;&amp; !StringUtils.isBlank(queryParams.getFirst(Constants.RPC_TYPE));
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">WebSocketParamFilter</span>
+    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span> <span class="nf">doFilter</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">WebFilterChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">();</span>
+        <span class="c1">// 进入debug，查看其值为 websocket</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">upgrade</span> <span class="o">=</span> <span class="n">headers</span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="s">"Upgrade"</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNoneBlank</span><span class="p">(</span><span class="n">upgrade</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">WEB_SOCKET</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">upgrade</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">just</span><span class="p">(</span><span class="n">verify</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getQueryParams</span><span class="p">()));</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">just</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 下面这个判断是直接从请求里面取出来的</span>
+    <span class="kd">private</span> <span class="n">Boolean</span> <span class="nf">verify</span><span class="p">(</span><span class="kd">final</span> <span class="n">MultiValueMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">queryParams</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">!</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isBlank</span><span class="p">(</span><span class="n">queryParams</span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">MODULE</span><span class="p">))</span>
+                <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isBlank</span><span class="p">(</span><span class="n">queryParams</span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">METHOD</span><span class="p">))</span>
+                <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isBlank</span><span class="p">(</span><span class="n">queryParams</span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">RPC_TYPE</span><span class="p">));</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      通过上面的代码，我们基本可以判断，GlobalPlugin 的 transformMap(queryParams) 基本是 websocket 的，而 websocket 类似是随着客户端的请求传入的
     </p>
-    <h2>
+    <h2 id="_4">
      总结
     </h2>
     <p>
@@ -573,10 +551,10 @@ private Boolean verify(final MultiValueMap&lt;String, String&gt; queryParams) {
     <p>
      还知道了网关初始化的时候获取路由时，路由的信息自带请求类型；而Websocket请求比较特殊，它从客户端传入就自带请求类型
     </p>
-    <h2>
+    <h2 id="soul_1">
      Soul网关源码分析文章列表
     </h2>
-    <h3>
+    <h3 id="github">
      Github
     </h3>
     <ul>
@@ -611,7 +589,7 @@ private Boolean verify(final MultiValueMap&lt;String, String&gt; queryParams) {
       </a>
      </li>
     </ul>
-    <h3>
+    <h3 id="_5">
      掘金
     </h3>
     <ul>

@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,49 +43,35 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="zsh">
      ZSH 安装设置
     </h1>
     <hr/>
-    <h2>
+    <h2 id="centos">
      CentOS
     </h2>
     <p>
      安装完成后退出重新登录终端即可
     </p>
-    <p>
-     ```sh
-yum install -y zsh
+    <div class="codehilite">
+     <pre><span></span><code>yum install -y zsh
 chsh -s /bin/zsh
-curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
-    </p>
-    <h1>
-     or
-    </h1>
-    <p>
-     sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-    </p>
-    <h1>
-     or 自行建立脚本运行
-    </h1>
-    <p>
-     https://github.com/ohmyzsh/ohmyzsh/blob/master/tools/install.sh
-    </p>
-    <h1>
-     感觉是被墙了的原因，无法直接获取文件进行安装
-    </h1>
-    <h1>
-     可以访问：https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
-    </h1>
-    <h1>
-     获取文件内容,下入下面的文件中，然后执行脚本
-    </h1>
-    <p>
-     vim zshInstall.sh
+curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh <span class="p">|</span> sh
+
+<span class="c1"># or</span>
+sh -c <span class="s2">"</span><span class="k">$(</span>curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh<span class="k">)</span><span class="s2">"</span>
+
+<span class="c1"># or 自行建立脚本运行</span>
+https://github.com/ohmyzsh/ohmyzsh/blob/master/tools/install.sh
+
+<span class="c1"># 感觉是被墙了的原因，无法直接获取文件进行安装</span>
+<span class="c1"># 可以访问：https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh</span>
+<span class="c1"># 获取文件内容,下入下面的文件中，然后执行脚本</span>
+vim zshInstall.sh
 sh zshInstall.sh
-```
-    </p>
-    <h2>
+</code></pre>
+    </div>
+    <h2 id="_1">
      参考链接
     </h2>
     <ul>

@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,56 +43,52 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soulzookeeper-bootstrap">
      Soul网关源码解析（十五）Zookeeper数据同步-Bootstrap端
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      本篇文章对Soul网关Bootstrap的Zookeeper数据同步进行探索
     </p>
-    <h2>
+    <h2 id="_2">
      示例启动
     </h2>
-    <h3>
+    <h3 id="_3">
      环境配置
     </h3>
     <p>
      使用docker启动mysql和zk
     </p>
     <p>
-     <pre>shell script
+     ```shell script
 docker run -dit --name zk -p 2181:2181 zookeepe
-docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest</pre>
+docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
     </p>
-    <h3>
-     Soul-Admin配置
-    </h3>
-    <p>
-     启动时候，我们先把Soul-admin和Soul-Bootstrap的Websocket同步给关了，开启HTTP同步，配置大致如下：
-    </p>
-    <p>
-     Soul-Admin的HTTP同步方式配置，暂时把其他同步方式给注释关闭
-    </p>
-    <p>
-     <pre>xml
-  sync:
-      zookeeper:
-          url: localhost:2181
-          sessionTimeout: 5000
-          connectionTimeout: 2000</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">###</span> <span class="n">Soul</span><span class="o">-</span><span class="n">Admin配置</span>
+<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">启动时候，我们先把</span><span class="n">Soul</span><span class="o">-</span><span class="n">admin和Soul</span><span class="o">-</span><span class="n">Bootstrap的Websocket同步给关了</span><span class="err">，开启</span><span class="n">HTTP同步</span><span class="err">，配置大致如下：</span>
+
+<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">Soul</span><span class="o">-</span><span class="n">Admin的HTTP同步方式配置</span><span class="err">，暂时把其他同步方式给注释关闭</span>
+
+<span class="o">```</span><span class="n">xml</span>
+  <span class="n">sync</span><span class="p">:</span>
+      <span class="n">zookeeper</span><span class="p">:</span>
+          <span class="n">url</span><span class="p">:</span> <span class="n">localhost</span><span class="p">:</span><span class="mi">2181</span>
+          <span class="n">sessionTimeout</span><span class="p">:</span> <span class="mi">5000</span>
+          <span class="n">connectionTimeout</span><span class="p">:</span> <span class="mi">2000</span>
+</code></pre>
+    </div>
+    <h3 id="soul-bootstrap">
      Soul-Bootstrap配置
     </h3>
     <p>
      Soul-Bootstrap的Http同步方式配置，暂时把其他同步方式给注释关闭
     </p>
-    <p>
-     <pre>xml
-soul :
+    <div class="codehilite">
+     <pre><span></span><code>soul :
     file:
       enabled: true
     corss:
@@ -102,9 +99,10 @@ soul :
         zookeeper:
              url: localhost:2181
              sessionTimeout: 5000
-             connectionTimeout: 2000</pre>
-    </p>
-    <h3>
+             connectionTimeout: 2000
+</code></pre>
+    </div>
+    <h3 id="_4">
      启动失败
     </h3>
     <p>
@@ -119,7 +117,7 @@ soul :
     <p>
      感觉可能是bug，但是首先排除下自己的代码版本问题和自己的使用问题，问了问群里的老哥，发现是自己的使用问题
     </p>
-    <h3>
+    <h3 id="_5">
      启动修复
     </h3>
     <p>
@@ -138,7 +136,7 @@ soul :
       https://issues.apache.org/jira/secure/attachment/12436620/ZooInspector.zip
      </li>
     </ul>
-    <h2>
+    <h2 id="_6">
      源码查看
     </h2>
     <p>
@@ -151,55 +149,50 @@ soul :
     <p>
      稍微用过zk的，就可以看到熟悉的watch，监听数据的变化，从下面的代码大致可以看出监听我前面分析的五种数据：插件数据、选择器数据、规则数据、AppAuth数据、Metadata数据
     </p>
-    <p>
-     ```java
-public class ZookeeperSyncDataService implements SyncDataService, AutoCloseable {
-    </p>
-    <pre><pre>public ZookeeperSyncDataService(final ZkClient zkClient, final PluginDataSubscriber pluginDataSubscriber,
-                                final List&lt;MetaDataSubscriber&gt; metaDataSubscribers, final List&lt;AuthDataSubscriber&gt; authDataSubscribers) {
-    this.zkClient = zkClient;
-    this.pluginDataSubscriber = pluginDataSubscriber;
-    this.metaDataSubscribers = metaDataSubscribers;
-    this.authDataSubscribers = authDataSubscribers;
-    watcherData();
-    watchAppAuth();
-    watchMetaData();
-}
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ZookeeperSyncDataService</span> <span class="kd">implements</span> <span class="n">SyncDataService</span><span class="p">,</span> <span class="n">AutoCloseable</span> <span class="p">{</span>
 
-private void watcherAll(final String pluginName) {
-    watcherPlugin(pluginName);
-    watcherSelector(pluginName);
-    watcherRule(pluginName);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="kd">public</span> <span class="nf">ZookeeperSyncDataService</span><span class="p">(</span><span class="kd">final</span> <span class="n">ZkClient</span> <span class="n">zkClient</span><span class="p">,</span> <span class="kd">final</span> <span class="n">PluginDataSubscriber</span> <span class="n">pluginDataSubscriber</span><span class="p">,</span>
+                                    <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">MetaDataSubscriber</span><span class="o">&gt;</span> <span class="n">metaDataSubscribers</span><span class="p">,</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">AuthDataSubscriber</span><span class="o">&gt;</span> <span class="n">authDataSubscribers</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">zkClient</span> <span class="o">=</span> <span class="n">zkClient</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">pluginDataSubscriber</span> <span class="o">=</span> <span class="n">pluginDataSubscriber</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">metaDataSubscribers</span> <span class="o">=</span> <span class="n">metaDataSubscribers</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">authDataSubscribers</span> <span class="o">=</span> <span class="n">authDataSubscribers</span><span class="p">;</span>
+        <span class="n">watcherData</span><span class="p">();</span>
+        <span class="n">watchAppAuth</span><span class="p">();</span>
+        <span class="n">watchMetaData</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">watcherAll</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">pluginName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">watcherPlugin</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="n">watcherSelector</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="n">watcherRule</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们在构造函数上打上断点，看看调用栈，发现是和HTTP同步差不多的，如下代码所示，可以看到使用Spring方式启动
     </p>
-    <p>
-     ```java
-public class ZookeeperSyncDataConfiguration {
-    </p>
-    <pre><pre>@Bean
-public SyncDataService syncDataService(final ObjectProvider&lt;ZkClient&gt; zkClient, final ObjectProvider&lt;PluginDataSubscriber&gt; pluginSubscriber,
-                                       final ObjectProvider&lt;List&lt;MetaDataSubscriber&gt;&gt; metaSubscribers, final ObjectProvider&lt;List&lt;AuthDataSubscriber&gt;&gt; authSubscribers) {
-    log.info("you use zookeeper sync soul data.......");
-    return new ZookeeperSyncDataService(zkClient.getIfAvailable(), pluginSubscriber.getIfAvailable(),
-            metaSubscribers.getIfAvailable(Collections::emptyList), authSubscribers.getIfAvailable(Collections::emptyList));
-}
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ZookeeperSyncDataConfiguration</span> <span class="p">{</span>
 
-@Bean
-public ZkClient zkClient(final ZookeeperConfig zookeeperConfig) {
-    return new ZkClient(zookeeperConfig.getUrl(), zookeeperConfig.getSessionTimeout(), zookeeperConfig.getConnectionTimeout());
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">SyncDataService</span> <span class="nf">syncDataService</span><span class="p">(</span><span class="kd">final</span> <span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">ZkClient</span><span class="o">&gt;</span> <span class="n">zkClient</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">PluginDataSubscriber</span><span class="o">&gt;</span> <span class="n">pluginSubscriber</span><span class="p">,</span>
+                                           <span class="kd">final</span> <span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">MetaDataSubscriber</span><span class="o">&gt;&gt;</span> <span class="n">metaSubscribers</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">AuthDataSubscriber</span><span class="o">&gt;&gt;</span> <span class="n">authSubscribers</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"you use zookeeper sync soul data......."</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">ZookeeperSyncDataService</span><span class="p">(</span><span class="n">zkClient</span><span class="p">.</span><span class="na">getIfAvailable</span><span class="p">(),</span> <span class="n">pluginSubscriber</span><span class="p">.</span><span class="na">getIfAvailable</span><span class="p">(),</span>
+                <span class="n">metaSubscribers</span><span class="p">.</span><span class="na">getIfAvailable</span><span class="p">(</span><span class="n">Collections</span><span class="p">::</span><span class="n">emptyList</span><span class="p">),</span> <span class="n">authSubscribers</span><span class="p">.</span><span class="na">getIfAvailable</span><span class="p">(</span><span class="n">Collections</span><span class="p">::</span><span class="n">emptyList</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">ZkClient</span> <span class="nf">zkClient</span><span class="p">(</span><span class="kd">final</span> <span class="n">ZookeeperConfig</span> <span class="n">zookeeperConfig</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">ZkClient</span><span class="p">(</span><span class="n">zookeeperConfig</span><span class="p">.</span><span class="na">getUrl</span><span class="p">(),</span> <span class="n">zookeeperConfig</span><span class="p">.</span><span class="na">getSessionTimeout</span><span class="p">(),</span> <span class="n">zookeeperConfig</span><span class="p">.</span><span class="na">getConnectionTimeout</span><span class="p">());</span>
+    <span class="p">}</span>
+
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      简单的调试和看了看，发现zk的同步方式和websocket一样还是比较简单的，结构也是非常的清晰，这里就不做过多的介绍了，就说明下其核心逻辑，代码如下：
     </p>
@@ -209,120 +202,117 @@ public ZkClient zkClient(final ZookeeperConfig zookeeperConfig) {
     <p>
      需要注意理解的是对列表数据的监听（监听增删之类），监听列表中单个数据的变化，代码中的监听基本都是这种套路，注意理解即可
     </p>
-    <p>
-     ```java
-public class ZookeeperSyncDataService implements SyncDataService, AutoCloseable {
-    </p>
-    <pre><pre>public ZookeeperSyncDataService(final ZkClient zkClient, final PluginDataSubscriber pluginDataSubscriber,
-                                final List&lt;MetaDataSubscriber&gt; metaDataSubscribers, final List&lt;AuthDataSubscriber&gt; authDataSubscribers) {
-    this.zkClient = zkClient;
-    this.pluginDataSubscriber = pluginDataSubscriber;
-    this.metaDataSubscribers = metaDataSubscribers;
-    this.authDataSubscribers = authDataSubscribers;
-    // 下面三个函数起到了初始化和启动监听的作用
-    watcherData();
-    watchAppAuth();
-    watchMetaData();
-}
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ZookeeperSyncDataService</span> <span class="kd">implements</span> <span class="n">SyncDataService</span><span class="p">,</span> <span class="n">AutoCloseable</span> <span class="p">{</span>
 
-private void watcherData() {
-    final String pluginParent = ZkPathConstants.PLUGIN_PARENT;
-    // 获取插件列表，启动监听（在其中同时进行插件数据、选择器、规则的初始化）
-    List&lt;String&gt; pluginZKs = zkClientGetChildren(pluginParent);
-    for (String pluginName : pluginZKs) {
-        watcherAll(pluginName);
-    }
+    <span class="kd">public</span> <span class="nf">ZookeeperSyncDataService</span><span class="p">(</span><span class="kd">final</span> <span class="n">ZkClient</span> <span class="n">zkClient</span><span class="p">,</span> <span class="kd">final</span> <span class="n">PluginDataSubscriber</span> <span class="n">pluginDataSubscriber</span><span class="p">,</span>
+                                    <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">MetaDataSubscriber</span><span class="o">&gt;</span> <span class="n">metaDataSubscribers</span><span class="p">,</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">AuthDataSubscriber</span><span class="o">&gt;</span> <span class="n">authDataSubscribers</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">zkClient</span> <span class="o">=</span> <span class="n">zkClient</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">pluginDataSubscriber</span> <span class="o">=</span> <span class="n">pluginDataSubscriber</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">metaDataSubscribers</span> <span class="o">=</span> <span class="n">metaDataSubscribers</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">authDataSubscribers</span> <span class="o">=</span> <span class="n">authDataSubscribers</span><span class="p">;</span>
+        <span class="c1">// 下面三个函数起到了初始化和启动监听的作用</span>
+        <span class="n">watcherData</span><span class="p">();</span>
+        <span class="n">watchAppAuth</span><span class="p">();</span>
+        <span class="n">watchMetaData</span><span class="p">();</span>
+    <span class="p">}</span>
 
-    // 启动监听，数据更新（新增和修改），对更新的插件进行监听
-    zkClient.subscribeChildChanges(pluginParent, (parentPath, currentChildren) -&gt; {
-        if (CollectionUtils.isNotEmpty(currentChildren)) {
-            for (String pluginName : currentChildren) {
-                watcherAll(pluginName);
-            }
-        }
-    });
-}
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">watcherData</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">pluginParent</span> <span class="o">=</span> <span class="n">ZkPathConstants</span><span class="p">.</span><span class="na">PLUGIN_PARENT</span><span class="p">;</span>
+        <span class="c1">// 获取插件列表，启动监听（在其中同时进行插件数据、选择器、规则的初始化）</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">pluginZKs</span> <span class="o">=</span> <span class="n">zkClientGetChildren</span><span class="p">(</span><span class="n">pluginParent</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">pluginName</span> <span class="p">:</span> <span class="n">pluginZKs</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">watcherAll</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="p">}</span>
 
-private void watcherAll(final String pluginName) {
-    watcherPlugin(pluginName);
-    watcherSelector(pluginName);
-    watcherRule(pluginName);
-}
+        <span class="c1">// 启动监听，数据更新（新增和修改），对更新的插件进行监听</span>
+        <span class="n">zkClient</span><span class="p">.</span><span class="na">subscribeChildChanges</span><span class="p">(</span><span class="n">pluginParent</span><span class="p">,</span> <span class="p">(</span><span class="n">parentPath</span><span class="p">,</span> <span class="n">currentChildren</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">currentChildren</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">pluginName</span> <span class="p">:</span> <span class="n">currentChildren</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">watcherAll</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
 
-private void watcherPlugin(final String pluginName) {
-    String pluginPath = ZkPathConstants.buildPluginPath(pluginName);
-    if (!zkClient.exists(pluginPath)) {
-        zkClient.createPersistent(pluginPath, true);
-    }
-    // 初始化插件数据
-    cachePluginData(zkClient.readData(pluginPath));
-    // 监听插件数据
-    subscribePluginDataChanges(pluginPath, pluginName);
-}
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">watcherAll</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">pluginName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">watcherPlugin</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="n">watcherSelector</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="n">watcherRule</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+    <span class="p">}</span>
 
-// 选择器结构大致是：插件 --&gt; 选择器列表 --&gt; 单个选择器
-// 所有最终需要对单个选择器进行初始化和监听
-// 并对上层的选择器列表进行监听，列表也会更新
-private void watcherSelector(final String pluginName) {
-    String selectorParentPath = ZkPathConstants.buildSelectorParentPath(pluginName);
-    List&lt;String&gt; childrenList = zkClientGetChildren(selectorParentPath);
-    if (CollectionUtils.isNotEmpty(childrenList)) {
-        childrenList.forEach(children -&gt; {
-            String realPath = buildRealPath(selectorParentPath, children);
-            cacheSelectorData(zkClient.readData(realPath));
-            subscribeSelectorDataChanges(realPath);
-        });
-    }
-    subscribeChildChanges(ConfigGroupEnum.SELECTOR, selectorParentPath, childrenList);
-}
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">watcherPlugin</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">pluginName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">pluginPath</span> <span class="o">=</span> <span class="n">ZkPathConstants</span><span class="p">.</span><span class="na">buildPluginPath</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">zkClient</span><span class="p">.</span><span class="na">exists</span><span class="p">(</span><span class="n">pluginPath</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">zkClient</span><span class="p">.</span><span class="na">createPersistent</span><span class="p">(</span><span class="n">pluginPath</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// 初始化插件数据</span>
+        <span class="n">cachePluginData</span><span class="p">(</span><span class="n">zkClient</span><span class="p">.</span><span class="na">readData</span><span class="p">(</span><span class="n">pluginPath</span><span class="p">));</span>
+        <span class="c1">// 监听插件数据</span>
+        <span class="n">subscribePluginDataChanges</span><span class="p">(</span><span class="n">pluginPath</span><span class="p">,</span> <span class="n">pluginName</span><span class="p">);</span>
+    <span class="p">}</span>
 
-// 原理同选择器
-private void watcherRule(final String pluginName) {
-    String ruleParent = ZkPathConstants.buildRuleParentPath(pluginName);
-    List&lt;String&gt; childrenList = zkClientGetChildren(ruleParent);
-    if (CollectionUtils.isNotEmpty(childrenList)) {
-        childrenList.forEach(children -&gt; {
-            String realPath = buildRealPath(ruleParent, children);
-            cacheRuleData(zkClient.readData(realPath));
-            subscribeRuleDataChanges(realPath);
-        });
-    }
-    subscribeChildChanges(ConfigGroupEnum.RULE, ruleParent, childrenList);
-}
+    <span class="c1">// 选择器结构大致是：插件 --&gt; 选择器列表 --&gt; 单个选择器</span>
+    <span class="c1">// 所有最终需要对单个选择器进行初始化和监听</span>
+    <span class="c1">// 并对上层的选择器列表进行监听，列表也会更新</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">watcherSelector</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">pluginName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">selectorParentPath</span> <span class="o">=</span> <span class="n">ZkPathConstants</span><span class="p">.</span><span class="na">buildSelectorParentPath</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">childrenList</span> <span class="o">=</span> <span class="n">zkClientGetChildren</span><span class="p">(</span><span class="n">selectorParentPath</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">childrenList</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">childrenList</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">children</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">String</span> <span class="n">realPath</span> <span class="o">=</span> <span class="n">buildRealPath</span><span class="p">(</span><span class="n">selectorParentPath</span><span class="p">,</span> <span class="n">children</span><span class="p">);</span>
+                <span class="n">cacheSelectorData</span><span class="p">(</span><span class="n">zkClient</span><span class="p">.</span><span class="na">readData</span><span class="p">(</span><span class="n">realPath</span><span class="p">));</span>
+                <span class="n">subscribeSelectorDataChanges</span><span class="p">(</span><span class="n">realPath</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+        <span class="n">subscribeChildChanges</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">SELECTOR</span><span class="p">,</span> <span class="n">selectorParentPath</span><span class="p">,</span> <span class="n">childrenList</span><span class="p">);</span>
+    <span class="p">}</span>
 
-// 原理类似选择器
-private void watchAppAuth() {
-    final String appAuthParent = ZkPathConstants.APP_AUTH_PARENT;
-    List&lt;String&gt; childrenList = zkClientGetChildren(appAuthParent);
-    if (CollectionUtils.isNotEmpty(childrenList)) {
-        childrenList.forEach(children -&gt; {
-            String realPath = buildRealPath(appAuthParent, children);
-            cacheAuthData(zkClient.readData(realPath));
-            subscribeAppAuthDataChanges(realPath);
-        });
-    }
-    subscribeChildChanges(ConfigGroupEnum.APP_AUTH, appAuthParent, childrenList);
-}
+    <span class="c1">// 原理同选择器</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">watcherRule</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">pluginName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">ruleParent</span> <span class="o">=</span> <span class="n">ZkPathConstants</span><span class="p">.</span><span class="na">buildRuleParentPath</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">childrenList</span> <span class="o">=</span> <span class="n">zkClientGetChildren</span><span class="p">(</span><span class="n">ruleParent</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">childrenList</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">childrenList</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">children</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">String</span> <span class="n">realPath</span> <span class="o">=</span> <span class="n">buildRealPath</span><span class="p">(</span><span class="n">ruleParent</span><span class="p">,</span> <span class="n">children</span><span class="p">);</span>
+                <span class="n">cacheRuleData</span><span class="p">(</span><span class="n">zkClient</span><span class="p">.</span><span class="na">readData</span><span class="p">(</span><span class="n">realPath</span><span class="p">));</span>
+                <span class="n">subscribeRuleDataChanges</span><span class="p">(</span><span class="n">realPath</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+        <span class="n">subscribeChildChanges</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">RULE</span><span class="p">,</span> <span class="n">ruleParent</span><span class="p">,</span> <span class="n">childrenList</span><span class="p">);</span>
+    <span class="p">}</span>
 
-// 原理类似选择器
-private void watchMetaData() {
-    final String metaDataPath = ZkPathConstants.META_DATA;
-    List&lt;String&gt; childrenList = zkClientGetChildren(metaDataPath);
-    if (CollectionUtils.isNotEmpty(childrenList)) {
-        childrenList.forEach(children -&gt; {
-            String realPath = buildRealPath(metaDataPath, children);
-            cacheMetaData(zkClient.readData(realPath));
-            subscribeMetaDataChanges(realPath);
-        });
-    }
-    subscribeChildChanges(ConfigGroupEnum.APP_AUTH, metaDataPath, childrenList);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h2>
+    <span class="c1">// 原理类似选择器</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">watchAppAuth</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">appAuthParent</span> <span class="o">=</span> <span class="n">ZkPathConstants</span><span class="p">.</span><span class="na">APP_AUTH_PARENT</span><span class="p">;</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">childrenList</span> <span class="o">=</span> <span class="n">zkClientGetChildren</span><span class="p">(</span><span class="n">appAuthParent</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">childrenList</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">childrenList</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">children</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">String</span> <span class="n">realPath</span> <span class="o">=</span> <span class="n">buildRealPath</span><span class="p">(</span><span class="n">appAuthParent</span><span class="p">,</span> <span class="n">children</span><span class="p">);</span>
+                <span class="n">cacheAuthData</span><span class="p">(</span><span class="n">zkClient</span><span class="p">.</span><span class="na">readData</span><span class="p">(</span><span class="n">realPath</span><span class="p">));</span>
+                <span class="n">subscribeAppAuthDataChanges</span><span class="p">(</span><span class="n">realPath</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+        <span class="n">subscribeChildChanges</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">APP_AUTH</span><span class="p">,</span> <span class="n">appAuthParent</span><span class="p">,</span> <span class="n">childrenList</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 原理类似选择器</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">watchMetaData</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">metaDataPath</span> <span class="o">=</span> <span class="n">ZkPathConstants</span><span class="p">.</span><span class="na">META_DATA</span><span class="p">;</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">childrenList</span> <span class="o">=</span> <span class="n">zkClientGetChildren</span><span class="p">(</span><span class="n">metaDataPath</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">childrenList</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">childrenList</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">children</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">String</span> <span class="n">realPath</span> <span class="o">=</span> <span class="n">buildRealPath</span><span class="p">(</span><span class="n">metaDataPath</span><span class="p">,</span> <span class="n">children</span><span class="p">);</span>
+                <span class="n">cacheMetaData</span><span class="p">(</span><span class="n">zkClient</span><span class="p">.</span><span class="na">readData</span><span class="p">(</span><span class="n">realPath</span><span class="p">));</span>
+                <span class="n">subscribeMetaDataChanges</span><span class="p">(</span><span class="n">realPath</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+        <span class="n">subscribeChildChanges</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">APP_AUTH</span><span class="p">,</span> <span class="n">metaDataPath</span><span class="p">,</span> <span class="n">childrenList</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h2 id="_7">
      总结
     </h2>
     <p>
@@ -357,10 +347,10 @@ private void watchMetaData() {
       3.读取变化的数据进行本地缓存更新，并对其进行监听
      </li>
     </ul>
-    <h2>
+    <h2 id="soul">
      Soul网关源码分析文章列表
     </h2>
-    <h3>
+    <h3 id="github">
      Github
     </h3>
     <ul>
@@ -449,7 +439,7 @@ private void watchMetaData() {
       </p>
      </li>
     </ul>
-    <h3>
+    <h3 id="_8">
      掘金
     </h3>
     <ul>

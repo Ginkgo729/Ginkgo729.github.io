@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,7 +43,7 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="id3c45">
      决策树ID3与C4.5
     </h1>
     <hr/>
@@ -51,13 +52,13 @@
       参考极客时间&lt;数据分析实战45讲&gt;17章
      </em>
     </p>
-    <h2>
+    <h2 id="_1">
      决策树的生成
     </h2>
     <p>
      决策树的生成会经历两个阶段:构造和剪枝
     </p>
-    <h3>
+    <h3 id="_2">
      构造
     </h3>
     <p>
@@ -88,7 +89,7 @@
       3.什么时候停止并得到目标节点状态,即叶节点
      </li>
     </ul>
-    <h3>
+    <h3 id="_3">
      剪枝
     </h3>
     <p>
@@ -100,23 +101,154 @@
     <p>
      后剪枝就是在生成决策树之后再进行剪枝,通常会从决策树的叶节点开始,逐层向上对每个节点进行评估.如果减掉这个节点子树,与保留该节点子树在分类上准确性差别不大或有所提升,那么就可以把该节点子树进行剪枝.方法是:用这个节点子树的叶子节点来替代该节点,类标记为这个节点子树中最频繁的那个类.
     </p>
-    <h3>
+    <h3 id="_4">
      节点选择
     </h3>
     <p>
      给出一个打篮球的数据集如下:
     </p>
-    <p>
-     |天气|温度|湿度|刮风|是否打篮球|
-|----|:--:|:--:|:--:|--------|
-|晴|高|中|否|否|
-|晴|高|中|是|否|
-|阴|高|高|否|是|
-|小雨|高|高|否|是|
-|小雨|低|高|否|是|
-|晴天|中|中|是|是|
-|阴天|中|高|是|否|
-    </p>
+    <table>
+     <thead>
+      <tr>
+       <th>
+        天气
+       </th>
+       <th align="center">
+        温度
+       </th>
+       <th align="center">
+        湿度
+       </th>
+       <th align="center">
+        刮风
+       </th>
+       <th>
+        是否打篮球
+       </th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr>
+       <td>
+        晴
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        否
+       </td>
+       <td>
+        否
+       </td>
+      </tr>
+      <tr>
+       <td>
+        晴
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        是
+       </td>
+       <td>
+        否
+       </td>
+      </tr>
+      <tr>
+       <td>
+        阴
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        否
+       </td>
+       <td>
+        是
+       </td>
+      </tr>
+      <tr>
+       <td>
+        小雨
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        否
+       </td>
+       <td>
+        是
+       </td>
+      </tr>
+      <tr>
+       <td>
+        小雨
+       </td>
+       <td align="center">
+        低
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        否
+       </td>
+       <td>
+        是
+       </td>
+      </tr>
+      <tr>
+       <td>
+        晴天
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        是
+       </td>
+       <td>
+        是
+       </td>
+      </tr>
+      <tr>
+       <td>
+        阴天
+       </td>
+       <td align="center">
+        中
+       </td>
+       <td align="center">
+        高
+       </td>
+       <td align="center">
+        是
+       </td>
+       <td>
+        否
+       </td>
+      </tr>
+     </tbody>
+    </table>
     <p>
      在这个探讨将那个属性(天气,温度,湿度,刮风)作为根节点的关键问题,这里是根据纯度和信息熵进行选择的,在纯度和信息熵之间有关联关系:纯度越低,信息熵越大;纯度越高,信息熵越小.
     </p>
@@ -132,10 +264,10 @@
     <p>
      在构造的过程中需要计算两个东西:信息熵,信息增益.下面以打篮球的数据集为例如何计算:
     </p>
-    <h4>
+    <h4 id="_5">
      信息熵
     </h4>
-    <h5>
+    <h5 id="_6">
      根节点信息熵
     </h5>
     <p>
@@ -150,7 +282,7 @@
     <p>
      $$Ent(D) = - \sum p_k \log_2 p_k = - (\frac{4}{7} \log_2 \frac{4}{7} + \frac{3}{7} \log_2 \frac{3}{7}) = 0.985$$
     </p>
-    <h5>
+    <h5 id="_7">
      归一化信息熵
     </h5>
     <p>
@@ -182,13 +314,13 @@ $$Ent(D3) = - (\frac{1}{2} log_2 \frac{1}{2} + \frac{1}{2} log_2 \frac{1}{2}) = 
      </em>
      1.0+2/7*1.0=0.965$
     </p>
-    <h4>
+    <h4 id="_8">
      信息增益
     </h4>
     <p>
      在上面的信息熵的结果上可以得到天气作为属性节点的信息增益为根节点信息熵-归一化信息熵:$Gain(D,天气)=0.985-0.965=0.020$
     </p>
-    <h4>
+    <h4 id="_9">
      根据信息熵和信息增益选择节点
     </h4>
     <p>
@@ -211,7 +343,7 @@ $$Ent(D3) = - (\frac{1}{2} log_2 \frac{1}{2} + \frac{1}{2} log_2 \frac{1}{2}) = 
     <p>
      可以看出这里的温度的信息增益最大,所有温度作为整个决策树的根节点.后面根据温度的高中低会生成三个中间节点,而这三个中间节点的选择算法同根节点,如果只有一种结果那这个节点就是叶节点.这样就生成了一颗决策树.
     </p>
-    <h4>
+    <h4 id="_10">
      信息增益率
     </h4>
     <p>
@@ -223,7 +355,7 @@ $$Ent(D3) = - (\frac{1}{2} log_2 \frac{1}{2} + \frac{1}{2} log_2 \frac{1}{2}) = 
     <p>
      信息增益率是C4.5算法对ID3改进使用的,它由信息增益和属性熵获取(属性分裂信息度量)
     </p>
-    <h5>
+    <h5 id="_11">
      属性熵(属性分裂信息度量)
     </h5>
     <p>
@@ -235,358 +367,337 @@ H(温度)= -(4/7 * log2(4/7) + 2/7 * log2(2/7) + 1/7 * log2(1/7)) 温度有高�
 H(湿度)= -(4/7 * log2(4/7) + 3/7 * log2(3/7)) 湿度有两种情况
 H(刮风)= -(4/7 * log2(4/7) + 3/7 * log2(3/7)) 刮风有两种情况
     </p>
-    <h2>
+    <h2 id="id3c45python3">
      ID3和C4.5算法实现(Python3)
     </h2>
-    <p>
-     ```python
-    </p>
-    <h1>
-     -
-     <em>
-      - coding: utf-8 -
-     </em>
-     -
-    </h1>
-    <p>
-     from copy import copy
-    </p>
-    <p>
-     import math
-    </p>
-    <p>
-     def calculateInfoEntropy(trainData, attributeIndex):
-    """
-    </p>
-    <pre><pre>:param trainData:
-:param attributeIndex:
-:return:
-{
-    status: {
-        count: value,
-        value: value,
-    },
-    ......
-}
-"""
-statusStatistics = {}
-for item in trainData:
-    if item[attributeIndex] not in statusStatistics:
-        statusStatistics[item[attributeIndex]] = {}
-    if trainData[item] not in statusStatistics[item[attributeIndex]]:
-        statusStatistics[item[attributeIndex]][trainData[item]] = 1
-    else:
-        statusStatistics[item[attributeIndex]][trainData[item]] = statusStatistics[item[attributeIndex]][trainData[item]] + 1
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 
-infoEntropyMap = {}
-for status in statusStatistics:
-    amount = 0
-    for result in statusStatistics[status]:
-        amount = amount + statusStatistics[status][result]
+<span class="kn">import</span> <span class="nn">math</span>
 
-    infoEntropy = 0.0
-    for result in statusStatistics[status]:
-        probability = statusStatistics[status][result] / amount
-        infoEntropy = infoEntropy + (probability * math.log(probability, 2))
 
-    infoEntropyMap[status] = {}
-    infoEntropyMap[status]["count"] = amount
-    infoEntropyMap[status]["value"] = infoEntropy * -1
-return infoEntropyMap
-</pre></pre>
-    <p>
-     def getInfoEntropy(trainData, properties, propertiesIndex):
-    """
-    </p>
-    <pre><pre>:param trainData:
-:param properties:
-:param propertiesIndex:
-:return:
-{
-    attribute: {
-        status: {
-            count: value,
-            value: value,
-        },
-        ......
-    },
-    ......
-}
-"""
-infoEntropy = {}
-for attribute in properties:
-    infoEntropy[attribute] = calculateInfoEntropy(trainData, propertiesIndex[attribute])
-return infoEntropy
-</pre></pre>
-    <p>
-     def calculateNormalizedInfoEntropy(attributeInfoEntropy):
-    amount = 0
-    for status in attributeInfoEntropy:
-        amount = amount + attributeInfoEntropy[status]["count"]
-    </p>
-    <pre><pre>normalizedInfoEntropy = 0.0
-for status in attributeInfoEntropy:
-    probability = attributeInfoEntropy[status]["count"] / amount
-    normalizedInfoEntropy = normalizedInfoEntropy + probability * attributeInfoEntropy[status]["value"]
-return normalizedInfoEntropy
-</pre></pre>
-    <p>
-     def getNormalizedInfoEntropy(infoEntropy):
-    normalizedInfoEntropy = {}
-    for attribute in infoEntropy:
-        normalizedInfoEntropy[attribute] = calculateNormalizedInfoEntropy(infoEntropy[attribute])
-    return normalizedInfoEntropy
-    </p>
-    <p>
-     def getAttributeEntropy(trainData, properties, propertiesIndex):
-    attributeEntropy = {}
-    for attribute in properties:
-        attributeEntropy[attribute] = 0.0
-        index = propertiesIndex[attribute]
-        attributeStatistics = {}
-        for item in trainData:
-            if item[index] not in attributeStatistics:
-                attributeStatistics[item[index]] = 1
-            else:
-                attributeStatistics[item[index]] = attributeStatistics[item[index]] + 1
-    </p>
-    <pre><pre>    for item in attributeStatistics:
-        probability = attributeStatistics[item] / len(trainData)
-        attributeEntropy[attribute] = attributeEntropy[attribute] + probability * math.log(probability, 2)
-    attributeEntropy[attribute] = attributeEntropy[attribute] * -1
-return attributeEntropy
-</pre></pre>
-    <p>
-     def getInfoGainRate(infoGain, attributeEntropy):
-    infoGainRate = {}
-    for attribute in attributeEntropy:
-        if attributeEntropy[attribute] == 0.0:
-            continue
-        infoGainRate[attribute] = infoGain[attribute] / attributeEntropy[attribute]
-    return infoGainRate
-    </p>
-    <p>
-     def selectNode(trainData, properties, propertiesIndex, model):
-    """
-    </p>
-    <pre><pre>:param trainData:
-:param properties:
-:param propertiesIndex:
-:return:
-node(当前选择的节点属性信息):{
-    name: 节点属性名称
-    status: { 各个状态的信息熵
-        key: {
-            keys: []
-            value: value
-        }
-    }
-}
-"""
-print("\n当前训练集为:", trainData)
-print("当前的属性列表为:", properties)
-resultStatistics = {}
-for item in trainData:
-    if trainData[item] not in resultStatistics:
-        resultStatistics[trainData[item]] = 1
-    else:
-        resultStatistics[trainData[item]] = resultStatistics[trainData[item]] + 1
+<span class="k">def</span> <span class="nf">calculateInfoEntropy</span><span class="p">(</span><span class="n">trainData</span><span class="p">,</span> <span class="n">attributeIndex</span><span class="p">):</span>
+    <span class="sd">"""</span>
 
-rootInfoEntropy = 0.0
-for result in resultStatistics:
-    probability = resultStatistics[result] / len(trainData)
-    rootInfoEntropy = rootInfoEntropy + (probability * math.log(probability, 2))
-rootInfoEntropy = rootInfoEntropy * -1
-print("当前训练集的根节点的信息熵:", rootInfoEntropy)
+<span class="sd">    :param trainData:</span>
+<span class="sd">    :param attributeIndex:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    {</span>
+<span class="sd">        status: {</span>
+<span class="sd">            count: value,</span>
+<span class="sd">            value: value,</span>
+<span class="sd">        },</span>
+<span class="sd">        ......</span>
+<span class="sd">    }</span>
+<span class="sd">    """</span>
+    <span class="n">statusStatistics</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">trainData</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="n">attributeIndex</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">statusStatistics</span><span class="p">:</span>
+            <span class="n">statusStatistics</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="n">attributeIndex</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">trainData</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">statusStatistics</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="n">attributeIndex</span><span class="p">]]:</span>
+            <span class="n">statusStatistics</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="n">attributeIndex</span><span class="p">]][</span><span class="n">trainData</span><span class="p">[</span><span class="n">item</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">statusStatistics</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="n">attributeIndex</span><span class="p">]][</span><span class="n">trainData</span><span class="p">[</span><span class="n">item</span><span class="p">]]</span> <span class="o">=</span> <span class="n">statusStatistics</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="n">attributeIndex</span><span class="p">]][</span><span class="n">trainData</span><span class="p">[</span><span class="n">item</span><span class="p">]]</span> <span class="o">+</span> <span class="mi">1</span>
 
-infoEntropy = getInfoEntropy(trainData, properties, propertiesIndex)
-print("当前训练集的信息熵:", infoEntropy)
+    <span class="n">infoEntropyMap</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">statusStatistics</span><span class="p">:</span>
+        <span class="n">amount</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">statusStatistics</span><span class="p">[</span><span class="n">status</span><span class="p">]:</span>
+            <span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span> <span class="o">+</span> <span class="n">statusStatistics</span><span class="p">[</span><span class="n">status</span><span class="p">][</span><span class="n">result</span><span class="p">]</span>
 
-normalizedInfoEntropy = getNormalizedInfoEntropy(infoEntropy)
-print("当前训练集的归一化信息熵:", normalizedInfoEntropy)
+        <span class="n">infoEntropy</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">statusStatistics</span><span class="p">[</span><span class="n">status</span><span class="p">]:</span>
+            <span class="n">probability</span> <span class="o">=</span> <span class="n">statusStatistics</span><span class="p">[</span><span class="n">status</span><span class="p">][</span><span class="n">result</span><span class="p">]</span> <span class="o">/</span> <span class="n">amount</span>
+            <span class="n">infoEntropy</span> <span class="o">=</span> <span class="n">infoEntropy</span> <span class="o">+</span> <span class="p">(</span><span class="n">probability</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">probability</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 
-infoGain = {}
-for attribute in properties:
-    infoGain[attribute] = rootInfoEntropy - normalizedInfoEntropy[attribute]
-print("当前训练集的信息增益:", infoGain)
+        <span class="n">infoEntropyMap</span><span class="p">[</span><span class="n">status</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">infoEntropyMap</span><span class="p">[</span><span class="n">status</span><span class="p">][</span><span class="s2">"count"</span><span class="p">]</span> <span class="o">=</span> <span class="n">amount</span>
+        <span class="n">infoEntropyMap</span><span class="p">[</span><span class="n">status</span><span class="p">][</span><span class="s2">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="n">infoEntropy</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">infoEntropyMap</span>
 
-name = None
-for attribute in infoGain:
-    if name is None:
-        name = attribute
-    elif infoGain[attribute] &gt; infoGain[name]:
-        name = attribute
 
-# C4.5添加start
-attributeEntropy = {}
-infoGainRate = {}
-if model == 1:
-    attributeEntropy = getAttributeEntropy(trainData, properties, propertiesIndex)
-    print("当前属性熵：", attributeEntropy)
+<span class="k">def</span> <span class="nf">getInfoEntropy</span><span class="p">(</span><span class="n">trainData</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">propertiesIndex</span><span class="p">):</span>
+    <span class="sd">"""</span>
 
-    infoGainRate = getInfoGainRate(infoGain, attributeEntropy)
-    print("当前信息增益率:", infoGainRate)
+<span class="sd">    :param trainData:</span>
+<span class="sd">    :param properties:</span>
+<span class="sd">    :param propertiesIndex:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    {</span>
+<span class="sd">        attribute: {</span>
+<span class="sd">            status: {</span>
+<span class="sd">                count: value,</span>
+<span class="sd">                value: value,</span>
+<span class="sd">            },</span>
+<span class="sd">            ......</span>
+<span class="sd">        },</span>
+<span class="sd">        ......</span>
+<span class="sd">    }</span>
+<span class="sd">    """</span>
+    <span class="n">infoEntropy</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+        <span class="n">infoEntropy</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculateInfoEntropy</span><span class="p">(</span><span class="n">trainData</span><span class="p">,</span> <span class="n">propertiesIndex</span><span class="p">[</span><span class="n">attribute</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">infoEntropy</span>
 
-    name = None
-    for attribute in infoGainRate:
-        if name is None:
-            name = attribute
-        elif infoGainRate[attribute] &gt; infoGainRate[name]:
-            name = attribute
 
-statusMap = {}
-for status in infoEntropy[name]:
-    statusMap[status] = {}
-    statusMap[status]["value"] = infoEntropy[name][status]["value"]
-    statusMap[status]["keys"] = []
-    for item in trainData:
-        if item[propertiesIndex[name]] == status:
-            statusMap[status]["keys"].append(item)
+<span class="k">def</span> <span class="nf">calculateNormalizedInfoEntropy</span><span class="p">(</span><span class="n">attributeInfoEntropy</span><span class="p">):</span>
+    <span class="n">amount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">attributeInfoEntropy</span><span class="p">:</span>
+        <span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span> <span class="o">+</span> <span class="n">attributeInfoEntropy</span><span class="p">[</span><span class="n">status</span><span class="p">][</span><span class="s2">"count"</span><span class="p">]</span>
 
-node = {
-    "name": name,
-    "status": statusMap,
-}
-return node
-</pre></pre>
-    <p>
-     def getID3Tree(trainData, properties, propertiesIndex, model):
-    """
-    获取ID3决策树
-    :param trainData:
-    :param properties:
-    :param propertiesIndex:
-    :return:
-    </p>
-    <pre><pre>node(当前选择的节点属性信息):{
-    name: 节点属性名称
-    status: { 各个状态的信息熵
-        key: {
-            keys: []
-            value: value
-        }
-    }
-}
-"""
-node = selectNode(trainData, properties, propertiesIndex, model)
-print("当前选择的最优节点为:", node)
-tree = {
-    node["name"]: {},
-}
+    <span class="n">normalizedInfoEntropy</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">attributeInfoEntropy</span><span class="p">:</span>
+        <span class="n">probability</span> <span class="o">=</span> <span class="n">attributeInfoEntropy</span><span class="p">[</span><span class="n">status</span><span class="p">][</span><span class="s2">"count"</span><span class="p">]</span> <span class="o">/</span> <span class="n">amount</span>
+        <span class="n">normalizedInfoEntropy</span> <span class="o">=</span> <span class="n">normalizedInfoEntropy</span> <span class="o">+</span> <span class="n">probability</span> <span class="o">*</span> <span class="n">attributeInfoEntropy</span><span class="p">[</span><span class="n">status</span><span class="p">][</span><span class="s2">"value"</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">normalizedInfoEntropy</span>
 
-tempProperties = copy(properties)
-print("进行属性列表裁剪:", tempProperties, node["name"])
-if node["name"] in tempProperties:
-    tempProperties.remove(node["name"])
 
-for status in node["status"]:
-    if node["status"][status]["value"] == 0.0:
-        tree[node["name"]][status] = trainData[node["status"][status]["keys"][0]]
-    else:
-        tempTrainData = {}
-        for item in trainData:
-            if item[propertiesIndex[node["name"]]] == status:
-                tempTrainData[item] = trainData[item]
+<span class="k">def</span> <span class="nf">getNormalizedInfoEntropy</span><span class="p">(</span><span class="n">infoEntropy</span><span class="p">):</span>
+    <span class="n">normalizedInfoEntropy</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">infoEntropy</span><span class="p">:</span>
+        <span class="n">normalizedInfoEntropy</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculateNormalizedInfoEntropy</span><span class="p">(</span><span class="n">infoEntropy</span><span class="p">[</span><span class="n">attribute</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">normalizedInfoEntropy</span>
 
-        tree[node["name"]][status], nodeName = getID3Tree(tempTrainData, tempProperties, propertiesIndex, model)
-        print("进行属性列表裁剪:", tempProperties, nodeName)
-        if nodeName in tempProperties:
-            tempProperties.remove(nodeName)
 
-return tree, node["name"]
-</pre></pre>
-    <p>
-     def printTree(tree, interval):
-    newInterval = interval + "\t"
-    for item in tree:
-        if type(tree[item]) is not dict:
-            print(interval + item, tree[item])
-        else:
-            print(interval + item)
-            printTree(tree[item], newInterval)
-    </p>
-    <p>
-     if
-     <strong>
-      name
-     </strong>
-     == "
-     <strong>
-      main
-     </strong>
-     ":
-    # 设置算法模式: 0-&gt;ID3 1-&gt;C4.5
-    model = 0
-    </p>
-    <pre><pre>properties = ["weather", "temperature", "humidity", "windy"]
-propertiesIndex = {"weather": 0, "temperature": 1, "humidity": 2, "windy": 3}
-# 0:不打篮球 1:打篮球
-trainData = {
-    ("sun", "high", "middle", "no"): 0,
-    ("sun", "high", "middle", "yes"): 0,
-    ("cloud", "high", "high", "no"): 1,
-    ("rain", "high", "high", "no"): 1,
-    ("rain", "low", "high", "no"): 0,
-    ("sun", "middle", "middle", "yes"): 1,
-    ("cloud", "middle", "high", "yes"): 0,
-}
-# for key in trainData:
-#     print(key, trainData[key])
+<span class="k">def</span> <span class="nf">getAttributeEntropy</span><span class="p">(</span><span class="n">trainData</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">propertiesIndex</span><span class="p">):</span>
+    <span class="n">attributeEntropy</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+        <span class="n">attributeEntropy</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">propertiesIndex</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span>
+        <span class="n">attributeStatistics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">trainData</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attributeStatistics</span><span class="p">:</span>
+                <span class="n">attributeStatistics</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">attributeStatistics</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span> <span class="o">=</span> <span class="n">attributeStatistics</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span> <span class="o">+</span> <span class="mi">1</span>
 
-tree, name = getID3Tree(trainData, properties, propertiesIndex, model)
-print(str(tree).replace("'", '"'))
-printTree(tree, "")
-</pre></pre>
-    <p>
-     ```
-    </p>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">attributeStatistics</span><span class="p">:</span>
+            <span class="n">probability</span> <span class="o">=</span> <span class="n">attributeStatistics</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">trainData</span><span class="p">)</span>
+            <span class="n">attributeEntropy</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributeEntropy</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">+</span> <span class="n">probability</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">probability</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">attributeEntropy</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributeEntropy</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">attributeEntropy</span>
+
+
+<span class="k">def</span> <span class="nf">getInfoGainRate</span><span class="p">(</span><span class="n">infoGain</span><span class="p">,</span> <span class="n">attributeEntropy</span><span class="p">):</span>
+    <span class="n">infoGainRate</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attributeEntropy</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">attributeEntropy</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">infoGainRate</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">infoGain</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">/</span> <span class="n">attributeEntropy</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">infoGainRate</span>
+
+
+<span class="k">def</span> <span class="nf">selectNode</span><span class="p">(</span><span class="n">trainData</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">propertiesIndex</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="sd">"""</span>
+
+<span class="sd">    :param trainData:</span>
+<span class="sd">    :param properties:</span>
+<span class="sd">    :param propertiesIndex:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    node(当前选择的节点属性信息):{</span>
+<span class="sd">        name: 节点属性名称</span>
+<span class="sd">        status: { 各个状态的信息熵</span>
+<span class="sd">            key: {</span>
+<span class="sd">                keys: []</span>
+<span class="sd">                value: value</span>
+<span class="sd">            }</span>
+<span class="sd">        }</span>
+<span class="sd">    }</span>
+<span class="sd">    """</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">当前训练集为:"</span><span class="p">,</span> <span class="n">trainData</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"当前的属性列表为:"</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+    <span class="n">resultStatistics</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">trainData</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">trainData</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">resultStatistics</span><span class="p">:</span>
+            <span class="n">resultStatistics</span><span class="p">[</span><span class="n">trainData</span><span class="p">[</span><span class="n">item</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">resultStatistics</span><span class="p">[</span><span class="n">trainData</span><span class="p">[</span><span class="n">item</span><span class="p">]]</span> <span class="o">=</span> <span class="n">resultStatistics</span><span class="p">[</span><span class="n">trainData</span><span class="p">[</span><span class="n">item</span><span class="p">]]</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">rootInfoEntropy</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">resultStatistics</span><span class="p">:</span>
+        <span class="n">probability</span> <span class="o">=</span> <span class="n">resultStatistics</span><span class="p">[</span><span class="n">result</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">trainData</span><span class="p">)</span>
+        <span class="n">rootInfoEntropy</span> <span class="o">=</span> <span class="n">rootInfoEntropy</span> <span class="o">+</span> <span class="p">(</span><span class="n">probability</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">probability</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">rootInfoEntropy</span> <span class="o">=</span> <span class="n">rootInfoEntropy</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"当前训练集的根节点的信息熵:"</span><span class="p">,</span> <span class="n">rootInfoEntropy</span><span class="p">)</span>
+
+    <span class="n">infoEntropy</span> <span class="o">=</span> <span class="n">getInfoEntropy</span><span class="p">(</span><span class="n">trainData</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">propertiesIndex</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"当前训练集的信息熵:"</span><span class="p">,</span> <span class="n">infoEntropy</span><span class="p">)</span>
+
+    <span class="n">normalizedInfoEntropy</span> <span class="o">=</span> <span class="n">getNormalizedInfoEntropy</span><span class="p">(</span><span class="n">infoEntropy</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"当前训练集的归一化信息熵:"</span><span class="p">,</span> <span class="n">normalizedInfoEntropy</span><span class="p">)</span>
+
+    <span class="n">infoGain</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+        <span class="n">infoGain</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">rootInfoEntropy</span> <span class="o">-</span> <span class="n">normalizedInfoEntropy</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"当前训练集的信息增益:"</span><span class="p">,</span> <span class="n">infoGain</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">infoGain</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">attribute</span>
+        <span class="k">elif</span> <span class="n">infoGain</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">infoGain</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">attribute</span>
+
+    <span class="c1"># C4.5添加start</span>
+    <span class="n">attributeEntropy</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">infoGainRate</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">attributeEntropy</span> <span class="o">=</span> <span class="n">getAttributeEntropy</span><span class="p">(</span><span class="n">trainData</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">propertiesIndex</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"当前属性熵："</span><span class="p">,</span> <span class="n">attributeEntropy</span><span class="p">)</span>
+
+        <span class="n">infoGainRate</span> <span class="o">=</span> <span class="n">getInfoGainRate</span><span class="p">(</span><span class="n">infoGain</span><span class="p">,</span> <span class="n">attributeEntropy</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"当前信息增益率:"</span><span class="p">,</span> <span class="n">infoGainRate</span><span class="p">)</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">infoGainRate</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">attribute</span>
+            <span class="k">elif</span> <span class="n">infoGainRate</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">infoGainRate</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">attribute</span>
+
+    <span class="n">statusMap</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">infoEntropy</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+        <span class="n">statusMap</span><span class="p">[</span><span class="n">status</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">statusMap</span><span class="p">[</span><span class="n">status</span><span class="p">][</span><span class="s2">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="n">infoEntropy</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">status</span><span class="p">][</span><span class="s2">"value"</span><span class="p">]</span>
+        <span class="n">statusMap</span><span class="p">[</span><span class="n">status</span><span class="p">][</span><span class="s2">"keys"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">trainData</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="n">propertiesIndex</span><span class="p">[</span><span class="n">name</span><span class="p">]]</span> <span class="o">==</span> <span class="n">status</span><span class="p">:</span>
+                <span class="n">statusMap</span><span class="p">[</span><span class="n">status</span><span class="p">][</span><span class="s2">"keys"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="n">node</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+        <span class="s2">"status"</span><span class="p">:</span> <span class="n">statusMap</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">node</span>
+
+
+<span class="k">def</span> <span class="nf">getID3Tree</span><span class="p">(</span><span class="n">trainData</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">propertiesIndex</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    获取ID3决策树</span>
+<span class="sd">    :param trainData:</span>
+<span class="sd">    :param properties:</span>
+<span class="sd">    :param propertiesIndex:</span>
+<span class="sd">    :return:</span>
+
+<span class="sd">    node(当前选择的节点属性信息):{</span>
+<span class="sd">        name: 节点属性名称</span>
+<span class="sd">        status: { 各个状态的信息熵</span>
+<span class="sd">            key: {</span>
+<span class="sd">                keys: []</span>
+<span class="sd">                value: value</span>
+<span class="sd">            }</span>
+<span class="sd">        }</span>
+<span class="sd">    }</span>
+<span class="sd">    """</span>
+    <span class="n">node</span> <span class="o">=</span> <span class="n">selectNode</span><span class="p">(</span><span class="n">trainData</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">propertiesIndex</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"当前选择的最优节点为:"</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">node</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]:</span> <span class="p">{},</span>
+    <span class="p">}</span>
+
+    <span class="n">tempProperties</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"进行属性列表裁剪:"</span><span class="p">,</span> <span class="n">tempProperties</span><span class="p">,</span> <span class="n">node</span><span class="p">[</span><span class="s2">"name"</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="ow">in</span> <span class="n">tempProperties</span><span class="p">:</span>
+        <span class="n">tempProperties</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s2">"name"</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">node</span><span class="p">[</span><span class="s2">"status"</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s2">"status"</span><span class="p">][</span><span class="n">status</span><span class="p">][</span><span class="s2">"value"</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">tree</span><span class="p">[</span><span class="n">node</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]][</span><span class="n">status</span><span class="p">]</span> <span class="o">=</span> <span class="n">trainData</span><span class="p">[</span><span class="n">node</span><span class="p">[</span><span class="s2">"status"</span><span class="p">][</span><span class="n">status</span><span class="p">][</span><span class="s2">"keys"</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tempTrainData</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">trainData</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="n">propertiesIndex</span><span class="p">[</span><span class="n">node</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]]]</span> <span class="o">==</span> <span class="n">status</span><span class="p">:</span>
+                    <span class="n">tempTrainData</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">trainData</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+
+            <span class="n">tree</span><span class="p">[</span><span class="n">node</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]][</span><span class="n">status</span><span class="p">],</span> <span class="n">nodeName</span> <span class="o">=</span> <span class="n">getID3Tree</span><span class="p">(</span><span class="n">tempTrainData</span><span class="p">,</span> <span class="n">tempProperties</span><span class="p">,</span> <span class="n">propertiesIndex</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"进行属性列表裁剪:"</span><span class="p">,</span> <span class="n">tempProperties</span><span class="p">,</span> <span class="n">nodeName</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nodeName</span> <span class="ow">in</span> <span class="n">tempProperties</span><span class="p">:</span>
+                <span class="n">tempProperties</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">nodeName</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tree</span><span class="p">,</span> <span class="n">node</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">printTree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">interval</span><span class="p">):</span>
+    <span class="n">newInterval</span> <span class="o">=</span> <span class="n">interval</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">tree</span><span class="p">[</span><span class="n">item</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">interval</span> <span class="o">+</span> <span class="n">item</span><span class="p">,</span> <span class="n">tree</span><span class="p">[</span><span class="n">item</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">interval</span> <span class="o">+</span> <span class="n">item</span><span class="p">)</span>
+            <span class="n">printTree</span><span class="p">(</span><span class="n">tree</span><span class="p">[</span><span class="n">item</span><span class="p">],</span> <span class="n">newInterval</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="c1"># 设置算法模式: 0-&gt;ID3 1-&gt;C4.5</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"weather"</span><span class="p">,</span> <span class="s2">"temperature"</span><span class="p">,</span> <span class="s2">"humidity"</span><span class="p">,</span> <span class="s2">"windy"</span><span class="p">]</span>
+    <span class="n">propertiesIndex</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"weather"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"temperature"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"humidity"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"windy"</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+    <span class="c1"># 0:不打篮球 1:打篮球</span>
+    <span class="n">trainData</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">(</span><span class="s2">"sun"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">,</span> <span class="s2">"middle"</span><span class="p">,</span> <span class="s2">"no"</span><span class="p">):</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">"sun"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">,</span> <span class="s2">"middle"</span><span class="p">,</span> <span class="s2">"yes"</span><span class="p">):</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">"cloud"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">,</span> <span class="s2">"no"</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">"rain"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">,</span> <span class="s2">"no"</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">"rain"</span><span class="p">,</span> <span class="s2">"low"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">,</span> <span class="s2">"no"</span><span class="p">):</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">"sun"</span><span class="p">,</span> <span class="s2">"middle"</span><span class="p">,</span> <span class="s2">"middle"</span><span class="p">,</span> <span class="s2">"yes"</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">"cloud"</span><span class="p">,</span> <span class="s2">"middle"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">,</span> <span class="s2">"yes"</span><span class="p">):</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="c1"># for key in trainData:</span>
+    <span class="c1">#     print(key, trainData[key])</span>
+
+    <span class="n">tree</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">getID3Tree</span><span class="p">(</span><span class="n">trainData</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">propertiesIndex</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"'"</span><span class="p">,</span> <span class="s1">'"'</span><span class="p">))</span>
+    <span class="n">printTree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+</code></pre>
+    </div>
     <p>
      运行结果为:
-```
-当前训练集为: {('sun', 'high', 'middle', 'no'): 0, ('sun', 'high', 'middle', 'yes'): 0, ('cloud', 'high', 'high', 'no'): 1, ('rain', 'high', 'high', 'no'): 1, ('rain', 'low', 'high', 'no'): 0, ('sun', 'middle', 'middle', 'yes'): 1, ('cloud', 'middle', 'high', 'yes'): 0}
-当前的属性列表为: ['weather', 'temperature', 'humidity', 'windy']
-当前训练集的根节点的信息熵: 0.9852281360342516
-当前训练集的信息熵: {'weather': {'sun': {'count': 3, 'value': 0.9182958340544896}, 'cloud': {'count': 2, 'value': 1.0}, 'rain': {'count': 2, 'value': 1.0}}, 'temperature': {'high': {'count': 4, 'value': 1.0}, 'low': {'count': 1, 'value': -0.0}, 'middle': {'count': 2, 'value': 1.0}}, 'humidity': {'middle': {'count': 3, 'value': 0.9182958340544896}, 'high': {'count': 4, 'value': 1.0}}, 'windy': {'no': {'count': 4, 'value': 1.0}, 'yes': {'count': 3, 'value': 0.9182958340544896}}}
-当前训练集的归一化信息熵: {'weather': 0.9649839288804954, 'temperature': 0.8571428571428571, 'humidity': 0.9649839288804954, 'windy': 0.9649839288804954}
-当前训练集的信息增益: {'weather': 0.02024420715375619, 'temperature': 0.12808527889139454, 'humidity': 0.02024420715375619, 'windy': 0.02024420715375619}
-当前选择的最优节点为: {'name': 'temperature', 'status': {'high': {'value': 1.0, 'keys': [('sun', 'high', 'middle', 'no'), ('sun', 'high', 'middle', 'yes'), ('cloud', 'high', 'high', 'no'), ('rain', 'high', 'high', 'no')]}, 'low': {'value': -0.0, 'keys': [('rain', 'low', 'high', 'no')]}, 'middle': {'value': 1.0, 'keys': [('sun', 'middle', 'middle', 'yes'), ('cloud', 'middle', 'high', 'yes')]}}}
-进行属性列表裁剪: ['weather', 'temperature', 'humidity', 'windy'] temperature
     </p>
-    <p>
-     当前训练集为: {('sun', 'high', 'middle', 'no'): 0, ('sun', 'high', 'middle', 'yes'): 0, ('cloud', 'high', 'high', 'no'): 1, ('rain', 'high', 'high', 'no'): 1}
-当前的属性列表为: ['weather', 'humidity', 'windy']
-当前训练集的根节点的信息熵: 1.0
-当前训练集的信息熵: {'weather': {'sun': {'count': 2, 'value': -0.0}, 'cloud': {'count': 1, 'value': -0.0}, 'rain': {'count': 1, 'value': -0.0}}, 'humidity': {'middle': {'count': 2, 'value': -0.0}, 'high': {'count': 2, 'value': -0.0}}, 'windy': {'no': {'count': 3, 'value': 0.9182958340544896}, 'yes': {'count': 1, 'value': -0.0}}}
-当前训练集的归一化信息熵: {'weather': 0.0, 'humidity': 0.0, 'windy': 0.6887218755408672}
-当前训练集的信息增益: {'weather': 1.0, 'humidity': 1.0, 'windy': 0.31127812445913283}
-当前选择的最优节点为: {'name': 'weather', 'status': {'sun': {'value': -0.0, 'keys': [('sun', 'high', 'middle', 'no'), ('sun', 'high', 'middle', 'yes')]}, 'cloud': {'value': -0.0, 'keys': [('cloud', 'high', 'high', 'no')]}, 'rain': {'value': -0.0, 'keys': [('rain', 'high', 'high', 'no')]}}}
-进行属性列表裁剪: ['weather', 'humidity', 'windy'] weather
-进行属性列表裁剪: ['weather', 'humidity', 'windy'] weather
-    </p>
-    <p>
-     当前训练集为: {('sun', 'middle', 'middle', 'yes'): 1, ('cloud', 'middle', 'high', 'yes'): 0}
-当前的属性列表为: ['humidity', 'windy']
-当前训练集的根节点的信息熵: 1.0
-当前训练集的信息熵: {'humidity': {'middle': {'count': 1, 'value': -0.0}, 'high': {'count': 1, 'value': -0.0}}, 'windy': {'yes': {'count': 2, 'value': 1.0}}}
-当前训练集的归一化信息熵: {'humidity': 0.0, 'windy': 1.0}
-当前训练集的信息增益: {'humidity': 1.0, 'windy': 0.0}
-当前选择的最优节点为: {'name': 'humidity', 'status': {'middle': {'value': -0.0, 'keys': [('sun', 'middle', 'middle', 'yes')]}, 'high': {'value': -0.0, 'keys': [('cloud', 'middle', 'high', 'yes')]}}}
-进行属性列表裁剪: ['humidity', 'windy'] humidity
-进行属性列表裁剪: ['humidity', 'windy'] humidity
-{"temperature": {"high": {"weather": {"sun": 0, "cloud": 1, "rain": 1}}, "low": 0, "middle": {"humidity": {"middle": 1, "high": 0}}}}
-temperature
-    high
-        weather
-            sun 0
-            cloud 1
-            rain 1
-    low 0
-    middle
-        humidity
-            middle 1
-            high 0
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">当前训练集为</span><span class="p">:</span> <span class="err">{</span><span class="p">(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">):</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">):</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s1">'cloud'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="s1">'rain'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="s1">'rain'</span><span class="p">,</span> <span class="s1">'low'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">):</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="s1">'cloud'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">):</span> <span class="mi">0</span><span class="err">}</span>
+<span class="err">当前的属性列表为</span><span class="p">:</span> <span class="p">[</span><span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'temperature'</span><span class="p">,</span> <span class="s1">'humidity'</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">]</span>
+<span class="err">当前训练集的根节点的信息熵</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">9852281360342516</span>
+<span class="err">当前训练集的信息熵</span><span class="p">:</span> <span class="err">{</span><span class="s1">'weather'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'sun'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">9182958340544896</span><span class="err">}</span><span class="p">,</span> <span class="s1">'cloud'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="err">}</span><span class="p">,</span> <span class="s1">'rain'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="err">}}</span><span class="p">,</span> <span class="s1">'temperature'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'high'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="err">}</span><span class="p">,</span> <span class="s1">'low'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="err">}</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="err">}}</span><span class="p">,</span> <span class="s1">'humidity'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'middle'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">9182958340544896</span><span class="err">}</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="err">}}</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'no'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="err">}</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">9182958340544896</span><span class="err">}}}</span>
+<span class="err">当前训练集的归一化信息熵</span><span class="p">:</span> <span class="err">{</span><span class="s1">'weather'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">9649839288804954</span><span class="p">,</span> <span class="s1">'temperature'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">8571428571428571</span><span class="p">,</span> <span class="s1">'humidity'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">9649839288804954</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">9649839288804954</span><span class="err">}</span>
+<span class="err">当前训练集的信息增益</span><span class="p">:</span> <span class="err">{</span><span class="s1">'weather'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">02024420715375619</span><span class="p">,</span> <span class="s1">'temperature'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">12808527889139454</span><span class="p">,</span> <span class="s1">'humidity'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">02024420715375619</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">02024420715375619</span><span class="err">}</span>
+<span class="err">当前选择的最优节点为</span><span class="p">:</span> <span class="err">{</span><span class="s1">'name'</span><span class="p">:</span> <span class="s1">'temperature'</span><span class="p">,</span> <span class="s1">'status'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'high'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'value'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'keys'</span><span class="p">:</span> <span class="p">[(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'cloud'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'rain'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">)]</span><span class="err">}</span><span class="p">,</span> <span class="s1">'low'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'keys'</span><span class="p">:</span> <span class="p">[(</span><span class="s1">'rain'</span><span class="p">,</span> <span class="s1">'low'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">)]</span><span class="err">}</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'value'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'keys'</span><span class="p">:</span> <span class="p">[(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'cloud'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">)]</span><span class="err">}}}</span>
+<span class="err">进行属性列表裁剪</span><span class="p">:</span> <span class="p">[</span><span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'temperature'</span><span class="p">,</span> <span class="s1">'humidity'</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">]</span> <span class="n">temperature</span>
+
+<span class="err">当前训练集为</span><span class="p">:</span> <span class="err">{</span><span class="p">(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">):</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">):</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="s1">'cloud'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="s1">'rain'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">):</span> <span class="mi">1</span><span class="err">}</span>
+<span class="err">当前的属性列表为</span><span class="p">:</span> <span class="p">[</span><span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'humidity'</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">]</span>
+<span class="err">当前训练集的根节点的信息熵</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span>
+<span class="err">当前训练集的信息熵</span><span class="p">:</span> <span class="err">{</span><span class="s1">'weather'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'sun'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="err">}</span><span class="p">,</span> <span class="s1">'cloud'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="err">}</span><span class="p">,</span> <span class="s1">'rain'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="err">}}</span><span class="p">,</span> <span class="s1">'humidity'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'middle'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="err">}</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="err">}}</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'no'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">9182958340544896</span><span class="err">}</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="err">}}}</span>
+<span class="err">当前训练集的归一化信息熵</span><span class="p">:</span> <span class="err">{</span><span class="s1">'weather'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'humidity'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">6887218755408672</span><span class="err">}</span>
+<span class="err">当前训练集的信息增益</span><span class="p">:</span> <span class="err">{</span><span class="s1">'weather'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'humidity'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">31127812445913283</span><span class="err">}</span>
+<span class="err">当前选择的最优节点为</span><span class="p">:</span> <span class="err">{</span><span class="s1">'name'</span><span class="p">:</span> <span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'status'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'sun'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'keys'</span><span class="p">:</span> <span class="p">[(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">)]</span><span class="err">}</span><span class="p">,</span> <span class="s1">'cloud'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'keys'</span><span class="p">:</span> <span class="p">[(</span><span class="s1">'cloud'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">)]</span><span class="err">}</span><span class="p">,</span> <span class="s1">'rain'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'keys'</span><span class="p">:</span> <span class="p">[(</span><span class="s1">'rain'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'no'</span><span class="p">)]</span><span class="err">}}}</span>
+<span class="err">进行属性列表裁剪</span><span class="p">:</span> <span class="p">[</span><span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'humidity'</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">]</span> <span class="n">weather</span>
+<span class="err">进行属性列表裁剪</span><span class="p">:</span> <span class="p">[</span><span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'humidity'</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">]</span> <span class="n">weather</span>
+
+<span class="err">当前训练集为</span><span class="p">:</span> <span class="err">{</span><span class="p">(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="s1">'cloud'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">):</span> <span class="mi">0</span><span class="err">}</span>
+<span class="err">当前的属性列表为</span><span class="p">:</span> <span class="p">[</span><span class="s1">'humidity'</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">]</span>
+<span class="err">当前训练集的根节点的信息熵</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span>
+<span class="err">当前训练集的信息熵</span><span class="p">:</span> <span class="err">{</span><span class="s1">'humidity'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'middle'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="err">}</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="err">}}</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'yes'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'count'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'value'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="err">}}}</span>
+<span class="err">当前训练集的归一化信息熵</span><span class="p">:</span> <span class="err">{</span><span class="s1">'humidity'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="err">}</span>
+<span class="err">当前训练集的信息增益</span><span class="p">:</span> <span class="err">{</span><span class="s1">'humidity'</span><span class="p">:</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">:</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="err">}</span>
+<span class="err">当前选择的最优节点为</span><span class="p">:</span> <span class="err">{</span><span class="s1">'name'</span><span class="p">:</span> <span class="s1">'humidity'</span><span class="p">,</span> <span class="s1">'status'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'middle'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'keys'</span><span class="p">:</span> <span class="p">[(</span><span class="s1">'sun'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">)]</span><span class="err">}</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">:</span> <span class="err">{</span><span class="s1">'value'</span><span class="p">:</span> <span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'keys'</span><span class="p">:</span> <span class="p">[(</span><span class="s1">'cloud'</span><span class="p">,</span> <span class="s1">'middle'</span><span class="p">,</span> <span class="s1">'high'</span><span class="p">,</span> <span class="s1">'yes'</span><span class="p">)]</span><span class="err">}}}</span>
+<span class="err">进行属性列表裁剪</span><span class="p">:</span> <span class="p">[</span><span class="s1">'humidity'</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">]</span> <span class="n">humidity</span>
+<span class="err">进行属性列表裁剪</span><span class="p">:</span> <span class="p">[</span><span class="s1">'humidity'</span><span class="p">,</span> <span class="s1">'windy'</span><span class="p">]</span> <span class="n">humidity</span>
+<span class="err">{</span><span class="ss">"temperature"</span><span class="p">:</span> <span class="err">{</span><span class="ss">"high"</span><span class="p">:</span> <span class="err">{</span><span class="ss">"weather"</span><span class="p">:</span> <span class="err">{</span><span class="ss">"sun"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="ss">"cloud"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">"rain"</span><span class="p">:</span> <span class="mi">1</span><span class="err">}}</span><span class="p">,</span> <span class="ss">"low"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="ss">"middle"</span><span class="p">:</span> <span class="err">{</span><span class="ss">"humidity"</span><span class="p">:</span> <span class="err">{</span><span class="ss">"middle"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">"high"</span><span class="p">:</span> <span class="mi">0</span><span class="err">}}}}</span>
+<span class="n">temperature</span>
+    <span class="n">high</span>
+        <span class="n">weather</span>
+            <span class="n">sun</span> <span class="mi">0</span>
+            <span class="n">cloud</span> <span class="mi">1</span>
+            <span class="n">rain</span> <span class="mi">1</span>
+    <span class="n">low</span> <span class="mi">0</span>
+    <span class="n">middle</span>
+        <span class="n">humidity</span>
+            <span class="n">middle</span> <span class="mi">1</span>
+            <span class="n">high</span> <span class="mi">0</span>
+</code></pre>
+    </div>
    </article>
   </div>
   <!-- BG -->

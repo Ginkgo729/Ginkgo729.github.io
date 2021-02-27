@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,7 +43,7 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="vue">
      Vue 项目打包直接访问
     </h1>
     <hr/>
@@ -54,52 +55,47 @@
     <p>
      修改 config/index.js 中的 build 的路径为相对路径既可
     </p>
-    <p>
-     ```js
-'use strict'
-// Template version: 1.3.1
-// see http://vuejs-templates.github.io/webpack for documentation.
-    </p>
-    <p>
-     const path = require('path')
-    </p>
-    <p>
-     module.exports = {
-  build: {
-    // Template for index.html
-    index: path.resolve(__dirname, '../dist/index.html'),
-    </p>
-    <pre><pre>// Paths
-assetsRoot: path.resolve(__dirname, '../dist'),
-assetsSubDirectory: 'static',
-assetsPublicPath: './', //修改成这样既可
+    <div class="codehilite">
+     <pre><span></span><code><span class="s1">'use strict'</span>
+<span class="c1">// Template version: 1.3.1</span>
+<span class="c1">// see http://vuejs-templates.github.io/webpack for documentation.</span>
 
-/**
- * Source Maps
- */
+<span class="kr">const</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'path'</span><span class="p">)</span>
 
-productionSourceMap: true,
-// https://webpack.js.org/configuration/devtool/#production
-devtool: '#source-map',
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">build</span><span class="o">:</span> <span class="p">{</span>
+    <span class="c1">// Template for index.html</span>
+    <span class="nx">index</span><span class="o">:</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">'../dist/index.html'</span><span class="p">),</span>
 
-// Gzip off by default as many popular static hosts such as
-// Surge or Netlify already gzip all static assets for you.
-// Before setting to `true`, make sure to:
-// npm install --save-dev compression-webpack-plugin
-productionGzip: false,
-productionGzipExtensions: ['js', 'css'],
+    <span class="c1">// Paths</span>
+    <span class="nx">assetsRoot</span><span class="o">:</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">'../dist'</span><span class="p">),</span>
+    <span class="nx">assetsSubDirectory</span><span class="o">:</span> <span class="s1">'static'</span><span class="p">,</span>
+    <span class="nx">assetsPublicPath</span><span class="o">:</span> <span class="s1">'./'</span><span class="p">,</span> <span class="c1">//修改成这样既可</span>
 
-// Run the build command with an extra argument to
-// View the bundle analyzer report after build finishes:
-// `npm run build --report`
-// Set to `true` or `false` to always turn it on or off
-bundleAnalyzerReport: process.env.npm_config_report
-</pre></pre>
-    <p>
-     }
-}
-```
-    </p>
+    <span class="cm">/**</span>
+<span class="cm">     * Source Maps</span>
+<span class="cm">     */</span>
+
+    <span class="nx">productionSourceMap</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="c1">// https://webpack.js.org/configuration/devtool/#production</span>
+    <span class="nx">devtool</span><span class="o">:</span> <span class="s1">'#source-map'</span><span class="p">,</span>
+
+    <span class="c1">// Gzip off by default as many popular static hosts such as</span>
+    <span class="c1">// Surge or Netlify already gzip all static assets for you.</span>
+    <span class="c1">// Before setting to `true`, make sure to:</span>
+    <span class="c1">// npm install --save-dev compression-webpack-plugin</span>
+    <span class="nx">productionGzip</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="nx">productionGzipExtensions</span><span class="o">:</span> <span class="p">[</span><span class="s1">'js'</span><span class="p">,</span> <span class="s1">'css'</span><span class="p">],</span>
+
+    <span class="c1">// Run the build command with an extra argument to</span>
+    <span class="c1">// View the bundle analyzer report after build finishes:</span>
+    <span class="c1">// `npm run build --report`</span>
+    <span class="c1">// Set to `true` or `false` to always turn it on or off</span>
+    <span class="nx">bundleAnalyzerReport</span><span class="o">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">npm_config_report</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
    </article>
   </div>
   <!-- BG -->

@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,7 +43,7 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="shardingsphere-proxy">
      ShardingSphere Proxy 主从读写 入门使用
     </h1>
     <hr/>
@@ -51,10 +52,10 @@
       基于ShardingSphere5.0.0Alpha
      </em>
     </p>
-    <h2>
+    <h2 id="_1">
      环境准备
     </h2>
-    <h3>
+    <h3 id="mysql">
      MySQL搭建
     </h3>
     <p>
@@ -76,7 +77,7 @@
       </ul>
      </li>
     </ul>
-    <h3>
+    <h3 id="shardingsphere-proxy_1">
      配置ShardingSphere-Proxy
     </h3>
     <p>
@@ -111,341 +112,276 @@
     </ul>
     <p>
      server.xml 这份感觉不用改，如果和下面的一样就不用改
-```java
     </p>
-    <h6>
-    </h6>
-    <h1>
-    </h1>
-    <h1>
-     If you want to configure orchestration, authorization and proxy properties, please refer to this file.
-    </h1>
-    <h1>
-    </h1>
-    <h6>
-    </h6>
-    <h1>
-     orchestration:
-    </h1>
-    <h1>
-     name: orchestration_ds
-    </h1>
-    <h1>
-     overwrite: true
-    </h1>
-    <h1>
-     registry:
-    </h1>
-    <h1>
-     type: zookeeper
-    </h1>
-    <h1>
-     serverLists: localhost:2181
-    </h1>
-    <h1>
-     namespace: orchestration
-    </h1>
-    <p>
-     authentication:
-  users:
-    root:
-      password: root
-    sharding:
-      password: sharding
-      authorizedSchemas: test
-    </p>
-    <p>
-     props:
-  max.connections.size.per.query: 1
-  acceptor.size: 16  # The default value is available processors count * 2.
-  executor.size: 16  # Infinite by default.
-  proxy.frontend.flush.threshold: 128  # The default value is 128.
-    # LOCAL: Proxy will run with LOCAL transaction.
-    # XA: Proxy will run with XA transaction.
-  # BASE: Proxy will run with B.A.S.E transaction.
-  proxy.transaction.type: LOCAL
-  proxy.opentracing.enabled: false
-  query.with.cipher.column: true
-  sql.show: false
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">######################################################################################################</span>
+<span class="err">#</span>
+<span class="err">#</span> <span class="n">If</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">configure</span> <span class="n">orchestration</span><span class="p">,</span> <span class="n">authorization</span> <span class="n">and</span> <span class="n">proxy</span> <span class="n">properties</span><span class="p">,</span> <span class="n">please</span> <span class="n">refer</span> <span class="n">to</span> <span class="k">this</span> <span class="n">file</span><span class="p">.</span>
+<span class="err">#</span>
+<span class="err">######################################################################################################</span>
+
+<span class="err">#</span> <span class="n">orchestration</span><span class="p">:</span>
+<span class="err">#</span>  <span class="n">name</span><span class="p">:</span> <span class="n">orchestration_ds</span>
+<span class="err">#</span>  <span class="n">overwrite</span><span class="p">:</span> <span class="kc">true</span>
+<span class="err">#</span>  <span class="n">registry</span><span class="p">:</span>
+<span class="err">#</span>    <span class="n">type</span><span class="p">:</span> <span class="n">zookeeper</span>
+<span class="err">#</span>    <span class="n">serverLists</span><span class="p">:</span> <span class="n">localhost</span><span class="p">:</span><span class="mi">2181</span>
+<span class="err">#</span>    <span class="n">namespace</span><span class="p">:</span> <span class="n">orchestration</span>
+
+<span class="nl">authentication:</span>
+  <span class="n">users</span><span class="p">:</span>
+    <span class="n">root</span><span class="p">:</span>
+      <span class="n">password</span><span class="p">:</span> <span class="n">root</span>
+    <span class="n">sharding</span><span class="p">:</span>
+      <span class="n">password</span><span class="p">:</span> <span class="n">sharding</span>
+      <span class="n">authorizedSchemas</span><span class="p">:</span> <span class="n">test</span>
+
+<span class="nl">props:</span>
+  <span class="n">max</span><span class="p">.</span><span class="na">connections</span><span class="p">.</span><span class="na">size</span><span class="p">.</span><span class="na">per</span><span class="p">.</span><span class="na">query</span><span class="p">:</span> <span class="mi">1</span>
+  <span class="n">acceptor</span><span class="p">.</span><span class="na">size</span><span class="p">:</span> <span class="mi">16</span>  <span class="err">#</span> <span class="n">The</span> <span class="k">default</span> <span class="n">value</span> <span class="n">is</span> <span class="n">available</span> <span class="n">processors</span> <span class="n">count</span> <span class="o">*</span> <span class="mf">2.</span>
+  <span class="n">executor</span><span class="p">.</span><span class="na">size</span><span class="p">:</span> <span class="mi">16</span>  <span class="err">#</span> <span class="n">Infinite</span> <span class="n">by</span> <span class="k">default</span><span class="p">.</span>
+  <span class="n">proxy</span><span class="p">.</span><span class="na">frontend</span><span class="p">.</span><span class="na">flush</span><span class="p">.</span><span class="na">threshold</span><span class="p">:</span> <span class="mi">128</span>  <span class="err">#</span> <span class="n">The</span> <span class="k">default</span> <span class="n">value</span> <span class="n">is</span> <span class="mf">128.</span>
+    <span class="err">#</span> <span class="n">LOCAL</span><span class="p">:</span> <span class="n">Proxy</span> <span class="n">will</span> <span class="n">run</span> <span class="n">with</span> <span class="n">LOCAL</span> <span class="n">transaction</span><span class="p">.</span>
+    <span class="err">#</span> <span class="n">XA</span><span class="p">:</span> <span class="n">Proxy</span> <span class="n">will</span> <span class="n">run</span> <span class="n">with</span> <span class="n">XA</span> <span class="n">transaction</span><span class="p">.</span>
+  <span class="err">#</span> <span class="n">BASE</span><span class="p">:</span> <span class="n">Proxy</span> <span class="n">will</span> <span class="n">run</span> <span class="n">with</span> <span class="n">B</span><span class="p">.</span><span class="na">A</span><span class="p">.</span><span class="na">S</span><span class="p">.</span><span class="na">E</span> <span class="n">transaction</span><span class="p">.</span>
+  <span class="n">proxy</span><span class="p">.</span><span class="na">transaction</span><span class="p">.</span><span class="na">type</span><span class="p">:</span> <span class="n">LOCAL</span>
+  <span class="n">proxy</span><span class="p">.</span><span class="na">opentracing</span><span class="p">.</span><span class="na">enabled</span><span class="p">:</span> <span class="kc">false</span>
+  <span class="n">query</span><span class="p">.</span><span class="na">with</span><span class="p">.</span><span class="na">cipher</span><span class="p">.</span><span class="na">column</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="n">sql</span><span class="p">.</span><span class="na">show</span><span class="p">:</span> <span class="kc">false</span>
+</code></pre>
+    </div>
     <p>
      config-master_slave.yaml,这个文件的配置关键字一定不要安装官方example的那个来，完全不行，要按照官方文档来，比如JDBCURL需要改成url，大致的文件内容如下：
     </p>
-    <p>
-     ```java
-    </p>
-    <h6>
-    </h6>
-    <h1>
-    </h1>
-    <h1>
-     Here you can configure the rules for the proxy.
-    </h1>
-    <h1>
-     This example is configuration of master-slave rule.
-    </h1>
-    <h1>
-    </h1>
-    <h1>
-     If you want to use master-slave, please refer to this file;
-    </h1>
-    <h1>
-     if you want to use sharding, please refer to the config-sharding.yaml.
-    </h1>
-    <h1>
-    </h1>
-    <h6>
-    </h6>
-    <p>
-     schemaName: test
-    </p>
-    <p>
-     dataSources:
-  master_ds:
-    url: jdbc:mysql://localhost:3306/test?serverTimezone=UTC&amp;useUnipre=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true
-    username: root
-    password: root
-    connectionTimeoutMilliseconds: 30000
-    idleTimeoutMilliseconds: 60000
-    maxLifetimeMilliseconds: 1800000
-    maxPoolSize: 50
-  slave_ds_0:
-    url: jdbc:mysql://localhost:3309/test?serverTimezone=UTC&amp;useUnipre=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true
-    username: root
-    password: root
-    connectionTimeoutMilliseconds: 30000
-    idleTimeoutMilliseconds: 60000
-    maxLifetimeMilliseconds: 1800000
-    maxPoolSize: 50
-  slave_ds_1:
-    url: jdbc:mysql://localhost:3310/test?serverTimezone=UTC&amp;useUnipre=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true
-    username: root
-    password: root
-    connectionTimeoutMilliseconds: 30000
-    idleTimeoutMilliseconds: 60000
-    maxLifetimeMilliseconds: 1800000
-    maxPoolSize: 50
-    </p>
-    <p>
-     rules:
-- !REPLICA_QUERY
-  dataSources:
-    master_ds:
-      primaryDataSourceName: master_ds
-      replicaDataSourceNames:
-        - slave_ds_0
-        - slave_ds_1
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">######################################################################################################</span>
+<span class="err">#</span> 
+<span class="err">#</span> <span class="n">Here</span> <span class="n">you</span> <span class="n">can</span> <span class="n">configure</span> <span class="n">the</span> <span class="n">rules</span> <span class="k">for</span> <span class="n">the</span> <span class="n">proxy</span><span class="p">.</span>
+<span class="err">#</span> <span class="n">This</span> <span class="n">example</span> <span class="n">is</span> <span class="n">configuration</span> <span class="n">of</span> <span class="n">master</span><span class="o">-</span><span class="n">slave</span> <span class="n">rule</span><span class="p">.</span>
+<span class="err">#</span>   
+<span class="err">#</span> <span class="n">If</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">use</span> <span class="n">master</span><span class="o">-</span><span class="n">slave</span><span class="p">,</span> <span class="n">please</span> <span class="n">refer</span> <span class="n">to</span> <span class="k">this</span> <span class="n">file</span><span class="p">;</span> 
+<span class="err">#</span> <span class="k">if</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">use</span> <span class="n">sharding</span><span class="p">,</span> <span class="n">please</span> <span class="n">refer</span> <span class="n">to</span> <span class="n">the</span> <span class="n">config</span><span class="o">-</span><span class="n">sharding</span><span class="p">.</span><span class="na">yaml</span><span class="p">.</span>
+<span class="err">#</span> 
+<span class="err">######################################################################################################</span>
+
+<span class="nl">schemaName:</span> <span class="n">test</span>
+
+<span class="nl">dataSources:</span>
+  <span class="n">master_ds</span><span class="p">:</span>
+    <span class="n">url</span><span class="p">:</span> <span class="n">jdbc</span><span class="p">:</span><span class="n">mysql</span><span class="p">:</span><span class="c1">//localhost:3306/test?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</span>
+    <span class="n">username</span><span class="p">:</span> <span class="n">root</span>
+    <span class="n">password</span><span class="p">:</span> <span class="n">root</span>
+    <span class="n">connectionTimeoutMilliseconds</span><span class="p">:</span> <span class="mi">30000</span>
+    <span class="n">idleTimeoutMilliseconds</span><span class="p">:</span> <span class="mi">60000</span>
+    <span class="n">maxLifetimeMilliseconds</span><span class="p">:</span> <span class="mi">1800000</span>
+    <span class="n">maxPoolSize</span><span class="p">:</span> <span class="mi">50</span>
+  <span class="n">slave_ds_0</span><span class="p">:</span>
+    <span class="n">url</span><span class="p">:</span> <span class="n">jdbc</span><span class="p">:</span><span class="n">mysql</span><span class="p">:</span><span class="c1">//localhost:3309/test?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</span>
+    <span class="n">username</span><span class="p">:</span> <span class="n">root</span>
+    <span class="n">password</span><span class="p">:</span> <span class="n">root</span>
+    <span class="n">connectionTimeoutMilliseconds</span><span class="p">:</span> <span class="mi">30000</span>
+    <span class="n">idleTimeoutMilliseconds</span><span class="p">:</span> <span class="mi">60000</span>
+    <span class="n">maxLifetimeMilliseconds</span><span class="p">:</span> <span class="mi">1800000</span>
+    <span class="n">maxPoolSize</span><span class="p">:</span> <span class="mi">50</span>
+  <span class="n">slave_ds_1</span><span class="p">:</span>
+    <span class="n">url</span><span class="p">:</span> <span class="n">jdbc</span><span class="p">:</span><span class="n">mysql</span><span class="p">:</span><span class="c1">//localhost:3310/test?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</span>
+    <span class="n">username</span><span class="p">:</span> <span class="n">root</span>
+    <span class="n">password</span><span class="p">:</span> <span class="n">root</span>
+    <span class="n">connectionTimeoutMilliseconds</span><span class="p">:</span> <span class="mi">30000</span>
+    <span class="n">idleTimeoutMilliseconds</span><span class="p">:</span> <span class="mi">60000</span>
+    <span class="n">maxLifetimeMilliseconds</span><span class="p">:</span> <span class="mi">1800000</span>
+    <span class="n">maxPoolSize</span><span class="p">:</span> <span class="mi">50</span>
+
+
+<span class="nl">rules:</span>
+<span class="o">-</span> <span class="o">!</span><span class="n">REPLICA_QUERY</span>
+  <span class="n">dataSources</span><span class="p">:</span>
+    <span class="n">master_ds</span><span class="p">:</span>
+      <span class="n">primaryDataSourceName</span><span class="p">:</span> <span class="n">master_ds</span>
+      <span class="n">replicaDataSourceNames</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">slave_ds_0</span>
+        <span class="o">-</span> <span class="n">slave_ds_1</span>
+</code></pre>
+    </div>
+    <h2 id="_2">
      运行
     </h2>
     <p>
      经过前面的步骤基本配置差不多了，现在只需要运行Sharding-Proxy根目录下的 bin/start.bat就行了，运行命令大致如下：
     </p>
-    <p>
-     ```bash
-    </p>
-    <h1>
-     进入相应的目录下，指定在13306端口运行，不指定默认运行在3307端口
-    </h1>
-    <p>
-     .\start.bat 13306
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># 进入相应的目录下，指定在13306端口运行，不指定默认运行在3307端口</span>
+.<span class="se">\s</span>tart.bat <span class="m">13306</span>
+</code></pre>
+    </div>
     <p>
      这里需要注意的是，Java11运行好像有点问题，需要用1.8来运行，而不确定Java运行版本的，可以直接写个脚本：start.bat(start.sh类似),整个脚本修改大致如下：
     </p>
-    <p>
-     ```bash
-@rem
-@rem Licensed to the Apache Software Foundation (ASF) under one or more
+    <div class="codehilite">
+     <pre><span></span><code>@rem
+@rem Licensed to the Apache Software Foundation <span class="o">(</span>ASF<span class="o">)</span> under one or more
 @rem contributor license agreements.  See the NOTICE file distributed with
-@rem this work for additional information regarding copyright ownership.
-@rem The ASF licenses this file to You under the Apache License, Version 2.0
-@rem (the "License"); you may not use this file except in compliance with
+@rem this work <span class="k">for</span> additional information regarding copyright ownership.
+@rem The ASF licenses this file to You under the Apache License, Version <span class="m">2</span>.0
+@rem <span class="o">(</span>the <span class="s2">"License"</span><span class="o">)</span><span class="p">;</span> you may not use this file except in compliance with
 @rem the License.  You may obtain a copy of the License at
 @rem
 @rem     http://www.apache.org/licenses/LICENSE-2.0
 @rem
 @rem Unless required by applicable law or agreed to in writing, software
-@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem distributed under the License is distributed on an <span class="s2">"AS IS"</span> BASIS,
 @rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-@rem See the License for the specific language governing permissions and
+@rem See the License <span class="k">for</span> the specific language governing permissions and
 @rem limitations under the License.
 @rem
-    </p>
-    <p>
-     @echo off &amp; setlocal enabledelayedexpansion
-    </p>
-    <p>
-     cd %~dp0
-    </p>
-    <p>
-     set SERVER_NAME=ShardingSphere-Proxy
-    </p>
-    <p>
-     set CLASS_PATH="..;..\lib*;..\ext-lib*"
-    </p>
-    <p>
-     set PORT=%1
-    </p>
-    <p>
-     set CONFIG=%2
-    </p>
-    <p>
-     if "%PORT%"=="-h" (
+
+@echo off <span class="p">&amp;</span> setlocal enabledelayedexpansion
+
+<span class="nb">cd</span> %~dp0
+
+<span class="nb">set</span> <span class="nv">SERVER_NAME</span><span class="o">=</span>ShardingSphere-Proxy
+
+<span class="nb">set</span> <span class="nv">CLASS_PATH</span><span class="o">=</span><span class="s2">"..;..\lib\*;..\ext-lib\*"</span>
+
+<span class="nb">set</span> <span class="nv">PORT</span><span class="o">=</span>%1
+
+<span class="nb">set</span> <span class="nv">CONFIG</span><span class="o">=</span>%2
+
+<span class="k">if</span> <span class="s2">"%PORT%"</span><span class="o">==</span><span class="s2">"-h"</span> <span class="o">(</span>
     goto print_usage
-)
-if "%PORT%"=="--help" (
+<span class="o">)</span>
+<span class="k">if</span> <span class="s2">"%PORT%"</span><span class="o">==</span><span class="s2">"--help"</span> <span class="o">(</span>
     goto print_usage
-)
-    </p>
-    <p>
-     if "%PORT%"=="" (
-set MAIN_CLASS=org.apache.shardingsphere.proxy.Bootstrap
-) else ( if "%CONFIG%"=="" (
-    set MAIN_CLASS=org.apache.shardingsphere.proxy.Bootstrap %PORT%
-    echo The port is configured as %PORT%
-    set CLASS_PATH=../conf;%CLASS_PATH%
-    ) else (
-    set MAIN_CLASS=org.apache.shardingsphere.proxy.Bootstrap %PORT% %CONFIG%
-    echo The port is configured as %PORT%
-    echo The configuration path is %CONFIG%
-    set CLASS_PATH=../%CONFIG%;%CLASS_PATH%
-    )
-    echo The classpath is %CLASS_PATH%
-)
-    </p>
-    <p>
-     echo Starting the %SERVER_NAME% ...
-    </p>
-    <h1>
-     在这里就直接设置死了Java的运行版本，如果不能正常运行，请去掉这行
-    </h1>
-    <p>
-     F:\Software\Java\jdk1.8.0_261\bin\java.exe -server -Xmx2g -Xms2g -Xmn1g -Xss256k -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 -Dfile.encoding=UTF-8 -classpath %CLASS_PATH% %MAIN_CLASS%
-    </p>
-    <p>
-     goto exit
-    </p>
-    <p>
-     :print_usage
- echo "usage: start.bat [port] [config_dir]"
- echo "  port: proxy listen port, default is 3307"
- echo "  config_dir: proxy config directory, default is conf"
+<span class="o">)</span>
+
+<span class="k">if</span> <span class="s2">"%PORT%"</span><span class="o">==</span><span class="s2">""</span> <span class="o">(</span>
+<span class="nb">set</span> <span class="nv">MAIN_CLASS</span><span class="o">=</span>org.apache.shardingsphere.proxy.Bootstrap
+<span class="o">)</span> <span class="k">else</span> <span class="o">(</span> <span class="k">if</span> <span class="s2">"%CONFIG%"</span><span class="o">==</span><span class="s2">""</span> <span class="o">(</span>
+    <span class="nb">set</span> <span class="nv">MAIN_CLASS</span><span class="o">=</span>org.apache.shardingsphere.proxy.Bootstrap %PORT%
+    <span class="nb">echo</span> The port is configured as %PORT%
+    <span class="nb">set</span> <span class="nv">CLASS_PATH</span><span class="o">=</span>../conf<span class="p">;</span>%CLASS_PATH%
+    <span class="o">)</span> <span class="k">else</span> <span class="o">(</span>
+    <span class="nb">set</span> <span class="nv">MAIN_CLASS</span><span class="o">=</span>org.apache.shardingsphere.proxy.Bootstrap %PORT% %CONFIG%
+    <span class="nb">echo</span> The port is configured as %PORT%
+    <span class="nb">echo</span> The configuration path is %CONFIG%
+    <span class="nb">set</span> <span class="nv">CLASS_PATH</span><span class="o">=</span>../%CONFIG%<span class="p">;</span>%CLASS_PATH%
+    <span class="o">)</span>
+    <span class="nb">echo</span> The classpath is %CLASS_PATH%
+<span class="o">)</span>
+
+<span class="nb">echo</span> Starting the %SERVER_NAME% ...
+
+<span class="c1"># 在这里就直接设置死了Java的运行版本，如果不能正常运行，请去掉这行</span>
+F:<span class="se">\S</span>oftware<span class="se">\J</span>ava<span class="se">\j</span>dk1.8.0_261<span class="se">\b</span>in<span class="se">\j</span>ava.exe -server -Xmx2g -Xms2g -Xmn1g -Xss256k -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:LargePageSizeInBytes<span class="o">=</span>128m -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction<span class="o">=</span><span class="m">70</span> -Dfile.encoding<span class="o">=</span>UTF-8 -classpath %CLASS_PATH% %MAIN_CLASS%
+
+goto <span class="nb">exit</span>
+
+:print_usage
+ <span class="nb">echo</span> <span class="s2">"usage: start.bat [port] [config_dir]"</span>
+ <span class="nb">echo</span> <span class="s2">"  port: proxy listen port, default is 3307"</span>
+ <span class="nb">echo</span> <span class="s2">"  config_dir: proxy config directory, default is conf"</span>
  pause
-    </p>
-    <p>
-     :exit
+
+:exit
  pause
-```
-    </p>
+</code></pre>
+    </div>
     <p>
      运行正常的话，就可以看到刷刷刷的一排正常日志打出，这样就OK了
     </p>
-    <h2>
+    <h2 id="shardingsphere-proxy_2">
      ShardingSphere Proxy连接测试
     </h2>
     <p>
      使用docker mysql命令有问题，成功连接了但是有bug，但使用MySQL workbench连接和程序连接是没有问题的
     </p>
-    <h3>
+    <h3 id="mysql-workbench">
      MySQL Workbench链接
     </h3>
     <p>
      使用图形化界面MySQL Workbench连接：本地ip、13306端口、root、root，连接成功，查询和删除，相应数据变化正确
     </p>
-    <h3>
+    <h3 id="java-jdbc">
      Java JDBC连接测试
     </h3>
     <p>
      下面是整个测试代码，可直接运行，运行下来也没有问题：
     </p>
-    <p>
-     ```java
-package com.example.demo.shardingsphere.proxy.jdbc;
-    </p>
-    <p>
-     import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Transactional;
-    </p>
-    <p>
-     import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-    </p>
-    <p>
-     /*
-     <em>
-      * ShardingSphere Proxy Raw JDBC测试
-     </em>
-     /
-public class ShardingSphereProxyRawJdbcTest {
-    </p>
-    <pre><pre>@Test @Transactional
-public void test() throws SQLException {
-    System.out.println("Start test");
-    DataSource SSDataSource = createShardingSphereProxyDataSource();
-    DataSource slaveDataSource = createSlaveDataSource();
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo.shardingsphere.proxy.jdbc</span><span class="p">;</span>
 
-    // 测试通过SSP是否数据修改和查询正常
-    Connection ssCon = SSDataSource.getConnection();
-    Statement ssState = ssCon.createStatement();
-    ssState.execute("UPDATE `users` SET `money` = '200' WHERE (`id` = '1');");
+<span class="kn">import</span> <span class="nn">com.zaxxer.hikari.HikariDataSource</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.junit.jupiter.api.Test</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.transaction.annotation.Transactional</span><span class="p">;</span>
 
-    ResultSet ret = ssState.executeQuery("select * from test.users where id=1;");
-    while (ret.next()) {
-        System.out.println(ret.getLong("money"));
-        assert ret.getLong("money") == 200;
-    }
+<span class="kn">import</span> <span class="nn">javax.sql.DataSource</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.Connection</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.ResultSet</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.Statement</span><span class="p">;</span>
 
-    // 测试从库是否数据同步更改
-    Connection slaveCon = slaveDataSource.getConnection();
-    Statement slaveState = slaveCon.createStatement();
-    ResultSet ret2 = slaveState.executeQuery("select * from test.users where id=1;");
-    while (ret2.next()) {
-        System.out.println(ret2.getLong("money"));
-        assert ret2.getLong("money") == 200;
-    }
+<span class="cm">/**</span>
+<span class="cm"> * ShardingSphere Proxy Raw JDBC测试</span>
+<span class="cm"> */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ShardingSphereProxyRawJdbcTest</span> <span class="p">{</span>
 
-    ret2.close();
-    ret.close();
-    ssState.close();
-    slaveState.close();
-    ssCon.close();
-    slaveCon.close();
-}
+    <span class="nd">@Test</span> <span class="nd">@Transactional</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"Start test"</span><span class="p">);</span>
+        <span class="n">DataSource</span> <span class="n">SSDataSource</span> <span class="o">=</span> <span class="n">createShardingSphereProxyDataSource</span><span class="p">();</span>
+        <span class="n">DataSource</span> <span class="n">slaveDataSource</span> <span class="o">=</span> <span class="n">createSlaveDataSource</span><span class="p">();</span>
 
-private DataSource createSlaveDataSource() {
-    HikariDataSource dataSource = new HikariDataSource();
-    dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-    dataSource.setJdbcUrl("jdbc:mysql://localhost:3309/test?serverTimezone=UTC&amp;useUnipre=true&amp;characterEncoding" +
-            "=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true");
-    dataSource.setUsername("root");
-    dataSource.setPassword("root");
-    return dataSource;
-}
+        <span class="c1">// 测试通过SSP是否数据修改和查询正常</span>
+        <span class="n">Connection</span> <span class="n">ssCon</span> <span class="o">=</span> <span class="n">SSDataSource</span><span class="p">.</span><span class="na">getConnection</span><span class="p">();</span>
+        <span class="n">Statement</span> <span class="n">ssState</span> <span class="o">=</span> <span class="n">ssCon</span><span class="p">.</span><span class="na">createStatement</span><span class="p">();</span>
+        <span class="n">ssState</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="s">"UPDATE `users` SET `money` = '200' WHERE (`id` = '1');"</span><span class="p">);</span>
 
-private DataSource createShardingSphereProxyDataSource() {
-    HikariDataSource dataSource = new HikariDataSource();
-    dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-    dataSource.setJdbcUrl("jdbc:mysql://localhost:13306/test?serverTimezone=UTC&amp;useUnipre=true&amp;characterEncoding" +
-            "=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true");
-    dataSource.setUsername("root");
-    dataSource.setPassword("root");
-    return dataSource;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h2>
+        <span class="n">ResultSet</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">ssState</span><span class="p">.</span><span class="na">executeQuery</span><span class="p">(</span><span class="s">"select * from test.users where id=1;"</span><span class="p">);</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">ret</span><span class="p">.</span><span class="na">next</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">ret</span><span class="p">.</span><span class="na">getLong</span><span class="p">(</span><span class="s">"money"</span><span class="p">));</span>
+            <span class="k">assert</span> <span class="n">ret</span><span class="p">.</span><span class="na">getLong</span><span class="p">(</span><span class="s">"money"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">200</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 测试从库是否数据同步更改</span>
+        <span class="n">Connection</span> <span class="n">slaveCon</span> <span class="o">=</span> <span class="n">slaveDataSource</span><span class="p">.</span><span class="na">getConnection</span><span class="p">();</span>
+        <span class="n">Statement</span> <span class="n">slaveState</span> <span class="o">=</span> <span class="n">slaveCon</span><span class="p">.</span><span class="na">createStatement</span><span class="p">();</span>
+        <span class="n">ResultSet</span> <span class="n">ret2</span> <span class="o">=</span> <span class="n">slaveState</span><span class="p">.</span><span class="na">executeQuery</span><span class="p">(</span><span class="s">"select * from test.users where id=1;"</span><span class="p">);</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">ret2</span><span class="p">.</span><span class="na">next</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">ret2</span><span class="p">.</span><span class="na">getLong</span><span class="p">(</span><span class="s">"money"</span><span class="p">));</span>
+            <span class="k">assert</span> <span class="n">ret2</span><span class="p">.</span><span class="na">getLong</span><span class="p">(</span><span class="s">"money"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">200</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">ret2</span><span class="p">.</span><span class="na">close</span><span class="p">();</span>
+        <span class="n">ret</span><span class="p">.</span><span class="na">close</span><span class="p">();</span>
+        <span class="n">ssState</span><span class="p">.</span><span class="na">close</span><span class="p">();</span>
+        <span class="n">slaveState</span><span class="p">.</span><span class="na">close</span><span class="p">();</span>
+        <span class="n">ssCon</span><span class="p">.</span><span class="na">close</span><span class="p">();</span>
+        <span class="n">slaveCon</span><span class="p">.</span><span class="na">close</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">DataSource</span> <span class="nf">createSlaveDataSource</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">HikariDataSource</span> <span class="n">dataSource</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HikariDataSource</span><span class="p">();</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setDriverClassName</span><span class="p">(</span><span class="s">"com.mysql.cj.jdbc.Driver"</span><span class="p">);</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setJdbcUrl</span><span class="p">(</span><span class="s">"jdbc:mysql://localhost:3309/test?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding"</span> <span class="o">+</span>
+                <span class="s">"=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"</span><span class="p">);</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setUsername</span><span class="p">(</span><span class="s">"root"</span><span class="p">);</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setPassword</span><span class="p">(</span><span class="s">"root"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">dataSource</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">DataSource</span> <span class="nf">createShardingSphereProxyDataSource</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">HikariDataSource</span> <span class="n">dataSource</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HikariDataSource</span><span class="p">();</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setDriverClassName</span><span class="p">(</span><span class="s">"com.mysql.cj.jdbc.Driver"</span><span class="p">);</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setJdbcUrl</span><span class="p">(</span><span class="s">"jdbc:mysql://localhost:13306/test?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding"</span> <span class="o">+</span>
+                <span class="s">"=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"</span><span class="p">);</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setUsername</span><span class="p">(</span><span class="s">"root"</span><span class="p">);</span>
+        <span class="n">dataSource</span><span class="p">.</span><span class="na">setPassword</span><span class="p">(</span><span class="s">"root"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">dataSource</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h2 id="_3">
      参考链接
     </h2>
     <ul>

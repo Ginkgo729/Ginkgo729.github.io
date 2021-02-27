@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,17 +43,17 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soulhttp-bootstrap">
      Soul网关源码解析（十四）HTTP数据同步-Bootstrap端
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      本篇文章来研究下Soul网关Bootstrap端的HTTP数据同步，看看和上篇的Websocket数据同步区别大不大
     </p>
-    <h2>
+    <h2 id="_2">
      示例启动
     </h2>
     <p>
@@ -61,18 +62,17 @@
     <p>
      Soul-Admin的HTTP同步方式配置
     </p>
-    <p>
-     <pre>xml
-  sync:
+    <div class="codehilite">
+     <pre><span></span><code>  sync:
       http:
-        enabled: true</pre>
-    </p>
+        enabled: true
+</code></pre>
+    </div>
     <p>
      Soul-Bootstrap的Http同步方式配置
     </p>
-    <p>
-     <pre>xml
-soul :
+    <div class="codehilite">
+     <pre><span></span><code>soul :
     file:
       enabled: true
     corss:
@@ -81,101 +81,84 @@ soul :
       parameter: multi
     sync:
         http:
-             url : http://localhost:9095</pre>
-    </p>
+             url : http://localhost:9095
+</code></pre>
+    </div>
     <p>
      启动Soul-admin、Soul-Bootstrap、Soul-Example-HTTP，开始进入源码debug
     </p>
-    <h2>
+    <h2 id="debug">
      源码Debug
     </h2>
     <p>
      首先进入属性的 CommonPluginDataSubscriber ,在插件数据更新的函数上打上断点，代码如下：
     </p>
-    <p>
-     ```java
-public class CommonPluginDataSubscriber implements PluginDataSubscriber {
-    </p>
-    <pre><pre>@Override
-public void onSubscribe(final PluginData pluginData) {
-    subscribeDataHandler(pluginData, DataEventTypeEnum.UPDATE);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CommonPluginDataSubscriber</span> <span class="kd">implements</span> <span class="n">PluginDataSubscriber</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onSubscribe</span><span class="p">(</span><span class="kd">final</span> <span class="n">PluginData</span> <span class="n">pluginData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">subscribeDataHandler</span><span class="p">(</span><span class="n">pluginData</span><span class="p">,</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      跟踪调用栈来到数据同步初探文章中的HTTP同步模块的入口处，调用了subscribe
     </p>
-    <p>
-     ```java
-public class PluginDataRefresh extends AbstractDataRefresh
-     <plugindata>
-      {
-     </plugindata>
-    </p>
-    <pre><pre>@Override
-protected void refresh(final List&lt;PluginData&gt; data) {
-    if (CollectionUtils.isEmpty(data)) {
-        log.info("clear all plugin data cache");
-        pluginDataSubscriber.refreshPluginDataAll();
-    } else {
-        pluginDataSubscriber.refreshPluginDataAll();
-        data.forEach(pluginDataSubscriber::onSubscribe);
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PluginDataRefresh</span> <span class="kd">extends</span> <span class="n">AbstractDataRefresh</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">refresh</span><span class="p">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"clear all plugin data cache"</span><span class="p">);</span>
+            <span class="n">pluginDataSubscriber</span><span class="p">.</span><span class="na">refreshPluginDataAll</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">pluginDataSubscriber</span><span class="p">.</span><span class="na">refreshPluginDataAll</span><span class="p">();</span>
+            <span class="n">data</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">pluginDataSubscriber</span><span class="p">::</span><span class="n">onSubscribe</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续跟，来到下面的代码，这里得到data数据，但是调用栈在这里断了。我们在refresh函数上打上断点，然后重启
     </p>
-    <p>
-     ```java
-public abstract class AbstractDataRefresh
-     <t>
-      implements DataRefresh {
-     </t>
-    </p>
-    <pre><pre>@Override
-public Boolean refresh(final JsonObject data) {
-    boolean updated = false;
-    JsonObject jsonObject = convert(data);
-    if (null != jsonObject) {
-        ConfigData&lt;T&gt; result = fromJson(jsonObject);
-        if (this.updateCacheIfNeed(result)) {
-            updated = true;
-            refresh(result.getData());
-        }
-    }
-    return updated;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">AbstractDataRefresh</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">implements</span> <span class="n">DataRefresh</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">refresh</span><span class="p">(</span><span class="kd">final</span> <span class="n">JsonObject</span> <span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">boolean</span> <span class="n">updated</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="n">JsonObject</span> <span class="n">jsonObject</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">jsonObject</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">ConfigData</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">fromJson</span><span class="p">(</span><span class="n">jsonObject</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">updateCacheIfNeed</span><span class="p">(</span><span class="n">result</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">updated</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="n">refresh</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">getData</span><span class="p">());</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">updated</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      成功出现新的调用栈，我们跟踪调用栈，来到下面一个函数，这个函数看大意是所有的数据类型都调用更新一遍，考虑到HTTP是全量数据，确实有这个可能
     </p>
-    <p>
-     ```java
-public final class DataRefreshFactory {
-    </p>
-    <pre><pre>public boolean executor(final JsonObject data) {
-    final boolean[] success = {false};
-    // 代码的调用明显和websocket不一样，看着代码大意是五个类型都有进行更新，结合HTTP请求是全量数据，感觉确实需要五个都进行缓存更新
-    ENUM_MAP.values().parallelStream().forEach(dataRefresh -&gt; success[0] = dataRefresh.refresh(data));
-    return success[0];
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">DataRefreshFactory</span> <span class="p">{</span>
+
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">executor</span><span class="p">(</span><span class="kd">final</span> <span class="n">JsonObject</span> <span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="kt">boolean</span><span class="o">[]</span> <span class="n">success</span> <span class="o">=</span> <span class="p">{</span><span class="kc">false</span><span class="p">};</span>
+        <span class="c1">// 代码的调用明显和websocket不一样，看着代码大意是五个类型都有进行更新，结合HTTP请求是全量数据，感觉确实需要五个都进行缓存更新</span>
+        <span class="n">ENUM_MAP</span><span class="p">.</span><span class="na">values</span><span class="p">().</span><span class="na">parallelStream</span><span class="p">().</span><span class="na">forEach</span><span class="p">(</span><span class="n">dataRefresh</span> <span class="o">-&gt;</span> <span class="n">success</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">=</span> <span class="n">dataRefresh</span><span class="p">.</span><span class="na">refresh</span><span class="p">(</span><span class="n">data</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">success</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续跟踪调用栈，来到了一个比较大的类，里面有很多的操作，其中比较重要的是：
     </p>
@@ -190,87 +173,84 @@ public final class DataRefreshFactory {
     <p>
      相关代码和说明如下：
     </p>
-    <p>
-     ```java
-public class HttpSyncDataService implements SyncDataService, AutoCloseable {
-    </p>
-    <pre><pre>private void start() {
-    // It could be initialized multiple times, so you need to control that.
-    if (RUNNING.compareAndSet(false, true)) {
-        // 第一次初始化会调用一次，去获取所有的数据，初始化缓存
-        // fetch all group configs.
-        this.fetchGroupConfig(ConfigGroupEnum.values());
-        int threadSize = serverList.size();
-        this.executor = new ThreadPoolExecutor(threadSize, threadSize, 60L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue&lt;&gt;(),
-                SoulThreadFactory.create("http-long-polling", true));
-        // 我们看到这里用了线程池，其了一个任务，后面我们再跟进去看看
-        // start long polling, each server creates a thread to listen for changes.
-        this.serverList.forEach(server -&gt; this.executor.execute(new HttpLongPollingTask(server)));
-    } else {
-        log.info("soul http long polling was started, executor=[{}]", executor);
-    }
-}
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpSyncDataService</span> <span class="kd">implements</span> <span class="n">SyncDataService</span><span class="p">,</span> <span class="n">AutoCloseable</span> <span class="p">{</span>
 
-// server list 感觉是多个soul-admin，应该是集群模式的高可用吧
-// server list 看着都要去请求一次，重复更新和操作是不是有点频繁，压力有些大？
-private void fetchGroupConfig(final ConfigGroupEnum... groups) throws SoulException {
-    for (int index = 0; index &lt; this.serverList.size(); index++) {
-        String server = serverList.get(index);
-        try {
-            this.doFetchGroupConfig(server, groups);
-            break;
-        } catch (SoulException e) {
-            // no available server, throw exception.
-            if (index &gt;= serverList.size() - 1) {
-                throw e;
-            }
-            log.warn("fetch config fail, try another one: {}", serverList.get(index + 1));
-        }
-    }
-}
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">start</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// It could be initialized multiple times, so you need to control that.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">RUNNING</span><span class="p">.</span><span class="na">compareAndSet</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span> <span class="kc">true</span><span class="p">))</span> <span class="p">{</span>
+            <span class="c1">// 第一次初始化会调用一次，去获取所有的数据，初始化缓存</span>
+            <span class="c1">// fetch all group configs.</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">fetchGroupConfig</span><span class="p">(</span><span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">values</span><span class="p">());</span>
+            <span class="kt">int</span> <span class="n">threadSize</span> <span class="o">=</span> <span class="n">serverList</span><span class="p">.</span><span class="na">size</span><span class="p">();</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">executor</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">threadSize</span><span class="p">,</span> <span class="n">threadSize</span><span class="p">,</span> <span class="mi">60L</span><span class="p">,</span> <span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">,</span>
+                    <span class="k">new</span> <span class="n">LinkedBlockingQueue</span><span class="o">&lt;&gt;</span><span class="p">(),</span>
+                    <span class="n">SoulThreadFactory</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="s">"http-long-polling"</span><span class="p">,</span> <span class="kc">true</span><span class="p">));</span>
+            <span class="c1">// 我们看到这里用了线程池，其了一个任务，后面我们再跟进去看看</span>
+            <span class="c1">// start long polling, each server creates a thread to listen for changes.</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">serverList</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">server</span> <span class="o">-&gt;</span> <span class="k">this</span><span class="p">.</span><span class="na">executor</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="k">new</span> <span class="n">HttpLongPollingTask</span><span class="p">(</span><span class="n">server</span><span class="p">)));</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"soul http long polling was started, executor=[{}]"</span><span class="p">,</span> <span class="n">executor</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-// 这个函数负责去获取请求，然后进行更新
-// 如果updated为false，会多睡上30秒，这个更新与否感觉挺重要的，但先放放，回头过来看
-private void doFetchGroupConfig(final String server, final ConfigGroupEnum... groups) {
-    StringBuilder params = new StringBuilder();
-    for (ConfigGroupEnum groupKey : groups) {
-        params.append("groupKeys").append("=").append(groupKey.name()).append("&amp;");
-    }
-    // 在这请求了所有的数据
-    String url = server + "/configs/fetch?" + StringUtils.removeEnd(params.toString(), "&amp;");
-    log.info("request configs: [{}]", url);
-    String json = null;
-    try {
-        json = this.httpClient.getForObject(url, String.class);
-    } catch (RestClientException e) {
-        String message = String.format("fetch config fail from server[%s], %s", url, e.getMessage());
-        log.warn(message);
-        throw new SoulException(message, e);
-    }
-    // 这个判断有点意思，如果请求数据没有发生变化，那下一次请求将延长30秒
-    // 这个updated如果判断得到的，我们一会回过头再去跟一跟
-    boolean updated = this.updateCacheWithJson(json);
-    if (updated) {
-        log.info("get latest configs: [{}]", json);
-        return;
-    }
-    // not updated. it is likely that the current config server has not been updated yet. wait a moment.
-    log.info("The config of the server[{}] has not been updated or is out of date. Wait for 30s to listen for changes again.", server);
-    ThreadUtils.sleep(TimeUnit.SECONDS, 30);
-}
+    <span class="c1">// server list 感觉是多个soul-admin，应该是集群模式的高可用吧</span>
+    <span class="c1">// server list 看着都要去请求一次，重复更新和操作是不是有点频繁，压力有些大？</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">fetchGroupConfig</span><span class="p">(</span><span class="kd">final</span> <span class="n">ConfigGroupEnum</span><span class="p">...</span> <span class="n">groups</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SoulException</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="na">serverList</span><span class="p">.</span><span class="na">size</span><span class="p">();</span> <span class="n">index</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">String</span> <span class="n">server</span> <span class="o">=</span> <span class="n">serverList</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">index</span><span class="p">);</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">doFetchGroupConfig</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">groups</span><span class="p">);</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">SoulException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="c1">// no available server, throw exception.</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="n">serverList</span><span class="p">.</span><span class="na">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">throw</span> <span class="n">e</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">warn</span><span class="p">(</span><span class="s">"fetch config fail, try another one: {}"</span><span class="p">,</span> <span class="n">serverList</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">));</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-private boolean updateCacheWithJson(final String json) {
-    JsonObject jsonObject = GSON.fromJson(json, JsonObject.class);
-    JsonObject data = jsonObject.getAsJsonObject("data");
-    // if the config cache will be updated?
-    return factory.executor(data);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="c1">// 这个函数负责去获取请求，然后进行更新</span>
+    <span class="c1">// 如果updated为false，会多睡上30秒，这个更新与否感觉挺重要的，但先放放，回头过来看</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">doFetchGroupConfig</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">server</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ConfigGroupEnum</span><span class="p">...</span> <span class="n">groups</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">StringBuilder</span> <span class="n">params</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringBuilder</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">ConfigGroupEnum</span> <span class="n">groupKey</span> <span class="p">:</span> <span class="n">groups</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">params</span><span class="p">.</span><span class="na">append</span><span class="p">(</span><span class="s">"groupKeys"</span><span class="p">).</span><span class="na">append</span><span class="p">(</span><span class="s">"="</span><span class="p">).</span><span class="na">append</span><span class="p">(</span><span class="n">groupKey</span><span class="p">.</span><span class="na">name</span><span class="p">()).</span><span class="na">append</span><span class="p">(</span><span class="s">"&amp;"</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// 在这请求了所有的数据</span>
+        <span class="n">String</span> <span class="n">url</span> <span class="o">=</span> <span class="n">server</span> <span class="o">+</span> <span class="s">"/configs/fetch?"</span> <span class="o">+</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">removeEnd</span><span class="p">(</span><span class="n">params</span><span class="p">.</span><span class="na">toString</span><span class="p">(),</span> <span class="s">"&amp;"</span><span class="p">);</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"request configs: [{}]"</span><span class="p">,</span> <span class="n">url</span><span class="p">);</span>
+        <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">json</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">httpClient</span><span class="p">.</span><span class="na">getForObject</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">String</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">RestClientException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">String</span> <span class="n">message</span> <span class="o">=</span> <span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">"fetch config fail from server[%s], %s"</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">warn</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">SoulException</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// 这个判断有点意思，如果请求数据没有发生变化，那下一次请求将延长30秒</span>
+        <span class="c1">// 这个updated如果判断得到的，我们一会回过头再去跟一跟</span>
+        <span class="kt">boolean</span> <span class="n">updated</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">updateCacheWithJson</span><span class="p">(</span><span class="n">json</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">updated</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"get latest configs: [{}]"</span><span class="p">,</span> <span class="n">json</span><span class="p">);</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="c1">// not updated. it is likely that the current config server has not been updated yet. wait a moment.</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"The config of the server[{}] has not been updated or is out of date. Wait for 30s to listen for changes again."</span><span class="p">,</span> <span class="n">server</span><span class="p">);</span>
+        <span class="n">ThreadUtils</span><span class="p">.</span><span class="na">sleep</span><span class="p">(</span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">updateCacheWithJson</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">json</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">JsonObject</span> <span class="n">jsonObject</span> <span class="o">=</span> <span class="n">GSON</span><span class="p">.</span><span class="na">fromJson</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="n">JsonObject</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="n">JsonObject</span> <span class="n">data</span> <span class="o">=</span> <span class="n">jsonObject</span><span class="p">.</span><span class="na">getAsJsonObject</span><span class="p">(</span><span class="s">"data"</span><span class="p">);</span>
+        <span class="c1">// if the config cache will be updated?</span>
+        <span class="k">return</span> <span class="n">factory</span><span class="p">.</span><span class="na">executor</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      通过上面的代码，我们了解了开始启动的时候，会请求一次全量的数据进行本地缓存的更新
     </p>
@@ -280,41 +260,38 @@ private boolean updateCacheWithJson(final String json) {
     <p>
      从下面的代码大致可以看出是一个轮询的代码，其中出错就会在多睡一会
     </p>
-    <p>
-     ```java
-public class HttpSyncDataService implements SyncDataService, AutoCloseable {
-    class HttpLongPollingTask implements Runnable {
-    </p>
-    <pre><pre>    @Override
-    public void run() {
-        // 从代码可以大致的看出是一个轮询的函数，出错了就会多睡一会
-        while (RUNNING.get()) {
-            for (int time = 1; time &lt;= retryTimes; time++) {
-                try {
-                    // 我们跟一根这个函数
-                    doLongPolling(server);
-                } catch (Exception e) {
-                    // print warnning log.
-                    if (time &lt; retryTimes) {
-                        log.warn("Long polling failed, tried {} times, {} times left, will be suspended for a while! {}",
-                                time, retryTimes - time, e.getMessage());
-                        ThreadUtils.sleep(TimeUnit.SECONDS, 5);
-                        continue;
-                    }
-                    // print error, then suspended for a while.
-                    log.error("Long polling failed, try again after 5 minutes!", e);
-                    ThreadUtils.sleep(TimeUnit.MINUTES, 5);
-                }
-            }
-        }
-        log.warn("Stop http long polling.");
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpSyncDataService</span> <span class="kd">implements</span> <span class="n">SyncDataService</span><span class="p">,</span> <span class="n">AutoCloseable</span> <span class="p">{</span>
+    <span class="kd">class</span> <span class="nc">HttpLongPollingTask</span> <span class="kd">implements</span> <span class="n">Runnable</span> <span class="p">{</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="p">()</span> <span class="p">{</span>
+            <span class="c1">// 从代码可以大致的看出是一个轮询的函数，出错了就会多睡一会</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">RUNNING</span><span class="p">.</span><span class="na">get</span><span class="p">())</span> <span class="p">{</span>
+                <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">time</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">time</span> <span class="o">&lt;=</span> <span class="n">retryTimes</span><span class="p">;</span> <span class="n">time</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">try</span> <span class="p">{</span>
+                        <span class="c1">// 我们跟一根这个函数</span>
+                        <span class="n">doLongPolling</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="c1">// print warnning log.</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">retryTimes</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="n">log</span><span class="p">.</span><span class="na">warn</span><span class="p">(</span><span class="s">"Long polling failed, tried {} times, {} times left, will be suspended for a while! {}"</span><span class="p">,</span>
+                                    <span class="n">time</span><span class="p">,</span> <span class="n">retryTimes</span> <span class="o">-</span> <span class="n">time</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+                            <span class="n">ThreadUtils</span><span class="p">.</span><span class="na">sleep</span><span class="p">(</span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+                            <span class="k">continue</span><span class="p">;</span>
+                        <span class="p">}</span>
+                        <span class="c1">// print error, then suspended for a while.</span>
+                        <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">"Long polling failed, try again after 5 minutes!"</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+                        <span class="n">ThreadUtils</span><span class="p">.</span><span class="na">sleep</span><span class="p">(</span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">MINUTES</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">warn</span><span class="p">(</span><span class="s">"Stop http long polling."</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      我们接着看看 doLongPolling 的细节：
     </p>
@@ -330,174 +307,150 @@ public class HttpSyncDataService implements SyncDataService, AutoCloseable {
     <p>
      睡的操作只有在 doFetchGroupConfig 中，当update为false的是才睡一个30秒，所以这个update的细节还是挺重要的，后面得跟一跟
     </p>
-    <p>
-     ```java
-public class HttpSyncDataService implements SyncDataService, AutoCloseable {
-    </p>
-    <pre><pre>private void doLongPolling(final String server) {
-    MultiValueMap&lt;String, String&gt; params = new LinkedMultiValueMap&lt;&gt;(8);
-    for (ConfigGroupEnum group : ConfigGroupEnum.values()) {
-        ConfigData&lt;?&gt; cacheConfig = factory.cacheConfigData(group);
-        String value = String.join(",", cacheConfig.getMd5(), String.valueOf(cacheConfig.getLastModifyTime()));
-        params.put(group.name(), Lists.newArrayList(value));
-    }
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-    HttpEntity httpEntity = new HttpEntity(params, headers);
-    // 它又请求了另外一个接口
-    String listenerUrl = server + "/configs/listener";
-    log.debug("request listener configs: [{}]", listenerUrl);
-    JsonArray groupJson = null;
-    try {
-        String json = this.httpClient.postForEntity(listenerUrl, httpEntity, String.class).getBody();
-        log.debug("listener result: [{}]", json);
-        groupJson = GSON.fromJson(json, JsonObject.class).getAsJsonArray("data");
-    } catch (RestClientException e) {
-        String message = String.format("listener configs fail, server:[%s], %s", server, e.getMessage());
-        throw new SoulException(message, e);
-    }
-    if (groupJson != null) {
-        // fetch group configuration async.
-        ConfigGroupEnum[] changedGroups = GSON.fromJson(groupJson, ConfigGroupEnum[].class);
-        if (ArrayUtils.isNotEmpty(changedGroups)) {
-            log.info("Group config changed: {}", Arrays.toString(changedGroups));
-            // 这里又调用强求全部数据的函数，猜测前面的那个listener的接口大致使用判断是否有数据更新
-            // 有数据更新了，那就请求全量的数据进行更新
-            this.doFetchGroupConfig(server, changedGroups);
-        }
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpSyncDataService</span> <span class="kd">implements</span> <span class="n">SyncDataService</span><span class="p">,</span> <span class="n">AutoCloseable</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">doLongPolling</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">server</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">MultiValueMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">params</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedMultiValueMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">ConfigGroupEnum</span> <span class="n">group</span> <span class="p">:</span> <span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">values</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">ConfigData</span><span class="o">&lt;?&gt;</span> <span class="n">cacheConfig</span> <span class="o">=</span> <span class="n">factory</span><span class="p">.</span><span class="na">cacheConfigData</span><span class="p">(</span><span class="n">group</span><span class="p">);</span>
+            <span class="n">String</span> <span class="n">value</span> <span class="o">=</span> <span class="n">String</span><span class="p">.</span><span class="na">join</span><span class="p">(</span><span class="s">","</span><span class="p">,</span> <span class="n">cacheConfig</span><span class="p">.</span><span class="na">getMd5</span><span class="p">(),</span> <span class="n">String</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">cacheConfig</span><span class="p">.</span><span class="na">getLastModifyTime</span><span class="p">()));</span>
+            <span class="n">params</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">group</span><span class="p">.</span><span class="na">name</span><span class="p">(),</span> <span class="n">Lists</span><span class="p">.</span><span class="na">newArrayList</span><span class="p">(</span><span class="n">value</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="n">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HttpHeaders</span><span class="p">();</span>
+        <span class="n">headers</span><span class="p">.</span><span class="na">setContentType</span><span class="p">(</span><span class="n">MediaType</span><span class="p">.</span><span class="na">APPLICATION_FORM_URLENCODED</span><span class="p">);</span>
+        <span class="n">HttpEntity</span> <span class="n">httpEntity</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HttpEntity</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">);</span>
+        <span class="c1">// 它又请求了另外一个接口</span>
+        <span class="n">String</span> <span class="n">listenerUrl</span> <span class="o">=</span> <span class="n">server</span> <span class="o">+</span> <span class="s">"/configs/listener"</span><span class="p">;</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"request listener configs: [{}]"</span><span class="p">,</span> <span class="n">listenerUrl</span><span class="p">);</span>
+        <span class="n">JsonArray</span> <span class="n">groupJson</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">httpClient</span><span class="p">.</span><span class="na">postForEntity</span><span class="p">(</span><span class="n">listenerUrl</span><span class="p">,</span> <span class="n">httpEntity</span><span class="p">,</span> <span class="n">String</span><span class="p">.</span><span class="na">class</span><span class="p">).</span><span class="na">getBody</span><span class="p">();</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"listener result: [{}]"</span><span class="p">,</span> <span class="n">json</span><span class="p">);</span>
+            <span class="n">groupJson</span> <span class="o">=</span> <span class="n">GSON</span><span class="p">.</span><span class="na">fromJson</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="n">JsonObject</span><span class="p">.</span><span class="na">class</span><span class="p">).</span><span class="na">getAsJsonArray</span><span class="p">(</span><span class="s">"data"</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">RestClientException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">String</span> <span class="n">message</span> <span class="o">=</span> <span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">"listener configs fail, server:[%s], %s"</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">SoulException</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">groupJson</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// fetch group configuration async.</span>
+            <span class="n">ConfigGroupEnum</span><span class="o">[]</span> <span class="n">changedGroups</span> <span class="o">=</span> <span class="n">GSON</span><span class="p">.</span><span class="na">fromJson</span><span class="p">(</span><span class="n">groupJson</span><span class="p">,</span> <span class="n">ConfigGroupEnum</span><span class="o">[]</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ArrayUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">changedGroups</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"Group config changed: {}"</span><span class="p">,</span> <span class="n">Arrays</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">changedGroups</span><span class="p">));</span>
+                <span class="c1">// 这里又调用强求全部数据的函数，猜测前面的那个listener的接口大致使用判断是否有数据更新</span>
+                <span class="c1">// 有数据更新了，那就请求全量的数据进行更新</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">doFetchGroupConfig</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">changedGroups</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      跟一下start函数的调用栈，发现来到下面两个代码。可以看到是非常熟悉的Spring配置相关的了，那HTTP基本上是通过配置启动的了
     </p>
-    <p>
-     <pre>java
-public class HttpSyncDataService implements SyncDataService, AutoCloseable {
-    public HttpSyncDataService(final HttpConfig httpConfig, final PluginDataSubscriber pluginDataSubscriber,
-                               final List&lt;MetaDataSubscriber&gt; metaDataSubscribers, final List&lt;AuthDataSubscriber&gt; authDataSubscribers) {
-        this.factory = new DataRefreshFactory(pluginDataSubscriber, metaDataSubscribers, authDataSubscribers);
-        this.httpConfig = httpConfig;
-        this.serverList = Lists.newArrayList(Splitter.on(",").split(httpConfig.getUrl()));
-        this.httpClient = createRestTemplate();
-        this.start();
-    }
-}</pre>
-    </p>
-    <p>
-     ```java
-public class HttpSyncDataConfiguration {
-    </p>
-    <pre><pre>@Bean
-public SyncDataService httpSyncDataService(final ObjectProvider&lt;HttpConfig&gt; httpConfig, final ObjectProvider&lt;PluginDataSubscriber&gt; pluginSubscriber,
-                                       final ObjectProvider&lt;List&lt;MetaDataSubscriber&gt;&gt; metaSubscribers, final ObjectProvider&lt;List&lt;AuthDataSubscriber&gt;&gt; authSubscribers) {
-    log.info("you use http long pull sync soul data");
-    return new HttpSyncDataService(Objects.requireNonNull(httpConfig.getIfAvailable()), Objects.requireNonNull(pluginSubscriber.getIfAvailable()),
-            metaSubscribers.getIfAvailable(Collections::emptyList), authSubscribers.getIfAvailable(Collections::emptyList));
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpSyncDataService</span> <span class="kd">implements</span> <span class="n">SyncDataService</span><span class="p">,</span> <span class="n">AutoCloseable</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="nf">HttpSyncDataService</span><span class="p">(</span><span class="kd">final</span> <span class="n">HttpConfig</span> <span class="n">httpConfig</span><span class="p">,</span> <span class="kd">final</span> <span class="n">PluginDataSubscriber</span> <span class="n">pluginDataSubscriber</span><span class="p">,</span>
+                               <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">MetaDataSubscriber</span><span class="o">&gt;</span> <span class="n">metaDataSubscribers</span><span class="p">,</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">AuthDataSubscriber</span><span class="o">&gt;</span> <span class="n">authDataSubscribers</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DataRefreshFactory</span><span class="p">(</span><span class="n">pluginDataSubscriber</span><span class="p">,</span> <span class="n">metaDataSubscribers</span><span class="p">,</span> <span class="n">authDataSubscribers</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">httpConfig</span> <span class="o">=</span> <span class="n">httpConfig</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">serverList</span> <span class="o">=</span> <span class="n">Lists</span><span class="p">.</span><span class="na">newArrayList</span><span class="p">(</span><span class="n">Splitter</span><span class="p">.</span><span class="na">on</span><span class="p">(</span><span class="s">","</span><span class="p">).</span><span class="na">split</span><span class="p">(</span><span class="n">httpConfig</span><span class="p">.</span><span class="na">getUrl</span><span class="p">()));</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">httpClient</span> <span class="o">=</span> <span class="n">createRestTemplate</span><span class="p">();</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">start</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpSyncDataConfiguration</span> <span class="p">{</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">SyncDataService</span> <span class="nf">httpSyncDataService</span><span class="p">(</span><span class="kd">final</span> <span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">HttpConfig</span><span class="o">&gt;</span> <span class="n">httpConfig</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">PluginDataSubscriber</span><span class="o">&gt;</span> <span class="n">pluginSubscriber</span><span class="p">,</span>
+                                           <span class="kd">final</span> <span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">MetaDataSubscriber</span><span class="o">&gt;&gt;</span> <span class="n">metaSubscribers</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">AuthDataSubscriber</span><span class="o">&gt;&gt;</span> <span class="n">authSubscribers</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"you use http long pull sync soul data"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">HttpSyncDataService</span><span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">httpConfig</span><span class="p">.</span><span class="na">getIfAvailable</span><span class="p">()),</span> <span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">pluginSubscriber</span><span class="p">.</span><span class="na">getIfAvailable</span><span class="p">()),</span>
+                <span class="n">metaSubscribers</span><span class="p">.</span><span class="na">getIfAvailable</span><span class="p">(</span><span class="n">Collections</span><span class="p">::</span><span class="n">emptyList</span><span class="p">),</span> <span class="n">authSubscribers</span><span class="p">.</span><span class="na">getIfAvailable</span><span class="p">(</span><span class="n">Collections</span><span class="p">::</span><span class="n">emptyList</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      通过上面的分析，大致了解了HTTP同步的启动了，还有请求相关的代码，下面我们来分析一波非常重要的update相关的操作
     </p>
     <p>
      从上面代码跟踪下来，update的值是从这里来的，是HTTP同步的一个类，前面也遇到过，我们跟踪一下 dataRefresh.refresh 的操作
     </p>
-    <p>
-     ```java
-public final class DataRefreshFactory {
-    </p>
-    <pre><pre>public boolean executor(final JsonObject data) {
-    final boolean[] success = {false};
-    // 代码的调用明显和websocket不一样，看着代码大意是五个类型都有进行更新，结合HTTP请求是全量数据，感觉确实需要五个都进行缓存更新
-    ENUM_MAP.values().parallelStream().forEach(dataRefresh -&gt; success[0] = dataRefresh.refresh(data));
-    return success[0];
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">DataRefreshFactory</span> <span class="p">{</span>
+
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">executor</span><span class="p">(</span><span class="kd">final</span> <span class="n">JsonObject</span> <span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="kt">boolean</span><span class="o">[]</span> <span class="n">success</span> <span class="o">=</span> <span class="p">{</span><span class="kc">false</span><span class="p">};</span>
+        <span class="c1">// 代码的调用明显和websocket不一样，看着代码大意是五个类型都有进行更新，结合HTTP请求是全量数据，感觉确实需要五个都进行缓存更新</span>
+        <span class="n">ENUM_MAP</span><span class="p">.</span><span class="na">values</span><span class="p">().</span><span class="na">parallelStream</span><span class="p">().</span><span class="na">forEach</span><span class="p">(</span><span class="n">dataRefresh</span> <span class="o">-&gt;</span> <span class="n">success</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">=</span> <span class="n">dataRefresh</span><span class="p">.</span><span class="na">refresh</span><span class="p">(</span><span class="n">data</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">success</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续跟踪，来到下面的代码，在下面的代码中看到了关键的一步：updateCacheIfNeed
     </p>
     <p>
      在前面的代码中我们看到更新其实是全部更新的，五类型都更新的，这里就说明了，如果其中一个类型发送了更新，那update就为true
     </p>
-    <p>
-     ```java
-public abstract class AbstractDataRefresh
-     <t>
-      implements DataRefresh {
-     </t>
-    </p>
-    <pre><pre>@Override
-public Boolean refresh(final JsonObject data) {
-    boolean updated = false;
-    JsonObject jsonObject = convert(data);
-    if (null != jsonObject) {
-        ConfigData&lt;T&gt; result = fromJson(jsonObject);
-        // 这段很关键，如果updateCacheIfNeed为true，那update就为true
-        if (this.updateCacheIfNeed(result)) {
-            updated = true;
-            // 如果需要更新，进行更新操作
-            refresh(result.getData());
-        }
-    }
-    return updated;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">AbstractDataRefresh</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">implements</span> <span class="n">DataRefresh</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">refresh</span><span class="p">(</span><span class="kd">final</span> <span class="n">JsonObject</span> <span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">boolean</span> <span class="n">updated</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="n">JsonObject</span> <span class="n">jsonObject</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">jsonObject</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">ConfigData</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">fromJson</span><span class="p">(</span><span class="n">jsonObject</span><span class="p">);</span>
+            <span class="c1">// 这段很关键，如果updateCacheIfNeed为true，那update就为true</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">updateCacheIfNeed</span><span class="p">(</span><span class="n">result</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">updated</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="c1">// 如果需要更新，进行更新操作</span>
+                <span class="n">refresh</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">getData</span><span class="p">());</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">updated</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      继续跟下去，看到了非常关键的一些代码，可以大致看出是使用MD5值来判断是否重复的，感觉又学到了一手！
     </p>
-    <p>
-     ```java
-public class PluginDataRefresh extends AbstractDataRefresh
-     <plugindata>
-      {
-    protected boolean updateCacheIfNeed(final ConfigData
-      <plugindata>
-       result) {
-        return updateCacheIfNeed(result, ConfigGroupEnum.PLUGIN);
-    }
-      </plugindata>
-     </plugindata>
-    </p>
-    <pre><pre>protected boolean updateCacheIfNeed(final ConfigData&lt;T&gt; newVal, final ConfigGroupEnum groupEnum) {
-    // first init cache
-    if (GROUP_CACHE.putIfAbsent(groupEnum, newVal) == null) {
-        return true;
-    }
-    ResultHolder holder = new ResultHolder(false);
-    // 这段是判断的，看到是判断的Md5的值，来看是否一样，感觉Soul-admin端的HTTP同步也做了很多的工作
-    GROUP_CACHE.merge(groupEnum, newVal, (oldVal, value) -&gt; {
-        // must compare the last update time
-        if (!StringUtils.equals(oldVal.getMd5(), newVal.getMd5()) &amp;&amp; oldVal.getLastModifyTime() &lt; newVal.getLastModifyTime()) {
-            log.info("update {} config: {}", groupEnum, newVal);
-            holder.result = true;
-            return newVal;
-        }
-        log.info("Get the same config, the [{}] config cache will not be updated, md5:{}", groupEnum, oldVal.getMd5());
-        return oldVal;
-    });
-    return holder.result;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PluginDataRefresh</span> <span class="kd">extends</span> <span class="n">AbstractDataRefresh</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="kd">protected</span> <span class="kt">boolean</span> <span class="nf">updateCacheIfNeed</span><span class="p">(</span><span class="kd">final</span> <span class="n">ConfigData</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">result</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">updateCacheIfNeed</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">PLUGIN</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">protected</span> <span class="kt">boolean</span> <span class="nf">updateCacheIfNeed</span><span class="p">(</span><span class="kd">final</span> <span class="n">ConfigData</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">newVal</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ConfigGroupEnum</span> <span class="n">groupEnum</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// first init cache</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">GROUP_CACHE</span><span class="p">.</span><span class="na">putIfAbsent</span><span class="p">(</span><span class="n">groupEnum</span><span class="p">,</span> <span class="n">newVal</span><span class="p">)</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">ResultHolder</span> <span class="n">holder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ResultHolder</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+        <span class="c1">// 这段是判断的，看到是判断的Md5的值，来看是否一样，感觉Soul-admin端的HTTP同步也做了很多的工作</span>
+        <span class="n">GROUP_CACHE</span><span class="p">.</span><span class="na">merge</span><span class="p">(</span><span class="n">groupEnum</span><span class="p">,</span> <span class="n">newVal</span><span class="p">,</span> <span class="p">(</span><span class="n">oldVal</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="c1">// must compare the last update time</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">oldVal</span><span class="p">.</span><span class="na">getMd5</span><span class="p">(),</span> <span class="n">newVal</span><span class="p">.</span><span class="na">getMd5</span><span class="p">())</span> <span class="o">&amp;&amp;</span> <span class="n">oldVal</span><span class="p">.</span><span class="na">getLastModifyTime</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">newVal</span><span class="p">.</span><span class="na">getLastModifyTime</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"update {} config: {}"</span><span class="p">,</span> <span class="n">groupEnum</span><span class="p">,</span> <span class="n">newVal</span><span class="p">);</span>
+                <span class="n">holder</span><span class="p">.</span><span class="na">result</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="k">return</span> <span class="n">newVal</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"Get the same config, the [{}] config cache will not be updated, md5:{}"</span><span class="p">,</span> <span class="n">groupEnum</span><span class="p">,</span> <span class="n">oldVal</span><span class="p">.</span><span class="na">getMd5</span><span class="p">());</span>
+            <span class="k">return</span> <span class="n">oldVal</span><span class="p">;</span>
+        <span class="p">});</span>
+        <span class="k">return</span> <span class="n">holder</span><span class="p">.</span><span class="na">result</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      为了测试我们猜想的轮询是否正常，我们在HttpSyncDataService 的 doLongPolling ，等一段时间后，它自己就进入了断点，验证了我们的猜想基本是对的
     </p>
@@ -507,48 +460,48 @@ public class PluginDataRefresh extends AbstractDataRefresh
     <p>
      我们又测试了在后台改变插件状态下的请求，发现能准确的探测到改变的是那一部分，感觉Soul-Admin那边也是做了很多的工作的
     </p>
-    <p>
-     <pre>java
-public class HttpSyncDataService implements SyncDataService, AutoCloseable {
-    private void doLongPolling(final String server) {
-        MultiValueMap&lt;String, String&gt; params = new LinkedMultiValueMap&lt;&gt;(8);
-        // 这里把PLUGIN/RULE/SELECTOR/META_DATA/APP_AUTH都放进去了
-        for (ConfigGroupEnum group : ConfigGroupEnum.values()) {
-            ConfigData&lt;?&gt; cacheConfig = factory.cacheConfigData(group);
-            String value = String.join(",", cacheConfig.getMd5(), String.valueOf(cacheConfig.getLastModifyTime()));
-            params.put(group.name(), Lists.newArrayList(value));
-        }
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        HttpEntity httpEntity = new HttpEntity(params, headers);
-        String listenerUrl = server + "/configs/listener";
-        log.debug("request listener configs: [{}]", listenerUrl);
-        JsonArray groupJson = null;
-        try {
-            String json = this.httpClient.postForEntity(listenerUrl, httpEntity, String.class).getBody();
-            log.debug("listener result: [{}]", json);
-            // 没有更新时：{"pre":200,"message":"success","data":[]} groupJson == []
-            // 当我们admin后台改变限流插件的状态是，groupJson = ["PLUGIN"]
-            groupJson = GSON.fromJson(json, JsonObject.class).getAsJsonArray("data");
-        } catch (RestClientException e) {
-            String message = String.format("listener configs fail, server:[%s], %s", server, e.getMessage());
-            throw new SoulException(message, e);
-        }
-        if (groupJson != null) {
-            // fetch group configuration async.
-            ConfigGroupEnum[] changedGroups = GSON.fromJson(groupJson, ConfigGroupEnum[].class);
-            if (ArrayUtils.isNotEmpty(changedGroups)) {
-                log.info("Group config changed: {}", Arrays.toString(changedGroups));
-                this.doFetchGroupConfig(server, changedGroups);
-            }
-        }
-    }
-}</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HttpSyncDataService</span> <span class="kd">implements</span> <span class="n">SyncDataService</span><span class="p">,</span> <span class="n">AutoCloseable</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">doLongPolling</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">server</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">MultiValueMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">params</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedMultiValueMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
+        <span class="c1">// 这里把PLUGIN/RULE/SELECTOR/META_DATA/APP_AUTH都放进去了</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">ConfigGroupEnum</span> <span class="n">group</span> <span class="p">:</span> <span class="n">ConfigGroupEnum</span><span class="p">.</span><span class="na">values</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">ConfigData</span><span class="o">&lt;?&gt;</span> <span class="n">cacheConfig</span> <span class="o">=</span> <span class="n">factory</span><span class="p">.</span><span class="na">cacheConfigData</span><span class="p">(</span><span class="n">group</span><span class="p">);</span>
+            <span class="n">String</span> <span class="n">value</span> <span class="o">=</span> <span class="n">String</span><span class="p">.</span><span class="na">join</span><span class="p">(</span><span class="s">","</span><span class="p">,</span> <span class="n">cacheConfig</span><span class="p">.</span><span class="na">getMd5</span><span class="p">(),</span> <span class="n">String</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">cacheConfig</span><span class="p">.</span><span class="na">getLastModifyTime</span><span class="p">()));</span>
+            <span class="n">params</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">group</span><span class="p">.</span><span class="na">name</span><span class="p">(),</span> <span class="n">Lists</span><span class="p">.</span><span class="na">newArrayList</span><span class="p">(</span><span class="n">value</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="n">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HttpHeaders</span><span class="p">();</span>
+        <span class="n">headers</span><span class="p">.</span><span class="na">setContentType</span><span class="p">(</span><span class="n">MediaType</span><span class="p">.</span><span class="na">APPLICATION_FORM_URLENCODED</span><span class="p">);</span>
+        <span class="n">HttpEntity</span> <span class="n">httpEntity</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HttpEntity</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">);</span>
+        <span class="n">String</span> <span class="n">listenerUrl</span> <span class="o">=</span> <span class="n">server</span> <span class="o">+</span> <span class="s">"/configs/listener"</span><span class="p">;</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"request listener configs: [{}]"</span><span class="p">,</span> <span class="n">listenerUrl</span><span class="p">);</span>
+        <span class="n">JsonArray</span> <span class="n">groupJson</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">httpClient</span><span class="p">.</span><span class="na">postForEntity</span><span class="p">(</span><span class="n">listenerUrl</span><span class="p">,</span> <span class="n">httpEntity</span><span class="p">,</span> <span class="n">String</span><span class="p">.</span><span class="na">class</span><span class="p">).</span><span class="na">getBody</span><span class="p">();</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"listener result: [{}]"</span><span class="p">,</span> <span class="n">json</span><span class="p">);</span>
+            <span class="c1">// 没有更新时：{"code":200,"message":"success","data":[]} groupJson == []</span>
+            <span class="c1">// 当我们admin后台改变限流插件的状态是，groupJson = ["PLUGIN"]</span>
+            <span class="n">groupJson</span> <span class="o">=</span> <span class="n">GSON</span><span class="p">.</span><span class="na">fromJson</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="n">JsonObject</span><span class="p">.</span><span class="na">class</span><span class="p">).</span><span class="na">getAsJsonArray</span><span class="p">(</span><span class="s">"data"</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">RestClientException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">String</span> <span class="n">message</span> <span class="o">=</span> <span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">"listener configs fail, server:[%s], %s"</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">SoulException</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">groupJson</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// fetch group configuration async.</span>
+            <span class="n">ConfigGroupEnum</span><span class="o">[]</span> <span class="n">changedGroups</span> <span class="o">=</span> <span class="n">GSON</span><span class="p">.</span><span class="na">fromJson</span><span class="p">(</span><span class="n">groupJson</span><span class="p">,</span> <span class="n">ConfigGroupEnum</span><span class="o">[]</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ArrayUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">changedGroups</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"Group config changed: {}"</span><span class="p">,</span> <span class="n">Arrays</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">changedGroups</span><span class="p">));</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">doFetchGroupConfig</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">changedGroups</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      到这里分析基本结束，进行一波总结
     </p>
-    <h2>
+    <h2 id="_3">
      总结
     </h2>
     <p>
@@ -588,10 +541,10 @@ public class HttpSyncDataService implements SyncDataService, AutoCloseable {
     <p>
      还有些疑问：如果是多个Soul-admin，那多个Soul-admin之间的数据是如何同步的呢？这个留待后面研究
     </p>
-    <h2>
+    <h2 id="soul">
      Soul网关源码分析文章列表
     </h2>
-    <h3>
+    <h3 id="github">
      Github
     </h3>
     <ul>
@@ -675,7 +628,7 @@ public class HttpSyncDataService implements SyncDataService, AutoCloseable {
       </p>
      </li>
     </ul>
-    <h3>
+    <h3 id="_4">
      掘金
     </h3>
     <ul>

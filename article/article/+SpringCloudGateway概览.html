@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="springcloudgateway">
      SpringCloudGateway(一) 概览
     </h1>
     <hr/>
-    <h3>
+    <h3 id="spring-cloud-gateway">
      Spring Cloud Gateway 的数据流图
     </h3>
     <p>
@@ -80,35 +81,32 @@
       </p>
      </li>
     </ul>
-    <h3>
+    <h3 id="_1">
      一个简单的转发百度的示例
     </h3>
     <p>
      一个路由定义最关键的是三个地方：匹配（path）、filter（可以多个filter处理）、目标（uri），这样访问此应用就转到了百度
     </p>
-    <p>
-     ```java
-@SpringBootApplication
-public class Application {
-    </p>
-    <pre><pre>public static void main(String[] args) {
-    SpringApplication.run(Application.class, args);
-}
+    <div class="codehilite">
+     <pre><span></span><code><span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Application</span> <span class="p">{</span>
 
-@Bean
-public RouteLocator myRoutes(RouteLocatorBuilder builder) {
-    return builder.routes()
-            .route(p -&gt; p
-                    .path("/")
-                    .filters(f -&gt; f.addRequestParameter("wd", "fs").addRequestHeader("test", "test"))
-                    .uri("http://www.baidu.com/"))
-            .build();
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">SpringApplication</span><span class="p">.</span><span class="na">run</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="na">class</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">RouteLocator</span> <span class="nf">myRoutes</span><span class="p">(</span><span class="n">RouteLocatorBuilder</span> <span class="n">builder</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">builder</span><span class="p">.</span><span class="na">routes</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">route</span><span class="p">(</span><span class="n">p</span> <span class="o">-&gt;</span> <span class="n">p</span>
+                        <span class="p">.</span><span class="na">path</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span>
+                        <span class="p">.</span><span class="na">filters</span><span class="p">(</span><span class="n">f</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="p">.</span><span class="na">addRequestParameter</span><span class="p">(</span><span class="s">"wd"</span><span class="p">,</span> <span class="s">"fs"</span><span class="p">).</span><span class="na">addRequestHeader</span><span class="p">(</span><span class="s">"test"</span><span class="p">,</span> <span class="s">"test"</span><span class="p">))</span>
+                        <span class="p">.</span><span class="na">uri</span><span class="p">(</span><span class="s">"http://www.baidu.com/"</span><span class="p">))</span>
+                <span class="p">.</span><span class="na">build</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
    </article>
   </div>
   <!-- BG -->

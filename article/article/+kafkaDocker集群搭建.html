@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,17 +43,17 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="windows10-kafka-docker">
      Windows10 Kafka Docker 集群搭建
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      使用 Windows Docker Desktop 搭建 Kafka 集群
     </p>
-    <h3>
+    <h3 id="zookeeper">
      运行 Zookeeper
     </h3>
     <p>
@@ -61,70 +62,51 @@
     <p>
      ```shell script
     </p>
-    <h1>
+    <h1 id="_2">
      第一次启动
     </h1>
     <p>
      docker run -dit --name zk -p 2181:2181 zookeeper
     </p>
-    <h1>
+    <h1 id="_3">
      重启
     </h1>
     <p>
      docker restart zk
     </p>
-    <h1>
+    <h1 id="_4">
      查看日志
     </h1>
     <p>
      docker logs -f zk
-```
     </p>
-    <h3>
-     运行 Kafka
-    </h3>
-    <p>
-     启动的命令如下，注意将下面的 192.168.101.104 换成自己的宿主机IP，运行后查看日志正常即可
-    </p>
-    <p>
-     ```shell script
-    </p>
-    <h1>
-     第一次启动
-    </h1>
-    <p>
-     docker run -dit --name kafka0 -p 9092:9092 -e KAFKA_BROKER_ID=0 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9092 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 -t wurstmeister/kafka
-    </p>
-    <p>
-     docker run -dit --name kafka1 -p 9093:9093 -e KAFKA_BROKER_ID=1 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9093 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9093 -t wurstmeister/kafka
-    </p>
-    <p>
-     docker run -dit --name kafka2 -p 9094:9094 -e KAFKA_BROKER_ID=2 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9094 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9094 -t wurstmeister/kafka
-    </p>
-    <h1>
-     重启
-    </h1>
-    <p>
-     docker restart kafka0
-docker restart kafka1
-docker restart kafka2
-    </p>
-    <h1>
-     查看日志
-    </h1>
-    <p>
-     docker logs -f kafka0
-    </p>
-    <h1>
-     删除kafka
-    </h1>
-    <p>
-     docker rm -f kafka0
-docker rm -f kafka1
-docker rm -f kafka2
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">###</span> <span class="err">运行</span> <span class="n">Kafka</span>
+<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">启动的命令如下，注意将下面的</span> <span class="mi">192</span><span class="p">.</span><span class="mi">168</span><span class="p">.</span><span class="mi">101</span><span class="p">.</span><span class="mi">104</span> <span class="err">换成自己的宿主机</span><span class="n">IP</span><span class="err">，运行后查看日志正常即可</span>
+
+<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="o">#</span> <span class="err">第一次启动</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="c1">--name kafka0 -p 9092:9092 -e KAFKA_BROKER_ID=0 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9092 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 -t wurstmeister/kafka</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="c1">--name kafka1 -p 9093:9093 -e KAFKA_BROKER_ID=1 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9093 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9093 -t wurstmeister/kafka</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="c1">--name kafka2 -p 9094:9094 -e KAFKA_BROKER_ID=2 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9094 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9094 -t wurstmeister/kafka</span>
+
+<span class="o">#</span> <span class="err">重启</span>
+<span class="n">docker</span> <span class="k">restart</span> <span class="n">kafka0</span>
+<span class="n">docker</span> <span class="k">restart</span> <span class="n">kafka1</span>
+<span class="n">docker</span> <span class="k">restart</span> <span class="n">kafka2</span>
+
+<span class="o">#</span> <span class="err">查看日志</span>
+<span class="n">docker</span> <span class="n">logs</span> <span class="o">-</span><span class="n">f</span> <span class="n">kafka0</span>
+
+<span class="o">#</span> <span class="err">删除</span><span class="n">kafka</span>
+<span class="n">docker</span> <span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="n">kafka0</span>
+<span class="n">docker</span> <span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="n">kafka1</span>
+<span class="n">docker</span> <span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="n">kafka2</span>
+</code></pre>
+    </div>
+    <h3 id="_5">
      测试
     </h3>
     <p>
@@ -133,13 +115,13 @@ docker rm -f kafka2
     <p>
      ```shell script
     </p>
-    <h1>
+    <h1 id="partition">
      建立副本和partition
     </h1>
     <p>
      docker exec -ti kafka0 kafka-topics.sh --create --zookeeper 192.168.101.104:2181 --replication-factor 3 --partitions 5 --topic TestTopic
     </p>
-    <h1>
+    <h1 id="_6">
      查看信息
     </h1>
     <p>
@@ -147,7 +129,7 @@ docker rm -f kafka2
 docker exec -ti kafka1 kafka-topics.sh --describe --zookeeper 192.168.101.104:2181 --topic TestTopic
 docker exec -ti kafka2 kafka-topics.sh --describe --zookeeper 192.168.101.104:2181 --topic TestTopic
     </p>
-    <h1>
+    <h1 id="kafka0">
      消费和生产，最后一个kafka0输出后在其他两个能看到
     </h1>
     <p>
@@ -155,29 +137,24 @@ docker exec -ti kafka2 kafka-topics.sh --describe --zookeeper 192.168.101.104:21
 docker exec -ti kafka2 kafka-console-consumer.sh --bootstrap-server 192.168.101.104:9094 --topic TestTopic --from-beginning
 docker exec -ti kafka0 kafka-console-producer.sh --broker-list 192.168.101.104:9092 --topic TestTopic
     </p>
-    <h1>
+    <h1 id="_7">
      性能测试
     </h1>
     <p>
      docker exec -ti kafka0 kafka-producer-perf-test.sh --topic TestTopic --num-records 100000 --record-size 1000 --throughput 2000 --producer-props bootstrap.servers=192.168.101.104:9092
 docker exec -ti kafka0 kafka-consumer-perf-test.sh --bootstrap-server 192.168.101.104:9092 --topic TestTopic --fetch-size 1048576 --messages 100000 --threads 1
-```
     </p>
-    <h3>
-     kafka manage
-    </h3>
-    <p>
-     使用docker启动后，访问: http://localhost:9000/ , 点击添加cluster，输入前两个（名称和zk地址），保存即可
-    </p>
-    <p>
-     ```shell script
-docker run -dit -p 9000:9000 -e ZK_HOSTS="192.168.101.104:2181" hlebalbau/kafka-manager:stable
-    </p>
-    <p>
-     http://localhost:9000/
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">###</span> <span class="n">kafka</span> <span class="n">manage</span>
+<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">使用</span><span class="n">docker启动后</span><span class="err">，访问</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">9000</span><span class="o">/</span> <span class="p">,</span> <span class="err">点击添加</span><span class="k">cluster</span><span class="err">，输入前两个（名称和</span><span class="n">zk地址</span><span class="err">），保存即可</span>
+
+<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9000</span><span class="p">:</span><span class="mi">9000</span> <span class="o">-</span><span class="n">e</span> <span class="n">ZK_HOSTS</span><span class="o">=</span><span class="ss">"192.168.101.104:2181"</span> <span class="n">hlebalbau</span><span class="o">/</span><span class="n">kafka</span><span class="o">-</span><span class="n">manager</span><span class="p">:</span><span class="k">stable</span>
+
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">9000</span><span class="o">/</span>
+</code></pre>
+    </div>
+    <h2 id="_8">
      参考链接
     </h2>
     <ul>

@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,17 +43,17 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="spring-cloud-gateway-filter">
      Spring Cloud Gateway （三） Filter 链的生成与触发
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      在上篇中分析了请求在Filter中的传播过程，但不同的请求，应该是有不同的各自的定制的filter，今天来看看如何对请求定制filter链
     </p>
-    <h2>
+    <h2 id="_2">
      分析过程
     </h2>
     <p>
@@ -61,95 +62,83 @@
     <p>
      在 FilteringWebHandler 中找到了如何构造特定请求的定制filter链的代码。在下面的代码中，特定请求的filter存放到了exchange中，和全局的filter放到一起排序，形成了上次的filter链路
     </p>
-    <p>
-     ```java
-public class FilteringWebHandler implements WebHandler {
-    @Override
-    public Mono
-     <void>
-      handle(ServerWebExchange exchange) {
-        // 这里是获取特定转发的filter列表
-        Route route = exchange.getRequiredAttribute(GATEWAY_ROUTE_ATTR);
-        List
-      <gatewayfilter>
-       gatewayFilters = route.getFilters();
-      </gatewayfilter>
-     </void>
-    </p>
-    <pre><pre>    // 获取全局filter列表，和上面的排序组合成新的filter
-    List&lt;GatewayFilter&gt; combined = new ArrayList&lt;&gt;(this.globalFilters);
-    combined.addAll(gatewayFilters);
-    // TODO: needed or cached?
-    AnnotationAwareOrderComparator.sort(combined);
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">FilteringWebHandler</span> <span class="kd">implements</span> <span class="n">WebHandler</span> <span class="p">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 这里是获取特定转发的filter列表</span>
+        <span class="n">Route</span> <span class="n">route</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequiredAttribute</span><span class="p">(</span><span class="n">GATEWAY_ROUTE_ATTR</span><span class="p">);</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">GatewayFilter</span><span class="o">&gt;</span> <span class="n">gatewayFilters</span> <span class="o">=</span> <span class="n">route</span><span class="p">.</span><span class="na">getFilters</span><span class="p">();</span>
 
-    if (logger.isDebugEnabled()) {
-        logger.debug("Sorted gatewayFilterFactories: " + combined);
-    }
+        <span class="c1">// 获取全局filter列表，和上面的排序组合成新的filter</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">GatewayFilter</span><span class="o">&gt;</span> <span class="n">combined</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">globalFilters</span><span class="p">);</span>
+        <span class="n">combined</span><span class="p">.</span><span class="na">addAll</span><span class="p">(</span><span class="n">gatewayFilters</span><span class="p">);</span>
+        <span class="c1">// TODO: needed or cached?</span>
+        <span class="n">AnnotationAwareOrderComparator</span><span class="p">.</span><span class="na">sort</span><span class="p">(</span><span class="n">combined</span><span class="p">);</span>
 
-    // 触发调用
-    return new DefaultGatewayFilterChain(combined).filter(exchange);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+        <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">logger</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"Sorted gatewayFilterFactories: "</span> <span class="o">+</span> <span class="n">combined</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 触发调用</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">DefaultGatewayFilterChain</span><span class="p">(</span><span class="n">combined</span><span class="p">).</span><span class="na">filter</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      想查询定位到exchange的路由路径独有filter是如何来的，但没有思路，后面看到Get Route的下面这句：
     </p>
-    <p>
-     <pre>java
-Route route = exchange.getRequiredAttribute(GATEWAY_ROUTE_ATTR);</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">Route</span> <span class="n">route</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequiredAttribute</span><span class="p">(</span><span class="n">GATEWAY_ROUTE_ATTR</span><span class="p">);</span>
+</code></pre>
+    </div>
     <p>
      查看相关代码中如何设置的代码，假设在代码中存在下面这句，把route放入其中的语句：
     </p>
-    <p>
-     <pre>java
-exchange.getAttributes().put(GATEWAY_ROUTE_ATTR</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">GATEWAY_ROUTE_ATTR</span>
+</code></pre>
+    </div>
     <p>
      经过搜索，找到了下面的类：RoutePredicateHandlerMapping
     </p>
-    <p>
-     ```java
-public class RoutePredicateHandlerMapping extends AbstractHandlerMapping {
-    </p>
-    <pre><pre>@Override
-protected Mono&lt;?&gt; getHandlerInternal(ServerWebExchange exchange) {
-    // don't handle requests on management port if set and different than server port
-    if (this.managementPortType == DIFFERENT &amp;&amp; this.managementPort != null
-            &amp;&amp; exchange.getRequest().getURI().getPort() == this.managementPort) {
-        return Mono.empty();
-    }
-    exchange.getAttributes().put(GATEWAY_HANDLER_MAPPER_ATTR, getSimpleName());
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RoutePredicateHandlerMapping</span> <span class="kd">extends</span> <span class="n">AbstractHandlerMapping</span> <span class="p">{</span>
 
-    return lookupRoute(exchange)
-            // .log("route-predicate-handler-mapping", Level.FINER) //name this
-            .flatMap((Function&lt;Route, Mono&lt;?&gt;&gt;) r -&gt; {
-                exchange.getAttributes().remove(GATEWAY_PREDICATE_ROUTE_ATTR);
-                if (logger.isDebugEnabled()) {
-                    logger.debug(
-                            "Mapping [" + getExchangeDesc(exchange) + "] to " + r);
-                }
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;?&gt;</span> <span class="n">getHandlerInternal</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// don't handle requests on management port if set and different than server port</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">managementPortType</span> <span class="o">==</span> <span class="n">DIFFERENT</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="na">managementPort</span> <span class="o">!=</span> <span class="kc">null</span>
+                <span class="o">&amp;&amp;</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getURI</span><span class="p">().</span><span class="na">getPort</span><span class="p">()</span> <span class="o">==</span> <span class="k">this</span><span class="p">.</span><span class="na">managementPort</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">GATEWAY_HANDLER_MAPPER_ATTR</span><span class="p">,</span> <span class="n">getSimpleName</span><span class="p">());</span>
 
-                // r 是它独有的filter 处理器
-                exchange.getAttributes().put(GATEWAY_ROUTE_ATTR, r);
-                // webHandler 是全局链？
-                return Mono.just(webHandler);
-            }).switchIfEmpty(Mono.empty().then(Mono.fromRunnable(() -&gt; {
-                exchange.getAttributes().remove(GATEWAY_PREDICATE_ROUTE_ATTR);
-                if (logger.isTraceEnabled()) {
-                    logger.trace("No RouteDefinition found for ["
-                            + getExchangeDesc(exchange) + "]");
-                }
-            })));
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+        <span class="k">return</span> <span class="n">lookupRoute</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span>
+                <span class="c1">// .log("route-predicate-handler-mapping", Level.FINER) //name this</span>
+                <span class="p">.</span><span class="na">flatMap</span><span class="p">((</span><span class="n">Function</span><span class="o">&lt;</span><span class="n">Route</span><span class="p">,</span> <span class="n">Mono</span><span class="o">&lt;?&gt;&gt;</span><span class="p">)</span> <span class="n">r</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                    <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">remove</span><span class="p">(</span><span class="n">GATEWAY_PREDICATE_ROUTE_ATTR</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+                        <span class="n">logger</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span>
+                                <span class="s">"Mapping ["</span> <span class="o">+</span> <span class="n">getExchangeDesc</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span> <span class="o">+</span> <span class="s">"] to "</span> <span class="o">+</span> <span class="n">r</span><span class="p">);</span>
+                    <span class="p">}</span>
+
+                    <span class="c1">// r 是它独有的filter 处理器</span>
+                    <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">GATEWAY_ROUTE_ATTR</span><span class="p">,</span> <span class="n">r</span><span class="p">);</span>
+                    <span class="c1">// webHandler 是全局链？</span>
+                    <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">just</span><span class="p">(</span><span class="n">webHandler</span><span class="p">);</span>
+                <span class="p">}).</span><span class="na">switchIfEmpty</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">().</span><span class="na">then</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">fromRunnable</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                    <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">remove</span><span class="p">(</span><span class="n">GATEWAY_PREDICATE_ROUTE_ATTR</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isTraceEnabled</span><span class="p">())</span> <span class="p">{</span>
+                        <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="s">"No RouteDefinition found for ["</span>
+                                <span class="o">+</span> <span class="n">getExchangeDesc</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span> <span class="o">+</span> <span class="s">"]"</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">})));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面的代码中，指定路由路径的定制filter是从这传入的，并且debug可以看到，这个可以跳转到filter的开始类中，那这个类是承接了route和filter的最后一个route相关的类。
     </p>

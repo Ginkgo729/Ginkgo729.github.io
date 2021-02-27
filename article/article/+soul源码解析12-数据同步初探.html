@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,17 +43,17 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soul-bootstrap">
      Soul网关源码解析（十二）数据同步初探-Bootstrap端
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      此篇开始进入分析Soul网关的数据同步相关源码，首先看下数据是哪些数据，同步大致原理和方式
     </p>
-    <h2>
+    <h2 id="debug">
      源码Debug
     </h2>
     <p>
@@ -61,97 +62,94 @@
     <p>
      在前面的处理流程的分析中，我们知道进行路由匹配的核心代码如下：
     </p>
-    <p>
-     <pre>java
-public abstract class AbstractSoulPlugin implements SoulPlugin {
-    ......
-    public Mono&lt;Void&gt; execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-        String pluginName = named();
-        // 获取插件配置
-        final PluginData pluginData = BaseDataCache.getInstance().obtainPluginData(pluginName);
-        if (pluginData != null &amp;&amp; pluginData.getEnabled()) {
-            // 获取选择器
-            final Collection&lt;SelectorData&gt; selectors = BaseDataCache.getInstance().obtainSelectorData(pluginName);
-            .......
-            // 获取规则
-            final SelectorData selectorData = matchSelector(exchange, selectors);
-            .......
-        }
-        return chain.execute(exchange);
-    }
-    ......
-}</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">AbstractSoulPlugin</span> <span class="kd">implements</span> <span class="n">SoulPlugin</span> <span class="p">{</span>
+    <span class="p">......</span>
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">pluginName</span> <span class="o">=</span> <span class="n">named</span><span class="p">();</span>
+        <span class="c1">// 获取插件配置</span>
+        <span class="kd">final</span> <span class="n">PluginData</span> <span class="n">pluginData</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainPluginData</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pluginData</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">pluginData</span><span class="p">.</span><span class="na">getEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="c1">// 获取选择器</span>
+            <span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">SelectorData</span><span class="o">&gt;</span> <span class="n">selectors</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainSelectorData</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+            <span class="p">.......</span>
+            <span class="c1">// 获取规则</span>
+            <span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selectorData</span> <span class="o">=</span> <span class="n">matchSelector</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">selectors</span><span class="p">);</span>
+            <span class="p">.......</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="p">......</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      从上面可以看出数据大致有三种：插件配置数据、选择器数据、规则数据，这些数据都是从 BaseDataCache中获取的，我们来看看其核心代码：
     </p>
-    <p>
-     ```java
-public final class BaseDataCache {
-    </p>
-    <pre><pre>private static final BaseDataCache INSTANCE = new BaseDataCache();
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">BaseDataCache</span> <span class="p">{</span>
 
-/**
- * pluginName -&gt; PluginData.
- */
-private static final ConcurrentMap&lt;String, PluginData&gt; PLUGIN_MAP = Maps.newConcurrentMap();
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">BaseDataCache</span> <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BaseDataCache</span><span class="p">();</span>
 
-/**
- * pluginName -&gt; SelectorData.
- */
-private static final ConcurrentMap&lt;String, List&lt;SelectorData&gt;&gt; SELECTOR_MAP = Maps.newConcurrentMap();
+    <span class="cm">/**</span>
+<span class="cm">     * pluginName -&gt; PluginData.</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">ConcurrentMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">PLUGIN_MAP</span> <span class="o">=</span> <span class="n">Maps</span><span class="p">.</span><span class="na">newConcurrentMap</span><span class="p">();</span>
 
-/**
- * selectorId -&gt; RuleData.
- */
-private static final ConcurrentMap&lt;String, List&lt;RuleData&gt;&gt; RULE_MAP = Maps.newConcurrentMap();
+    <span class="cm">/**</span>
+<span class="cm">     * pluginName -&gt; SelectorData.</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">ConcurrentMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">SelectorData</span><span class="o">&gt;&gt;</span> <span class="n">SELECTOR_MAP</span> <span class="o">=</span> <span class="n">Maps</span><span class="p">.</span><span class="na">newConcurrentMap</span><span class="p">();</span>
 
-public void cachePluginData(final PluginData pluginData) {
-    Optional.ofNullable(pluginData).ifPresent(data -&gt; PLUGIN_MAP.put(data.getName(), data));
-}
+    <span class="cm">/**</span>
+<span class="cm">     * selectorId -&gt; RuleData.</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">ConcurrentMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">RuleData</span><span class="o">&gt;&gt;</span> <span class="n">RULE_MAP</span> <span class="o">=</span> <span class="n">Maps</span><span class="p">.</span><span class="na">newConcurrentMap</span><span class="p">();</span>
 
-public void removePluginData(final PluginData pluginData) {
-    Optional.ofNullable(pluginData).ifPresent(data -&gt; PLUGIN_MAP.remove(data.getName()));
-}
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">cachePluginData</span><span class="p">(</span><span class="kd">final</span> <span class="n">PluginData</span> <span class="n">pluginData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">pluginData</span><span class="p">).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">data</span> <span class="o">-&gt;</span> <span class="n">PLUGIN_MAP</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">data</span><span class="p">));</span>
+    <span class="p">}</span>
 
-public PluginData obtainPluginData(final String pluginName) {
-    return PLUGIN_MAP.get(pluginName);
-}
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">removePluginData</span><span class="p">(</span><span class="kd">final</span> <span class="n">PluginData</span> <span class="n">pluginData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">pluginData</span><span class="p">).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">data</span> <span class="o">-&gt;</span> <span class="n">PLUGIN_MAP</span><span class="p">.</span><span class="na">remove</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="na">getName</span><span class="p">()));</span>
+    <span class="p">}</span>
 
-public void cacheSelectData(final SelectorData selectorData) {
-    Optional.ofNullable(selectorData).ifPresent(this::selectorAccept);
-}
+    <span class="kd">public</span> <span class="n">PluginData</span> <span class="nf">obtainPluginData</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">pluginName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">PLUGIN_MAP</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+    <span class="p">}</span>
 
-public void removeSelectData(final SelectorData selectorData) {
-    Optional.ofNullable(selectorData).ifPresent(data -&gt; {
-        final List&lt;SelectorData&gt; selectorDataList = SELECTOR_MAP.get(data.getPluginName());
-        Optional.ofNullable(selectorDataList).ifPresent(list -&gt; list.removeIf(e -&gt; e.getId().equals(data.getId())));
-    });
-}
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">cacheSelectData</span><span class="p">(</span><span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selectorData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">selectorData</span><span class="p">).</span><span class="na">ifPresent</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">selectorAccept</span><span class="p">);</span>
+    <span class="p">}</span>
 
-public List&lt;SelectorData&gt; obtainSelectorData(final String pluginName) {
-    return SELECTOR_MAP.get(pluginName);
-}
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">removeSelectData</span><span class="p">(</span><span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selectorData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">selectorData</span><span class="p">).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">data</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">SelectorData</span><span class="o">&gt;</span> <span class="n">selectorDataList</span> <span class="o">=</span> <span class="n">SELECTOR_MAP</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="na">getPluginName</span><span class="p">());</span>
+            <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">selectorDataList</span><span class="p">).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">list</span> <span class="o">-&gt;</span> <span class="n">list</span><span class="p">.</span><span class="na">removeIf</span><span class="p">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">e</span><span class="p">.</span><span class="na">getId</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="na">getId</span><span class="p">())));</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
 
-public void cacheRuleData(final RuleData ruleData) {
-    Optional.ofNullable(ruleData).ifPresent(this::ruleAccept);
-}
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">SelectorData</span><span class="o">&gt;</span> <span class="nf">obtainSelectorData</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">pluginName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">SELECTOR_MAP</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+    <span class="p">}</span>
 
-public void removeRuleData(final RuleData ruleData) {
-    Optional.ofNullable(ruleData).ifPresent(data -&gt; {
-        final List&lt;RuleData&gt; ruleDataList = RULE_MAP.get(data.getSelectorId());
-        Optional.ofNullable(ruleDataList).ifPresent(list -&gt; list.removeIf(rule -&gt; rule.getId().equals(data.getId())));
-    });
-}
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">cacheRuleData</span><span class="p">(</span><span class="kd">final</span> <span class="n">RuleData</span> <span class="n">ruleData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">ruleData</span><span class="p">).</span><span class="na">ifPresent</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">ruleAccept</span><span class="p">);</span>
+    <span class="p">}</span>
 
-public List&lt;RuleData&gt; obtainRuleData(final String selectorId) {
-    return RULE_MAP.get(selectorId);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">removeRuleData</span><span class="p">(</span><span class="kd">final</span> <span class="n">RuleData</span> <span class="n">ruleData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">ruleData</span><span class="p">).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">data</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">RuleData</span><span class="o">&gt;</span> <span class="n">ruleDataList</span> <span class="o">=</span> <span class="n">RULE_MAP</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="na">getSelectorId</span><span class="p">());</span>
+            <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">ruleDataList</span><span class="p">).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">list</span> <span class="o">-&gt;</span> <span class="n">list</span><span class="p">.</span><span class="na">removeIf</span><span class="p">(</span><span class="n">rule</span> <span class="o">-&gt;</span> <span class="n">rule</span><span class="p">.</span><span class="na">getId</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="na">getId</span><span class="p">())));</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">RuleData</span><span class="o">&gt;</span> <span class="nf">obtainRuleData</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">selectorId</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">RULE_MAP</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">selectorId</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      从上面的代码可以看出，这是一个静态单例类，从各个方法的名字大致可以看出基本都是对插件配置数据、选择器配置数据、规则配置数据进行的增删改查
     </p>
@@ -164,84 +162,81 @@ public List&lt;RuleData&gt; obtainRuleData(final String selectorId) {
     <p>
      我们使用IDEA，Alt+F7 查看用那些地方进行了使用，通篇查找下来，处理 BaseDataCache类本身和一些测试相关的类，只有CommonPluginDataSubscriber这个类进行了调用，那这个类就是数据同步的核心类了，大致代码如下：
     </p>
-    <p>
-     ```java
-public class CommonPluginDataSubscriber implements PluginDataSubscriber {
-    .......
-    </p>
-    <pre><pre>// 下面这类函数又进行了一次封装，我们可以看到这里有那么一点小瑕疵，命名有点不统一；onSubscribe这个函数取的不是太好，不能见名识意，有点宽泛了
-@Override
-public void onSubscribe(final PluginData pluginData) {
-    subscribeDataHandler(pluginData, DataEventTypeEnum.UPDATE);
-}
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CommonPluginDataSubscriber</span> <span class="kd">implements</span> <span class="n">PluginDataSubscriber</span> <span class="p">{</span>
+    <span class="p">.......</span>
 
-@Override
-public void unSubscribe(final PluginData pluginData) {
-    subscribeDataHandler(pluginData, DataEventTypeEnum.DELETE);
-}
+    <span class="c1">// 下面这类函数又进行了一次封装，我们可以看到这里有那么一点小瑕疵，命名有点不统一；onSubscribe这个函数取的不是太好，不能见名识意，有点宽泛了</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onSubscribe</span><span class="p">(</span><span class="kd">final</span> <span class="n">PluginData</span> <span class="n">pluginData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">subscribeDataHandler</span><span class="p">(</span><span class="n">pluginData</span><span class="p">,</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">);</span>
+    <span class="p">}</span>
 
-public void onSelectorSubscribe(final SelectorData selectorData) {
-    subscribeDataHandler(selectorData, DataEventTypeEnum.UPDATE);
-}
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">unSubscribe</span><span class="p">(</span><span class="kd">final</span> <span class="n">PluginData</span> <span class="n">pluginData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">subscribeDataHandler</span><span class="p">(</span><span class="n">pluginData</span><span class="p">,</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">DELETE</span><span class="p">);</span>
+    <span class="p">}</span>
 
-@Override
-public void unSelectorSubscribe(final SelectorData selectorData) {
-    subscribeDataHandler(selectorData, DataEventTypeEnum.DELETE);
-}
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onSelectorSubscribe</span><span class="p">(</span><span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selectorData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">subscribeDataHandler</span><span class="p">(</span><span class="n">selectorData</span><span class="p">,</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">);</span>
+    <span class="p">}</span>
 
-@Override
-public void onRuleSubscribe(final RuleData ruleData) {
-    subscribeDataHandler(ruleData, DataEventTypeEnum.UPDATE);
-}
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">unSelectorSubscribe</span><span class="p">(</span><span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selectorData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">subscribeDataHandler</span><span class="p">(</span><span class="n">selectorData</span><span class="p">,</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">DELETE</span><span class="p">);</span>
+    <span class="p">}</span>
 
-@Override
-public void unRuleSubscribe(final RuleData ruleData) {
-    subscribeDataHandler(ruleData, DataEventTypeEnum.DELETE);
-}
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onRuleSubscribe</span><span class="p">(</span><span class="kd">final</span> <span class="n">RuleData</span> <span class="n">ruleData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">subscribeDataHandler</span><span class="p">(</span><span class="n">ruleData</span><span class="p">,</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">);</span>
+    <span class="p">}</span>
 
-private &lt;T&gt; void subscribeDataHandler(final T classData, final DataEventTypeEnum dataType) {
-    Optional.ofNullable(classData).ifPresent(data -&gt; {
-        if (data instanceof PluginData) {
-            PluginData pluginData = (PluginData) data;
-            if (dataType == DataEventTypeEnum.UPDATE) {
-                // 插件配置数据的更新
-                BaseDataCache.getInstance().cachePluginData(pluginData);
-                Optional.ofNullable(handlerMap.get(pluginData.getName())).ifPresent(handler -&gt; handler.handlerPlugin(pluginData));
-            } else if (dataType == DataEventTypeEnum.DELETE) {
-                // 插件配置数据的删除
-                BaseDataCache.getInstance().removePluginData(pluginData);
-                Optional.ofNullable(handlerMap.get(pluginData.getName())).ifPresent(handler -&gt; handler.removePlugin(pluginData));
-            }
-        } else if (data instanceof SelectorData) {
-            SelectorData selectorData = (SelectorData) data;
-            if (dataType == DataEventTypeEnum.UPDATE) {
-                // 选择器数据的更新
-                BaseDataCache.getInstance().cacheSelectData(selectorData);
-                Optional.ofNullable(handlerMap.get(selectorData.getPluginName())).ifPresent(handler -&gt; handler.handlerSelector(selectorData));
-            } else if (dataType == DataEventTypeEnum.DELETE) {
-                // 选择器数据的删除
-                BaseDataCache.getInstance().removeSelectData(selectorData);
-                Optional.ofNullable(handlerMap.get(selectorData.getPluginName())).ifPresent(handler -&gt; handler.removeSelector(selectorData));
-            }
-        } else if (data instanceof RuleData) {
-            RuleData ruleData = (RuleData) data;
-            if (dataType == DataEventTypeEnum.UPDATE) {
-                // 规则数据的更新
-                BaseDataCache.getInstance().cacheRuleData(ruleData);
-                Optional.ofNullable(handlerMap.get(ruleData.getPluginName())).ifPresent(handler -&gt; handler.handlerRule(ruleData));
-            } else if (dataType == DataEventTypeEnum.DELETE) {
-                // 规则数据的删除
-                BaseDataCache.getInstance().removeRuleData(ruleData);
-                Optional.ofNullable(handlerMap.get(ruleData.getPluginName())).ifPresent(handler -&gt; handler.removeRule(ruleData));
-            }
-        }
-    });
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">unRuleSubscribe</span><span class="p">(</span><span class="kd">final</span> <span class="n">RuleData</span> <span class="n">ruleData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">subscribeDataHandler</span><span class="p">(</span><span class="n">ruleData</span><span class="p">,</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">DELETE</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="nf">subscribeDataHandler</span><span class="p">(</span><span class="kd">final</span> <span class="n">T</span> <span class="n">classData</span><span class="p">,</span> <span class="kd">final</span> <span class="n">DataEventTypeEnum</span> <span class="n">dataType</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">classData</span><span class="p">).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">data</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">data</span> <span class="k">instanceof</span> <span class="n">PluginData</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">PluginData</span> <span class="n">pluginData</span> <span class="o">=</span> <span class="p">(</span><span class="n">PluginData</span><span class="p">)</span> <span class="n">data</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">dataType</span> <span class="o">==</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="c1">// 插件配置数据的更新</span>
+                    <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">cachePluginData</span><span class="p">(</span><span class="n">pluginData</span><span class="p">);</span>
+                    <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">handlerMap</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">pluginData</span><span class="p">.</span><span class="na">getName</span><span class="p">())).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">handler</span> <span class="o">-&gt;</span> <span class="n">handler</span><span class="p">.</span><span class="na">handlerPlugin</span><span class="p">(</span><span class="n">pluginData</span><span class="p">));</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">dataType</span> <span class="o">==</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">DELETE</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="c1">// 插件配置数据的删除</span>
+                    <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">removePluginData</span><span class="p">(</span><span class="n">pluginData</span><span class="p">);</span>
+                    <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">handlerMap</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">pluginData</span><span class="p">.</span><span class="na">getName</span><span class="p">())).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">handler</span> <span class="o">-&gt;</span> <span class="n">handler</span><span class="p">.</span><span class="na">removePlugin</span><span class="p">(</span><span class="n">pluginData</span><span class="p">));</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">data</span> <span class="k">instanceof</span> <span class="n">SelectorData</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">SelectorData</span> <span class="n">selectorData</span> <span class="o">=</span> <span class="p">(</span><span class="n">SelectorData</span><span class="p">)</span> <span class="n">data</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">dataType</span> <span class="o">==</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="c1">// 选择器数据的更新</span>
+                    <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">cacheSelectData</span><span class="p">(</span><span class="n">selectorData</span><span class="p">);</span>
+                    <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">handlerMap</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">selectorData</span><span class="p">.</span><span class="na">getPluginName</span><span class="p">())).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">handler</span> <span class="o">-&gt;</span> <span class="n">handler</span><span class="p">.</span><span class="na">handlerSelector</span><span class="p">(</span><span class="n">selectorData</span><span class="p">));</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">dataType</span> <span class="o">==</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">DELETE</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="c1">// 选择器数据的删除</span>
+                    <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">removeSelectData</span><span class="p">(</span><span class="n">selectorData</span><span class="p">);</span>
+                    <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">handlerMap</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">selectorData</span><span class="p">.</span><span class="na">getPluginName</span><span class="p">())).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">handler</span> <span class="o">-&gt;</span> <span class="n">handler</span><span class="p">.</span><span class="na">removeSelector</span><span class="p">(</span><span class="n">selectorData</span><span class="p">));</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">data</span> <span class="k">instanceof</span> <span class="n">RuleData</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">RuleData</span> <span class="n">ruleData</span> <span class="o">=</span> <span class="p">(</span><span class="n">RuleData</span><span class="p">)</span> <span class="n">data</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">dataType</span> <span class="o">==</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">UPDATE</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="c1">// 规则数据的更新</span>
+                    <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">cacheRuleData</span><span class="p">(</span><span class="n">ruleData</span><span class="p">);</span>
+                    <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">handlerMap</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">ruleData</span><span class="p">.</span><span class="na">getPluginName</span><span class="p">())).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">handler</span> <span class="o">-&gt;</span> <span class="n">handler</span><span class="p">.</span><span class="na">handlerRule</span><span class="p">(</span><span class="n">ruleData</span><span class="p">));</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">dataType</span> <span class="o">==</span> <span class="n">DataEventTypeEnum</span><span class="p">.</span><span class="na">DELETE</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="c1">// 规则数据的删除</span>
+                    <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">removeRuleData</span><span class="p">(</span><span class="n">ruleData</span><span class="p">);</span>
+                    <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">handlerMap</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">ruleData</span><span class="p">.</span><span class="na">getPluginName</span><span class="p">())).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">handler</span> <span class="o">-&gt;</span> <span class="n">handler</span><span class="p">.</span><span class="na">removeRule</span><span class="p">(</span><span class="n">ruleData</span><span class="p">));</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面的代码中，我们看它又对相关数据的更新做了一层封装，在其中我们找到一点命名不是太好的地方
     </p>
@@ -268,7 +263,7 @@ private &lt;T&gt; void subscribeDataHandler(final T classData, final DataEventTy
     <p>
      大致浏览了一下，这思路同步模块的代码差异比较大，那就是四篇的分析文章了啊
     </p>
-    <h2>
+    <h2 id="_2">
      总结
     </h2>
     <p>
@@ -302,10 +297,10 @@ private &lt;T&gt; void subscribeDataHandler(final T classData, final DataEventTy
     <p>
      此篇文章先对数据同步有个大致的了解，下面的文章开始进行四大同步模块的分析
     </p>
-    <h2>
+    <h2 id="soul">
      Soul网关源码分析文章列表
     </h2>
-    <h3>
+    <h3 id="github">
      Github
     </h3>
     <ul>
@@ -389,7 +384,7 @@ private &lt;T&gt; void subscribeDataHandler(final T classData, final DataEventTy
       </p>
      </li>
     </ul>
-    <h3>
+    <h3 id="_3">
      掘金
     </h3>
     <ul>

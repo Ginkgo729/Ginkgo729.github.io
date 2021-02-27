@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,185 +43,139 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="mongodb">
      MongoDB 使用记录
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      安装配置
     </h2>
-    <p>
-     ```sh
-vim /etc/yum.repos.d/mongodb-org-4.0.repo
-    </p>
-    <p>
-     [mongodb-org-4.0]
-name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.0/x86_64/
-gpgcheck=1
-enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
-    </p>
-    <p>
-     yum install -y mongodb-org
-    </p>
-    <p>
-     service mongod start
-    </p>
-    <h1>
-     修改能被外界访问
-    </h1>
-    <p>
-     vim /etc/mongodb.conf
-    </p>
-    <h1>
-     启动和开机启动设置
-    </h1>
-    <p>
-     systemctl start mongod
-systemctl enable mongod
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code>vim /etc/yum.repos.d/mongodb-org-4.0.repo
+
+<span class="o">[</span>mongodb-org-4.0<span class="o">]</span>
+<span class="nv">name</span><span class="o">=</span>MongoDB Repository
+<span class="nv">baseurl</span><span class="o">=</span>https://repo.mongodb.org/yum/redhat/<span class="nv">$releasever</span>/mongodb-org/4.0/x86_64/
+<span class="nv">gpgcheck</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">enabled</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">gpgkey</span><span class="o">=</span>https://www.mongodb.org/static/pgp/server-4.0.asc
+
+yum install -y mongodb-org
+
+service mongod start
+
+<span class="c1"># 修改能被外界访问</span>
+vim /etc/mongodb.conf
+
+<span class="c1"># 启动和开机启动设置</span>
+systemctl start mongod
+systemctl <span class="nb">enable</span> mongod
+</code></pre>
+    </div>
+    <h2 id="_2">
      操作
     </h2>
-    <h3>
+    <h3 id="collection">
      删除collection
     </h3>
-    <p>
-     ```sh
-mongo
-    </p>
-    <blockquote>
-     <p>
-      use test
-switched to db test
-show collections
+    <div class="codehilite">
+     <pre><span></span><code>mongo
+&gt;use <span class="nb">test</span>
+switched to db <span class="nb">test</span>
+&gt; show collections
 mycol
 mycollection
 newcollection
-db.mycollection.drop()
-db.users.find().count()
-db.col.createIndex({"description":-1})
-true
-```
-     </p>
-    </blockquote>
-    <h3>
+&gt;db.mycollection.drop<span class="o">()</span>
+&gt;db.users.find<span class="o">()</span>.count<span class="o">()</span>
+&gt;db.col.createIndex<span class="o">({</span><span class="s2">"description"</span>:-1<span class="o">})</span>
+<span class="nb">true</span>
+</code></pre>
+    </div>
+    <h3 id="_3">
      排序
     </h3>
-    <h3>
+    <h3 id="_4">
      索引
     </h3>
-    <p>
-     ```sh
-    </p>
-    <h1>
-     语法中 Key 值为你要创建的索引字段，1 为指定按升序创建索引，如果你想按降序来创建索引指定为 -1 即可。
-    </h1>
-    <p>
-     db.collection.createIndex(keys, options)
-    </p>
-    <h1>
-     查看集合索引
-    </h1>
-    <p>
-     db.col.getIndexes()
-    </p>
-    <h1>
-     查看集合索引大小
-    </h1>
-    <p>
-     db.col.totalIndexSize()
-    </p>
-    <h1>
-     删除集合所有索引
-    </h1>
-    <p>
-     db.col.dropIndexes()
-    </p>
-    <h1>
-     删除集合指定索引
-    </h1>
-    <p>
-     db.col.dropIndex("索引名称")
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># 语法中 Key 值为你要创建的索引字段，1 为指定按升序创建索引，如果你想按降序来创建索引指定为 -1 即可。</span>
+db.collection.createIndex<span class="o">(</span>keys, options<span class="o">)</span>
+
+<span class="c1"># 查看集合索引</span>
+db.col.getIndexes<span class="o">()</span>
+
+<span class="c1"># 查看集合索引大小</span>
+db.col.totalIndexSize<span class="o">()</span>
+
+<span class="c1"># 删除集合所有索引</span>
+db.col.dropIndexes<span class="o">()</span>
+
+<span class="c1"># 删除集合指定索引</span>
+db.col.dropIndex<span class="o">(</span><span class="s2">"索引名称"</span><span class="o">)</span>
+</code></pre>
+    </div>
+    <h3 id="_5">
      去重统计
     </h3>
-    <p>
-     ```sh
-db.collection_name.distinct(field,query,options)
-db.collection_name.distinct(field,query,options).length
-    </p>
-    <p>
-     field -----指定要返回的字段(string)
-query-----条件查询(document)
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>db.collection_name.distinct<span class="o">(</span>field,query,options<span class="o">)</span>
+db.collection_name.distinct<span class="o">(</span>field,query,options<span class="o">)</span>.length
+
+field -----指定要返回的字段<span class="o">(</span>string<span class="o">)</span>
+query-----条件查询<span class="o">(</span>document<span class="o">)</span>
+</code></pre>
+    </div>
+    <h3 id="_6">
      不同数据库之间表复制
     </h3>
-    <p>
-     <pre>sh
-db.threat.find({'unit_id': '90000001'}).forEach(function(d){ db.getSiblingDB('test_center')['threat'].insert(d); });
-db.comprehensiveIndexTest.find().forEach(function(d){ db.getSiblingDB('my_visual')['comprehensiveIndex'].insert(d); });
-db.basedIndexTest.find().forEach(function(d){ db.getSiblingDB('my_visual')['basedIndex'].insert(d); });
-db.fragileIndexTest.find().forEach(function(d){ db.getSiblingDB('my_visual')['fragileIndex'].insert(d); });
-db.threadIndexTest.find().forEach(function(d){ db.getSiblingDB('my_visual')['threadIndex'].insert(d); });</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>db.threat.find<span class="o">({</span><span class="s1">'unit_id'</span>: <span class="s1">'90000001'</span><span class="o">})</span>.forEach<span class="o">(</span><span class="k">function</span><span class="o">(</span>d<span class="o">){</span> db.getSiblingDB<span class="o">(</span><span class="s1">'test_center'</span><span class="o">)[</span><span class="s1">'threat'</span><span class="o">]</span>.insert<span class="o">(</span>d<span class="o">)</span><span class="p">;</span> <span class="o">})</span><span class="p">;</span>
+db.comprehensiveIndexTest.find<span class="o">()</span>.forEach<span class="o">(</span><span class="k">function</span><span class="o">(</span>d<span class="o">){</span> db.getSiblingDB<span class="o">(</span><span class="s1">'my_visual'</span><span class="o">)[</span><span class="s1">'comprehensiveIndex'</span><span class="o">]</span>.insert<span class="o">(</span>d<span class="o">)</span><span class="p">;</span> <span class="o">})</span><span class="p">;</span>
+db.basedIndexTest.find<span class="o">()</span>.forEach<span class="o">(</span><span class="k">function</span><span class="o">(</span>d<span class="o">){</span> db.getSiblingDB<span class="o">(</span><span class="s1">'my_visual'</span><span class="o">)[</span><span class="s1">'basedIndex'</span><span class="o">]</span>.insert<span class="o">(</span>d<span class="o">)</span><span class="p">;</span> <span class="o">})</span><span class="p">;</span>
+db.fragileIndexTest.find<span class="o">()</span>.forEach<span class="o">(</span><span class="k">function</span><span class="o">(</span>d<span class="o">){</span> db.getSiblingDB<span class="o">(</span><span class="s1">'my_visual'</span><span class="o">)[</span><span class="s1">'fragileIndex'</span><span class="o">]</span>.insert<span class="o">(</span>d<span class="o">)</span><span class="p">;</span> <span class="o">})</span><span class="p">;</span>
+db.threadIndexTest.find<span class="o">()</span>.forEach<span class="o">(</span><span class="k">function</span><span class="o">(</span>d<span class="o">){</span> db.getSiblingDB<span class="o">(</span><span class="s1">'my_visual'</span><span class="o">)[</span><span class="s1">'threadIndex'</span><span class="o">]</span>.insert<span class="o">(</span>d<span class="o">)</span><span class="p">;</span> <span class="o">})</span><span class="p">;</span>
+</code></pre>
+    </div>
+    <h3 id="_7">
      数据库复制
     </h3>
-    <p>
-     <pre>sh
-db.copyDatabase("cx_tag","cx_tag","127.0.0.1:27017");</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>db.copyDatabase<span class="o">(</span><span class="s2">"cx_tag"</span>,<span class="s2">"cx_tag"</span>,<span class="s2">"127.0.0.1:27017"</span><span class="o">)</span><span class="p">;</span>
+</code></pre>
+    </div>
+    <h3 id="sortsize">
      sort()方法的size限制
     </h3>
-    <p>
-     <pre>sh
-db.adminCommand({setParameter:1, internalQueryExecMaxBlockingSortBytes:335544320})</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>db.adminCommand<span class="o">({</span>setParameter:1, internalQueryExecMaxBlockingSortBytes:335544320<span class="o">})</span>
+</code></pre>
+    </div>
+    <h3 id="_8">
      模糊查询
     </h3>
-    <p>
-     <pre>sh
-db.getCollection('unit').find({"target":/192.168.169.0.24.*/})</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>db.getCollection<span class="o">(</span><span class="s1">'unit'</span><span class="o">)</span>.find<span class="o">({</span><span class="s2">"target"</span>:/192.168.169.0.24.*/<span class="o">})</span>
+</code></pre>
+    </div>
+    <h3 id="_9">
      导入导出
     </h3>
-    <p>
-     ```shell
-mongoimport -h 我的IP --port 端口 -d 数据库名 -c 表名 -u 帐号 -p 密码 --upsert /usr/share/nginx/html/xxx.json --authenticationDatabase admin
-    </p>
-    <p>
-     mongorestore -d db_name 文件夹目录
-    </p>
-    <h1>
-     导入json
-    </h1>
-    <p>
-     mongoimport -h 172.19.104.18 --port 20017 -d testdb -c testcol -u mytest -p 12345 --upsert /tmp/test.json --authenticationDatabase testdb
-    </p>
-    <h1>
-     导出数据库
-    </h1>
-    <p>
-     mongodump -h 172.19.104.18 --port 20017 -u mytest -p 12345 -d testdb -o /tmp --authenticationDatabase testdb
-    </p>
-    <h1>
-     导出表
-    </h1>
-    <p>
-     mongoexport -h 172.19.104.18 --port 20017 -u mytest -p 12345 -d testdb -c testcol -o /tmp/test.json --authenticationDatabase testdb
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code>mongoimport -h 我的IP --port 端口 -d 数据库名 -c 表名 -u 帐号 -p 密码 --upsert /usr/share/nginx/html/xxx.json --authenticationDatabase admin
+
+mongorestore -d db_name 文件夹目录
+
+<span class="c1"># 导入json</span>
+mongoimport -h <span class="m">172</span>.19.104.18 --port <span class="m">20017</span> -d testdb -c testcol -u mytest -p <span class="m">12345</span> --upsert /tmp/test.json --authenticationDatabase testdb
+
+<span class="c1"># 导出数据库</span>
+mongodump -h <span class="m">172</span>.19.104.18 --port <span class="m">20017</span> -u mytest -p <span class="m">12345</span> -d testdb -o /tmp --authenticationDatabase testdb
+<span class="c1"># 导出表</span>
+mongoexport -h <span class="m">172</span>.19.104.18 --port <span class="m">20017</span> -u mytest -p <span class="m">12345</span> -d testdb -c testcol -o /tmp/test.json --authenticationDatabase testdb
+</code></pre>
+    </div>
+    <h2 id="_10">
      参考链接
     </h2>
     <ul>

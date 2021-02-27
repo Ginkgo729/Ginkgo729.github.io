@@ -4,6 +4,22 @@ import markdown
 from bs4 import BeautifulSoup
 
 
+extensions = [ #根据不同教程加上的扩展
+    'markdown.extensions.extra',
+    'markdown.extensions.codehilite', #代码高亮扩展
+    'markdown.extensions.toc',
+    'markdown.extensions.tables',
+    'markdown.extensions.fenced_code',
+]
+
+config = {
+    'codehilite': {
+        'use_pygments': False,
+        'css_class': 'prettyprint linenums',
+    }
+}
+
+
 def read_file(file_path):
     file = open(file_path, "r", encoding="utf-8")
     content = ""
@@ -14,14 +30,13 @@ def read_file(file_path):
 
 
 def markdown_convert_html(text):
-    return markdown.markdown(text)
+    return markdown.markdown(text, extensions=extensions, extension_config=config)
 
 
 def rebuild_html(soup, name, insert_html):
     div = soup.find(id=name)
     div.clear()
-    div.append(BeautifulSoup(insert_html.replace("code", "pre"), "html.parser"))
-    # print(div)
+    div.append(BeautifulSoup(insert_html, "html.parser"))
 
 
 def save(content, path="..index.html"):

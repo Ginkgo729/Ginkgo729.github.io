@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,34 +43,36 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="ctenos7-vim8">
      Ctenos7 vim8 安装
     </h1>
     <hr/>
-    <h3>
+    <h3 id="github">
      一、GitHub官网下载相应的安装包
     </h3>
     <p>
      https://github.com/vim/vim/releases
     </p>
-    <h3>
+    <h3 id="_1">
      二、解压安装
     </h3>
     <p>
      按照下面的命令进行安装即可
     </p>
-    <p>
-     <pre>./configure --with-features=huge --enable-multibyte --enable-rubyinterp=yes --enable-pythoninterp=yes --enable-python3interp=yes --prefix=/usr/local/vim8</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">./configure --with-features=huge --enable-multibyte --enable-rubyinterp=yes --enable-pythoninterp=yes --enable-python3interp=yes --prefix=/usr/local/vim8</span>
+</code></pre>
+    </div>
     <p>
      <em>
       安装后可以命令不能及时识别，运行命令重新加载一下
      </em>
     </p>
-    <p>
-     <pre>source /etc/profile</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">source /etc/profile</span>
+</code></pre>
+    </div>
+    <h3 id="python-vim">
      Python vim
     </h3>
     <ul>
@@ -80,28 +83,23 @@
       :!command :退出vim，并执行shell命令command，将命令输出显示在vim的命令区域，不会改变当前编辑的文件的内容
      </li>
     </ul>
-    <p>
-     ```
-    </p>
-    <h1>
-     vimrc
-    </h1>
-    <p>
-     set mouse=a 
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err"># vimrc</span>
+<span class="err">set mouse=a </span>
+</code></pre>
+    </div>
+    <h3 id="spf13-vim">
      spf13-vim 配置安装问题
     </h3>
-    <p>
-     <pre>sh
-vim /root/.vimbundle
-Replace vundle plugin 'amirh/HTML-AutoCloseTag' with 'heracek/HTML-AuCloseTag
-Plugin 'heracek/HTML-AutoCloseTag', {'name': 'HTML-AutoCloseTag2'}
-UnBundle 'amirh/HTML-AutoCloseTag'
-vim +PluginInstall +qall</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code>vim /root/.vimbundle
+Replace vundle plugin <span class="s1">'amirh/HTML-AutoCloseTag'</span> with <span class="s1">'heracek/HTML-AuCloseTag</span>
+<span class="s1">Plugin '</span>heracek/HTML-AutoCloseTag<span class="s1">', {'</span>name<span class="s1">': '</span>HTML-AutoCloseTag2<span class="s1">'}</span>
+<span class="s1">UnBundle '</span>amirh/HTML-AutoCloseTag<span class="err">'</span>
+vim +PluginInstall +qall
+</code></pre>
+    </div>
+    <h2 id="_2">
      参考链接
     </h2>
     <ul>

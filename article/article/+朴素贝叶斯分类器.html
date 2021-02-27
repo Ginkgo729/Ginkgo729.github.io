@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,35 +43,35 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="_1">
      朴素贝叶斯分类器
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_2">
      相关概念介绍
     </h2>
     <p>
      这里设定一些数据：假设这里有10个白色棋子和10个黑色棋子，分别放入一个白盒和一个黑盒中。白盒放入4个白色棋子和6个黑色棋子，黑盒放入6个白色棋子和4个黑色棋子。
     </p>
-    <h3>
+    <h3 id="_3">
      先验概率
     </h3>
     <p>
      通过经验来判断事情发送的概率，比如上面的随机从任意盒子取棋子，白色棋子的概率是1/2，黑色棋子的概率也是1/2，这就是先验概率。
     </p>
-    <h3>
+    <h3 id="_4">
      后验概率
     </h3>
     <p>
      后验概率就是发生结果后，推测原因的概率。比如取出了一个白色棋子，白色棋子是从白盒中取出的概率和从黑盒中取出的概率，就是后验概率。
     </p>
-    <h3>
+    <h3 id="_5">
      条件概率
     </h3>
     <p>
      事件A在另一个事件B已经发生的情况下的发生概率。比如从白盒中取出白色棋子的概率和从黑盒中取出白色棋子的概率就是条件概率。
     </p>
-    <h3>
+    <h3 id="_6">
      极大似然估计
     </h3>
     <p>
@@ -82,7 +83,7 @@
     <p>
      概率模型的训练过程就是参数估计过程。
     </p>
-    <h3>
+    <h3 id="_7">
      朴素贝叶斯分类器
     </h3>
     <p>
@@ -91,7 +92,7 @@
     <p>
      朴素贝叶斯分类器就是用来估计后验概率的，比如知道取出白色棋子的结果下，估计是来自白盒和黑盒的概率。对应的分类预测就是，判断取出的棋子是属于白盒还是黑盒。
     </p>
-    <h2>
+    <h2 id="_8">
      算法描述
     </h2>
    </article>

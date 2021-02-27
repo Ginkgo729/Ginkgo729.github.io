@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,17 +43,17 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soulsouldubboclient">
      Soul网关源码解析（二十四）SoulDubboClient注解
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      本篇文章来探索下Soul网关Apache Dubbo客户端的注册处理流程
     </p>
-    <h2>
+    <h2 id="_2">
      概览
     </h2>
     <p>
@@ -70,10 +71,10 @@
     <p>
      下面开始分析：
     </p>
-    <h2>
+    <h2 id="debug">
      源码Debug
     </h2>
-    <h3>
+    <h3 id="bean">
      如何获取到Bean
     </h3>
     <p>
@@ -90,21 +91,16 @@
       ApplicationListener和ContextRefreshedEvent
      </a>
     </p>
-    <p>
-     ```
-在IOC的容器的启动过程，当所有的bean都已经处理完成之后，spring ioc容器会有一个发布事件的动作。从 AbstractApplicationContext 的源码中就可以看出
-当ioc容器加载处理完相应的bean之后，也给我们提供了一个机会（先有InitializingBean，后有ApplicationListener
-     <contextrefreshedevent>
-      ），可以去做一些自己想做的事。其实这也就是spring ioc容器给提供的一个扩展的地方。我们可以这样使用这个扩展机制。
-     </contextrefreshedevent>
-    </p>
-    <p>
-     作者：AmeeLove
-链接：https://www.jianshu.com/p/4bd3f68cb179
-来源：简书
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">在</span><span class="n">IOC的容器的启动过程</span><span class="err">，当所有的</span><span class="n">bean都已经处理完成之后</span><span class="err">，</span><span class="n">spring</span> <span class="n">ioc容器会有一个发布事件的动作</span><span class="err">。从</span> <span class="n">AbstractApplicationContext</span> <span class="err">的源码中就可以看出</span>
+<span class="err">当</span><span class="n">ioc容器加载处理完相应的bean之后</span><span class="err">，也给我们提供了一个机会（先有</span><span class="n">InitializingBean</span><span class="err">，后有</span><span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span><span class="err">），可以去做一些自己想做的事。其实这也就是</span><span class="n">spring</span> <span class="n">ioc容器给提供的一个扩展的地方</span><span class="err">。我们可以这样使用这个扩展机制。</span>
+
+<span class="err">作者：</span><span class="n">AmeeLove</span>
+<span class="err">链接：</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="p">.</span><span class="n">jianshu</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">p</span><span class="o">/</span><span class="mi">4</span><span class="n">bd3f68cb179</span>
+<span class="err">来源：简书</span>
+<span class="err">著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</span>
+</code></pre>
+    </div>
     <p>
      大致就是在所有容器都初始化完成以后，会触发执行
     </p>
@@ -114,50 +110,44 @@
     <p>
      获取以后遍历开启线程去进行注册，获取Bean的过程大致就是这样了
     </p>
-    <p>
-     ```java
-public class ApacheDubboServiceBeanPostProcessor implements ApplicationListener
-     <contextrefreshedevent>
-      {
-     </contextrefreshedevent>
-    </p>
-    <pre><pre>// DubboConfig(adminUrl=http://localhost:9095, contextPath=/dubbo, appName=dubbo)
-private DubboConfig dubboConfig;
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApacheDubboServiceBeanPostProcessor</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span> <span class="p">{</span>
 
-private ExecutorService executorService;
+    <span class="c1">// DubboConfig(adminUrl=http://localhost:9095, contextPath=/dubbo, appName=dubbo)</span>
+    <span class="kd">private</span> <span class="n">DubboConfig</span> <span class="n">dubboConfig</span><span class="p">;</span>
 
-// http://localhost:9095/soul-client/dubbo-register
-private final String url;
+    <span class="kd">private</span> <span class="n">ExecutorService</span> <span class="n">executorService</span><span class="p">;</span>
 
-public ApacheDubboServiceBeanPostProcessor(final DubboConfig dubboConfig) {
-    String contextPath = dubboConfig.getContextPath();
-    String adminUrl = dubboConfig.getAdminUrl();
-    if (StringUtils.isEmpty(contextPath)
-            || StringUtils.isEmpty(adminUrl)) {
-        throw new RuntimeException("apache dubbo client must config the contextPath, adminUrl");
-    }
-    this.dubboConfig = dubboConfig;
-    url = dubboConfig.getAdminUrl() + "/soul-client/dubbo-register";
-    executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue&lt;&gt;());
-}
+    <span class="c1">// http://localhost:9095/soul-client/dubbo-register</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">url</span><span class="p">;</span>
 
-@Override
-public void onApplicationEvent(final ContextRefreshedEvent contextRefreshedEvent) {
-    if (Objects.nonNull(contextRefreshedEvent.getApplicationContext().getParent())) {
-        return;
-    }
-    // Fix bug(https://github.com/dromara/soul/issues/415), upload dubbo metadata on ContextRefreshedEvent
-    Map&lt;String, ServiceBean&gt; serviceBean = contextRefreshedEvent.getApplicationContext().getBeansOfType(ServiceBean.class);
-    for (Map.Entry&lt;String, ServiceBean&gt; entry : serviceBean.entrySet()) {
-        executorService.execute(() -&gt; handler(entry.getValue()));
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h3>
+    <span class="kd">public</span> <span class="nf">ApacheDubboServiceBeanPostProcessor</span><span class="p">(</span><span class="kd">final</span> <span class="n">DubboConfig</span> <span class="n">dubboConfig</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">contextPath</span> <span class="o">=</span> <span class="n">dubboConfig</span><span class="p">.</span><span class="na">getContextPath</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">adminUrl</span> <span class="o">=</span> <span class="n">dubboConfig</span><span class="p">.</span><span class="na">getAdminUrl</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">contextPath</span><span class="p">)</span>
+                <span class="o">||</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">adminUrl</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">RuntimeException</span><span class="p">(</span><span class="s">"apache dubbo client must config the contextPath, adminUrl"</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">dubboConfig</span> <span class="o">=</span> <span class="n">dubboConfig</span><span class="p">;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">dubboConfig</span><span class="p">.</span><span class="na">getAdminUrl</span><span class="p">()</span> <span class="o">+</span> <span class="s">"/soul-client/dubbo-register"</span><span class="p">;</span>
+        <span class="n">executorService</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="n">L</span><span class="p">,</span> <span class="n">TimeUnit</span><span class="p">.</span><span class="na">MILLISECONDS</span><span class="p">,</span> <span class="k">new</span> <span class="n">LinkedBlockingQueue</span><span class="o">&lt;&gt;</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onApplicationEvent</span><span class="p">(</span><span class="kd">final</span> <span class="n">ContextRefreshedEvent</span> <span class="n">contextRefreshedEvent</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">nonNull</span><span class="p">(</span><span class="n">contextRefreshedEvent</span><span class="p">.</span><span class="na">getApplicationContext</span><span class="p">().</span><span class="na">getParent</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="c1">// Fix bug(https://github.com/dromara/soul/issues/415), upload dubbo metadata on ContextRefreshedEvent</span>
+        <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">ServiceBean</span><span class="o">&gt;</span> <span class="n">serviceBean</span> <span class="o">=</span> <span class="n">contextRefreshedEvent</span><span class="p">.</span><span class="na">getApplicationContext</span><span class="p">().</span><span class="na">getBeansOfType</span><span class="p">(</span><span class="n">ServiceBean</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">Map</span><span class="p">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">ServiceBean</span><span class="o">&gt;</span> <span class="n">entry</span> <span class="p">:</span> <span class="n">serviceBean</span><span class="p">.</span><span class="na">entrySet</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">executorService</span><span class="p">.</span><span class="na">execute</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="n">handler</span><span class="p">(</span><span class="n">entry</span><span class="p">.</span><span class="na">getValue</span><span class="p">()));</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="_3">
      判断是否需要注册
     </h3>
     <p>
@@ -172,42 +162,36 @@ public void onApplicationEvent(final ContextRefreshedEvent contextRefreshedEvent
     <p>
      最后遍历类中的所有方法，如果有SoulDubboClient注解，将其接口注入到Admin中
     </p>
-    <p>
-     ```java
-public class ApacheDubboServiceBeanPostProcessor implements ApplicationListener
-     <contextrefreshedevent>
-      {
-     </contextrefreshedevent>
-    </p>
-    <pre><pre>private void handler(final ServiceBean serviceBean) {
-    // clazz == org.dromara.soul.examples.apache.dubbo.service.impl.DubboTestServiceImpl
-    Class&lt;?&gt; clazz = serviceBean.getRef().getClass();
-    // 这应该是得到反射代理生成的原本的类吧（为啥不能直接使用代理类呢？）
-    if (ClassUtils.isCglibProxyClass(clazz)) {
-        String superClassName = clazz.getGenericSuperclass().getTypeName();
-        try {
-            clazz = Class.forName(superClassName);
-        } catch (ClassNotFoundException e) {
-            log.error(String.format("class not found: %s", superClassName));
-            return;
-        }
-    }
-    // 遍历所有的方法，如果有相关的注解，则注册到Admin中
-    final Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(clazz);
-    for (Method method : methods) {
-        // public org.dromara.soul.examples.dubbo.api.entity.DubboTest org.dromara.soul.examples.apache.dubbo.service.impl.DubboTestServiceImpl.insert(org.dromara.soul.examples.dubbo.api.entity.DubboTest)
-        SoulDubboClient soulDubboClient = method.getAnnotation(SoulDubboClient.class);
-        if (Objects.nonNull(soulDubboClient)) {
-            RegisterUtils.doRegister(buildJsonParams(serviceBean, soulDubboClient, method), url, RpcTypeEnum.DUBBO);
-        }
-    }
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApacheDubboServiceBeanPostProcessor</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">handler</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServiceBean</span> <span class="n">serviceBean</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// clazz == org.dromara.soul.examples.apache.dubbo.service.impl.DubboTestServiceImpl</span>
+        <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span> <span class="o">=</span> <span class="n">serviceBean</span><span class="p">.</span><span class="na">getRef</span><span class="p">().</span><span class="na">getClass</span><span class="p">();</span>
+        <span class="c1">// 这应该是得到反射代理生成的原本的类吧（为啥不能直接使用代理类呢？）</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ClassUtils</span><span class="p">.</span><span class="na">isCglibProxyClass</span><span class="p">(</span><span class="n">clazz</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">String</span> <span class="n">superClassName</span> <span class="o">=</span> <span class="n">clazz</span><span class="p">.</span><span class="na">getGenericSuperclass</span><span class="p">().</span><span class="na">getTypeName</span><span class="p">();</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="n">clazz</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="n">superClassName</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">ClassNotFoundException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">"class not found: %s"</span><span class="p">,</span> <span class="n">superClassName</span><span class="p">));</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="c1">// 遍历所有的方法，如果有相关的注解，则注册到Admin中</span>
+        <span class="kd">final</span> <span class="n">Method</span><span class="o">[]</span> <span class="n">methods</span> <span class="o">=</span> <span class="n">ReflectionUtils</span><span class="p">.</span><span class="na">getUniqueDeclaredMethods</span><span class="p">(</span><span class="n">clazz</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">Method</span> <span class="n">method</span> <span class="p">:</span> <span class="n">methods</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// public org.dromara.soul.examples.dubbo.api.entity.DubboTest org.dromara.soul.examples.apache.dubbo.service.impl.DubboTestServiceImpl.insert(org.dromara.soul.examples.dubbo.api.entity.DubboTest)</span>
+            <span class="n">SoulDubboClient</span> <span class="n">soulDubboClient</span> <span class="o">=</span> <span class="n">method</span><span class="p">.</span><span class="na">getAnnotation</span><span class="p">(</span><span class="n">SoulDubboClient</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">nonNull</span><span class="p">(</span><span class="n">soulDubboClient</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">RegisterUtils</span><span class="p">.</span><span class="na">doRegister</span><span class="p">(</span><span class="n">buildJsonParams</span><span class="p">(</span><span class="n">serviceBean</span><span class="p">,</span> <span class="n">soulDubboClient</span><span class="p">,</span> <span class="n">method</span><span class="p">),</span> <span class="n">url</span><span class="p">,</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">DUBBO</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="_4">
      注册信息
     </h3>
     <p>
@@ -216,92 +200,86 @@ public class ApacheDubboServiceBeanPostProcessor implements ApplicationListener
     <p>
      我们没有看到像HTTP的那些IP和端口之类的信息，但联想到RPC的相关知识，大致知道Dubbo已经将其注册到Zookeeper中了
     </p>
-    <p>
-     ```java
-public class ApacheDubboServiceBeanPostProcessor implements ApplicationListener
-     <contextrefreshedevent>
-      {
-     </contextrefreshedevent>
-    </p>
-    <pre><pre>// DubboConfig(adminUrl=http://localhost:9095, contextPath=/dubbo, appName=dubbo)
-private DubboConfig dubboConfig;
+    <div class="codehilite">
+     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApacheDubboServiceBeanPostProcessor</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span> <span class="p">{</span>
 
-private ExecutorService executorService;
+    <span class="c1">// DubboConfig(adminUrl=http://localhost:9095, contextPath=/dubbo, appName=dubbo)</span>
+    <span class="kd">private</span> <span class="n">DubboConfig</span> <span class="n">dubboConfig</span><span class="p">;</span>
 
-// http://localhost:9095/soul-client/dubbo-register
-private final String url;
+    <span class="kd">private</span> <span class="n">ExecutorService</span> <span class="n">executorService</span><span class="p">;</span>
 
-private String buildJsonParams(final ServiceBean serviceBean, final SoulDubboClient soulDubboClient, final Method method) {
-    String appName = dubboConfig.getAppName();
-    if (StringUtils.isEmpty(appName)) {
-        appName = serviceBean.getApplication().getName();
-    }
-    String path = dubboConfig.getContextPath() + soulDubboClient.path();
-    String desc = soulDubboClient.desc();
-    // org.dromara.soul.examples.dubbo.api.service.DubboTestService
-    String serviceName = serviceBean.getInterface();
-    String configRuleName = soulDubboClient.ruleName();
-    // /dubbo/findAll
-    String ruleName = ("".equals(configRuleName)) ? path : configRuleName;
-    String methodName = method.getName();
-    Class&lt;?&gt;[] parameterTypesClazz = method.getParameterTypes();
-    String parameterTypes = Arrays.stream(parameterTypesClazz).map(Class::getName)
-            .collect(Collectors.joining(","));
-    MetaDataDTO metaDataDTO = MetaDataDTO.builder()
-            .appName(appName)
-            .serviceName(serviceName)
-            .methodName(methodName)
-            .contextPath(dubboConfig.getContextPath())
-            .path(path)
-            .ruleName(ruleName)
-            .pathDesc(desc)
-            .parameterTypes(parameterTypes)
-            .rpcExt(buildRpcExt(serviceBean))
-            .rpcType("dubbo")
-            .enabled(soulDubboClient.enabled())
-            .build();
-    return OkHttpTools.getInstance().getGson().toJson(metaDataDTO);
+    <span class="c1">// http://localhost:9095/soul-client/dubbo-register</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">url</span><span class="p">;</span>
 
-}
+    <span class="kd">private</span> <span class="n">String</span> <span class="nf">buildJsonParams</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServiceBean</span> <span class="n">serviceBean</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulDubboClient</span> <span class="n">soulDubboClient</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Method</span> <span class="n">method</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">appName</span> <span class="o">=</span> <span class="n">dubboConfig</span><span class="p">.</span><span class="na">getAppName</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">appName</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">appName</span> <span class="o">=</span> <span class="n">serviceBean</span><span class="p">.</span><span class="na">getApplication</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="n">String</span> <span class="n">path</span> <span class="o">=</span> <span class="n">dubboConfig</span><span class="p">.</span><span class="na">getContextPath</span><span class="p">()</span> <span class="o">+</span> <span class="n">soulDubboClient</span><span class="p">.</span><span class="na">path</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">desc</span> <span class="o">=</span> <span class="n">soulDubboClient</span><span class="p">.</span><span class="na">desc</span><span class="p">();</span>
+        <span class="c1">// org.dromara.soul.examples.dubbo.api.service.DubboTestService</span>
+        <span class="n">String</span> <span class="n">serviceName</span> <span class="o">=</span> <span class="n">serviceBean</span><span class="p">.</span><span class="na">getInterface</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">configRuleName</span> <span class="o">=</span> <span class="n">soulDubboClient</span><span class="p">.</span><span class="na">ruleName</span><span class="p">();</span>
+        <span class="c1">// /dubbo/findAll</span>
+        <span class="n">String</span> <span class="n">ruleName</span> <span class="o">=</span> <span class="p">(</span><span class="s">""</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">configRuleName</span><span class="p">))</span> <span class="o">?</span> <span class="n">path</span> <span class="p">:</span> <span class="n">configRuleName</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">methodName</span> <span class="o">=</span> <span class="n">method</span><span class="p">.</span><span class="na">getName</span><span class="p">();</span>
+        <span class="n">Class</span><span class="o">&lt;?&gt;[]</span> <span class="n">parameterTypesClazz</span> <span class="o">=</span> <span class="n">method</span><span class="p">.</span><span class="na">getParameterTypes</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">parameterTypes</span> <span class="o">=</span> <span class="n">Arrays</span><span class="p">.</span><span class="na">stream</span><span class="p">(</span><span class="n">parameterTypesClazz</span><span class="p">).</span><span class="na">map</span><span class="p">(</span><span class="n">Class</span><span class="p">::</span><span class="n">getName</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">collect</span><span class="p">(</span><span class="n">Collectors</span><span class="p">.</span><span class="na">joining</span><span class="p">(</span><span class="s">","</span><span class="p">));</span>
+        <span class="n">MetaDataDTO</span> <span class="n">metaDataDTO</span> <span class="o">=</span> <span class="n">MetaDataDTO</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">appName</span><span class="p">(</span><span class="n">appName</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">serviceName</span><span class="p">(</span><span class="n">serviceName</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">methodName</span><span class="p">(</span><span class="n">methodName</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">contextPath</span><span class="p">(</span><span class="n">dubboConfig</span><span class="p">.</span><span class="na">getContextPath</span><span class="p">())</span>
+                <span class="p">.</span><span class="na">path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">ruleName</span><span class="p">(</span><span class="n">ruleName</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">pathDesc</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">parameterTypes</span><span class="p">(</span><span class="n">parameterTypes</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">rpcExt</span><span class="p">(</span><span class="n">buildRpcExt</span><span class="p">(</span><span class="n">serviceBean</span><span class="p">))</span>
+                <span class="p">.</span><span class="na">rpcType</span><span class="p">(</span><span class="s">"dubbo"</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">enabled</span><span class="p">(</span><span class="n">soulDubboClient</span><span class="p">.</span><span class="na">enabled</span><span class="p">())</span>
+                <span class="p">.</span><span class="na">build</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">OkHttpTools</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">getGson</span><span class="p">().</span><span class="na">toJson</span><span class="p">(</span><span class="n">metaDataDTO</span><span class="p">);</span>
 
-private String buildRpcExt(final ServiceBean serviceBean) {
-    MetaDataDTO.RpcExt build = MetaDataDTO.RpcExt.builder()
-            .group(StringUtils.isNotEmpty(serviceBean.getGroup()) ? serviceBean.getGroup() : "")
-            .version(StringUtils.isNotEmpty(serviceBean.getVersion()) ? serviceBean.getVersion() : "")
-            .loadbalance(StringUtils.isNotEmpty(serviceBean.getLoadbalance()) ? serviceBean.getLoadbalance() : Constants.DEFAULT_LOADBALANCE)
-            .retries(Objects.isNull(serviceBean.getRetries()) ? Constants.DEFAULT_RETRIES : serviceBean.getRetries())
-            .timeout(Objects.isNull(serviceBean.getTimeout()) ? Constants.DEFAULT_CONNECT_TIMEOUT : serviceBean.getTimeout())
-            .url("")
-            .build();
-    return OkHttpTools.getInstance().getGson().toJson(build);
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h3>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">String</span> <span class="nf">buildRpcExt</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServiceBean</span> <span class="n">serviceBean</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">MetaDataDTO</span><span class="p">.</span><span class="na">RpcExt</span> <span class="n">build</span> <span class="o">=</span> <span class="n">MetaDataDTO</span><span class="p">.</span><span class="na">RpcExt</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">group</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">serviceBean</span><span class="p">.</span><span class="na">getGroup</span><span class="p">())</span> <span class="o">?</span> <span class="n">serviceBean</span><span class="p">.</span><span class="na">getGroup</span><span class="p">()</span> <span class="p">:</span> <span class="s">""</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">version</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">serviceBean</span><span class="p">.</span><span class="na">getVersion</span><span class="p">())</span> <span class="o">?</span> <span class="n">serviceBean</span><span class="p">.</span><span class="na">getVersion</span><span class="p">()</span> <span class="p">:</span> <span class="s">""</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">loadbalance</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNotEmpty</span><span class="p">(</span><span class="n">serviceBean</span><span class="p">.</span><span class="na">getLoadbalance</span><span class="p">())</span> <span class="o">?</span> <span class="n">serviceBean</span><span class="p">.</span><span class="na">getLoadbalance</span><span class="p">()</span> <span class="p">:</span> <span class="n">Constants</span><span class="p">.</span><span class="na">DEFAULT_LOADBALANCE</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">retries</span><span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">serviceBean</span><span class="p">.</span><span class="na">getRetries</span><span class="p">())</span> <span class="o">?</span> <span class="n">Constants</span><span class="p">.</span><span class="na">DEFAULT_RETRIES</span> <span class="p">:</span> <span class="n">serviceBean</span><span class="p">.</span><span class="na">getRetries</span><span class="p">())</span>
+                <span class="p">.</span><span class="na">timeout</span><span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">serviceBean</span><span class="p">.</span><span class="na">getTimeout</span><span class="p">())</span> <span class="o">?</span> <span class="n">Constants</span><span class="p">.</span><span class="na">DEFAULT_CONNECT_TIMEOUT</span> <span class="p">:</span> <span class="n">serviceBean</span><span class="p">.</span><span class="na">getTimeout</span><span class="p">())</span>
+                <span class="p">.</span><span class="na">url</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">build</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">OkHttpTools</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">getGson</span><span class="p">().</span><span class="na">toJson</span><span class="p">(</span><span class="n">build</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="apache-dubbo">
      Apache Dubbo 注册调用梳理
     </h3>
     <p>
      下面是最终发送的请求信息，不像HTTP那样直观，如果没有接触过RPC，可以感觉有点懵，这里梳理一下RPC相关的注册调用流程
     </p>
-    <p>
-     <pre>json
-{
-    "appName": "dubbo",
-    "contextPath": "/dubbo",
-    "path": "/dubbo/insert",
-    "pathDesc": "Insert a row of data",
-    "rpcType": "dubbo",
-    "serviceName": "org.dromara.soul.examples.dubbo.api.service.DubboTestService",
-    "methodName": "insert",
-    "ruleName": "/dubbo/insert",
-    "parameterTypes": "org.dromara.soul.examples.dubbo.api.entity.DubboTest",
-    "rpcExt": "{\"group\":\"\",\"version\":\"\",\"loadbalance\":\"random\",\"retries\":2,\"timeout\":10000,\"url\":\"\"}",
-    "enabled": true
-}</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="p">{</span>
+    <span class="nt">"appName"</span><span class="p">:</span> <span class="s2">"dubbo"</span><span class="p">,</span>
+    <span class="nt">"contextPath"</span><span class="p">:</span> <span class="s2">"/dubbo"</span><span class="p">,</span>
+    <span class="nt">"path"</span><span class="p">:</span> <span class="s2">"/dubbo/insert"</span><span class="p">,</span>
+    <span class="nt">"pathDesc"</span><span class="p">:</span> <span class="s2">"Insert a row of data"</span><span class="p">,</span>
+    <span class="nt">"rpcType"</span><span class="p">:</span> <span class="s2">"dubbo"</span><span class="p">,</span>
+    <span class="nt">"serviceName"</span><span class="p">:</span> <span class="s2">"org.dromara.soul.examples.dubbo.api.service.DubboTestService"</span><span class="p">,</span>
+    <span class="nt">"methodName"</span><span class="p">:</span> <span class="s2">"insert"</span><span class="p">,</span>
+    <span class="nt">"ruleName"</span><span class="p">:</span> <span class="s2">"/dubbo/insert"</span><span class="p">,</span>
+    <span class="nt">"parameterTypes"</span><span class="p">:</span> <span class="s2">"org.dromara.soul.examples.dubbo.api.entity.DubboTest"</span><span class="p">,</span>
+    <span class="nt">"rpcExt"</span><span class="p">:</span> <span class="s2">"{\"group\":\"\",\"version\":\"\",\"loadbalance\":\"random\",\"retries\":2,\"timeout\":10000,\"url\":\"\"}"</span><span class="p">,</span>
+    <span class="nt">"enabled"</span><span class="p">:</span> <span class="kc">true</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      一个Dubbo的注册和调用流程图如下：
     </p>
@@ -320,7 +298,7 @@ private String buildRpcExt(final ServiceBean serviceBean) {
     <p>
      当请求进行访问时，Soul网关直接调用Dubbo的客户端，让它去访问后台的Dubbo服务，拿到结果后返回即可
     </p>
-    <h2>
+    <h2 id="_5">
      总结
     </h2>
     <p>
@@ -358,13 +336,13 @@ private String buildRpcExt(final ServiceBean serviceBean) {
     <p>
      最后留一个疑问：为啥不能使用发射代理进行注册？
     </p>
-    <h2>
+    <h2 id="soul">
      Soul网关源码解析文章列表
     </h2>
-    <h3>
+    <h3 id="_6">
      掘金
     </h3>
-    <h4>
+    <h4 id="_7">
      了解与初步运行
     </h4>
     <ul>
@@ -379,7 +357,7 @@ private String buildRpcExt(final ServiceBean serviceBean) {
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="_8">
      请求处理流程解析
     </h4>
     <ul>
@@ -429,7 +407,7 @@ private String buildRpcExt(final ServiceBean serviceBean) {
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="_9">
      数据同步解析
     </h4>
     <ul>
@@ -489,7 +467,7 @@ private String buildRpcExt(final ServiceBean serviceBean) {
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="soul-client">
      Soul-Client模块
     </h4>
     <ul>
@@ -499,7 +477,7 @@ private String buildRpcExt(final ServiceBean serviceBean) {
       </a>
      </li>
     </ul>
-    <h4>
+    <h4 id="_10">
      番外
     </h4>
     <ul>

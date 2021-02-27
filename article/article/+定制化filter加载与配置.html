@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,229 +43,196 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="spring-cloud-gateway-filter">
      Spring Cloud Gateway (八) 定制化filter的配置(路由匹配概览)
     </h1>
     <hr/>
-    <h3>
+    <h3 id="filter">
      定制化filter的来源
     </h3>
     <p>
      非 global filter 从 routeLocator 中获取的，跟踪 routeLocator 看其的来源
     </p>
-    <p>
-     ```java
-    </p>
-    <h1>
-     class RoutePredicateHandlerMapping
-    </h1>
-    <pre><pre>protected Mono&lt;Route&gt; lookupRoute(ServerWebExchange exchange) {
-    // routeLocator 跟踪堆栈发现是 CachingRouteLocator
-    return this.routeLocator.getRoutes()
-            .concatMap(route -&gt; Mono.just(route).filterWhen(r -&gt; {
-                ......
-            })
-            .next()
-                ......
-            .map(route -&gt; {
-                ......
-            });
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">#</span> <span class="kd">class</span> <span class="nc">RoutePredicateHandlerMapping</span>
+    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Route</span><span class="o">&gt;</span> <span class="nf">lookupRoute</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// routeLocator 跟踪堆栈发现是 CachingRouteLocator</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">routeLocator</span><span class="p">.</span><span class="na">getRoutes</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">concatMap</span><span class="p">(</span><span class="n">route</span> <span class="o">-&gt;</span> <span class="n">Mono</span><span class="p">.</span><span class="na">just</span><span class="p">(</span><span class="n">route</span><span class="p">).</span><span class="na">filterWhen</span><span class="p">(</span><span class="n">r</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                    <span class="p">......</span>
+                <span class="p">})</span>
+                <span class="p">.</span><span class="na">next</span><span class="p">()</span>
+                    <span class="p">......</span>
+                <span class="p">.</span><span class="na">map</span><span class="p">(</span><span class="n">route</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                    <span class="p">......</span>
+                <span class="p">});</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      再跟踪 CachingRouteLocator ，发现是从 CompositeRouteLocator 来的
     </p>
-    <p>
-     ```java
-    public CachingRouteLocator(RouteLocator delegate) {
-        this.delegate = delegate;
-    </p>
-    <pre><pre>    // 这里提供一种Flux流缓存构造方式，他的意思是，当cache没有的时候，
-    // 我们执行this.delegate.getRoutes().sort(AnnotationAwareOrderComparator.INSTANCE)获得Flux流，并把这个结果写入cache这个Map。
-    // 这不会马上执行，当有subscribe才会执行。是懒加载方式。
-    routes = CacheFlux.lookup(cache, CACHE_KEY, Route.class)
-            .onCacheMissResume(this::fetch);
-}
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="nf">CachingRouteLocator</span><span class="p">(</span><span class="n">RouteLocator</span> <span class="n">delegate</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">delegate</span> <span class="o">=</span> <span class="n">delegate</span><span class="p">;</span>
 
-private Flux&lt;Route&gt; fetch() {
-    // 这个方法是一个核心的方法。负责把所有routeDefinition转换为route。是连接RouteDefinitionLocator和RouteLocator的通道
-    return this.delegate.getRoutes().sort(AnnotationAwareOrderComparator.INSTANCE);
-}
+        <span class="c1">// 这里提供一种Flux流缓存构造方式，他的意思是，当cache没有的时候，</span>
+        <span class="c1">// 我们执行this.delegate.getRoutes().sort(AnnotationAwareOrderComparator.INSTANCE)获得Flux流，并把这个结果写入cache这个Map。</span>
+        <span class="c1">// 这不会马上执行，当有subscribe才会执行。是懒加载方式。</span>
+        <span class="n">routes</span> <span class="o">=</span> <span class="n">CacheFlux</span><span class="p">.</span><span class="na">lookup</span><span class="p">(</span><span class="n">cache</span><span class="p">,</span> <span class="n">CACHE_KEY</span><span class="p">,</span> <span class="n">Route</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">onCacheMissResume</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">fetch</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">Flux</span><span class="o">&lt;</span><span class="n">Route</span><span class="o">&gt;</span> <span class="nf">fetch</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// 这个方法是一个核心的方法。负责把所有routeDefinition转换为route。是连接RouteDefinitionLocator和RouteLocator的通道</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">delegate</span><span class="p">.</span><span class="na">getRoutes</span><span class="p">().</span><span class="na">sort</span><span class="p">(</span><span class="n">AnnotationAwareOrderComparator</span><span class="p">.</span><span class="na">INSTANCE</span><span class="p">);</span>
+    <span class="p">}</span>
 
 
-@Bean
-@Primary
-@ConditionalOnMissingBean(name = "cachedCompositeRouteLocator")
-// TODO: property to disable composite?
-public RouteLocator cachedCompositeRouteLocator(List&lt;RouteLocator&gt; routeLocators) {
-    // routeLocators 里面有大量的 定制化的 filter factory
-    return new CachingRouteLocator(new CompositeRouteLocator(Flux.fromIterable(routeLocators)));
-}
+    <span class="nd">@Bean</span>
+    <span class="nd">@Primary</span>
+    <span class="nd">@ConditionalOnMissingBean</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"cachedCompositeRouteLocator"</span><span class="p">)</span>
+    <span class="c1">// TODO: property to disable composite?</span>
+    <span class="kd">public</span> <span class="n">RouteLocator</span> <span class="nf">cachedCompositeRouteLocator</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">RouteLocator</span><span class="o">&gt;</span> <span class="n">routeLocators</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// routeLocators 里面有大量的 定制化的 filter factory</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">CachingRouteLocator</span><span class="p">(</span><span class="k">new</span> <span class="n">CompositeRouteLocator</span><span class="p">(</span><span class="n">Flux</span><span class="p">.</span><span class="na">fromIterable</span><span class="p">(</span><span class="n">routeLocators</span><span class="p">)));</span>
+    <span class="p">}</span>
 
-public Flux&lt;Route&gt; getRoutes() {
-    return this.delegates.flatMapSequential(RouteLocator::getRoutes);
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <span class="kd">public</span> <span class="n">Flux</span><span class="o">&lt;</span><span class="n">Route</span><span class="o">&gt;</span> <span class="nf">getRoutes</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">delegates</span><span class="p">.</span><span class="na">flatMapSequential</span><span class="p">(</span><span class="n">RouteLocator</span><span class="p">::</span><span class="n">getRoutes</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      跟踪 CompositeRouteLocator 发现是初始化加载就初始化好了，大致流程是知道，细节后面再看，因为这部分属于加载了，后面分析这部分的时候再分析
     </p>
     <p>
      下面回头来看route的匹配，在下面的一段代码中，好像是相关匹配功能的
     </p>
-    <p>
-     <pre>java
-    protected Mono&lt;Route&gt; lookupRoute(ServerWebExchange exchange) {
-        return this.routeLocator.getRoutes()
-                // filterWhen 是返回的 true 和 false ，应该是起过滤的作用，但它后面的逻辑没有搞懂，不知道具体是怎么匹配的
-                .concatMap(route -&gt; Mono.just(route).filterWhen(r -&gt; {
-                    exchange.getAttributes().put(GATEWAY_PREDICATE_ROUTE_ATTR, r.getId());
-                    return r.getPredicate().apply(exchange);
-                })
-                        .doOnError(e -&gt; logger.error(
-                                "Error applying predicate for route: " + route.getId(),
-                                e))
-                        .onErrorResume(e -&gt; Mono.empty()))
-                .next()
-                .map(route -&gt; {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Route matched: " + route.getId());
-                    }
-                    validateRoute(route, exchange);
-                    return route;
-                });
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Route</span><span class="o">&gt;</span> <span class="nf">lookupRoute</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">routeLocator</span><span class="p">.</span><span class="na">getRoutes</span><span class="p">()</span>
+                <span class="c1">// filterWhen 是返回的 true 和 false ，应该是起过滤的作用，但它后面的逻辑没有搞懂，不知道具体是怎么匹配的</span>
+                <span class="p">.</span><span class="na">concatMap</span><span class="p">(</span><span class="n">route</span> <span class="o">-&gt;</span> <span class="n">Mono</span><span class="p">.</span><span class="na">just</span><span class="p">(</span><span class="n">route</span><span class="p">).</span><span class="na">filterWhen</span><span class="p">(</span><span class="n">r</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                    <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">GATEWAY_PREDICATE_ROUTE_ATTR</span><span class="p">,</span> <span class="n">r</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span>
+                    <span class="k">return</span> <span class="n">r</span><span class="p">.</span><span class="na">getPredicate</span><span class="p">().</span><span class="na">apply</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+                <span class="p">})</span>
+                        <span class="p">.</span><span class="na">doOnError</span><span class="p">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">logger</span><span class="p">.</span><span class="na">error</span><span class="p">(</span>
+                                <span class="s">"Error applying predicate for route: "</span> <span class="o">+</span> <span class="n">route</span><span class="p">.</span><span class="na">getId</span><span class="p">(),</span>
+                                <span class="n">e</span><span class="p">))</span>
+                        <span class="p">.</span><span class="na">onErrorResume</span><span class="p">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">()))</span>
+                <span class="p">.</span><span class="na">next</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">map</span><span class="p">(</span><span class="n">route</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+                        <span class="n">logger</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"Route matched: "</span> <span class="o">+</span> <span class="n">route</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span>
+                    <span class="p">}</span>
+                    <span class="n">validateRoute</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">exchange</span><span class="p">);</span>
+                    <span class="k">return</span> <span class="n">route</span><span class="p">;</span>
+                <span class="p">});</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      跟踪调用栈来到下面这段代码，可以看到返回的bool，但具体是怎么匹配的，没有搞懂
     </p>
-    <p>
-     <pre>java
-        public Publisher&lt;Boolean&gt; apply(T t) {
-            return Mono.from(left.apply(t)).flatMap(
-                    result -&gt; !result ? Mono.just(false) : Mono.from(right.apply(t)));
-        }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>        <span class="kd">public</span> <span class="n">Publisher</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span> <span class="nf">apply</span><span class="p">(</span><span class="n">T</span> <span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">left</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">t</span><span class="p">)).</span><span class="na">flatMap</span><span class="p">(</span>
+                    <span class="n">result</span> <span class="o">-&gt;</span> <span class="o">!</span><span class="n">result</span> <span class="o">?</span> <span class="n">Mono</span><span class="p">.</span><span class="na">just</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span> <span class="p">:</span> <span class="n">Mono</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">right</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">t</span><span class="p">)));</span>
+        <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      上面到这一直找不到这部分的细节，于是是看了骆老哥的相关于 predicate （断言）的一些学习笔记，知道了断言在一开始需要进行配置加载，接口类是： RoutePredicateFactory ，于是我们搜索定位到这个类，看看有哪些实现类，发现了两个和本次程序示例非常相关的两个： PathRoutePredicateFactory ， MethodRoutePredicateFactory ，寻找匹配相关的代码，给打上断点，在 PathRoutePredicateFactory 中打断点的相关代码如下：
     </p>
     <p>
      这里看到明显的返回布尔值的相关代码，在之前的分析中就是需要返回布尔值，打上断点后，调式确实进入了，到这终于找到了相关的匹配逻辑
     </p>
-    <p>
-     ```java
-    </p>
-    <h1>
-     class PathRoutePredicateFactory
-    </h1>
-    <pre><pre>public Predicate&lt;ServerWebExchange&gt; apply(Config config) {
-    final ArrayList&lt;PathPattern&gt; pathPatterns = new ArrayList&lt;&gt;();
-    synchronized (this.pathPatternParser) {
-        pathPatternParser.setMatchOptionalTrailingSeparator(
-                config.isMatchOptionalTrailingSeparator());
-        config.getPatterns().forEach(pattern -&gt; {
-            PathPattern pathPattern = this.pathPatternParser.parse(pattern);
-            pathPatterns.add(pathPattern);
-        });
-    }
-    return new GatewayPredicate() {
-        @Override
-        public boolean test(ServerWebExchange exchange) {
-            PathContainer path = parsePath(
-                    exchange.getRequest().getURI().getRawPath());
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">#</span> <span class="kd">class</span> <span class="nc">PathRoutePredicateFactory</span>
+    <span class="kd">public</span> <span class="n">Predicate</span><span class="o">&lt;</span><span class="n">ServerWebExchange</span><span class="o">&gt;</span> <span class="nf">apply</span><span class="p">(</span><span class="n">Config</span> <span class="n">config</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">PathPattern</span><span class="o">&gt;</span> <span class="n">pathPatterns</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+        <span class="kd">synchronized</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">pathPatternParser</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">pathPatternParser</span><span class="p">.</span><span class="na">setMatchOptionalTrailingSeparator</span><span class="p">(</span>
+                    <span class="n">config</span><span class="p">.</span><span class="na">isMatchOptionalTrailingSeparator</span><span class="p">());</span>
+            <span class="n">config</span><span class="p">.</span><span class="na">getPatterns</span><span class="p">().</span><span class="na">forEach</span><span class="p">(</span><span class="n">pattern</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">PathPattern</span> <span class="n">pathPattern</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">pathPatternParser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="n">pattern</span><span class="p">);</span>
+                <span class="n">pathPatterns</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">pathPattern</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">GatewayPredicate</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">test</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">PathContainer</span> <span class="n">path</span> <span class="o">=</span> <span class="n">parsePath</span><span class="p">(</span>
+                        <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getURI</span><span class="p">().</span><span class="na">getRawPath</span><span class="p">());</span>
 
-            Optional&lt;PathPattern&gt; optionalPathPattern = pathPatterns.stream()
-                    .filter(pattern -&gt; pattern.matches(path)).findFirst();
+                <span class="n">Optional</span><span class="o">&lt;</span><span class="n">PathPattern</span><span class="o">&gt;</span> <span class="n">optionalPathPattern</span> <span class="o">=</span> <span class="n">pathPatterns</span><span class="p">.</span><span class="na">stream</span><span class="p">()</span>
+                        <span class="p">.</span><span class="na">filter</span><span class="p">(</span><span class="n">pattern</span> <span class="o">-&gt;</span> <span class="n">pattern</span><span class="p">.</span><span class="na">matches</span><span class="p">(</span><span class="n">path</span><span class="p">)).</span><span class="na">findFirst</span><span class="p">();</span>
 
-            if (optionalPathPattern.isPresent()) {
-                PathPattern pathPattern = optionalPathPattern.get();
-                traceMatch("Pattern", pathPattern.getPatternString(), path, true);
-                PathMatchInfo pathMatchInfo = pathPattern.matchAndExtract(path);
-                putUriTemplateVariables(exchange, pathMatchInfo.getUriVariables());
-                return true;
-            }
-            else {
-                traceMatch("Pattern", config.getPatterns(), path, false);
-                return false;
-            }
-        }
+                <span class="k">if</span> <span class="p">(</span><span class="n">optionalPathPattern</span><span class="p">.</span><span class="na">isPresent</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="n">PathPattern</span> <span class="n">pathPattern</span> <span class="o">=</span> <span class="n">optionalPathPattern</span><span class="p">.</span><span class="na">get</span><span class="p">();</span>
+                    <span class="n">traceMatch</span><span class="p">(</span><span class="s">"Pattern"</span><span class="p">,</span> <span class="n">pathPattern</span><span class="p">.</span><span class="na">getPatternString</span><span class="p">(),</span> <span class="n">path</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+                    <span class="n">PathMatchInfo</span> <span class="n">pathMatchInfo</span> <span class="o">=</span> <span class="n">pathPattern</span><span class="p">.</span><span class="na">matchAndExtract</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+                    <span class="n">putUriTemplateVariables</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">pathMatchInfo</span><span class="p">.</span><span class="na">getUriVariables</span><span class="p">());</span>
+                    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">else</span> <span class="p">{</span>
+                    <span class="n">traceMatch</span><span class="p">(</span><span class="s">"Pattern"</span><span class="p">,</span> <span class="n">config</span><span class="p">.</span><span class="na">getPatterns</span><span class="p">(),</span> <span class="n">path</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+                    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
 
-        @Override
-        public String toString() {
-            return String.format("Paths: %s, match trailing slash: %b",
-                    config.getPatterns(), config.isMatchOptionalTrailingSeparator());
-        }
-    };
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="n">String</span> <span class="nf">toString</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">"Paths: %s, match trailing slash: %b"</span><span class="p">,</span>
+                        <span class="n">config</span><span class="p">.</span><span class="na">getPatterns</span><span class="p">(),</span> <span class="n">config</span><span class="p">.</span><span class="na">isMatchOptionalTrailingSeparator</span><span class="p">());</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      Path 的匹配逻辑可能有点复杂，看起来不是很直观，但 Method 的就很清晰了，大致如下,明显的匹配逻辑：
     </p>
-    <p>
-     ```java
-    </p>
-    <h1>
-     class MethodRoutePredicateFactory
-    </h1>
-    <pre><pre>public Predicate&lt;ServerWebExchange&gt; apply(Config config) {
-    return new GatewayPredicate() {
-        @Override
-        public boolean test(ServerWebExchange exchange) {
-            HttpMethod requestMethod = exchange.getRequest().getMethod();
-            return stream(config.getMethods())
-                    .anyMatch(httpMethod -&gt; httpMethod == requestMethod);
-        }
-    };
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">#</span> <span class="kd">class</span> <span class="nc">MethodRoutePredicateFactory</span>
+    <span class="kd">public</span> <span class="n">Predicate</span><span class="o">&lt;</span><span class="n">ServerWebExchange</span><span class="o">&gt;</span> <span class="nf">apply</span><span class="p">(</span><span class="n">Config</span> <span class="n">config</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">GatewayPredicate</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">test</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">HttpMethod</span> <span class="n">requestMethod</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getMethod</span><span class="p">();</span>
+                <span class="k">return</span> <span class="n">stream</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getMethods</span><span class="p">())</span>
+                        <span class="p">.</span><span class="na">anyMatch</span><span class="p">(</span><span class="n">httpMethod</span> <span class="o">-&gt;</span> <span class="n">httpMethod</span> <span class="o">==</span> <span class="n">requestMethod</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      接下来看看匹配的和或非之类的逻辑是如何实现的，相关的代码都在之前阻塞的 AsyncPredicate ，配置组合是在 combinePredicates ,可以大致看出在程序启动的时候就配置加载好了。和或非的匹配具体逻辑大致应该是递归之类实现的吧
     </p>
-    <p>
-     ```java
-    private AsyncPredicate
-     <serverwebexchange>
-      combinePredicates(
-            RouteDefinition routeDefinition) {
-        List
-      <predicatedefinition>
-       predicates = routeDefinition.getPredicates();
-        if (predicates == null || predicates.isEmpty()) {
-            // this is a very rare case, but possible, just match all
-            return AsyncPredicate.from(exchange -&gt; true);
-        }
-        AsyncPredicate
-       <serverwebexchange>
-        predicate = lookup(routeDefinition,
-                predicates.get(0));
-       </serverwebexchange>
-      </predicatedefinition>
-     </serverwebexchange>
-    </p>
-    <pre><pre>    for (PredicateDefinition andPredicate : predicates.subList(1,
-            predicates.size())) {
-        AsyncPredicate&lt;ServerWebExchange&gt; found = lookup(routeDefinition,
-                andPredicate);
-        predicate = predicate.and(found);
-    }
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">private</span> <span class="n">AsyncPredicate</span><span class="o">&lt;</span><span class="n">ServerWebExchange</span><span class="o">&gt;</span> <span class="nf">combinePredicates</span><span class="p">(</span>
+            <span class="n">RouteDefinition</span> <span class="n">routeDefinition</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">PredicateDefinition</span><span class="o">&gt;</span> <span class="n">predicates</span> <span class="o">=</span> <span class="n">routeDefinition</span><span class="p">.</span><span class="na">getPredicates</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">predicates</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">predicates</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span> <span class="p">{</span>
+            <span class="c1">// this is a very rare case, but possible, just match all</span>
+            <span class="k">return</span> <span class="n">AsyncPredicate</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">exchange</span> <span class="o">-&gt;</span> <span class="kc">true</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">AsyncPredicate</span><span class="o">&lt;</span><span class="n">ServerWebExchange</span><span class="o">&gt;</span> <span class="n">predicate</span> <span class="o">=</span> <span class="n">lookup</span><span class="p">(</span><span class="n">routeDefinition</span><span class="p">,</span>
+                <span class="n">predicates</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
 
-    return predicate;
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+        <span class="k">for</span> <span class="p">(</span><span class="n">PredicateDefinition</span> <span class="n">andPredicate</span> <span class="p">:</span> <span class="n">predicates</span><span class="p">.</span><span class="na">subList</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">predicates</span><span class="p">.</span><span class="na">size</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="n">AsyncPredicate</span><span class="o">&lt;</span><span class="n">ServerWebExchange</span><span class="o">&gt;</span> <span class="n">found</span> <span class="o">=</span> <span class="n">lookup</span><span class="p">(</span><span class="n">routeDefinition</span><span class="p">,</span>
+                    <span class="n">andPredicate</span><span class="p">);</span>
+            <span class="n">predicate</span> <span class="o">=</span> <span class="n">predicate</span><span class="p">.</span><span class="na">and</span><span class="p">(</span><span class="n">found</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">predicate</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
    </article>
   </div>
   <!-- BG -->

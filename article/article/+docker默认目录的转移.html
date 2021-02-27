@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,35 +43,33 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="docker">
      docker默认目录的转移
     </h1>
     <hr/>
-    <h2>
+    <h2 id="ctenos">
      Ctenos
     </h2>
     <p>
      在后面发现docker的文件的占用空间越来越到，而系统盘的空间较小，需要将其转入另一个比较大的磁盘中
     </p>
-    <h4>
+    <h4 id="_1">
      软链接方式
     </h4>
     <p>
      此方式较为简单，无须修改配置文件
     </p>
-    <p>
-     ```angular2html
-mv /var/lib/docker /home/docker/data
-ln -s /home/docker/data /var/lib/docker
-    </p>
-    <p>
-     chmod a+x /home
-chmod a+x /home/docker
-chmod a+x /home/docker/data
-chmod a+x /var/lib/docker
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">mv</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="k">data</span>
+<span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="k">data</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
+
+<span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">home</span>
+<span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">docker</span>
+<span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="k">data</span>
+<span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
+</code></pre>
+    </div>
+    <h2 id="_2">
      参考链接
     </h2>
     <ul>

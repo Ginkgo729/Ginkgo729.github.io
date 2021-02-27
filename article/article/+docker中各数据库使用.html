@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,20 +43,20 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="docker">
      Docker中数据库的使用
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      相关命令
     </h2>
-    <p>
-     <pre>sh
-docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
-docker run -dit --name neo4j -p 7474:7474 -p 7687:7687 --env=NEO4J_AUTH=none neo4j:3.5.13
-docker run -dit --name redis -p 6379:6379 redis
-docker run -dit --name mongo -p 27017:27017 mongo</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>docker run --name mysql -p <span class="m">3306</span>:3306 -e <span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>root -d mysql:latest
+docker run -dit --name neo4j -p <span class="m">7474</span>:7474 -p <span class="m">7687</span>:7687 --env<span class="o">=</span><span class="nv">NEO4J_AUTH</span><span class="o">=</span>none neo4j:3.5.13
+docker run -dit --name redis -p <span class="m">6379</span>:6379 redis
+docker run -dit --name mongo -p <span class="m">27017</span>:27017 mongo
+</code></pre>
+    </div>
    </article>
   </div>
   <!-- BG -->

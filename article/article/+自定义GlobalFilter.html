@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,17 +43,17 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="spring-cloud-gateway-global-filter">
      Spring Cloud Gateway (六) 自定义 Global Filter
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      在前面五篇的分析中，对 Spring Cloud Gateway 的 filter 组件有了一个大概的认知，今天就练练手，写一个统计请求返回时长的 global filter
     </p>
-    <h2>
+    <h2 id="_2">
      思路整理
     </h2>
     <p>
@@ -66,109 +67,101 @@
       Ordered ： 需要重写 getOrder 方法，决定自定义 filter 在链中的位置，按照数字大小进行的排序
      </li>
     </ul>
-    <h3>
+    <h3 id="filter">
      自定义时长统计 filter 编写
     </h3>
     <p>
      这里就简单的借鉴下 GatewayMetricsFilter 的写法，在 filter 链触发完成后，无论失败或者成功，都进行统计。filter 次序就简单的取 WRITE_RESPONSE_FILTER_ORDER 之后（用它定义的次序减一）。代码大致如下：
     </p>
-    <p>
-     ```java
-/*
-     <em>
-      * 统计一次请求在filter链中的时长
- *
- * @author lw1243925457
-     </em>
-     /
-public class DurationStatisticsFilter implements GlobalFilter, Ordered {
-    </p>
-    <pre><pre>private static final Log log = LogFactory.getLog(DurationStatisticsFilter.class);
-private static final String START_STAMP = "startStamp";
+    <div class="codehilite">
+     <pre><span></span><code><span class="cm">/**</span>
+<span class="cm"> * 统计一次请求在filter链中的时长</span>
+<span class="cm"> *</span>
+<span class="cm"> * @author lw1243925457</span>
+<span class="cm"> */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DurationStatisticsFilter</span> <span class="kd">implements</span> <span class="n">GlobalFilter</span><span class="p">,</span> <span class="n">Ordered</span> <span class="p">{</span>
 
-/**
- * 请求响应时长统计
- * 1.首先将请求进来时的时间戳写入到 exchange中
- * 2.filter链走完后，无论成功或者失败，都视为完成，从exchange取出开始时间戳，打印时长信息
- * @param exchange the current server exchange
- * @param chain provides a way to delegate to the next filter
- * @return mono
- */
-@Override
-public Mono&lt;Void&gt; filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-    log.debug("duration statistics filter");
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Log</span> <span class="n">log</span> <span class="o">=</span> <span class="n">LogFactory</span><span class="p">.</span><span class="na">getLog</span><span class="p">(</span><span class="n">DurationStatisticsFilter</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">START_STAMP</span> <span class="o">=</span> <span class="s">"startStamp"</span><span class="p">;</span>
 
-    exchange.getAttributes().put(START_STAMP, System.currentTimeMillis());
-    return chain.filter(exchange)
-            .doFinally(f -&gt; printDurationTime(exchange));
-}
+    <span class="cm">/**</span>
+<span class="cm">     * 请求响应时长统计</span>
+<span class="cm">     * 1.首先将请求进来时的时间戳写入到 exchange中</span>
+<span class="cm">     * 2.filter链走完后，无论成功或者失败，都视为完成，从exchange取出开始时间戳，打印时长信息</span>
+<span class="cm">     * @param exchange the current server exchange</span>
+<span class="cm">     * @param chain provides a way to delegate to the next filter</span>
+<span class="cm">     * @return mono</span>
+<span class="cm">     */</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">filter</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">GatewayFilterChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"duration statistics filter"</span><span class="p">);</span>
 
-private void printDurationTime(ServerWebExchange exchange) {
-    long startStamp = exchange.getAttribute(START_STAMP);
-    long endStamp = System.currentTimeMillis();
-    log.debug("duration filter time : " + (endStamp - startStamp) + " ms");
-}
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">START_STAMP</span><span class="p">,</span> <span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">());</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">filter</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">doFinally</span><span class="p">(</span><span class="n">f</span> <span class="o">-&gt;</span> <span class="n">printDurationTime</span><span class="p">(</span><span class="n">exchange</span><span class="p">));</span>
+    <span class="p">}</span>
 
-/**
- * 这里简单位于 NettyWriteResponseFilter 之后吧
- * @return order
- */
-@Override
-public int getOrder() {
-    return WRITE_RESPONSE_FILTER_ORDER - 1;
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
-    <h3>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">printDurationTime</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">long</span> <span class="n">startStamp</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">START_STAMP</span><span class="p">);</span>
+        <span class="kt">long</span> <span class="n">endStamp</span> <span class="o">=</span> <span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">();</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"duration filter time : "</span> <span class="o">+</span> <span class="p">(</span><span class="n">endStamp</span> <span class="o">-</span> <span class="n">startStamp</span><span class="p">)</span> <span class="o">+</span> <span class="s">" ms"</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 这里简单位于 NettyWriteResponseFilter 之后吧</span>
+<span class="cm">     * @return order</span>
+<span class="cm">     */</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getOrder</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">WRITE_RESPONSE_FILTER_ORDER</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="_3">
      主函数配置运行
     </h3>
     <p>
      需要在主函数中配置 bean，整个代码大致如下：
     </p>
-    <p>
-     ```java
-@SpringBootApplication
-public class Application {
-    </p>
-    <pre><pre>public static void main(String[] args) {
-    SpringApplication.run(Application.class, args);
-}
+    <div class="codehilite">
+     <pre><span></span><code><span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Application</span> <span class="p">{</span>
 
-@Bean
-public RouteLocator myRoutes(RouteLocatorBuilder builder) {
-    return builder.routes()
-            .route(p -&gt; p
-                    .path("/")
-                    .filters(f -&gt; f
-                            .addRequestParameter("test", "test")
-                            .addResponseHeader("return", "return")
-                            .retry(retryConsumer)
-                    )
-                    .uri("http://localhost:8082/"))
-            .build();
-}
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">SpringApplication</span><span class="p">.</span><span class="na">run</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="na">class</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="p">}</span>
 
-@Bean
-public GlobalFilter durationStatisticsFilter() {
-    return new DurationStatisticsFilter();
-}
-</pre></pre>
-    <p>
-     }
-```
-    </p>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">RouteLocator</span> <span class="nf">myRoutes</span><span class="p">(</span><span class="n">RouteLocatorBuilder</span> <span class="n">builder</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">builder</span><span class="p">.</span><span class="na">routes</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">route</span><span class="p">(</span><span class="n">p</span> <span class="o">-&gt;</span> <span class="n">p</span>
+                        <span class="p">.</span><span class="na">path</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span>
+                        <span class="p">.</span><span class="na">filters</span><span class="p">(</span><span class="n">f</span> <span class="o">-&gt;</span> <span class="n">f</span>
+                                <span class="p">.</span><span class="na">addRequestParameter</span><span class="p">(</span><span class="s">"test"</span><span class="p">,</span> <span class="s">"test"</span><span class="p">)</span>
+                                <span class="p">.</span><span class="na">addResponseHeader</span><span class="p">(</span><span class="s">"return"</span><span class="p">,</span> <span class="s">"return"</span><span class="p">)</span>
+                                <span class="p">.</span><span class="na">retry</span><span class="p">(</span><span class="n">retryConsumer</span><span class="p">)</span>
+                        <span class="p">)</span>
+                        <span class="p">.</span><span class="na">uri</span><span class="p">(</span><span class="s">"http://localhost:8082/"</span><span class="p">))</span>
+                <span class="p">.</span><span class="na">build</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">GlobalFilter</span> <span class="nf">durationStatisticsFilter</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">DurationStatisticsFilter</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      很简单，大致就这些，运行起来，浏览器访问，可以看到下面的输出，over
     </p>
-    <p>
-     <pre>shell
-o.s.c.g.sample.DurationStatisticsFilter  : duration statistics filter
-o.s.c.g.sample.DurationStatisticsFilter  : duration filter time : 349 ms</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code>o.s.c.g.sample.DurationStatisticsFilter  : duration statistics filter
+o.s.c.g.sample.DurationStatisticsFilter  : duration filter <span class="nb">time</span> : <span class="m">349</span> ms
+</code></pre>
+    </div>
+    <h2 id="filter_1">
      Filter 相关分析记录
     </h2>
     <ul>

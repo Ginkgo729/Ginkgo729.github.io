@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,17 +43,17 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="soul-sofa">
      Soul 网关源码解析（五）Sofa请求处理概览
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      今天来探索一下Sofa请求处理流程，看看和前面的HTTP、Dubbo有什么异同
     </p>
-    <h2>
+    <h2 id="sofa">
      Sofa示例运行
     </h2>
     <p>
@@ -69,92 +70,87 @@
      首先运行下官方的Sofa示例，首先启动下mysql和zookeeper，这里使用docker启动：
     </p>
     <p>
-     <pre>shell script
+     ```shell script
 docker run -dit --name zk -p 2181:2181 zookeepe
-docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest</pre>
+docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
     </p>
-    <p>
-     然后运行Soul-admin，Soul-Bootst，在管理图界面起用sofa插件
-    </p>
-    <p>
-     运行官方示例：soul-examples --&gt; soul-examples-sofa
-    </p>
-    <p>
-     这里有个坑，需要注意，启动后，bootstrap打印日志中没有sofa插件，请求一直失败
-    </p>
-    <p>
-     <pre>xml
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[global] [org.dromara.soul.plugin.global.GlobalPlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[sign] [org.dromara.soul.plugin.sign.SignPlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[waf] [org.dromara.soul.plugin.waf.WafPlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[rate_limiter] [org.dromara.soul.plugin.ratelimiter.RateLimiterPlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[hystrix] [org.dromara.soul.plugin.hystrix.HystrixPlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[resilience4j] [org.dromara.soul.plugin.resilience4j.Resilience4JPlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[divide] [org.dromara.soul.plugin.divide.DividePlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[webClient] [org.dromara.soul.plugin.httpclient.WebClientPlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[divide] [org.dromara.soul.plugin.divide.websocket.WebSocketPlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[alibaba-dubbo-body-param] [org.dromara.soul.plugin.alibaba.dubbo.param.BodyParamPlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[dubbo] [org.dromara.soul.plugin.alibaba.dubbo.AlibabaDubboPlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[monitor] [org.dromara.soul.plugin.monitor.MonitorPlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[response] [org.dromara.soul.plugin.httpclient.response.WebClientResponsePlugin]
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[response] [org.dromara.soul.plugin.alibaba.dubbo.response.DubboResponsePlugin]</pre>
-     xml
-    </p>
-    <p>
-     查看初始的plugins也是没有sofa
-    </p>
-    <p>
-     <pre>java
-    public SoulWebHandler soulWebHandler(final ObjectProvider&lt;List&lt;SoulPlugin&gt;&gt; plugins) {
-        List&lt;SoulPlugin&gt; pluginList = plugins.getIfAvailable(Collections::emptyList);
-        final List&lt;SoulPlugin&gt; soulPlugins = pluginList.stream()
-                .sorted(Comparator.comparingInt(SoulPlugin::getOrder)).collect(Collectors.toList());
-        soulPlugins.forEach(soulPlugin -&gt; log.info("load plugin:[{}] [{}]", soulPlugin.named(), soulPlugin.getClass().getName()));
-        return new SoulWebHandler(soulPlugins);
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">然后运行Soul</span><span class="o">-</span><span class="k">admin</span><span class="err">，</span><span class="n">Soul</span><span class="o">-</span><span class="n">Bootst</span><span class="err">，</span><span class="n">在管理图界面起用sofa插件</span><span class="w"></span>
+
+<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">运行官方示例</span><span class="err">：</span><span class="n">soul</span><span class="o">-</span><span class="n">examples</span><span class="w"> </span><span class="c1">--&gt; soul-examples-sofa</span>
+
+<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">这里有个坑</span><span class="err">，</span><span class="n">需要注意</span><span class="err">，</span><span class="n">启动后</span><span class="err">，</span><span class="n">bootstrap打印日志中没有sofa插件</span><span class="err">，</span><span class="n">请求一直失败</span><span class="w"></span>
+
+<span class="err">```</span><span class="nc">xml</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">global</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.global.GlobalPlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">sign</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.sign.SignPlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">waf</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.waf.WafPlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">rate_limiter</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.ratelimiter.RateLimiterPlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">hystrix</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.hystrix.HystrixPlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">resilience4j</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.resilience4j.Resilience4JPlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">divide</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.divide.DividePlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">webClient</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.httpclient.WebClientPlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">divide</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.divide.websocket.WebSocketPlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">alibaba-dubbo-body-param</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.alibaba.dubbo.param.BodyParamPlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">dubbo</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.alibaba.dubbo.AlibabaDubboPlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">monitor</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.monitor.MonitorPlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">response</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.httpclient.response.WebClientResponsePlugin</span><span class="o">]</span><span class="w"></span>
+<span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">configuration</span><span class="p">.</span><span class="n">SoulConfiguration</span><span class="w">  </span><span class="err">:</span><span class="w"> </span><span class="k">load</span><span class="w"> </span><span class="nl">plugin</span><span class="p">:</span><span class="o">[</span><span class="n">response</span><span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="n">org.dromara.soul.plugin.alibaba.dubbo.response.DubboResponsePlugin</span><span class="o">]</span><span class="w"></span>
+<span class="err">```</span><span class="nc">xml</span><span class="w"></span>
+
+<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">查看初始的plugins也是没有sofa</span><span class="w"></span>
+
+<span class="err">```</span><span class="n">java</span><span class="w"></span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="n">SoulWebHandler</span><span class="w"> </span><span class="n">soulWebHandler</span><span class="p">(</span><span class="n">final</span><span class="w"> </span><span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">SoulPlugin</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">plugins</span><span class="p">)</span><span class="w"> </span><span class="err">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">List</span><span class="o">&lt;</span><span class="n">SoulPlugin</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pluginList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plugins</span><span class="p">.</span><span class="n">getIfAvailable</span><span class="p">(</span><span class="nl">Collections</span><span class="p">:</span><span class="err">:</span><span class="n">emptyList</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">final</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">SoulPlugin</span><span class="o">&gt;</span><span class="w"> </span><span class="n">soulPlugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pluginList</span><span class="p">.</span><span class="n">stream</span><span class="p">()</span><span class="w"></span>
+<span class="w">                </span><span class="p">.</span><span class="n">sorted</span><span class="p">(</span><span class="n">Comparator</span><span class="p">.</span><span class="n">comparingInt</span><span class="p">(</span><span class="nl">SoulPlugin</span><span class="p">:</span><span class="err">:</span><span class="n">getOrder</span><span class="p">)).</span><span class="k">collect</span><span class="p">(</span><span class="n">Collectors</span><span class="p">.</span><span class="n">toList</span><span class="p">());</span><span class="w"></span>
+<span class="w">        </span><span class="n">soulPlugins</span><span class="p">.</span><span class="n">forEach</span><span class="p">(</span><span class="n">soulPlugin</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nf">log</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="ss">"load plugin:[{}] [{}]"</span><span class="p">,</span><span class="w"> </span><span class="n">soulPlugin</span><span class="p">.</span><span class="n">named</span><span class="p">(),</span><span class="w"> </span><span class="n">soulPlugin</span><span class="p">.</span><span class="n">getClass</span><span class="p">().</span><span class="n">getName</span><span class="p">()));</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SoulWebHandler</span><span class="p">(</span><span class="n">soulPlugins</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="w"></span>
+</code></pre>
+    </div>
     <p>
      经过探索和老哥的讨论，发现是没有起用sofa的相关依赖
     </p>
     <p>
      我们在Bootstrap的pom.xml文件中添加下面的依赖，然后重启
     </p>
-    <p>
-     <pre>xml
-        &lt;!--        sofa plugin start--&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;com.alipay.sofa&lt;/groupId&gt;
-            &lt;artifactId&gt;sofa-rpc-all&lt;/artifactId&gt;
-            &lt;version&gt;5.7.6&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;
-            &lt;artifactId&gt;curator-client&lt;/artifactId&gt;
-            &lt;version&gt;4.0.1&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;
-            &lt;artifactId&gt;curator-framework&lt;/artifactId&gt;
-            &lt;version&gt;4.0.1&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;
-            &lt;artifactId&gt;curator-recipes&lt;/artifactId&gt;
-            &lt;version&gt;4.0.1&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.dromara&lt;/groupId&gt;
-            &lt;artifactId&gt;soul-spring-boot-starter-plugin-sofa&lt;/artifactId&gt;
-            &lt;version&gt;${project.version}&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;!--        sofa plugin end--&gt;</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>        <span class="c">&lt;!--        sofa plugin start--&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>com.alipay.sofa<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>sofa-rpc-all<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>5.7.6<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.apache.curator<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>curator-client<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>4.0.1<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.apache.curator<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>curator-framework<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>4.0.1<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.apache.curator<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>curator-recipes<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>4.0.1<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.dromara<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>soul-spring-boot-starter-plugin-sofa<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>${project.version}<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+        <span class="c">&lt;!--        sofa plugin end--&gt;</span>
+</code></pre>
+    </div>
     <p>
      然后查看日志打印，出现了sofa相关的插件
     </p>
-    <p>
-     <pre>xml
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[global] [org.dromara.soul.plugin.global.GlobalPlugin]
+    <div class="codehilite">
+     <pre><span></span><code>o.d.s.w.configuration.SoulConfiguration  : load plugin:[global] [org.dromara.soul.plugin.global.GlobalPlugin]
 o.d.s.w.configuration.SoulConfiguration  : load plugin:[sign] [org.dromara.soul.plugin.sign.SignPlugin]
 o.d.s.w.configuration.SoulConfiguration  : load plugin:[waf] [org.dromara.soul.plugin.waf.WafPlugin]
 o.d.s.w.configuration.SoulConfiguration  : load plugin:[rate_limiter] [org.dromara.soul.plugin.ratelimiter.RateLimiterPlugin]
@@ -171,32 +167,33 @@ o.d.s.w.configuration.SoulConfiguration  : load plugin:[monitor] [org.dromara.so
 o.d.s.w.configuration.SoulConfiguration  : load plugin:[response] [org.dromara.soul.plugin.alibaba.dubbo.response.DubboResponsePlugin]
 o.d.s.w.configuration.SoulConfiguration  : load plugin:[response] [org.dromara.soul.plugin.httpclient.response.WebClientResponsePlugin]
 // 新出现的sofa相关的
-o.d.s.w.configuration.SoulConfiguration  : load plugin:[response] [org.dromara.soul.plugin.sofa.response.SofaResponsePlugin]</pre>
-    </p>
+o.d.s.w.configuration.SoulConfiguration  : load plugin:[response] [org.dromara.soul.plugin.sofa.response.SofaResponsePlugin]
+</code></pre>
+    </div>
     <p>
      日志中还打印了成功加载sofa相关的metadata
     </p>
-    <p>
-     <pre>xml
+    <div class="codehilite">
+     <pre><span></span><code>o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there meteData is :MetaData
 o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there meteData is :MetaData
 o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there meteData is :MetaData
-o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there meteData is :MetaData</pre>
-    </p>
+</code></pre>
+    </div>
     <p>
      访问链接： http://localhost:9195/sofa/findAll ，成功返回如下请求
     </p>
-    <p>
-     <pre>json
-{
-    "pre": 200,
-    "message": "Access to success!",
-    "data": {
-        "name": "hello world Soul Sofa , findAll",
-        "id": "998932133"
-    }
-}</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="p">{</span>
+    <span class="nt">"code"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="nt">"message"</span><span class="p">:</span> <span class="s2">"Access to success!"</span><span class="p">,</span>
+    <span class="nt">"data"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">"name"</span><span class="p">:</span> <span class="s2">"hello world Soul Sofa , findAll"</span><span class="p">,</span>
+        <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"998932133"</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h2 id="_2">
      源码解析
     </h2>
     <p>
@@ -207,249 +204,231 @@ o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there met
     <p>
      首先找到我们非常熟悉的切入点函数： SoulWebHandler ，在下面的方法中打上断点，然后逐步进入每个plugin观察其行为
     </p>
-    <p>
-     <pre>java
-        public Mono&lt;Void&gt; execute(final ServerWebExchange exchange) {
-            return Mono.defer(() -&gt; {
-                if (this.index &lt; plugins.size()) {
-                    SoulPlugin plugin = plugins.get(this.index++);
-                    Boolean skip = plugin.skip(exchange);
-                    if (skip) {
-                        return this.execute(exchange);
-                    }
-                    return plugin.execute(exchange, this);
-                }
-                return Mono.empty();
-            });
-        }</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>        <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">index</span> <span class="o">&lt;</span> <span class="n">plugins</span><span class="p">.</span><span class="na">size</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="n">SoulPlugin</span> <span class="n">plugin</span> <span class="o">=</span> <span class="n">plugins</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">index</span><span class="o">++</span><span class="p">);</span>
+                    <span class="n">Boolean</span> <span class="n">skip</span> <span class="o">=</span> <span class="n">plugin</span><span class="p">.</span><span class="na">skip</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">skip</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+                    <span class="p">}</span>
+                    <span class="k">return</span> <span class="n">plugin</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="globalplugin">
      GlobalPlugin
     </h3>
     <p>
      进入其中，执行处理逻辑，通过上篇的分析，我们知道大致作用是将请求类型放入exchange中
     </p>
-    <h3>
+    <h3 id="signpluginwafpluginratelimiterpluginhystrixpluginresilience4jplugin">
      SignPlugin/WafPlugin/RateLimiterPlugin/HystrixPlugin/Resilience4JPlugin
     </h3>
     <p>
      进入其中，但plugin没有起用，不执行逻辑
     </p>
-    <h3>
+    <h3 id="dividepluginwebclientpluginwebsocketplugin">
      DividePlugin/WebClientPlugin/WebSocketPlugin
     </h3>
     <p>
      通过类型判断，跳过，不执行
     </p>
-    <h3>
+    <h3 id="bodyparamplugin">
      BodyParamPlugin
     </h3>
     <p>
      这个plugin在dubbo的时候也是要执行，我们来看看它干了写啥事。从下面逻辑中大概能看出先判断是否符合执行条件，然后将请求地址替换成真实的后端地址
     </p>
-    <p>
-     ```java
-    public Mono
-     <void>
-      execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-        final ServerHttpRequest request = exchange.getRequest();
-        final SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-        // 判断类型是不是sofa
-        if (Objects.nonNull(soulContext) &amp;&amp; RpcTypeEnum.SOFA.getName().equals(soulContext.getRpcType())) {
-            MediaType mediaType = request.getHeaders().getContentType();
-            ServerRequest serverRequest = ServerRequest.create(exchange, messageReaders);
-            if (MediaType.APPLICATION_JSON.isCompatibleWith(mediaType)) {
-                return body(exchange, serverRequest, chain);
-            }
-            if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)) {
-                return formData(exchange, serverRequest, chain);
-            }
-            // 进行路径替换，换成后端服务器的
-            return query(exchange, serverRequest, chain);
-        }
-        return chain.execute(exchange);
-    }
-     </void>
-    </p>
-    <pre><pre>private Mono&lt;Void&gt; query(final ServerWebExchange exchange, final ServerRequest serverRequest, final SoulPluginChain chain) {
-    exchange.getAttributes().put(Constants.SOFA_PARAMS,
-            HttpParamConverter.ofString(() -&gt; serverRequest.uri().getQuery()));
-    return chain.execute(exchange);
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="c1">// 判断类型是不是sofa</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">nonNull</span><span class="p">(</span><span class="n">soulContext</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">SOFA</span><span class="p">.</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="n">MediaType</span> <span class="n">mediaType</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getContentType</span><span class="p">();</span>
+            <span class="n">ServerRequest</span> <span class="n">serverRequest</span> <span class="o">=</span> <span class="n">ServerRequest</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">messageReaders</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">MediaType</span><span class="p">.</span><span class="na">APPLICATION_JSON</span><span class="p">.</span><span class="na">isCompatibleWith</span><span class="p">(</span><span class="n">mediaType</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">body</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">serverRequest</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">MediaType</span><span class="p">.</span><span class="na">APPLICATION_FORM_URLENCODED</span><span class="p">.</span><span class="na">isCompatibleWith</span><span class="p">(</span><span class="n">mediaType</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">formData</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">serverRequest</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="c1">// 进行路径替换，换成后端服务器的</span>
+            <span class="k">return</span> <span class="n">query</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">serverRequest</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">query</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ServerRequest</span> <span class="n">serverRequest</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SOFA_PARAMS</span><span class="p">,</span>
+                <span class="n">HttpParamConverter</span><span class="p">.</span><span class="na">ofString</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="n">serverRequest</span><span class="p">.</span><span class="na">uri</span><span class="p">().</span><span class="na">getQuery</span><span class="p">()));</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      这里有个非常有趣的现象，我们第四篇分析中，dubbo也走了一模一样的类，在上面函数逻辑中，我们看出它并不能兼容dubbo，那dubbo是如何走这个类的呢？
     </p>
     <p>
      通过调试我们发现，当同时启动dubbo和sofa的时候，会生成两个BodyParamPlugin,名称是一模一样的，但里面的判断类型换了，很神奇，猜测这个类是动态生成之类的手段，这里先不探索了，可以后面研究研究
     </p>
-    <h3>
+    <h3 id="alibabadubboplugin">
      AlibabaDubboPlugin
     </h3>
     <p>
      通过类型判断，跳过
     </p>
-    <h3>
+    <h3 id="sofaplugin">
      SofaPlugin
     </h3>
     <p>
      这个从名字就看出来是核心类，我们看看它具体干了啥。通过下面注释的地方，可以看出和dubbo请求的非常的相像。进行路由匹配，成功后rpc调用，获得结果后放入exchange中
     </p>
-    <p>
-     ```java
-    # AbstractSoulPlugin
-    public Mono
-     <void>
-      execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-        String pluginName = named();
-        final PluginData pluginData = BaseDataCache.getInstance().obtainPluginData(pluginName);
-        if (pluginData != null &amp;&amp; pluginData.getEnabled()) {
-            final Collection
-      <selectordata>
-       selectors = BaseDataCache.getInstance().obtainSelectorData(pluginName);
-            if (CollectionUtils.isEmpty(selectors)) {
-                return handleSelectorIsNull(pluginName, exchange, chain);
-            }
-            final SelectorData selectorData = matchSelector(exchange, selectors);
-            if (Objects.isNull(selectorData)) {
-                return handleSelectorIsNull(pluginName, exchange, chain);
-            }
-            selectorLog(selectorData, pluginName);
-            final List
-       <ruledata>
-        rules = BaseDataCache.getInstance().obtainRuleData(selectorData.getId());
-            if (CollectionUtils.isEmpty(rules)) {
-                return handleRuleIsNull(pluginName, exchange, chain);
-            }
-            // 判断是否有路由规则能匹配上
-            RuleData rule;
-            if (selectorData.getType() == SelectorTypeEnum.FULL_FLOW.getCode()) {
-                //get last
-                rule = rules.get(rules.size() - 1);
-            } else {
-                rule = matchRule(exchange, rules);
-            }
-            if (Objects.isNull(rule)) {
-                return handleRuleIsNull(pluginName, exchange, chain);
-            }
-            ruleLog(rule, pluginName);
-            // 匹配上后执行处理逻辑
-            return doExecute(exchange, chain, selectorData, rule);
-        }
-        return chain.execute(exchange);
-    }
-       </ruledata>
-      </selectordata>
-     </void>
-    </p>
-    <pre><pre># SofaPlugin
-protected Mono&lt;Void&gt; doExecute(final ServerWebExchange exchange, final SoulPluginChain chain, final SelectorData selector, final RuleData rule) {
-    String body = exchange.getAttribute(Constants.SOFA_PARAMS);
-    SoulContext soulContext = exchange.getAttribute(Constants.CONTEXT);
-    assert soulContext != null;
-    MetaData metaData = exchange.getAttribute(Constants.META_DATA);
-    if (!checkMetaData(metaData)) {
-        assert metaData != null;
-        log.error(" path is :{}, meta data have error.... {}", soulContext.getPath(), metaData.toString());
-        exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-        Object error = SoulResultWrap.error(SoulResultEnum.META_DATA_ERROR.getCode(), SoulResultEnum.META_DATA_ERROR.getMsg(), null);
-        return WebFluxResultUtils.result(exchange, error);
-    }
-    if (StringUtils.isNoneBlank(metaData.getParameterTypes()) &amp;&amp; StringUtils.isBlank(body)) {
-        exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-        Object error = SoulResultWrap.error(SoulResultEnum.SOFA_HAVE_BODY_PARAM.getCode(), SoulResultEnum.SOFA_HAVE_BODY_PARAM.getMsg(), null);
-        return WebFluxResultUtils.result(exchange, error);
-    }
-    // 这里得到结果，跟下去
-    final Mono&lt;Object&gt; result = sofaProxyService.genericInvoker(body, metaData, exchange);
-    return result.then(chain.execute(exchange));
-}
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="err">#</span> <span class="n">AbstractSoulPlugin</span>
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">pluginName</span> <span class="o">=</span> <span class="n">named</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">PluginData</span> <span class="n">pluginData</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainPluginData</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pluginData</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">pluginData</span><span class="p">.</span><span class="na">getEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">SelectorData</span><span class="o">&gt;</span> <span class="n">selectors</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainSelectorData</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">selectors</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">handleSelectorIsNull</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selectorData</span> <span class="o">=</span> <span class="n">matchSelector</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">selectors</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">selectorData</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">handleSelectorIsNull</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">selectorLog</span><span class="p">(</span><span class="n">selectorData</span><span class="p">,</span> <span class="n">pluginName</span><span class="p">);</span>
+            <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">RuleData</span><span class="o">&gt;</span> <span class="n">rules</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainRuleData</span><span class="p">(</span><span class="n">selectorData</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">CollectionUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">rules</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">handleRuleIsNull</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="c1">// 判断是否有路由规则能匹配上</span>
+            <span class="n">RuleData</span> <span class="n">rule</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">selectorData</span><span class="p">.</span><span class="na">getType</span><span class="p">()</span> <span class="o">==</span> <span class="n">SelectorTypeEnum</span><span class="p">.</span><span class="na">FULL_FLOW</span><span class="p">.</span><span class="na">getCode</span><span class="p">())</span> <span class="p">{</span>
+                <span class="c1">//get last</span>
+                <span class="n">rule</span> <span class="o">=</span> <span class="n">rules</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">rules</span><span class="p">.</span><span class="na">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="n">rule</span> <span class="o">=</span> <span class="n">matchRule</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">rules</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">rule</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">handleRuleIsNull</span><span class="p">(</span><span class="n">pluginName</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">ruleLog</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">pluginName</span><span class="p">);</span>
+            <span class="c1">// 匹配上后执行处理逻辑</span>
+            <span class="k">return</span> <span class="n">doExecute</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="n">selectorData</span><span class="p">,</span> <span class="n">rule</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
 
-# SofaProxyService
-public Mono&lt;Object&gt; genericInvoker(final String body, final MetaData metaData, final ServerWebExchange exchange) throws SoulException {
-    // 根据请求路径，获得rpc中的consumer 
-    ConsumerConfig&lt;GenericService&gt; reference = ApplicationConfigCache.getInstance().get(metaData.getPath());
-    if (Objects.isNull(reference) || StringUtils.isEmpty(reference.getInterfaceId())) {
-        ApplicationConfigCache.getInstance().invalidate(metaData.getServiceName());
-        reference = ApplicationConfigCache.getInstance().initRef(metaData);
-    }
-    GenericService genericService = reference.refer();
-    Pair&lt;String[], Object[]&gt; pair;
-    if (null == body || "".equals(body) || "{}".equals(body) || "null".equals(body)) {
-        pair = new ImmutablePair&lt;&gt;(new String[]{}, new Object[]{});
-    } else {
-        pair = sofaParamResolveService.buildParameter(body, metaData.getParameterTypes());
-    }
-    CompletableFuture&lt;Object&gt; future = new CompletableFuture&lt;&gt;();
-    RpcInvokeContext.getContext().setResponseCallback(new SofaResponseCallback&lt;Object&gt;() {
-        @Override
-        public void onAppResponse(final Object o, final String s, final RequestBase requestBase) {
-            future.complete(o);
-        }
+    <span class="err">#</span> <span class="n">SofaPlugin</span>
+    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">doExecute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selector</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RuleData</span> <span class="n">rule</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">body</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SOFA_PARAMS</span><span class="p">);</span>
+        <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+        <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="n">MetaData</span> <span class="n">metaData</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">META_DATA</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">checkMetaData</span><span class="p">(</span><span class="n">metaData</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">assert</span> <span class="n">metaData</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">" path is :{}, meta data have error.... {}"</span><span class="p">,</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getPath</span><span class="p">(),</span> <span class="n">metaData</span><span class="p">.</span><span class="na">toString</span><span class="p">());</span>
+            <span class="n">exchange</span><span class="p">.</span><span class="na">getResponse</span><span class="p">().</span><span class="na">setStatusCode</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="p">);</span>
+            <span class="n">Object</span> <span class="n">error</span> <span class="o">=</span> <span class="n">SoulResultWrap</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">META_DATA_ERROR</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">META_DATA_ERROR</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNoneBlank</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getParameterTypes</span><span class="p">())</span> <span class="o">&amp;&amp;</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">isBlank</span><span class="p">(</span><span class="n">body</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">exchange</span><span class="p">.</span><span class="na">getResponse</span><span class="p">().</span><span class="na">setStatusCode</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="p">);</span>
+            <span class="n">Object</span> <span class="n">error</span> <span class="o">=</span> <span class="n">SoulResultWrap</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">SOFA_HAVE_BODY_PARAM</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">SOFA_HAVE_BODY_PARAM</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// 这里得到结果，跟下去</span>
+        <span class="kd">final</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">sofaProxyService</span><span class="p">.</span><span class="na">genericInvoker</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">metaData</span><span class="p">,</span> <span class="n">exchange</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">.</span><span class="na">then</span><span class="p">(</span><span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">));</span>
+    <span class="p">}</span>
 
-        @Override
-        public void onAppException(final Throwable throwable, final String s, final RequestBase requestBase) {
-            future.completeExceptionally(throwable);
-        }
+    <span class="err">#</span> <span class="n">SofaProxyService</span>
+    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="nf">genericInvoker</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">body</span><span class="p">,</span> <span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SoulException</span> <span class="p">{</span>
+        <span class="c1">// 根据请求路径，获得rpc中的consumer </span>
+        <span class="n">ConsumerConfig</span><span class="o">&lt;</span><span class="n">GenericService</span><span class="o">&gt;</span> <span class="n">reference</span> <span class="o">=</span> <span class="n">ApplicationConfigCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getPath</span><span class="p">());</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span> <span class="o">||</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">reference</span><span class="p">.</span><span class="na">getInterfaceId</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="n">ApplicationConfigCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">invalidate</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getServiceName</span><span class="p">());</span>
+            <span class="n">reference</span> <span class="o">=</span> <span class="n">ApplicationConfigCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">initRef</span><span class="p">(</span><span class="n">metaData</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">GenericService</span> <span class="n">genericService</span> <span class="o">=</span> <span class="n">reference</span><span class="p">.</span><span class="na">refer</span><span class="p">();</span>
+        <span class="n">Pair</span><span class="o">&lt;</span><span class="n">String</span><span class="o">[]</span><span class="p">,</span> <span class="n">Object</span><span class="o">[]&gt;</span> <span class="n">pair</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">body</span> <span class="o">||</span> <span class="s">""</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">||</span> <span class="s">"{}"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">||</span> <span class="s">"null"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">body</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">pair</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ImmutablePair</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="k">new</span> <span class="n">String</span><span class="o">[]</span><span class="p">{},</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span><span class="p">{});</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">pair</span> <span class="o">=</span> <span class="n">sofaParamResolveService</span><span class="p">.</span><span class="na">buildParameter</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">metaData</span><span class="p">.</span><span class="na">getParameterTypes</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="n">CompletableFuture</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="k">new</span> <span class="n">CompletableFuture</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+        <span class="n">RpcInvokeContext</span><span class="p">.</span><span class="na">getContext</span><span class="p">().</span><span class="na">setResponseCallback</span><span class="p">(</span><span class="k">new</span> <span class="n">SofaResponseCallback</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAppResponse</span><span class="p">(</span><span class="kd">final</span> <span class="n">Object</span> <span class="n">o</span><span class="p">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">s</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RequestBase</span> <span class="n">requestBase</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">future</span><span class="p">.</span><span class="na">complete</span><span class="p">(</span><span class="n">o</span><span class="p">);</span>
+            <span class="p">}</span>
 
-        @Override
-        public void onSofaException(final SofaRpcException e, final String s, final RequestBase requestBase) {
-            future.completeExceptionally(e);
-        }
-    });
-    // 通过函数名，能猜到是rpc调用，然后得到结果，并将结果放入exchange中
-    genericService.$invoke(metaData.getMethodName(), pair.getLeft(), pair.getRight());
-    return Mono.fromFuture(future.thenApply(ret -&gt; {
-        if (Objects.isNull(ret)) {
-            ret = Constants.SOFA_RPC_RESULT_EMPTY;
-        }
-        exchange.getAttributes().put(Constants.SOFA_RPC_RESULT, ret);
-        exchange.getAttributes().put(Constants.CLIENT_RESPONSE_RESULT_TYPE, ResultEnum.SUCCESS.getName());
-        return ret;
-    })).onErrorMap(SoulException::new);
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
-    <h3>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAppException</span><span class="p">(</span><span class="kd">final</span> <span class="n">Throwable</span> <span class="n">throwable</span><span class="p">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">s</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RequestBase</span> <span class="n">requestBase</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">future</span><span class="p">.</span><span class="na">completeExceptionally</span><span class="p">(</span><span class="n">throwable</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onSofaException</span><span class="p">(</span><span class="kd">final</span> <span class="n">SofaRpcException</span> <span class="n">e</span><span class="p">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">s</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RequestBase</span> <span class="n">requestBase</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">future</span><span class="p">.</span><span class="na">completeExceptionally</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+        <span class="c1">// 通过函数名，能猜到是rpc调用，然后得到结果，并将结果放入exchange中</span>
+        <span class="n">genericService</span><span class="p">.</span><span class="na">$invoke</span><span class="p">(</span><span class="n">metaData</span><span class="p">.</span><span class="na">getMethodName</span><span class="p">(),</span> <span class="n">pair</span><span class="p">.</span><span class="na">getLeft</span><span class="p">(),</span> <span class="n">pair</span><span class="p">.</span><span class="na">getRight</span><span class="p">());</span>
+        <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">fromFuture</span><span class="p">(</span><span class="n">future</span><span class="p">.</span><span class="na">thenApply</span><span class="p">(</span><span class="n">ret</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">ret</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">Constants</span><span class="p">.</span><span class="na">SOFA_RPC_RESULT_EMPTY</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SOFA_RPC_RESULT</span><span class="p">,</span> <span class="n">ret</span><span class="p">);</span>
+            <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CLIENT_RESPONSE_RESULT_TYPE</span><span class="p">,</span> <span class="n">ResultEnum</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+            <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+        <span class="p">})).</span><span class="na">onErrorMap</span><span class="p">(</span><span class="n">SoulException</span><span class="p">::</span><span class="k">new</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="monitorplugin">
      MonitorPlugin
     </h3>
     <p>
      不跳过，但插件没有开启
     </p>
-    <h3>
+    <h3 id="dubboresponsepluginwebclientresponseplugin">
      DubboResponsePlugin/WebClientResponsePlugin
     </h3>
     <p>
      通过类型判断，跳过执行
     </p>
-    <h3>
+    <h3 id="sofaresponseplugin">
      SofaResponsePlugin
     </h3>
     <p>
      通过上几篇分析和名字能猜出来是将响应返回给客户端的，通过下面代码的逻辑也可以看出
     </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; execute(final ServerWebExchange exchange, final SoulPluginChain chain) {
-        return chain.execute(exchange).then(Mono.defer(() -&gt; {
-            // 从exchange中获取结果
-            final Object result = exchange.getAttribute(Constants.SOFA_RPC_RESULT);
-            if (Objects.isNull(result)) {
-                Object error = SoulResultWrap.error(SoulResultEnum.SERVICE_RESULT_ERROR.getCode(), SoulResultEnum.SERVICE_RESULT_ERROR.getMsg(), null);
-                return WebFluxResultUtils.result(exchange, error);
-            }
-            Object success = SoulResultWrap.success(SoulResultEnum.SUCCESS.getCode(), SoulResultEnum.SUCCESS.getMsg(), JsonUtils.removeClass(result));
-            // 熟悉的返回响应的函数
-            return WebFluxResultUtils.result(exchange, success);
-        }));
-    }</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">).</span><span class="na">then</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="c1">// 从exchange中获取结果</span>
+            <span class="kd">final</span> <span class="n">Object</span> <span class="n">result</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SOFA_RPC_RESULT</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">isNull</span><span class="p">(</span><span class="n">result</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">Object</span> <span class="n">error</span> <span class="o">=</span> <span class="n">SoulResultWrap</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">SERVICE_RESULT_ERROR</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">SERVICE_RESULT_ERROR</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+                <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">Object</span> <span class="n">success</span> <span class="o">=</span> <span class="n">SoulResultWrap</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span> <span class="n">SoulResultEnum</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">.</span><span class="na">getMsg</span><span class="p">(),</span> <span class="n">JsonUtils</span><span class="p">.</span><span class="na">removeClass</span><span class="p">(</span><span class="n">result</span><span class="p">));</span>
+            <span class="c1">// 熟悉的返回响应的函数</span>
+            <span class="k">return</span> <span class="n">WebFluxResultUtils</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">success</span><span class="p">);</span>
+        <span class="p">}));</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
+    <h2 id="_3">
      总结
     </h2>
     <p>
@@ -522,10 +501,10 @@ public Mono&lt;Object&gt; genericInvoker(final String body, final MetaData metaD
       BodyParamPlugin 作用类似于 dividePlugin，能进行路由匹配，匹配后将路径修改真实的后端服务器路径；并且能动态的生成同名的但针对不同rpc实现的plugin
      </li>
     </ul>
-    <h2>
+    <h2 id="soul">
      Soul网关源码分析文章列表
     </h2>
-    <h3>
+    <h3 id="github">
      Github
     </h3>
     <ul>
@@ -560,7 +539,7 @@ public Mono&lt;Object&gt; genericInvoker(final String body, final MetaData metaD
       </a>
      </li>
     </ul>
-    <h3>
+    <h3 id="_4">
      掘金
     </h3>
     <ul>

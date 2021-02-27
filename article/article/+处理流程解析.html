@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,20 +43,20 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="spring-cloud-gateway">
      Spring Cloud Gateway （七）处理流程解析
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      简介
     </h2>
     <p>
      初步梳理 Spring Cloud Gateway 的处理流程
     </p>
-    <h3>
+    <h3 id="_2">
      过程记录
     </h3>
-    <h4>
+    <h4 id="_3">
      主要请求流程
     </h4>
     <p>
@@ -64,203 +65,179 @@
     <p>
      向前我们追溯到了 DispatcherHandler ,在这个断点处通过断点调试发现有类似循环的操作，这个感觉是查找相应 handler 进行处理，细节部分暂时不够，后面再来详细看
     </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; handle(ServerWebExchange exchange) {
-        return this.handlerMappings == null ? this.createNotFoundError() : Flux.fromIterable(this.handlerMappings).concatMap((mapping) -&gt; {
-            return mapping.getHandler(exchange);
-        }).next().switchIfEmpty(this.createNotFoundError()).flatMap((handler) -&gt; {
-            return this.invokeHandler(exchange, handler);
-        }).flatMap((result) -&gt; {
-            return this.handleResult(exchange, result);
-        });
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="na">createNotFoundError</span><span class="p">()</span> <span class="p">:</span> <span class="n">Flux</span><span class="p">.</span><span class="na">fromIterable</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span><span class="p">).</span><span class="na">concatMap</span><span class="p">((</span><span class="n">mapping</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">mapping</span><span class="p">.</span><span class="na">getHandler</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+        <span class="p">}).</span><span class="na">next</span><span class="p">().</span><span class="na">switchIfEmpty</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">createNotFoundError</span><span class="p">()).</span><span class="na">flatMap</span><span class="p">((</span><span class="n">handler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">invokeHandler</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">handler</span><span class="p">);</span>
+        <span class="p">}).</span><span class="na">flatMap</span><span class="p">((</span><span class="n">result</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">handleResult</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面函数打断点，再通过调用栈向前查找，找到 netty 相关的一个类： HttpServerHandle 。下面的函数中有类似 Mono 这里的代码，发布后触发调用
     </p>
-    <p>
-     ```java
-    public void onStateChange(Connection connection, State newState) {
-        if (newState == HttpServerState.REQUEST_RECEIVED) {
-            try {
-                if (log.isDebugEnabled()) {
-                    log.debug(ReactorNetty.format(connection.channel(), "Handler is being applied: {}"), new Object[]{this.handler});
-                }
-    </p>
-    <pre><pre>            HttpServerOperations ops = (HttpServerOperations)connection;
-            // Mono 发布,这一步需要注意，跟踪handler下去
-            Mono.fromDirect((Publisher)this.handler.apply(ops, ops)).subscribe(ops.disposeSubscriber());
-        } catch (Throwable var4) {
-            log.error(ReactorNetty.format(connection.channel(), ""), var4);
-            connection.channel().close();
-        }
-    }
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStateChange</span><span class="p">(</span><span class="n">Connection</span> <span class="n">connection</span><span class="p">,</span> <span class="n">State</span> <span class="n">newState</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">newState</span> <span class="o">==</span> <span class="n">HttpServerState</span><span class="p">.</span><span class="na">REQUEST_RECEIVED</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">log</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="n">log</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="n">ReactorNetty</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">connection</span><span class="p">.</span><span class="na">channel</span><span class="p">(),</span> <span class="s">"Handler is being applied: {}"</span><span class="p">),</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="na">handler</span><span class="p">});</span>
+                <span class="p">}</span>
+
+                <span class="n">HttpServerOperations</span> <span class="n">ops</span> <span class="o">=</span> <span class="p">(</span><span class="n">HttpServerOperations</span><span class="p">)</span><span class="n">connection</span><span class="p">;</span>
+                <span class="c1">// Mono 发布,这一步需要注意，跟踪handler下去</span>
+                <span class="n">Mono</span><span class="p">.</span><span class="na">fromDirect</span><span class="p">((</span><span class="n">Publisher</span><span class="p">)</span><span class="k">this</span><span class="p">.</span><span class="na">handler</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">ops</span><span class="p">,</span> <span class="n">ops</span><span class="p">)).</span><span class="na">subscribe</span><span class="p">(</span><span class="n">ops</span><span class="p">.</span><span class="na">disposeSubscriber</span><span class="p">());</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var4</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">ReactorNetty</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">connection</span><span class="p">.</span><span class="na">channel</span><span class="p">(),</span> <span class="s">""</span><span class="p">),</span> <span class="n">var4</span><span class="p">);</span>
+                <span class="n">connection</span><span class="p">.</span><span class="na">channel</span><span class="p">().</span><span class="na">close</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面注释的地方打上断点，进入相应类及其方法，跳入下面的 ReactorHttpHandlerAdapter , 其中再次调用了其他的 handler，进行参数的传递，我们再接着跟下去
     </p>
-    <p>
-     ```java
-    public Mono
-     <void>
-      apply(HttpServerRequest reactorRequest, HttpServerResponse reactorResponse) {
-        NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());
-     </void>
-    </p>
-    <pre><pre>    try {
-        ReactorServerHttpRequest request = new ReactorServerHttpRequest(reactorRequest, bufferFactory);
-        ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory);
-        if (request.getMethod() == HttpMethod.HEAD) {
-            response = new HttpHeadResponseDecorator((ServerHttpResponse)response);
-        }
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">apply</span><span class="p">(</span><span class="n">HttpServerRequest</span> <span class="n">reactorRequest</span><span class="p">,</span> <span class="n">HttpServerResponse</span> <span class="n">reactorResponse</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">NettyDataBufferFactory</span> <span class="n">bufferFactory</span> <span class="o">=</span> <span class="k">new</span> <span class="n">NettyDataBufferFactory</span><span class="p">(</span><span class="n">reactorResponse</span><span class="p">.</span><span class="na">alloc</span><span class="p">());</span>
 
-        // 这一步再次调用其他的 handler 进行传递，再次跟踪下去
-        return this.httpHandler.handle(request, (ServerHttpResponse)response).doOnError((ex) -&gt; {
-            logger.trace(request.getLogPrefix() + "Failed to complete: " + ex.getMessage());
-        }).doOnSuccess((aVoid) -&gt; {
-            logger.trace(request.getLogPrefix() + "Handling completed");
-        });
-    } catch (URISyntaxException var6) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Failed to get request URI: " + var6.getMessage());
-        }
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">ReactorServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReactorServerHttpRequest</span><span class="p">(</span><span class="n">reactorRequest</span><span class="p">,</span> <span class="n">bufferFactory</span><span class="p">);</span>
+            <span class="n">ServerHttpResponse</span> <span class="n">response</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReactorServerHttpResponse</span><span class="p">(</span><span class="n">reactorResponse</span><span class="p">,</span> <span class="n">bufferFactory</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getMethod</span><span class="p">()</span> <span class="o">==</span> <span class="n">HttpMethod</span><span class="p">.</span><span class="na">HEAD</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HttpHeadResponseDecorator</span><span class="p">((</span><span class="n">ServerHttpResponse</span><span class="p">)</span><span class="n">response</span><span class="p">);</span>
+            <span class="p">}</span>
 
-        reactorResponse.status(HttpResponseStatus.BAD_REQUEST);
-        return Mono.empty();
-    }
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+            <span class="c1">// 这一步再次调用其他的 handler 进行传递，再次跟踪下去</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">httpHandler</span><span class="p">.</span><span class="na">handle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="p">(</span><span class="n">ServerHttpResponse</span><span class="p">)</span><span class="n">response</span><span class="p">).</span><span class="na">doOnError</span><span class="p">((</span><span class="n">ex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getLogPrefix</span><span class="p">()</span> <span class="o">+</span> <span class="s">"Failed to complete: "</span> <span class="o">+</span> <span class="n">ex</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+            <span class="p">}).</span><span class="na">doOnSuccess</span><span class="p">((</span><span class="n">aVoid</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getLogPrefix</span><span class="p">()</span> <span class="o">+</span> <span class="s">"Handling completed"</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">URISyntaxException</span> <span class="n">var6</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">logger</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"Failed to get request URI: "</span> <span class="o">+</span> <span class="n">var6</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+            <span class="p">}</span>
+
+            <span class="n">reactorResponse</span><span class="p">.</span><span class="na">status</span><span class="p">(</span><span class="n">HttpResponseStatus</span><span class="p">.</span><span class="na">BAD_REQUEST</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      接着跳到了：WebServerManager ，里面进行了一次调用，来到了 HttpWebHandlerAdapter ,
     </p>
-    <p>
-     ```java
-    public Mono
-     <void>
-      handle(ServerHttpRequest request, ServerHttpResponse response) {
-        if (this.forwardedHeaderTransformer != null) {
-            request = this.forwardedHeaderTransformer.apply(request);
-        }
-     </void>
-    </p>
-    <pre><pre>    // 看到了熟悉，非常关键的exchange的生成，终于定位到了 exchange 的来源了
-    ServerWebExchange exchange = this.createExchange(request, response);
-    LogFormatUtils.traceDebug(logger, (traceOn) -&gt; {
-        return exchange.getLogPrefix() + this.formatRequest(exchange.getRequest()) + (traceOn ? ", headers=" + this.formatHeaders(exchange.getRequest().getHeaders()) : "");
-    });
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="n">ServerHttpResponse</span> <span class="n">response</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">forwardedHeaderTransformer</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">forwardedHeaderTransformer</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+        <span class="p">}</span>
 
-    // delegate 和 filter 息息相关，继续跟下去
-    Mono var10000 = this.getDelegate().handle(exchange).doOnSuccess((aVoid) -&gt; {
-        this.logResponse(exchange);
-    }).onErrorResume((ex) -&gt; {
-        return this.handleUnresolvedError(exchange, ex);
-    });
-    response.getClass();
-    return var10000.then(Mono.defer(response::setComplete));
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+        <span class="c1">// 看到了熟悉，非常关键的exchange的生成，终于定位到了 exchange 的来源了</span>
+        <span class="n">ServerWebExchange</span> <span class="n">exchange</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">createExchange</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">);</span>
+        <span class="n">LogFormatUtils</span><span class="p">.</span><span class="na">traceDebug</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="p">(</span><span class="n">traceOn</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getLogPrefix</span><span class="p">()</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="na">formatRequest</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">())</span> <span class="o">+</span> <span class="p">(</span><span class="n">traceOn</span> <span class="o">?</span> <span class="s">", headers="</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="na">formatHeaders</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getHeaders</span><span class="p">())</span> <span class="p">:</span> <span class="s">""</span><span class="p">);</span>
+        <span class="p">});</span>
+
+        <span class="c1">// delegate 和 filter 息息相关，继续跟下去</span>
+        <span class="n">Mono</span> <span class="n">var10000</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getDelegate</span><span class="p">().</span><span class="na">handle</span><span class="p">(</span><span class="n">exchange</span><span class="p">).</span><span class="na">doOnSuccess</span><span class="p">((</span><span class="n">aVoid</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">logResponse</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+        <span class="p">}).</span><span class="na">onErrorResume</span><span class="p">((</span><span class="n">ex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">handleUnresolvedError</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">ex</span><span class="p">);</span>
+        <span class="p">});</span>
+        <span class="n">response</span><span class="p">.</span><span class="na">getClass</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">var10000</span><span class="p">.</span><span class="na">then</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(</span><span class="n">response</span><span class="p">::</span><span class="n">setComplete</span><span class="p">));</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      接着到了： DispatcherHandler ，回到了最开始的切入点，看到其中大致是调用各个 mapping 进行处理
     </p>
-    <p>
-     <pre>java
-    public Mono&lt;Void&gt; handle(ServerWebExchange exchange) {
-        return this.handlerMappings == null ? this.createNotFoundError() : Flux.fromIterable(this.handlerMappings).concatMap((mapping) -&gt; {
-            return mapping.getHandler(exchange);
-        }).next().switchIfEmpty(this.createNotFoundError()).flatMap((handler) -&gt; {
-            // handler 调用
-            return this.invokeHandler(exchange, handler);
-        }).flatMap((result) -&gt; {
-            return this.handleResult(exchange, result);
-        });
-    }</pre>
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="na">createNotFoundError</span><span class="p">()</span> <span class="p">:</span> <span class="n">Flux</span><span class="p">.</span><span class="na">fromIterable</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span><span class="p">).</span><span class="na">concatMap</span><span class="p">((</span><span class="n">mapping</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">mapping</span><span class="p">.</span><span class="na">getHandler</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+        <span class="p">}).</span><span class="na">next</span><span class="p">().</span><span class="na">switchIfEmpty</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">createNotFoundError</span><span class="p">()).</span><span class="na">flatMap</span><span class="p">((</span><span class="n">handler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="c1">// handler 调用</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">invokeHandler</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">handler</span><span class="p">);</span>
+        <span class="p">}).</span><span class="na">flatMap</span><span class="p">((</span><span class="n">result</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">handleResult</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      查看 handlerMappings ，它有6个，routePredicateHandlerMapping 是熟悉的重要的，它会逐个调用各个 Mapping 的 getHandler 方法，不同的 Mapping 实现了不同的 getHandlerInternal 方法，成功的话返回 FilteringWebHandler
     </p>
-    <p>
-     ```java
-    public Mono
-     <object>
-      getHandler(ServerWebExchange exchange) {
-        // 调用 getHandlerInternal ，不同的 Mapping 有各自的实现
-        return this.getHandlerInternal(exchange).map((handler) -&gt; {
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
-            }
-     </object>
-    </p>
-    <pre><pre>        ServerHttpRequest request = exchange.getRequest();
-        if (this.hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
-            CorsConfiguration config = this.corsConfigurationSource != null ? this.corsConfigurationSource.getCorsConfiguration(exchange) : null;
-            CorsConfiguration handlerConfig = this.getCorsConfiguration(handler, exchange);
-            config = config != null ? config.combine(handlerConfig) : handlerConfig;
-            if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
-                return REQUEST_HANDLED_HANDLER;
-            }
-        }
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="nf">getHandler</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 调用 getHandlerInternal ，不同的 Mapping 有各自的实现</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">getHandlerInternal</span><span class="p">(</span><span class="n">exchange</span><span class="p">).</span><span class="na">map</span><span class="p">((</span><span class="n">handler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">logger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">logger</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="n">exchange</span><span class="p">.</span><span class="na">getLogPrefix</span><span class="p">()</span> <span class="o">+</span> <span class="s">"Mapped to "</span> <span class="o">+</span> <span class="n">handler</span><span class="p">);</span>
+            <span class="p">}</span>
 
-        // 这里 debug 返回 FilteringWebHandler
-        return handler;
-    });
-}
+            <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">hasCorsConfigurationSource</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span> <span class="o">||</span> <span class="n">CorsUtils</span><span class="p">.</span><span class="na">isPreFlightRequest</span><span class="p">(</span><span class="n">request</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">CorsConfiguration</span> <span class="n">config</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">corsConfigurationSource</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="na">corsConfigurationSource</span><span class="p">.</span><span class="na">getCorsConfiguration</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span> <span class="p">:</span> <span class="kc">null</span><span class="p">;</span>
+                <span class="n">CorsConfiguration</span> <span class="n">handlerConfig</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getCorsConfiguration</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">exchange</span><span class="p">);</span>
+                <span class="n">config</span> <span class="o">=</span> <span class="n">config</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">config</span><span class="p">.</span><span class="na">combine</span><span class="p">(</span><span class="n">handlerConfig</span><span class="p">)</span> <span class="p">:</span> <span class="n">handlerConfig</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="na">corsProcessor</span><span class="p">.</span><span class="na">process</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">exchange</span><span class="p">)</span> <span class="o">||</span> <span class="n">CorsUtils</span><span class="p">.</span><span class="na">isPreFlightRequest</span><span class="p">(</span><span class="n">request</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="n">REQUEST_HANDLED_HANDLER</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
 
-protected abstract Mono&lt;?&gt; getHandlerInternal(ServerWebExchange var1);
-</pre></pre>
-    <p>
-     ```
-    </p>
+            <span class="c1">// 这里 debug 返回 FilteringWebHandler</span>
+            <span class="k">return</span> <span class="n">handler</span><span class="p">;</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="kd">protected</span> <span class="kd">abstract</span> <span class="n">Mono</span><span class="o">&lt;?&gt;</span> <span class="n">getHandlerInternal</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">var1</span><span class="p">);</span>
+</code></pre>
+    </div>
     <p>
      getHandlerInternal(exchange) 调用跳到 RoutePredicateHandlerMapping ，其中关键的是绑定上定制化的 filter
     </p>
-    <p>
-     ```java
-    @Override
-    protected Mono&lt;?&gt; getHandlerInternal(ServerWebExchange exchange) {
-        // don't handle requests on management port if set and different than server port
-        if (this.managementPortType == DIFFERENT &amp;&amp; this.managementPort != null
-                &amp;&amp; exchange.getRequest().getURI().getPort() == this.managementPort) {
-            return Mono.empty();
-        }
-        exchange.getAttributes().put(GATEWAY_HANDLER_MAPPER_ATTR, getSimpleName());
-    </p>
-    <pre><pre>    return lookupRoute(exchange)
-            // .log("route-predicate-handler-mapping", Level.FINER) //name this
-            .flatMap((Function&lt;Route, Mono&lt;?&gt;&gt;) r -&gt; {
-                exchange.getAttributes().remove(GATEWAY_PREDICATE_ROUTE_ATTR);
-                if (logger.isDebugEnabled()) {
-                    logger.debug(
-                            "Mapping [" + getExchangeDesc(exchange) + "] to " + r);
-                }
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;?&gt;</span> <span class="n">getHandlerInternal</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// don't handle requests on management port if set and different than server port</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">managementPortType</span> <span class="o">==</span> <span class="n">DIFFERENT</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="na">managementPort</span> <span class="o">!=</span> <span class="kc">null</span>
+                <span class="o">&amp;&amp;</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">().</span><span class="na">getURI</span><span class="p">().</span><span class="na">getPort</span><span class="p">()</span> <span class="o">==</span> <span class="k">this</span><span class="p">.</span><span class="na">managementPort</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">GATEWAY_HANDLER_MAPPER_ATTR</span><span class="p">,</span> <span class="n">getSimpleName</span><span class="p">());</span>
 
-                // r 是它独有的filter 处理器
-                exchange.getAttributes().put(GATEWAY_ROUTE_ATTR, r);
+        <span class="k">return</span> <span class="n">lookupRoute</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span>
+                <span class="c1">// .log("route-predicate-handler-mapping", Level.FINER) //name this</span>
+                <span class="p">.</span><span class="na">flatMap</span><span class="p">((</span><span class="n">Function</span><span class="o">&lt;</span><span class="n">Route</span><span class="p">,</span> <span class="n">Mono</span><span class="o">&lt;?&gt;&gt;</span><span class="p">)</span> <span class="n">r</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                    <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">remove</span><span class="p">(</span><span class="n">GATEWAY_PREDICATE_ROUTE_ATTR</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+                        <span class="n">logger</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span>
+                                <span class="s">"Mapping ["</span> <span class="o">+</span> <span class="n">getExchangeDesc</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span> <span class="o">+</span> <span class="s">"] to "</span> <span class="o">+</span> <span class="n">r</span><span class="p">);</span>
+                    <span class="p">}</span>
 
-                // webHandler 是全局链
-                return Mono.just(webHandler);
-            }).switchIfEmpty(Mono.empty().then(Mono.fromRunnable(() -&gt; {
-                exchange.getAttributes().remove(GATEWAY_PREDICATE_ROUTE_ATTR);
-                if (logger.isTraceEnabled()) {
-                    logger.trace("No RouteDefinition found for ["
-                            + getExchangeDesc(exchange) + "]");
-                }
-            })));
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
+                    <span class="c1">// r 是它独有的filter 处理器</span>
+                    <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">GATEWAY_ROUTE_ATTR</span><span class="p">,</span> <span class="n">r</span><span class="p">);</span>
+
+                    <span class="c1">// webHandler 是全局链</span>
+                    <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">just</span><span class="p">(</span><span class="n">webHandler</span><span class="p">);</span>
+                <span class="p">}).</span><span class="na">switchIfEmpty</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">empty</span><span class="p">().</span><span class="na">then</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">fromRunnable</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                    <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">remove</span><span class="p">(</span><span class="n">GATEWAY_PREDICATE_ROUTE_ATTR</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isTraceEnabled</span><span class="p">())</span> <span class="p">{</span>
+                        <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="s">"No RouteDefinition found for ["</span>
+                                <span class="o">+</span> <span class="n">getExchangeDesc</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span> <span class="o">+</span> <span class="s">"]"</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">})));</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
     <p>
      在上面的 Mapping 中处理完成后，返回 handler ，然后this.invokeHandler(exchange, handler), 跳转到 FilteringWebHandler ,在其中从 exchange 中取出定制化的 filter，和 global filter 排序融合在一起，最后结合前面的：
      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E6%B5%81%E7%A8%8B%E7%B1%BB.md">
@@ -268,37 +245,28 @@ protected abstract Mono&lt;?&gt; getHandlerInternal(ServerWebExchange var1);
      </a>
      ，整个流程就串起来了
     </p>
-    <p>
-     ```java
-    public Mono
-     <void>
-      handle(ServerWebExchange exchange) {
-        // 这里是获取特定转发的filter列表
-        Route route = exchange.getRequiredAttribute(GATEWAY_ROUTE_ATTR);
-        List
-      <gatewayfilter>
-       gatewayFilters = route.getFilters();
-      </gatewayfilter>
-     </void>
-    </p>
-    <pre><pre>    // 获取全局filter列表，和上面的排序组合成新的filter
-    List&lt;GatewayFilter&gt; combined = new ArrayList&lt;&gt;(this.globalFilters);
-    combined.addAll(gatewayFilters);
-    // TODO: needed or cached?
-    AnnotationAwareOrderComparator.sort(combined);
+    <div class="codehilite">
+     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 这里是获取特定转发的filter列表</span>
+        <span class="n">Route</span> <span class="n">route</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequiredAttribute</span><span class="p">(</span><span class="n">GATEWAY_ROUTE_ATTR</span><span class="p">);</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">GatewayFilter</span><span class="o">&gt;</span> <span class="n">gatewayFilters</span> <span class="o">=</span> <span class="n">route</span><span class="p">.</span><span class="na">getFilters</span><span class="p">();</span>
 
-    if (logger.isDebugEnabled()) {
-        logger.debug("Sorted gatewayFilterFactories: " + combined);
-    }
+        <span class="c1">// 获取全局filter列表，和上面的排序组合成新的filter</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">GatewayFilter</span><span class="o">&gt;</span> <span class="n">combined</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">globalFilters</span><span class="p">);</span>
+        <span class="n">combined</span><span class="p">.</span><span class="na">addAll</span><span class="p">(</span><span class="n">gatewayFilters</span><span class="p">);</span>
+        <span class="c1">// TODO: needed or cached?</span>
+        <span class="n">AnnotationAwareOrderComparator</span><span class="p">.</span><span class="na">sort</span><span class="p">(</span><span class="n">combined</span><span class="p">);</span>
 
-    // 触发调用
-    return new DefaultGatewayFilterChain(combined).filter(exchange);
-}
-</pre></pre>
-    <p>
-     ```
-    </p>
-    <h3>
+        <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">logger</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"Sorted gatewayFilterFactories: "</span> <span class="o">+</span> <span class="n">combined</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 触发调用</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">DefaultGatewayFilterChain</span><span class="p">(</span><span class="n">combined</span><span class="p">).</span><span class="na">filter</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="_4">
      总结
     </h3>
     <p>

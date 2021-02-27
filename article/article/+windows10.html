@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,14 +43,14 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="windows">
      Windows 配置记录
     </h1>
     <hr/>
-    <h2>
+    <h2 id="_1">
      软件
     </h2>
-    <h3>
+    <h3 id="_2">
      必须的软件
     </h3>
     <ul>
@@ -92,7 +93,7 @@
       </a>
      </li>
     </ul>
-    <h3>
+    <h3 id="_3">
      备用软件
     </h3>
     <ul>
@@ -103,7 +104,7 @@
       Chocolatey：命令行的软件安装管理，正在尝试中
      </li>
     </ul>
-    <h3>
+    <h3 id="_4">
      好用的
     </h3>
     <ul>
@@ -163,7 +164,7 @@
       </a>
      </li>
     </ul>
-    <h3>
+    <h3 id="_5">
      其他软件
     </h3>
     <ul>
@@ -176,7 +177,7 @@
       [https://github.com/vim/vim-win32-installer/releases]()
      </li>
     </ul>
-    <h3>
+    <h3 id="_6">
      终端
     </h3>
     <ul>
@@ -187,269 +188,209 @@
       Powershell7：脚本配置
      </li>
     </ul>
-    <p>
-     ```sh
-    </p>
-    <h1>
-     oper powershell, check version,need 7, download url: https://github.com/PowerShell/PowerShell/releases/tag/v7.0.3
-    </h1>
-    <h1>
-     查看
-    </h1>
-    <p>
-     $PSVersionTable
-    </p>
-    <h1>
-     运行下面的命令，进项相应的安装，最好开着代理安装，不然可能会失败
-    </h1>
-    <h1>
-     posh-git
-    </h1>
-    <p>
-     Install-Module posh-git -Scope CurrentUser
-    </p>
-    <h1>
-     oh-my-posh
-    </h1>
-    <p>
-     Install-Module oh-my-posh -Scope CurrentUser
-    </p>
-    <h1>
-     PSReadLine
-    </h1>
-    <p>
-     Install-Module -Name PSReadLine -AllowPrerelease -Force
-    </p>
-    <h1>
-     编辑文件，填入下面的内容
-    </h1>
-    <p>
-     notepad.exe $Profile
-    </p>
-    <h1>
-     write content to file
-    </h1>
-    <p>
-     &lt;#
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># oper powershell, check version,need 7, download url: https://github.com/PowerShell/PowerShell/releases/tag/v7.0.3</span>
+<span class="c1"># 查看</span>
+<span class="nv">$PSVersionTable</span>
+
+<span class="c1"># 运行下面的命令，进项相应的安装，最好开着代理安装，不然可能会失败</span>
+<span class="c1"># posh-git</span>
+Install-Module posh-git -Scope CurrentUser 
+<span class="c1"># oh-my-posh</span>
+Install-Module oh-my-posh -Scope CurrentUser 
+<span class="c1"># PSReadLine</span>
+Install-Module -Name PSReadLine -AllowPrerelease -Force 
+
+<span class="c1"># 编辑文件，填入下面的内容</span>
+notepad.exe <span class="nv">$Profile</span>
+
+<span class="c1"># write content to file</span>
+&lt;<span class="c1">#</span>
  * FileName: Microsoft.PowerShell_profile.ps1
  * Author: 刘 鹏
  * Email: littleNewton6@outlook.com
- * Date: 2020, May. 1
- * Copyright: No copyright. You can use this pre for anything with no warranty.
-    </p>
-    <h1>
-     &gt;
-    </h1>
-    <h1>
-     ------------------------------- Import Modules BEGIN -------------------------------
-    </h1>
-    <h1>
-     引入 posh-git
-    </h1>
-    <p>
-     Import-Module posh-git
-    </p>
-    <h1>
-     引入 oh-my-posh
-    </h1>
-    <p>
-     Import-Module oh-my-posh
-    </p>
-    <h1>
-     设置 PowerShell 主题
-    </h1>
-    <p>
-     Set-Theme Paradox
-    </p>
-    <h1>
-     ------------------------------- Import Modules END   -------------------------------
-    </h1>
-    <h1>
-     -------------------------------  Set Hot-keys BEGIN  -------------------------------
-    </h1>
-    <h1>
-     设置 Tab 键补全
-    </h1>
-    <h1>
-     Set-PSReadlineKeyHandler -Key Tab -Function Complete
-    </h1>
-    <h1>
-     设置 Ctrl+d 为菜单补全和 Intellisense
-    </h1>
-    <p>
-     Set-PSReadLineKeyHandler -Key "Tab" -Function MenuComplete
-    </p>
-    <h1>
-     设置 Ctrl+d 为退出 PowerShell
-    </h1>
-    <p>
-     Set-PSReadlineKeyHandler -Key "Ctrl+d" -Function ViExit
-    </p>
-    <h1>
-     设置 Ctrl+z 为撤销
-    </h1>
-    <p>
-     Set-PSReadLineKeyHandler -Key "Ctrl+z" -Function Undo
-    </p>
-    <h1>
-     设置向上键为后向搜索历史记录
-    </h1>
-    <p>
-     Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
-    </p>
-    <h1>
-     设置向下键为前向搜索历史纪录
-    </h1>
-    <p>
-     Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
-    </p>
-    <h1>
-     -------------------------------  Set Hot-keys END    -------------------------------
-    </h1>
-    <p>
-     ```
-    </p>
-    <h1>
+ * Date: <span class="m">2020</span>, May. <span class="m">1</span>
+ * Copyright: No copyright. You can use this code <span class="k">for</span> anything with no warranty.
+<span class="c1">#&gt;</span>
+
+
+<span class="c1">#------------------------------- Import Modules BEGIN -------------------------------</span>
+<span class="c1"># 引入 posh-git</span>
+Import-Module posh-git
+
+<span class="c1"># 引入 oh-my-posh</span>
+Import-Module oh-my-posh
+
+<span class="c1"># 设置 PowerShell 主题</span>
+Set-Theme Paradox
+<span class="c1">#------------------------------- Import Modules END   -------------------------------</span>
+
+
+
+
+
+<span class="c1">#-------------------------------  Set Hot-keys BEGIN  -------------------------------</span>
+<span class="c1"># 设置 Tab 键补全</span>
+<span class="c1"># Set-PSReadlineKeyHandler -Key Tab -Function Complete</span>
+
+<span class="c1"># 设置 Ctrl+d 为菜单补全和 Intellisense</span>
+Set-PSReadLineKeyHandler -Key <span class="s2">"Tab"</span> -Function MenuComplete
+
+<span class="c1"># 设置 Ctrl+d 为退出 PowerShell</span>
+Set-PSReadlineKeyHandler -Key <span class="s2">"Ctrl+d"</span> -Function ViExit
+
+<span class="c1"># 设置 Ctrl+z 为撤销</span>
+Set-PSReadLineKeyHandler -Key <span class="s2">"Ctrl+z"</span> -Function Undo
+
+<span class="c1"># 设置向上键为后向搜索历史记录</span>
+Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
+
+<span class="c1"># 设置向下键为前向搜索历史纪录</span>
+Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
+<span class="c1">#-------------------------------  Set Hot-keys END    -------------------------------</span>
+</code></pre>
+    </div>
+    <h1 id="win-terminal">
      在win terminal 菜单选择设置，进入文件进行编辑
     </h1>
     <p>
      terni setting file
     </p>
-    <p>
-     <pre>sh
-// This file was initially generated by Windows Terminal 1.3.2651.0
+    <div class="codehilite">
+     <pre><span></span><code>// This file was initially generated by Windows Terminal <span class="m">1</span>.3.2651.0
 // It should still be usable in newer versions, but newer versions might have additional
-// settings, help text, or changes that you will not see unless you clear this file
-// and let us generate a new one for you.
-// To view the default settings, hold "alt" while clicking on the "Settings" button.
+// settings, <span class="nb">help</span> text, or changes that you will not see unless you clear this file
+// and <span class="nb">let</span> us generate a new one <span class="k">for</span> you.
+// To view the default settings, hold <span class="s2">"alt"</span> <span class="k">while</span> clicking on the <span class="s2">"Settings"</span> button.
 // For documentation on these settings, see: https://aka.ms/terminal-documentation
-{
-    "$schema": "https://aka.ms/terminal-profiles-schema",
+<span class="o">{</span>
+    <span class="s2">"</span><span class="nv">$schema</span><span class="s2">"</span>: <span class="s2">"https://aka.ms/terminal-profiles-schema"</span>,
     // modify to powershell7 guid
-    "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+    <span class="s2">"defaultProfile"</span>: <span class="s2">"{574e775e-4f2a-5b96-ac1e-a2962a402336}"</span>,
     // You can add more global application settings here.
     // To learn more about global settings, visit https://aka.ms/terminal-global-settings
     // If enabled, selections are automatically copied to your clipboard.
-    "copyOnSelect": false,
+    <span class="s2">"copyOnSelect"</span>: false,
     // If enabled, formatted data is also copied to your clipboard
-    "copyFormatting": false,
-    // A profile specifies a command to execute paired with information about how it should look and feel.
-    // Each one of them will appear in the 'New Tab' dropdown,
-    //   and can be invoked from the commandline with `wt.exe -p xxx`
+    <span class="s2">"copyFormatting"</span>: false,
+    // A profile specifies a <span class="nb">command</span> to execute paired with information about how it should look and feel.
+    // Each one of them will appear in the <span class="s1">'New Tab'</span> dropdown,
+    //   and can be invoked from the commandline with <span class="sb">`</span>wt.exe -p xxx<span class="sb">`</span>
     // To learn more about profiles, visit https://aka.ms/terminal-profile-settings
-    "profiles": {
-        "defaults": {
+    <span class="s2">"profiles"</span>: <span class="o">{</span>
+        <span class="s2">"defaults"</span>: <span class="o">{</span>
             // Put settings here that you want to apply to all profiles.
-            "useAcrylic": true, 
-            "acrylicOpacity": 0.5,
-            "backgroundImage": "file:///D:/download/1.jpeg",
-                "backgroundImageOpacity": 0.1,
-        },
-        "list": [
-            {
-                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-                "hidden": false,
-                "name": "PowerShell-7",
-                "source": "Windows.Terminal.PowershellCore",
+            <span class="s2">"useAcrylic"</span>: true, 
+            <span class="s2">"acrylicOpacity"</span>: <span class="m">0</span>.5,
+            <span class="s2">"backgroundImage"</span>: <span class="s2">"file:///D:/download/1.jpeg"</span>,
+                <span class="s2">"backgroundImageOpacity"</span>: <span class="m">0</span>.1,
+        <span class="o">}</span>,
+        <span class="s2">"list"</span>: <span class="o">[</span>
+            <span class="o">{</span>
+                <span class="s2">"guid"</span>: <span class="s2">"{574e775e-4f2a-5b96-ac1e-a2962a402336}"</span>,
+                <span class="s2">"hidden"</span>: false,
+                <span class="s2">"name"</span>: <span class="s2">"PowerShell-7"</span>,
+                <span class="s2">"source"</span>: <span class="s2">"Windows.Terminal.PowershellCore"</span>,
                 // 启动菜单一定要设置为 &lt;.&gt;，否则后面重要的一步将会无效！
-                "startingDirectory": ".",
+                <span class="s2">"startingDirectory"</span>: <span class="s2">"."</span>,
                 // 字体
-                "fontFace": "Fira Code",
-                "fontSize": 11,
-                "historySize": 9001,
-                "padding": "5, 5, 20, 25",
-                "snapOnInput": true,
-                "useAcrylic": true,
+                <span class="s2">"fontFace"</span>: <span class="s2">"Fira Code"</span>,
+                <span class="s2">"fontSize"</span>: <span class="m">11</span>,
+                <span class="s2">"historySize"</span>: <span class="m">9001</span>,
+                <span class="s2">"padding"</span>: <span class="s2">"5, 5, 20, 25"</span>,
+                <span class="s2">"snapOnInput"</span>: true,
+                <span class="s2">"useAcrylic"</span>: true,
                 // 颜色
-                "colorScheme": "Molokai",
-                "acrylicOpacity": 0.55,
-            },
-            {
+                <span class="s2">"colorScheme"</span>: <span class="s2">"Molokai"</span>,
+                <span class="s2">"acrylicOpacity"</span>: <span class="m">0</span>.55,
+            <span class="o">}</span>,
+            <span class="o">{</span>
                 // Make changes here to the powershell.exe profile.
-                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
-                "name": "Windows PowerShell",
-                "commandline": "powershell.exe",
-                "hidden": false
-            },
-            {
+                <span class="s2">"guid"</span>: <span class="s2">"{61c54bbd-c2c6-5271-96e7-009a87ff44bf}"</span>,
+                <span class="s2">"name"</span>: <span class="s2">"Windows PowerShell"</span>,
+                <span class="s2">"commandline"</span>: <span class="s2">"powershell.exe"</span>,
+                <span class="s2">"hidden"</span>: <span class="nb">false</span>
+            <span class="o">}</span>,
+            <span class="o">{</span>
                 // Make changes here to the cmd.exe profile.
-                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
-                "name": "命令提示符",
-                "commandline": "cmd.exe",
-                "hidden": false
-            },
-            {
-                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
-                "hidden": false,
-                "name": "Azure Cloud Shell",
-                "source": "Windows.Terminal.Azure"
-            },
-        ]
-    },
+                <span class="s2">"guid"</span>: <span class="s2">"{0caa0dad-35be-5f56-a8ff-afceeeaa6101}"</span>,
+                <span class="s2">"name"</span>: <span class="s2">"命令提示符"</span>,
+                <span class="s2">"commandline"</span>: <span class="s2">"cmd.exe"</span>,
+                <span class="s2">"hidden"</span>: <span class="nb">false</span>
+            <span class="o">}</span>,
+            <span class="o">{</span>
+                <span class="s2">"guid"</span>: <span class="s2">"{b453ae62-4e3d-5e58-b989-0a998ec441b8}"</span>,
+                <span class="s2">"hidden"</span>: false,
+                <span class="s2">"name"</span>: <span class="s2">"Azure Cloud Shell"</span>,
+                <span class="s2">"source"</span>: <span class="s2">"Windows.Terminal.Azure"</span>
+            <span class="o">}</span>,
+        <span class="o">]</span>
+    <span class="o">}</span>,
     // Add custom color schemes to this array.
     // To learn more about color schemes, visit https://aka.ms/terminal-color-schemes
-    "schemes": [
-        {
-            "name": "Molokai",
-            "black": "#121212",
-            "red": "#fa2573",
-            "green": "#98e123",
-            "yellow": "#dfd460",
-            "blue": "#1080d0",
-            "purple": "#8700ff",
-            "cyan": "#43a8d0",
-            "white": "#bbbbbb",
-            "brightBlack": "#555555",
-            "brightRed": "#f6669d",
-            "brightGreen": "#b1e05f",
-            "brightYellow": "#fff26d",
-            "brightBlue": "#00afff",
-            "brightPurple": "#af87ff",
-            "brightCyan": "#51ceff",
-            "brightWhite": "#ffffff",
-            "background": "#121212",
-            "foreground": "#bbbbbb"
-        }
-    ],
+    <span class="s2">"schemes"</span>: <span class="o">[</span>
+        <span class="o">{</span>
+            <span class="s2">"name"</span>: <span class="s2">"Molokai"</span>,
+            <span class="s2">"black"</span>: <span class="s2">"#121212"</span>,
+            <span class="s2">"red"</span>: <span class="s2">"#fa2573"</span>,
+            <span class="s2">"green"</span>: <span class="s2">"#98e123"</span>,
+            <span class="s2">"yellow"</span>: <span class="s2">"#dfd460"</span>,
+            <span class="s2">"blue"</span>: <span class="s2">"#1080d0"</span>,
+            <span class="s2">"purple"</span>: <span class="s2">"#8700ff"</span>,
+            <span class="s2">"cyan"</span>: <span class="s2">"#43a8d0"</span>,
+            <span class="s2">"white"</span>: <span class="s2">"#bbbbbb"</span>,
+            <span class="s2">"brightBlack"</span>: <span class="s2">"#555555"</span>,
+            <span class="s2">"brightRed"</span>: <span class="s2">"#f6669d"</span>,
+            <span class="s2">"brightGreen"</span>: <span class="s2">"#b1e05f"</span>,
+            <span class="s2">"brightYellow"</span>: <span class="s2">"#fff26d"</span>,
+            <span class="s2">"brightBlue"</span>: <span class="s2">"#00afff"</span>,
+            <span class="s2">"brightPurple"</span>: <span class="s2">"#af87ff"</span>,
+            <span class="s2">"brightCyan"</span>: <span class="s2">"#51ceff"</span>,
+            <span class="s2">"brightWhite"</span>: <span class="s2">"#ffffff"</span>,
+            <span class="s2">"background"</span>: <span class="s2">"#121212"</span>,
+            <span class="s2">"foreground"</span>: <span class="s2">"#bbbbbb"</span>
+        <span class="o">}</span>
+    <span class="o">]</span>,
     // Add custom actions and keybindings to this array.
-    // To unbind a key combination from your defaults.json, set the command to "unbound".
+    // To unbind a key combination from your defaults.json, <span class="nb">set</span> the <span class="nb">command</span> to <span class="s2">"unbound"</span>.
     // To learn more about actions and keybindings, visit https://aka.ms/terminal-keybindings
-    "actions": [
+    <span class="s2">"actions"</span>: <span class="o">[</span>
         // Copy and paste are bound to Ctrl+Shift+C and Ctrl+Shift+V in your defaults.json.
-        // These two lines additionally bind them to Ctrl+C and Ctrl+V.
+        // These two lines additionally <span class="nb">bind</span> them to Ctrl+C and Ctrl+V.
         // To learn more about selection, visit https://aka.ms/terminal-selection
-        {
-            "command": {
-                "action": "copy",
-                "singleLine": false
-            },
-            "keys": "ctrl+c"
-        },
-        {
-            "command": "paste",
-            "keys": "ctrl+v"
-        },
+        <span class="o">{</span>
+            <span class="s2">"command"</span>: <span class="o">{</span>
+                <span class="s2">"action"</span>: <span class="s2">"copy"</span>,
+                <span class="s2">"singleLine"</span>: <span class="nb">false</span>
+            <span class="o">}</span>,
+            <span class="s2">"keys"</span>: <span class="s2">"ctrl+c"</span>
+        <span class="o">}</span>,
+        <span class="o">{</span>
+            <span class="s2">"command"</span>: <span class="s2">"paste"</span>,
+            <span class="s2">"keys"</span>: <span class="s2">"ctrl+v"</span>
+        <span class="o">}</span>,
         // Press Ctrl+Shift+F to open the search box
-        {
-            "command": "find",
-            "keys": "ctrl+shift+f"
-        },
+        <span class="o">{</span>
+            <span class="s2">"command"</span>: <span class="s2">"find"</span>,
+            <span class="s2">"keys"</span>: <span class="s2">"ctrl+shift+f"</span>
+        <span class="o">}</span>,
         // Press Alt+Shift+D to open a new pane.
-        // - "split": "auto" makes this pane open in the direction that provides the most surface area.
-        // - "splitMode": "duplicate" makes the new pane use the focused pane's profile.
+        // - <span class="s2">"split"</span>: <span class="s2">"auto"</span> makes this pane open in the direction that provides the most surface area.
+        // - <span class="s2">"splitMode"</span>: <span class="s2">"duplicate"</span> makes the new pane use the focused pane<span class="err">'</span>s profile.
         // To learn more about panes, visit https://aka.ms/terminal-panes
-        {
-            "command": {
-                "action": "splitPane",
-                "split": "auto",
-                "splitMode": "duplicate"
-            },
-            "keys": "alt+shift+d"
-        }
-    ]
-}</pre>
-    </p>
-    <h2>
+        <span class="o">{</span>
+            <span class="s2">"command"</span>: <span class="o">{</span>
+                <span class="s2">"action"</span>: <span class="s2">"splitPane"</span>,
+                <span class="s2">"split"</span>: <span class="s2">"auto"</span>,
+                <span class="s2">"splitMode"</span>: <span class="s2">"duplicate"</span>
+            <span class="o">}</span>,
+            <span class="s2">"keys"</span>: <span class="s2">"alt+shift+d"</span>
+        <span class="o">}</span>
+    <span class="o">]</span>
+<span class="o">}</span>
+</code></pre>
+    </div>
+    <h2 id="_7">
      推荐的网站
     </h2>
     <ul>
@@ -468,10 +409,10 @@
       </a>
      </li>
     </ul>
-    <h2>
+    <h2 id="win10">
      Win10快捷键使用
     </h2>
-    <h3>
+    <h3 id="_8">
      多桌面
     </h3>
     <ul>
@@ -482,7 +423,7 @@
       Win+Ctrl+左右键：切换桌面
      </li>
     </ul>
-    <h3>
+    <h3 id="_9">
      终端
     </h3>
     <ul>
@@ -502,7 +443,7 @@
       Ctrl+shift+左右方向键：移动选中
      </li>
     </ul>
-    <h2>
+    <h2 id="_10">
      命令
     </h2>
     <ul>
@@ -510,7 +451,7 @@
       查看硬盘列表及类型：Get-PhysicalDisk
      </li>
     </ul>
-    <h2>
+    <h2 id="_11">
      参考链接
     </h2>
     <ul>
@@ -575,7 +516,7 @@
       </a>
      </li>
     </ul>
-    <h3>
+    <h3 id="_12">
      备用软件
     </h3>
     <ul>

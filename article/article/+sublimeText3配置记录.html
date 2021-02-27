@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,11 +43,11 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="sublime-text-3">
      sublime text 3 配置记录
     </h1>
     <hr/>
-    <h2>
+    <h2 id="sublime-text-3_1">
      下载sublime text 3
     </h2>
     <ul>
@@ -59,16 +60,17 @@
       有很多，搜一搜就行了
      </li>
     </ul>
-    <h2>
+    <h2 id="_1">
      插件安装
     </h2>
     <p>
      按Ctrl+`调出console，输入下面的内容回车后即可，不用重启
     </p>
-    <p>
-     <pre>import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">import</span> <span class="nn">urllib.request</span><span class="o">,</span><span class="nn">os</span><span class="p">;</span> <span class="n">pf</span> <span class="o">=</span> <span class="s1">'Package Control.sublime-package'</span><span class="p">;</span> <span class="n">ipp</span> <span class="o">=</span> <span class="n">sublime</span><span class="o">.</span><span class="n">installed_packages_path</span><span class="p">();</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">install_opener</span><span class="p">(</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">build_opener</span><span class="p">(</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">ProxyHandler</span><span class="p">())</span> <span class="p">);</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ipp</span><span class="p">,</span> <span class="n">pf</span><span class="p">),</span> <span class="s1">'wb'</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span> <span class="s1">'http://sublime.wbond.net/'</span> <span class="o">+</span> <span class="n">pf</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">' '</span><span class="p">,</span><span class="s1">'%20'</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</code></pre>
+    </div>
+    <h2 id="_2">
      基础插件配置列表
     </h2>
     <ul>
@@ -91,7 +93,7 @@
       git:ctrl shift p 后直接add, commit, push 即可
      </li>
     </ul>
-    <h2>
+    <h2 id="markdown">
      markdown插件配置
     </h2>
     <ul>
@@ -99,69 +101,59 @@
       OmniMarkupPreviewer：Markdown文件浏览和转换
      </li>
     </ul>
-    <h2>
+    <h2 id="_3">
      有效的证书
     </h2>
-    <p>
-     <pre>—– BEGIN LICENSE —–
-TwitterInc
-200 User License
-EA7E-890007
-1D77F72E 390CDD93 4DCBA022 FAF60790
-61AA12C0 A37081C5 D0316412 4584D136
-94D7F7D4 95BC8C1C 527DA828 560BB037
-D1EDDD8C AE7B379F 50C9D69D B35179EF
-2FE898C4 8E4277A8 555CE714 E1FB0E43
-D5D52613 C3D12E98 BC49967F 7652EED2
-9D2D2E61 67610860 6D338B72 5CF95C69
-E36B85CC 84991F19 7575D828 470A92AB
-—— END LICENSE ——</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="err">—– BEGIN LICENSE —–</span>
+<span class="err">TwitterInc</span>
+<span class="err">200 User License</span>
+<span class="err">EA7E-890007</span>
+<span class="err">1D77F72E 390CDD93 4DCBA022 FAF60790</span>
+<span class="err">61AA12C0 A37081C5 D0316412 4584D136</span>
+<span class="err">94D7F7D4 95BC8C1C 527DA828 560BB037</span>
+<span class="err">D1EDDD8C AE7B379F 50C9D69D B35179EF</span>
+<span class="err">2FE898C4 8E4277A8 555CE714 E1FB0E43</span>
+<span class="err">D5D52613 C3D12E98 BC49967F 7652EED2</span>
+<span class="err">9D2D2E61 67610860 6D338B72 5CF95C69</span>
+<span class="err">E36B85CC 84991F19 7575D828 470A92AB</span>
+<span class="err">—— END LICENSE ——</span>
+</code></pre>
+    </div>
+    <h2 id="_4">
      使用中遇到的问题记录
     </h2>
-    <h3>
+    <h3 id="omnimarkuppreviewer">
      OmniMarkupPreviewer无法在线浏览问题
     </h3>
     <p>
      问题描述如下：
     </p>
-    <p>
-     ```
-Error: 404 Not Found
-    </p>
-    <p>
-     Sorry, the requested URL 'http://127.0.0.1:51004/view/31' caused an error:
-    </p>
-    <p>
-     'buffer_id(31) is not valid (closed or unsupported file format)'
-    </p>
-    <p>
-     <strong>
-      NOTE:
-     </strong>
-     If you run multiple instances of Sublime Text, you may want to adjust
-the
-     <pre>server_port</pre>
-     option in order to get this plugin work again.
-```
-    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">Error</span><span class="p">:</span> <span class="mi">404</span> <span class="k">Not</span> <span class="n">Found</span>
+
+<span class="n">Sorry</span><span class="p">,</span> <span class="n">the</span> <span class="n">requested</span> <span class="n">URL</span> <span class="s1">'http://127.0.0.1:51004/view/31'</span> <span class="n">caused</span> <span class="n">an</span> <span class="n">error</span><span class="p">:</span>
+
+<span class="s1">'buffer_id(31) is not valid (closed or unsupported file format)'</span>
+
+<span class="o">**</span><span class="n">NOTE</span><span class="p">:</span><span class="o">**</span> <span class="k">If</span> <span class="n">you</span> <span class="n">run</span> <span class="n">multiple</span> <span class="n">instances</span> <span class="n">of</span> <span class="n">Sublime</span> <span class="kt">Text</span><span class="p">,</span> <span class="n">you</span> <span class="n">may</span> <span class="n">want</span> <span class="k">to</span> <span class="n">adjust</span>
+<span class="n">the</span> <span class="ss">`server_port`</span> <span class="k">option</span> <span class="k">in</span> <span class="k">order</span> <span class="k">to</span> <span class="n">get</span> <span class="n">this</span> <span class="n">plugin</span> <span class="n">work</span> <span class="n">again</span><span class="p">.</span>
+</code></pre>
+    </div>
     <p>
      解决办法,可以先尝试改变端口 Sublime Text &gt; Preferences &gt; Package Settings &gt; OmniMarkupPreviewer &gt; Settings，不行再进行下面的尝试：
     </p>
-    <p>
-     ```
-Sublime Text &gt; Preferences &gt; Package Settings &gt; OmniMarkupPreviewer &gt; Settings - User
-    </p>
-    <p>
-     {
-    "renderer_options-MarkdownRenderer": {
-        "extensions": ["tables", "fenced_pre", "prehilite"]
-    }
-}
-```
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">Sublime</span> <span class="nb">Text</span> <span class="o">&gt;</span> <span class="n">Preferences</span> <span class="o">&gt;</span> <span class="n">Package</span> <span class="n">Settings</span> <span class="o">&gt;</span> <span class="n">OmniMarkupPreviewer</span> <span class="o">&gt;</span> <span class="n">Settings</span> <span class="o">-</span> <span class="k">User</span>
+
+<span class="err">{</span>
+    <span class="ss">"renderer_options-MarkdownRenderer"</span><span class="p">:</span> <span class="err">{</span>
+        <span class="ss">"extensions"</span><span class="p">:</span> <span class="p">[</span><span class="ss">"tables"</span><span class="p">,</span> <span class="ss">"fenced_code"</span><span class="p">,</span> <span class="ss">"codehilite"</span><span class="p">]</span>
+    <span class="err">}</span>
+<span class="err">}</span>
+</code></pre>
+    </div>
+    <h2 id="_5">
      参考链接
     </h2>
     <ul>

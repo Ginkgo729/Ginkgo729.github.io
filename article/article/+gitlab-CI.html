@@ -14,6 +14,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
   <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
   <noscript>
    <link href="../../assets/css/noscript.css" rel="stylesheet"/>
   </noscript>
@@ -42,7 +43,7 @@
     </ul>
    </nav>
    <article class="active" id="article" style="display: block">
-    <h1>
+    <h1 id="gitlab-ci">
      GitLab CI 部署
     </h1>
     <hr/>
@@ -51,18 +52,18 @@
       部署环境 Centos7
      </em>
     </p>
-    <h2>
+    <h2 id="_1">
      安装
     </h2>
-    <h3>
+    <h3 id="gitlab-ci-multi-runner">
      gitlab-ci-multi-runner
     </h3>
-    <p>
-     <pre>sh
-curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.rpm.sh | sudo bash
-yum install gitlab-ci-multi-runner</pre>
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.rpm.sh <span class="p">|</span> sudo bash
+yum install gitlab-ci-multi-runner
+</code></pre>
+    </div>
+    <h3 id="token">
      获取项目的地址、token
     </h3>
     <ul>
@@ -82,52 +83,50 @@ yum install gitlab-ci-multi-runner</pre>
       Set up a specific Runner manually
      </li>
     </ul>
-    <h3>
+    <h3 id="token_1">
      设置项目地址、token
     </h3>
-    <p>
-     ```sh
-gitlab-ci-multi-runner register
-    </p>
-    <p>
-     Please enter the gitlab-ci coordinator URL: gitlab地址
-Please enter the gitlab-ci token for this runner: 项目的token
-Please enter the gitlab-ci description for this runner ：描述，可以进行修改
-Please enter the gitlab-ci tags for this runner (comma separated): runner的标签，需要慎重填写，gitlab CI 配置文件根据标签定位runner
-Whether to run untagged builds [true/false]: 询问是否在未加标签的Build上运行 true
-Please enter the executor: 询问是否锁定最近项目  true
-```
-    </p>
-    <h3>
+    <div class="codehilite">
+     <pre><span></span><code>gitlab-ci-multi-runner register
+
+Please enter the gitlab-ci coordinator URL: gitlab地址
+Please enter the gitlab-ci token <span class="k">for</span> this runner: 项目的token
+Please enter the gitlab-ci description <span class="k">for</span> this runner ：描述，可以进行修改
+Please enter the gitlab-ci tags <span class="k">for</span> this runner <span class="o">(</span>comma separated<span class="o">)</span>: runner的标签，需要慎重填写，gitlab CI 配置文件根据标签定位runner
+Whether to run untagged builds <span class="o">[</span>true/false<span class="o">]</span>: 询问是否在未加标签的Build上运行 <span class="nb">true</span>
+Please enter the executor: 询问是否锁定最近项目  <span class="nb">true</span>
+</code></pre>
+    </div>
+    <h3 id="_2">
      运行
     </h3>
-    <p>
-     <pre>sh
-gitlab-runner restart | start | stop</pre>
-    </p>
-    <h2>
+    <div class="codehilite">
+     <pre><span></span><code>gitlab-runner restart <span class="p">|</span> start <span class="p">|</span> stop
+</code></pre>
+    </div>
+    <h2 id="_3">
      项目配置
     </h2>
     <p>
      在项目根目录下新建文件：.gitlab-ci.yml（gitlab会自动识别），填入下面的内容
     </p>
-    <p>
-     <pre>sh
-stages:
+    <div class="codehilite">
+     <pre><span></span><code>stages:
   - deploy
 deploy:
-  stage: deploy # 对应stages的步骤
-  script: # 执行的命令
-    - echo "start deploy"
-    - cd /home/nssas/projects/Visual
-    - mvn clean package -Dmaven.test.skip=true
-    - echo "end deploy"
+  stage: deploy <span class="c1"># 对应stages的步骤</span>
+  script: <span class="c1"># 执行的命令</span>
+    - <span class="nb">echo</span> <span class="s2">"start deploy"</span>
+    - <span class="nb">cd</span> /home/nssas/projects/Visual
+    - mvn clean package -Dmaven.test.skip<span class="o">=</span><span class="nb">true</span>
+    - <span class="nb">echo</span> <span class="s2">"end deploy"</span>
   only:
-    - master # 设置master分支提交的时候触发
+    - master <span class="c1"># 设置master分支提交的时候触发</span>
   tags:
-    - master # 触发标签为master的runner</pre>
-    </p>
-    <h2>
+    - master <span class="c1"># 触发标签为master的runner</span>
+</code></pre>
+    </div>
+    <h2 id="_4">
      运行自动集成
     </h2>
     <p>
@@ -136,7 +135,7 @@ deploy:
      </em>
      代码进行提交即可进行自动集成
     </p>
-    <h2>
+    <h2 id="_5">
      持续集成的步骤
     </h2>
     <ul>
@@ -166,7 +165,7 @@ deploy:
       GitLab有可视化的集成监视器吗？
      </li>
     </ul>
-    <h2>
+    <h2 id="_6">
      参考链接
     </h2>
     <ul>
