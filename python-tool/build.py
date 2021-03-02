@@ -72,7 +72,6 @@ def rebuild_other(soup):
 def write_catalog_markdown(catalog, content_list, space_amount):
     for key in catalog.keys():
         if len(catalog[key]) == 0:
-            # content_list.append(' ' * space_amount + '- [' + key[1:] + '](../article/' + str(key).replace("md", "html") + ')')
             content_list.append(' ' * space_amount + '- [' + key[1:] + '](./article/article/' + str(key).replace("md", "html") + ')')
         else:
             content_list.append(' ' * space_amount + '- ' + key)
@@ -159,7 +158,6 @@ def build_home_page():
     save(template_soup.prettify(), "../index.html")
 
     build_article(file_list)
-
 
 
 def get_catalog(blog_path):
