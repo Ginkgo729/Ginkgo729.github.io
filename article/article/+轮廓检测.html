@@ -24,41 +24,28 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="_1">
-     轮廓检测
-    </h1>
-    <hr/>
-    <p>
-     <em>
-      <a href="http://opencv-python-tutroals.readthedocs.io/en/stable/py_tutorials/py_imgproc/py_contours/py_contours_begin/py_contours_begin.html#contours-getting-started">
-       参考官方新手教程
-      </a>
-     </em>
-    </p>
-    <h2 id="1">
-     1.轮廓检测的简单使用
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># 使用读取相应的图像</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="_1">
+      轮廓检测
+     </h1>
+     <hr/>
+     <p>
+      <em>
+       <a href="http://opencv-python-tutroals.readthedocs.io/en/stable/py_tutorials/py_imgproc/py_contours/py_contours_begin/py_contours_begin.html#contours-getting-started">
+        参考官方新手教程
+       </a>
+      </em>
+     </p>
+     <h2 id="1">
+      1.轮廓检测的简单使用
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># 使用读取相应的图像</span>
 <span class="n">image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
 <span class="c1"># 对图像进行灰度化</span>
 <span class="n">image_gray</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
@@ -70,25 +57,36 @@
 <span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="n">image</span><span class="p">)</span>
 <span class="n">cv2</span><span class="o">.</span><span class="n">waitKey</span><span class="p">()</span>
 </code></pre>
-    </div>
-    <h2 id="2">
-     2.参数讲解
-    </h2>
-   </article>
+     </div>
+     <h2 id="2">
+      2.参数讲解
+     </h2>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

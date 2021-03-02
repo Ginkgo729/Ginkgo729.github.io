@@ -24,102 +24,89 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="sublime-test-2">
-     sublime test 2 配置说明
-    </h1>
-    <hr/>
-    <h2 id="vim">
-     vim 启动方法
-    </h2>
-    <ul>
-     <li>
-      1.进入 Preferences Setting-User，修改代码如下：
-     </li>
-    </ul>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">{</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="sublime-test-2">
+      sublime test 2 配置说明
+     </h1>
+     <hr/>
+     <h2 id="vim">
+      vim 启动方法
+     </h2>
+     <ul>
+      <li>
+       1.进入 Preferences Setting-User，修改代码如下：
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">{</span>
     <span class="ss">"ignored_packages"</span><span class="p">:</span>
     <span class="p">[</span>
 
     <span class="p">]</span>
 <span class="err">}</span>
 </code></pre>
-    </div>
-    <h2 id="_1">
-     启动插件安装
-    </h2>
-    <ul>
-     <li>
-      1.按Ctrl+`调出console
-     </li>
-     <li>
-      2.粘贴以下代码到底部命令行并回车：
-     </li>
-    </ul>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kn">import</span> <span class="nn">urllib2</span><span class="o">,</span><span class="nn">os</span><span class="p">;</span><span class="n">pf</span><span class="o">=</span><span class="s1">'Package Control.sublime-package'</span><span class="p">;</span><span class="n">ipp</span><span class="o">=</span><span class="n">sublime</span><span class="o">.</span><span class="n">installed_packages_path</span><span class="p">();</span><span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">ipp</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ipp</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span><span class="p">;</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ipp</span><span class="p">,</span><span class="n">pf</span><span class="p">),</span><span class="s1">'wb'</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s1">'http://sublime.wbond.net/'</span><span class="o">+</span><span class="n">pf</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">' '</span><span class="p">,</span><span class="s1">'%20'</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+     </div>
+     <h2 id="_1">
+      启动插件安装
+     </h2>
+     <ul>
+      <li>
+       1.按Ctrl+`调出console
+      </li>
+      <li>
+       2.粘贴以下代码到底部命令行并回车：
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">import</span> <span class="nn">urllib2</span><span class="o">,</span><span class="nn">os</span><span class="p">;</span><span class="n">pf</span><span class="o">=</span><span class="s1">'Package Control.sublime-package'</span><span class="p">;</span><span class="n">ipp</span><span class="o">=</span><span class="n">sublime</span><span class="o">.</span><span class="n">installed_packages_path</span><span class="p">();</span><span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">ipp</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ipp</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span><span class="p">;</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ipp</span><span class="p">,</span><span class="n">pf</span><span class="p">),</span><span class="s1">'wb'</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s1">'http://sublime.wbond.net/'</span><span class="o">+</span><span class="n">pf</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">' '</span><span class="p">,</span><span class="s1">'%20'</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 </code></pre>
-    </div>
-    <ul>
-     <li>
-      3.重启Sublime Text 2
-     </li>
-    </ul>
-    <h2 id="markdown">
-     Markdown 相关插件安装
-    </h2>
-    <ul>
-     <li>
-      MarkdownEditing:Markdown文件编辑
-     </li>
-     <li>
-      MarkdownPreviewing:在前面加[TOC]后按Ctrl+B生成带目录的HTML文件
-     </li>
-     <li>
-      OmniMarkupPreviewer：Markdown文件浏览和转换
-     </li>
-     <li>
-      IMESupport:输入法光标不跟随问题解决差距
-     </li>
-     <li>
-      ConvertToUTF8:Windows 乱码问题
-     </li>
-     <li>
-      <a href="https://github.com/vkocubinsky/SublimeTableEditor">
-      </a>
-      ：表格插件
-     </li>
-     <li>
-      <a href="https://www.cnblogs.com/syfwhu/p/5123637.html">
-       sublime3
-      </a>
-     </li>
-     <li>
-      注册码：
-     </li>
-    </ul>
-    <p>
-     <code>
-      —– BEGIN LICENSE —–
+     </div>
+     <ul>
+      <li>
+       3.重启Sublime Text 2
+      </li>
+     </ul>
+     <h2 id="markdown">
+      Markdown 相关插件安装
+     </h2>
+     <ul>
+      <li>
+       MarkdownEditing:Markdown文件编辑
+      </li>
+      <li>
+       MarkdownPreviewing:在前面加[TOC]后按Ctrl+B生成带目录的HTML文件
+      </li>
+      <li>
+       OmniMarkupPreviewer：Markdown文件浏览和转换
+      </li>
+      <li>
+       IMESupport:输入法光标不跟随问题解决差距
+      </li>
+      <li>
+       ConvertToUTF8:Windows 乱码问题
+      </li>
+      <li>
+       <a href="https://github.com/vkocubinsky/SublimeTableEditor">
+       </a>
+       ：表格插件
+      </li>
+      <li>
+       <a href="https://www.cnblogs.com/syfwhu/p/5123637.html">
+        sublime3
+       </a>
+      </li>
+      <li>
+       注册码：
+      </li>
+     </ul>
+     <p>
+      <code>
+       —– BEGIN LICENSE —–
 TwitterInc
 200 User License
 EA7E-890007
@@ -132,23 +119,34 @@ D5D52613 C3D12E98 BC49967F 7652EED2
 9D2D2E61 67610860 6D338B72 5CF95C69
 E36B85CC 84991F19 7575D828 470A92AB
 —— END LICENSE ——
-     </code>
+      </code>
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

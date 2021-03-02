@@ -24,37 +24,24 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="python-mongodb">
-     Python MongoDB
-    </h1>
-    <hr/>
-    <h2 id="code">
-     Code
-    </h2>
-    <h3 id="_1">
-     基本使用
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="ch">#!/usr/bin/env python</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="python-mongodb">
+      Python MongoDB
+     </h1>
+     <hr/>
+     <h2 id="code">
+      Code
+     </h2>
+     <h3 id="_1">
+      基本使用
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="ch">#!/usr/bin/env python</span>
 <span class="c1"># @Time    : 2018/11/19 11:46</span>
 <span class="c1"># @Author  : LiuWei</span>
 <span class="c1"># @Site    : </span>
@@ -104,66 +91,77 @@
     <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">find_one</span><span class="p">()</span>
     <span class="n">MongoDBUtil</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </code></pre>
-    </div>
-    <h3 id="objectid">
-     ObjectId处理
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kn">from</span> <span class="nn">bson.objectid</span> <span class="kn">import</span> <span class="n">ObjectId</span>
+     </div>
+     <h3 id="objectid">
+      ObjectId处理
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">from</span> <span class="nn">bson.objectid</span> <span class="kn">import</span> <span class="n">ObjectId</span>
 <span class="n">a</span> <span class="o">=</span> <span class="n">ObjectId</span><span class="p">(</span><span class="s1">'55717c9eb2c983c127000000'</span><span class="p">)</span>
 <span class="n">a</span><span class="o">.</span><span class="n">generation_time</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()</span> 
 </code></pre>
-    </div>
-    <h3 id="_2">
-     统计
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">results</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s2">"test_set"</span><span class="p">:</span><span class="s2">"abc"</span><span class="p">})</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s2">"abc"</span><span class="p">,</span><span class="n">pymongo</span><span class="o">.</span><span class="n">DESCENDING</span><span class="p">)</span><span class="o">.</span><span class="n">skip</span><span class="p">((</span><span class="n">page</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">num</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+     </div>
+     <h3 id="_2">
+      统计
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">results</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s2">"test_set"</span><span class="p">:</span><span class="s2">"abc"</span><span class="p">})</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s2">"abc"</span><span class="p">,</span><span class="n">pymongo</span><span class="o">.</span><span class="n">DESCENDING</span><span class="p">)</span><span class="o">.</span><span class="n">skip</span><span class="p">((</span><span class="n">page</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">num</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
 <span class="n">results_count</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 </code></pre>
-    </div>
-    <h3 id="_3">
-     去重
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">tags</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">mycoll</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s2">"category"</span><span class="p">:</span> <span class="s2">"movie"</span><span class="p">})</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="s2">"tags"</span><span class="p">)</span>
+     </div>
+     <h3 id="_3">
+      去重
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">tags</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">mycoll</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s2">"category"</span><span class="p">:</span> <span class="s2">"movie"</span><span class="p">})</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="s2">"tags"</span><span class="p">)</span>
 </code></pre>
-    </div>
-    <h2 id="_4">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="http://www.runoob.com/python3/python-mongodb-query-document.html">
-       Python Mongodb 查询文档
-      </a>
-     </li>
-     <li>
-      <a href="http://www.runoob.com/python3/python-mongodb.html">
-       Python Mongodb
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/u011744758/article/details/50085013">
-       python -【mongo】 处理ObjectID
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_4">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="http://www.runoob.com/python3/python-mongodb-query-document.html">
+        Python Mongodb 查询文档
+       </a>
+      </li>
+      <li>
+       <a href="http://www.runoob.com/python3/python-mongodb.html">
+        Python Mongodb
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/u011744758/article/details/50085013">
+        python -【mongo】 处理ObjectID
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

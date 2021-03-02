@@ -24,34 +24,21 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="linux">
-     Linux 时间校准
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     命令
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">tzselect</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="linux">
+      Linux 时间校准
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      命令
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">tzselect</span>
 <span class="n">export</span> <span class="n">TZ</span><span class="o">=</span><span class="s1">'Asia/Shanghai'</span>
 <span class="k">source</span> <span class="o">~/</span><span class="p">.</span><span class="n">bashrc</span>
 <span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="k">localtime</span>
@@ -61,32 +48,43 @@
 <span class="n">yum</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">ntp</span>
 <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">ntpdate</span> <span class="o">-</span><span class="n">u</span> <span class="n">cn</span><span class="p">.</span><span class="n">pool</span><span class="p">.</span><span class="n">ntp</span><span class="p">.</span><span class="n">org</span>
 </code></pre>
-    </div>
-    <h2 id="_2">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://blog.csdn.net/zisefeizhu/article/details/81535299">
-       Linux服务器时间不一致问题的解决
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_2">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://blog.csdn.net/zisefeizhu/article/details/81535299">
+        Linux服务器时间不一致问题的解决
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

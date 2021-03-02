@@ -24,77 +24,75 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="go">
-     Go设置使用记录
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     常用编译命令
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code>go run xxx.go
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="go">
+      Go设置使用记录
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      常用编译命令
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code>go run xxx.go
 
 go build
 
 go mod init xxxx
 </code></pre>
-    </div>
-    <h2 id="_2">
-     国内源切换
-    </h2>
-    <p>
-     Go 1.13 及以上（推荐）
+     </div>
+     <h2 id="_2">
+      国内源切换
+     </h2>
+     <p>
+      Go 1.13 及以上（推荐）
 打开你的终端并执行
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>$ go env -w <span class="nv">GO111MODULE</span><span class="o">=</span>on
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>$ go env -w <span class="nv">GO111MODULE</span><span class="o">=</span>on
 $ go env -w <span class="nv">GOPROXY</span><span class="o">=</span>https://goproxy.cn,direct
 </code></pre>
-    </div>
-    <h2 id="_3">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://github.com/goproxy/goproxy.cn/blob/master/README.zh-CN.md">
-       Goproxy 中国
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_3">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://github.com/goproxy/goproxy.cn/blob/master/README.zh-CN.md">
+        Goproxy 中国
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

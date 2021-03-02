@@ -24,31 +24,18 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="iptables">
-     iptables 端口转发和映射
-    </h1>
-    <hr/>
-    <div class="codehilite">
-     <pre><span></span><code><span class="p">;</span> 添加
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="iptables">
+      iptables 端口转发和映射
+     </h1>
+     <hr/>
+     <div class="codehilite">
+      <pre><span></span><code><span class="p">;</span> 添加
 iptables -t nat -A PREROUTING -p tcp -m tcp --dport <span class="m">40001</span> -j DNAT --to-destination <span class="m">172</span>.19.104.19:27017
 iptables -t nat -A POSTROUTING -d <span class="m">172</span>.19.104.19/32 -p tcp -j SNAT --to-source <span class="m">172</span>.19.104.28
 
@@ -96,52 +83,63 @@ service iptables restart
 
 应该在默认的22端口这条规则的下面添加端口新规则，然后重启防火墙才能生效。如下：
 </code></pre>
-    </div>
-    <h2 id="_1">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="http://hi.ktsee.com/635.html">
-       Linux通过iptables端口转发访问内网服务器上的内网服务
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/taiyang1987912/article/details/40189371">
-       centos下配置防火墙端口失败
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/zzhongcy/article/details/42738285">
-       linux下用iptables做本机端口转发方法
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/kongfanyu/article/details/80579493">
-       CentOS 7 使用iptables 开放端口
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/taiyang1987912/article/details/40189371">
-       将规则添加到防火墙中，总是端口无法开启
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_1">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="http://hi.ktsee.com/635.html">
+        Linux通过iptables端口转发访问内网服务器上的内网服务
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/taiyang1987912/article/details/40189371">
+        centos下配置防火墙端口失败
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/zzhongcy/article/details/42738285">
+        linux下用iptables做本机端口转发方法
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/kongfanyu/article/details/80579493">
+        CentOS 7 使用iptables 开放端口
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/taiyang1987912/article/details/40189371">
+        将规则添加到防火墙中，总是端口无法开启
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

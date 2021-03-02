@@ -24,75 +24,62 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="soulsouldubboclient">
+      Soul网关源码解析（二十四）SoulDubboClient注解
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      本篇文章来探索下Soul网关Apache Dubbo客户端的注册处理流程
+     </p>
+     <h2 id="_2">
+      概览
+     </h2>
+     <p>
+      有了上一篇的基础：
+      <a href="https://juejin.cn/post/6922643958455599111">
+       Soul网关源码解析（二十三）SoulSpringMvcClient注解
       </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
+     </p>
+     <p>
+      我们直接在Soul-Client模块下定位到：soul-client-apache-dubbo，找到进行具体处理的类：ApacheDubboServiceBeanPostProcessor
+     </p>
+     <p>
+      我们看下是如何获取到Bean的？如果判断是Soul-Client-Apache-Dubbo的？注册了那些信息？
+     </p>
+     <p>
+      下面开始分析：
+     </p>
+     <h2 id="debug">
+      源码Debug
+     </h2>
+     <h3 id="bean">
+      如何获取到Bean
+     </h3>
+     <p>
+      直接定位到处理类如下，onApplicationEvent方法是入口，那应该是从这里开始像HTTP那样获取Bean的
+     </p>
+     <p>
+      首先看下继承的类，可以看到和HTTP不同，这里是：ApplicationListener
+      <contextrefreshedevent>
+      </contextrefreshedevent>
+     </p>
+     <p>
+      由于不熟悉，我们搜索下它是干嘛的，参考链接是：
+      <a href="https://www.jianshu.com/p/4bd3f68cb179">
+       ApplicationListener和ContextRefreshedEvent
       </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="soulsouldubboclient">
-     Soul网关源码解析（二十四）SoulDubboClient注解
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简介
-    </h2>
-    <p>
-     本篇文章来探索下Soul网关Apache Dubbo客户端的注册处理流程
-    </p>
-    <h2 id="_2">
-     概览
-    </h2>
-    <p>
-     有了上一篇的基础：
-     <a href="https://juejin.cn/post/6922643958455599111">
-      Soul网关源码解析（二十三）SoulSpringMvcClient注解
-     </a>
-    </p>
-    <p>
-     我们直接在Soul-Client模块下定位到：soul-client-apache-dubbo，找到进行具体处理的类：ApacheDubboServiceBeanPostProcessor
-    </p>
-    <p>
-     我们看下是如何获取到Bean的？如果判断是Soul-Client-Apache-Dubbo的？注册了那些信息？
-    </p>
-    <p>
-     下面开始分析：
-    </p>
-    <h2 id="debug">
-     源码Debug
-    </h2>
-    <h3 id="bean">
-     如何获取到Bean
-    </h3>
-    <p>
-     直接定位到处理类如下，onApplicationEvent方法是入口，那应该是从这里开始像HTTP那样获取Bean的
-    </p>
-    <p>
-     首先看下继承的类，可以看到和HTTP不同，这里是：ApplicationListener
-     <contextrefreshedevent>
-     </contextrefreshedevent>
-    </p>
-    <p>
-     由于不熟悉，我们搜索下它是干嘛的，参考链接是：
-     <a href="https://www.jianshu.com/p/4bd3f68cb179">
-      ApplicationListener和ContextRefreshedEvent
-     </a>
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">在</span><span class="n">IOC的容器的启动过程</span><span class="err">，当所有的</span><span class="n">bean都已经处理完成之后</span><span class="err">，</span><span class="n">spring</span> <span class="n">ioc容器会有一个发布事件的动作</span><span class="err">。从</span> <span class="n">AbstractApplicationContext</span> <span class="err">的源码中就可以看出</span>
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">在</span><span class="n">IOC的容器的启动过程</span><span class="err">，当所有的</span><span class="n">bean都已经处理完成之后</span><span class="err">，</span><span class="n">spring</span> <span class="n">ioc容器会有一个发布事件的动作</span><span class="err">。从</span> <span class="n">AbstractApplicationContext</span> <span class="err">的源码中就可以看出</span>
 <span class="err">当</span><span class="n">ioc容器加载处理完相应的bean之后</span><span class="err">，也给我们提供了一个机会（先有</span><span class="n">InitializingBean</span><span class="err">，后有</span><span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span><span class="err">），可以去做一些自己想做的事。其实这也就是</span><span class="n">spring</span> <span class="n">ioc容器给提供的一个扩展的地方</span><span class="err">。我们可以这样使用这个扩展机制。</span>
 
 <span class="err">作者：</span><span class="n">AmeeLove</span>
@@ -100,18 +87,18 @@
 <span class="err">来源：简书</span>
 <span class="err">著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</span>
 </code></pre>
-    </div>
-    <p>
-     大致就是在所有容器都初始化完成以后，会触发执行
-    </p>
-    <p>
-     我们在下面的代码中打断点进行调试，发现:contextRefreshedEvent.getApplicationContext().getBeansOfType(ServiceBean.class),执行完以后就可以得到我们示例中的两个Impl服务，感觉挺便利的。这个感觉需要对Dubbo有一些熟悉，现在又学到了一手
-    </p>
-    <p>
-     获取以后遍历开启线程去进行注册，获取Bean的过程大致就是这样了
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApacheDubboServiceBeanPostProcessor</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span> <span class="p">{</span>
+     </div>
+     <p>
+      大致就是在所有容器都初始化完成以后，会触发执行
+     </p>
+     <p>
+      我们在下面的代码中打断点进行调试，发现:contextRefreshedEvent.getApplicationContext().getBeansOfType(ServiceBean.class),执行完以后就可以得到我们示例中的两个Impl服务，感觉挺便利的。这个感觉需要对Dubbo有一些熟悉，现在又学到了一手
+     </p>
+     <p>
+      获取以后遍历开启线程去进行注册，获取Bean的过程大致就是这样了
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApacheDubboServiceBeanPostProcessor</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span> <span class="p">{</span>
 
     <span class="c1">// DubboConfig(adminUrl=http://localhost:9095, contextPath=/dubbo, appName=dubbo)</span>
     <span class="kd">private</span> <span class="n">DubboConfig</span> <span class="n">dubboConfig</span><span class="p">;</span>
@@ -146,24 +133,24 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="_3">
-     判断是否需要注册
-    </h3>
-    <p>
-     我们直接来到具体处理的handler函数
-    </p>
-    <p>
-     可以看到其直接从bean获取到类信息，而且如果是发射代理类的话，要获取到原来被代理的类（这里有些奇怪，为啥不能直接使用代理类，是方法生成后有什么不同吗？后面去探索一下）
-    </p>
-    <p>
-     这里没有看到像HTTP那样的通配符了，Dubbo好像不能这样，这个感觉是个值得注意的点，感觉通配的话在从URL转Dubbo的路径的时候不好转，所有没有提供这方面的机制
-    </p>
-    <p>
-     最后遍历类中的所有方法，如果有SoulDubboClient注解，将其接口注入到Admin中
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApacheDubboServiceBeanPostProcessor</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span> <span class="p">{</span>
+     </div>
+     <h3 id="_3">
+      判断是否需要注册
+     </h3>
+     <p>
+      我们直接来到具体处理的handler函数
+     </p>
+     <p>
+      可以看到其直接从bean获取到类信息，而且如果是发射代理类的话，要获取到原来被代理的类（这里有些奇怪，为啥不能直接使用代理类，是方法生成后有什么不同吗？后面去探索一下）
+     </p>
+     <p>
+      这里没有看到像HTTP那样的通配符了，Dubbo好像不能这样，这个感觉是个值得注意的点，感觉通配的话在从URL转Dubbo的路径的时候不好转，所有没有提供这方面的机制
+     </p>
+     <p>
+      最后遍历类中的所有方法，如果有SoulDubboClient注解，将其接口注入到Admin中
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApacheDubboServiceBeanPostProcessor</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span> <span class="p">{</span>
 
     <span class="kd">private</span> <span class="kt">void</span> <span class="nf">handler</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServiceBean</span> <span class="n">serviceBean</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// clazz == org.dromara.soul.examples.apache.dubbo.service.impl.DubboTestServiceImpl</span>
@@ -190,18 +177,18 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="_4">
-     注册信息
-    </h3>
-    <p>
-     下面是构造请求相关的函数，从其中可以看出，注册了选择器和规则相关的信息。在其中的Ext中还有分组、版本、负载均衡等信息
-    </p>
-    <p>
-     我们没有看到像HTTP的那些IP和端口之类的信息，但联想到RPC的相关知识，大致知道Dubbo已经将其注册到Zookeeper中了
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApacheDubboServiceBeanPostProcessor</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span> <span class="p">{</span>
+     </div>
+     <h3 id="_4">
+      注册信息
+     </h3>
+     <p>
+      下面是构造请求相关的函数，从其中可以看出，注册了选择器和规则相关的信息。在其中的Ext中还有分组、版本、负载均衡等信息
+     </p>
+     <p>
+      我们没有看到像HTTP的那些IP和端口之类的信息，但联想到RPC的相关知识，大致知道Dubbo已经将其注册到Zookeeper中了
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApacheDubboServiceBeanPostProcessor</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span> <span class="p">{</span>
 
     <span class="c1">// DubboConfig(adminUrl=http://localhost:9095, contextPath=/dubbo, appName=dubbo)</span>
     <span class="kd">private</span> <span class="n">DubboConfig</span> <span class="n">dubboConfig</span><span class="p">;</span>
@@ -257,15 +244,15 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="apache-dubbo">
-     Apache Dubbo 注册调用梳理
-    </h3>
-    <p>
-     下面是最终发送的请求信息，不像HTTP那样直观，如果没有接触过RPC，可以感觉有点懵，这里梳理一下RPC相关的注册调用流程
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="p">{</span>
+     </div>
+     <h3 id="apache-dubbo">
+      Apache Dubbo 注册调用梳理
+     </h3>
+     <p>
+      下面是最终发送的请求信息，不像HTTP那样直观，如果没有接触过RPC，可以感觉有点懵，这里梳理一下RPC相关的注册调用流程
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="p">{</span>
     <span class="nt">"appName"</span><span class="p">:</span> <span class="s2">"dubbo"</span><span class="p">,</span>
     <span class="nt">"contextPath"</span><span class="p">:</span> <span class="s2">"/dubbo"</span><span class="p">,</span>
     <span class="nt">"path"</span><span class="p">:</span> <span class="s2">"/dubbo/insert"</span><span class="p">,</span>
@@ -279,229 +266,240 @@
     <span class="nt">"enabled"</span><span class="p">:</span> <span class="kc">true</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     一个Dubbo的注册和调用流程图如下：
+     </div>
+     <p>
+      一个Dubbo的注册和调用流程图如下：
+     </p>
+     <p>
+      <img alt="" src="./picture/soul-dubbo.png"/>
+     </p>
+     <p>
+      注册和调用都有可能同时发生，也就是路由Soul网关的路由时可以动态变化的
+     </p>
+     <p>
+      当有新的服务进行注册或服务更新时，就会将数据发给Zookeeper
+     </p>
+     <p>
+      Boostrap那边有一个Dubbo的客户端之类的东西，会受到Zookeeper变化的服务信息，实时进行更新
+     </p>
+     <p>
+      当请求进行访问时，Soul网关直接调用Dubbo的客户端，让它去访问后台的Dubbo服务，拿到结果后返回即可
+     </p>
+     <h2 id="_5">
+      总结
+     </h2>
+     <p>
+      本篇对Soul-Client的Apache Dubbo模块进行探索，发现和HTTP的注册流程大致相同：
+     </p>
+     <ul>
+      <li>
+       1.获取对应的Bean（类）：
+      </li>
+      <li>
+       HTTP是通过在每个Bean构造完成后进行操作，这样比Dubbo可能要费时
+      </li>
+      <li>
+       <p>
+        Dubbo在所有Bean构造完成后进行操作，直接能获取Dubbo相关的Bean
+       </p>
+      </li>
+      <li>
+       <p>
+        2.注册判断：两者都是通过判断是否满足相应的注解
+       </p>
+      </li>
+      <li>
+       <p>
+        3.注册信息：
+       </p>
+      </li>
+      <li>
+       HTTP没有中间层，所有必须要有额外的IP和端口信息
+      </li>
+      <li>
+       Dubbo有Zookeeper中间层，Boostrap有个Dubbo客户端，通过Zookeeper能得到后台信息，就没有传入额外的IP和端口信息
+      </li>
+     </ul>
+     <p>
+      最后留一个疑问：为啥不能使用发射代理进行注册？
+     </p>
+     <h2 id="soul">
+      Soul网关源码解析文章列表
+     </h2>
+     <h3 id="_6">
+      掘金
+     </h3>
+     <h4 id="_7">
+      了解与初步运行
+     </h4>
+     <ul>
+      <li>
+       <a href="https://juejin.cn/post/6917864624423436296">
+        Soul网关源码解析（一） 概览
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6917865804121767944">
+        Soul网关源码解析（二）代码初步运行
+       </a>
+      </li>
+     </ul>
+     <h4 id="_8">
+      请求处理流程解析
+     </h4>
+     <ul>
+      <li>
+       <a href="https://juejin.cn/post/6917866538712334343">
+        Soul网关源码解析（三）请求处理概览
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6917867369909977102">
+        Soul网关源码解析（四）Dubbo请求概览
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6918575905962983438">
+        Soul网关源码解析（五）请求类型探索
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6918736260467015693">
+        Soul网关源码解析（六）Sofa请求处理概览
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6919348164944232455/">
+        Soul网关源码解析（七）限流插件初探
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6919774553241550855/">
+        Soul网关源码解析（八）路由匹配初探
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6920074307590684685/">
+        Soul网关源码解析（九）插件配置加载初探
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6920142348617777166">
+        Soul网关源码解析（十）自定义简单插件编写
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6920596034171174925">
+        Soul网关源码解析（十一）请求处理小结
+       </a>
+      </li>
+     </ul>
+     <h4 id="_9">
+      数据同步解析
+     </h4>
+     <ul>
+      <li>
+       <a href="https://juejin.cn/post/6920596173925384206">
+        Soul网关源码解析（十二）数据同步初探
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6920596028505178125">
+        Soul网关源码解析（十三）Websocket同步数据-Bootstrap端
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6920597298674302983">
+        Soul网关源码解析（十四）HTTP数据同步-Bootstrap端
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6920764643967238151">
+        Soul网关源码解析（十五）Zookeeper数据同步-Bootstrap端
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6921170233868845064">
+        Soul网关源码解析（十六）Nacos数据同步示例运行
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6921325882753695757/">
+        Soul网关源码解析（十七）Nacos数据同步解析-Bootstrap端
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6921495273122463751/">
+        Soul网关源码解析（十八）Zookeeper数据同步初探-Admin端
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6921621915995996168/">
+        Soul网关源码解析（十九）Nacos数据同步初始化修复-Admin端
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6921988280187617287/">
+        Soul网关源码解析（二十）Websocket数据同步-Admin端
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6922301585288593416/">
+        Soul网关源码解析（二十一）HTTP长轮询数据同步-Admin端
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6922584596810825735/">
+        Soul网关源码解析（二十二）数据同步小结
+       </a>
+      </li>
+     </ul>
+     <h4 id="soul-client">
+      Soul-Client模块
+     </h4>
+     <ul>
+      <li>
+       <a href="https://juejin.cn/post/6922643958455599111">
+        Soul网关源码解析（二十三）SoulSpringMvcClient注解
+       </a>
+      </li>
+     </ul>
+     <h4 id="_10">
+      番外
+     </h4>
+     <ul>
+      <li>
+       <a href="https://juejin.cn/post/6918947689564471309">
+        Soul网关源码阅读番外篇（一） HTTP参数请求错误
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <p>
-     <img alt="" src="./picture/soul-dubbo.png"/>
-    </p>
-    <p>
-     注册和调用都有可能同时发生，也就是路由Soul网关的路由时可以动态变化的
-    </p>
-    <p>
-     当有新的服务进行注册或服务更新时，就会将数据发给Zookeeper
-    </p>
-    <p>
-     Boostrap那边有一个Dubbo的客户端之类的东西，会受到Zookeeper变化的服务信息，实时进行更新
-    </p>
-    <p>
-     当请求进行访问时，Soul网关直接调用Dubbo的客户端，让它去访问后台的Dubbo服务，拿到结果后返回即可
-    </p>
-    <h2 id="_5">
-     总结
-    </h2>
-    <p>
-     本篇对Soul-Client的Apache Dubbo模块进行探索，发现和HTTP的注册流程大致相同：
-    </p>
-    <ul>
-     <li>
-      1.获取对应的Bean（类）：
-     </li>
-     <li>
-      HTTP是通过在每个Bean构造完成后进行操作，这样比Dubbo可能要费时
-     </li>
-     <li>
-      <p>
-       Dubbo在所有Bean构造完成后进行操作，直接能获取Dubbo相关的Bean
-      </p>
-     </li>
-     <li>
-      <p>
-       2.注册判断：两者都是通过判断是否满足相应的注解
-      </p>
-     </li>
-     <li>
-      <p>
-       3.注册信息：
-      </p>
-     </li>
-     <li>
-      HTTP没有中间层，所有必须要有额外的IP和端口信息
-     </li>
-     <li>
-      Dubbo有Zookeeper中间层，Boostrap有个Dubbo客户端，通过Zookeeper能得到后台信息，就没有传入额外的IP和端口信息
-     </li>
-    </ul>
-    <p>
-     最后留一个疑问：为啥不能使用发射代理进行注册？
-    </p>
-    <h2 id="soul">
-     Soul网关源码解析文章列表
-    </h2>
-    <h3 id="_6">
-     掘金
-    </h3>
-    <h4 id="_7">
-     了解与初步运行
-    </h4>
-    <ul>
-     <li>
-      <a href="https://juejin.cn/post/6917864624423436296">
-       Soul网关源码解析（一） 概览
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6917865804121767944">
-       Soul网关源码解析（二）代码初步运行
-      </a>
-     </li>
-    </ul>
-    <h4 id="_8">
-     请求处理流程解析
-    </h4>
-    <ul>
-     <li>
-      <a href="https://juejin.cn/post/6917866538712334343">
-       Soul网关源码解析（三）请求处理概览
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6917867369909977102">
-       Soul网关源码解析（四）Dubbo请求概览
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6918575905962983438">
-       Soul网关源码解析（五）请求类型探索
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6918736260467015693">
-       Soul网关源码解析（六）Sofa请求处理概览
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6919348164944232455/">
-       Soul网关源码解析（七）限流插件初探
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6919774553241550855/">
-       Soul网关源码解析（八）路由匹配初探
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6920074307590684685/">
-       Soul网关源码解析（九）插件配置加载初探
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6920142348617777166">
-       Soul网关源码解析（十）自定义简单插件编写
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6920596034171174925">
-       Soul网关源码解析（十一）请求处理小结
-      </a>
-     </li>
-    </ul>
-    <h4 id="_9">
-     数据同步解析
-    </h4>
-    <ul>
-     <li>
-      <a href="https://juejin.cn/post/6920596173925384206">
-       Soul网关源码解析（十二）数据同步初探
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6920596028505178125">
-       Soul网关源码解析（十三）Websocket同步数据-Bootstrap端
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6920597298674302983">
-       Soul网关源码解析（十四）HTTP数据同步-Bootstrap端
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6920764643967238151">
-       Soul网关源码解析（十五）Zookeeper数据同步-Bootstrap端
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6921170233868845064">
-       Soul网关源码解析（十六）Nacos数据同步示例运行
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6921325882753695757/">
-       Soul网关源码解析（十七）Nacos数据同步解析-Bootstrap端
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6921495273122463751/">
-       Soul网关源码解析（十八）Zookeeper数据同步初探-Admin端
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6921621915995996168/">
-       Soul网关源码解析（十九）Nacos数据同步初始化修复-Admin端
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6921988280187617287/">
-       Soul网关源码解析（二十）Websocket数据同步-Admin端
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6922301585288593416/">
-       Soul网关源码解析（二十一）HTTP长轮询数据同步-Admin端
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.cn/post/6922584596810825735/">
-       Soul网关源码解析（二十二）数据同步小结
-      </a>
-     </li>
-    </ul>
-    <h4 id="soul-client">
-     Soul-Client模块
-    </h4>
-    <ul>
-     <li>
-      <a href="https://juejin.cn/post/6922643958455599111">
-       Soul网关源码解析（二十三）SoulSpringMvcClient注解
-      </a>
-     </li>
-    </ul>
-    <h4 id="_10">
-     番外
-    </h4>
-    <ul>
-     <li>
-      <a href="https://juejin.cn/post/6918947689564471309">
-       Soul网关源码阅读番外篇（一） HTTP参数请求错误
-      </a>
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

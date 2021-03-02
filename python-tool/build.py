@@ -72,7 +72,8 @@ def rebuild_other(soup):
 def write_catalog_markdown(catalog, content_list, space_amount):
     for key in catalog.keys():
         if len(catalog[key]) == 0:
-            content_list.append(' ' * space_amount + '- [' + key[1:] + '](../article/' + str(key).replace("md", "html") + ')')
+            # content_list.append(' ' * space_amount + '- [' + key[1:] + '](../article/' + str(key).replace("md", "html") + ')')
+            content_list.append(' ' * space_amount + '- [' + key[1:] + '](./article/article/' + str(key).replace("md", "html") + ')')
         else:
             content_list.append(' ' * space_amount + '- ' + key)
             write_catalog_markdown(catalog[key], content_list, space_amount + 4)
@@ -109,16 +110,14 @@ def create_catalog_markdown(file_list):
     return contents
 
 
-def build_catalog(file_list):
+def build_catalog(file_list, soup):
     catalog_markdown = create_catalog_markdown(file_list)
     save(catalog_markdown, "../article/catalog/catalog.md")
     insert_html = markdown_convert_html(catalog_markdown)
 
-    template_page_path = "../article_template.html"
-    template_soup = read_html(template_page_path)
-    rebuild_html(template_soup, "article", insert_html)
-
-    save(template_soup.prettify(), "../article/catalog/catalog.html")
+    article = soup.find(id="article")
+    article.clear()
+    article.append(BeautifulSoup(insert_html, "html.parser"))
 
 
 def build_article(file_list):
@@ -127,9 +126,21 @@ def build_article(file_list):
     for file in file_list:
         content = read_file(file)
         insert_html = markdown_convert_html(content)
+
         rebuild_html(template_soup, "article", insert_html)
         file_path = "../article/article/" + file.split("\\")[-1].replace("md", "html")
         save(template_soup.prettify(), file_path)
+
+
+def build_resume(soup):
+    markdown = read_file("../article/resume.md")
+    context = markdown_convert_html(markdown)
+    article = "<article id=\"resume\">\n"
+    article += str(context)
+    article += "\n</article>"
+
+    main_div = soup.find(id="main")
+    main_div.append(BeautifulSoup(article, "html.parser"))
 
 
 def build_home_page():
@@ -139,12 +150,16 @@ def build_home_page():
     rebuild_intro(template_soup)
     rebuild_experience(template_soup)
     rebuild_other(template_soup)
-    save(template_soup.prettify(), "../index.html")
+    build_resume(template_soup)
 
     blog_path = "F:\Code\Markdown\LOG\profession"
     file_list = get_catalog(blog_path)
-    build_catalog(file_list)
+    build_catalog(file_list, template_soup)
+
+    save(template_soup.prettify(), "../index.html")
+
     build_article(file_list)
+
 
 
 def get_catalog(blog_path):

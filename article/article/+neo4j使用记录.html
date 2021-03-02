@@ -24,31 +24,18 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="neo4j">
-     Neo4j 使用记录
-    </h1>
-    <hr/>
-    <div class="codehilite">
-     <pre><span></span><code>First, you<span class="s1">'ll want our key:</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="neo4j">
+      Neo4j 使用记录
+     </h1>
+     <hr/>
+     <div class="codehilite">
+      <pre><span></span><code>First, you<span class="s1">'ll want our key:</span>
 
 <span class="s1">cd /tmp</span>
 <span class="s1">wget http://debian.neo4j.org/neotechnology.gpg.key</span>
@@ -74,51 +61,62 @@ rm /var/lib/neo4j/data/dbms/auth
 
 http://172.18.0.44:7474/browser/
 </code></pre>
-    </div>
-    <div class="codehilite">
-     <pre><span></span><code>match<span class="o">(</span>n<span class="o">)</span> <span class="k">return</span> n
+     </div>
+     <div class="codehilite">
+      <pre><span></span><code>match<span class="o">(</span>n<span class="o">)</span> <span class="k">return</span> n
 </code></pre>
-    </div>
-    <h2 id="_1">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://neo4j.com/docs/operations-manual/3.1/installation/linux/rpm/">
-       Red Hat / CentOS / Fedora
-      </a>
-     </li>
-     <li>
-      <a href="https://neo4j.com/docs/operations-manual/3.1/installation/">
-       Chapter 2. Installation
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/wzwdcld/article/details/80763251">
-       Neo4j服务关闭启动·常用配置·快速设定新密码
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/c1052981766/article/details/79530061">
-       使用neo4j-admin进行neo4j数据备份、迁移
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_1">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://neo4j.com/docs/operations-manual/3.1/installation/linux/rpm/">
+        Red Hat / CentOS / Fedora
+       </a>
+      </li>
+      <li>
+       <a href="https://neo4j.com/docs/operations-manual/3.1/installation/">
+        Chapter 2. Installation
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/wzwdcld/article/details/80763251">
+        Neo4j服务关闭启动·常用配置·快速设定新密码
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/c1052981766/article/details/79530061">
+        使用neo4j-admin进行neo4j数据备份、迁移
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

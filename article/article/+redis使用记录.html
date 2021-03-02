@@ -24,43 +24,30 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="redis">
-     Redis使用记录
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     安装
-    </h2>
-    <h3 id="python">
-     python
-    </h3>
-    <p>
-     https://pypi.org/project/redis/#description
-    </p>
-    <h3 id="centos">
-     centos
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>yum update -y
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="redis">
+      Redis使用记录
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      安装
+     </h2>
+     <h3 id="python">
+      python
+     </h3>
+     <p>
+      https://pypi.org/project/redis/#description
+     </p>
+     <h3 id="centos">
+      centos
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>yum update -y
 yum install epel-release -y
 yum update -y
 yum install redis
@@ -70,90 +57,101 @@ systemctl <span class="nb">enable</span> redis
 vim /etc/redis.conf
 <span class="nb">bind</span> <span class="m">0</span>.0.0.0
 </code></pre>
-    </div>
-    <h3 id="docker">
-     Docker
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>docker run -dit --name redis -p <span class="m">6379</span>:6379 redis
+     </div>
+     <h3 id="docker">
+      Docker
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>docker run -dit --name redis -p <span class="m">6379</span>:6379 redis
 
 docker <span class="nb">exec</span> -ti redis redis-cli shutdown
 </code></pre>
-    </div>
-    <h2 id="_2">
-     设置
-    </h2>
-    <h3 id="_3">
-     外网访问
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err"># 打开配置文件把下面对应的注释掉</span>
+     </div>
+     <h2 id="_2">
+      设置
+     </h2>
+     <h3 id="_3">
+      外网访问
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err"># 打开配置文件把下面对应的注释掉</span>
 <span class="err"># bind 127.0.0.1 </span>
 <span class="err"># Redis默认不是以守护进程的方式运行，可以通过该配置项修改，使用yes启用守护进程，设置为no</span>
 <span class="err">daemonize no</span>
 <span class="err"># 保护模式</span>
 <span class="err">protected-mode no </span>
 </code></pre>
-    </div>
-    <h3 id="_4">
-     数据导入导出
-    </h3>
-    <p>
-     第一步、先redis-cli 进去后bgsave下数据将数据存储到磁盘对应文件dump.rdb中。如果是只存内存的请先做对应的存储设置(修改redis.conf中的save 等参数)
+     </div>
+     <h3 id="_4">
+      数据导入导出
+     </h3>
+     <p>
+      第一步、先redis-cli 进去后bgsave下数据将数据存储到磁盘对应文件dump.rdb中。如果是只存内存的请先做对应的存储设置(修改redis.conf中的save 等参数)
     第二步、 ps -ef|grep redis 找到对应的进程，kill掉。
     第三步、 找到dump.rdb 备份下并拷贝一份到要导入的redis机器
     第四步、kill掉导入机器的对应redis端口，将原rdb文件移除(移除前请自行备份),将第三步导过来的文件替换掉对应的rdb文件。
     第五步、启动对应的redis端口，便可以看到导入的新的数据了
+     </p>
+     <h2 id="_5">
+      内置操作
+     </h2>
+     <h3 id="_6">
+      列表
+     </h3>
+     <p>
+      Redis 列表(List)：http://www.runoob.com/redis/redis-lists.html
+     </p>
+     <h2 id="_7">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://www.cnblogs.com/melonjiang/p/5342505.html">
+        Python—操作redis
+       </a>
+      </li>
+      <li>
+       <a href="http://www.cnblogs.com/melonjiang/p/5342383.html">
+        Python—redis
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/2639549bedc8">
+        使用python来操作redis用法详解
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/0bf63c3ac8f5">
+        redis数据导入导出（迁移）
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <h2 id="_5">
-     内置操作
-    </h2>
-    <h3 id="_6">
-     列表
-    </h3>
-    <p>
-     Redis 列表(List)：http://www.runoob.com/redis/redis-lists.html
-    </p>
-    <h2 id="_7">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://www.cnblogs.com/melonjiang/p/5342505.html">
-       Python—操作redis
-      </a>
-     </li>
-     <li>
-      <a href="http://www.cnblogs.com/melonjiang/p/5342383.html">
-       Python—redis
-      </a>
-     </li>
-     <li>
-      <a href="https://www.jianshu.com/p/2639549bedc8">
-       使用python来操作redis用法详解
-      </a>
-     </li>
-     <li>
-      <a href="https://www.jianshu.com/p/0bf63c3ac8f5">
-       redis数据导入导出（迁移）
-      </a>
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

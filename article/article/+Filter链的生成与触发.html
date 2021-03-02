@@ -24,46 +24,33 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="spring-cloud-gateway-filter">
-     Spring Cloud Gateway （三） Filter 链的生成与触发
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简介
-    </h2>
-    <p>
-     在上篇中分析了请求在Filter中的传播过程，但不同的请求，应该是有不同的各自的定制的filter，今天来看看如何对请求定制filter链
-    </p>
-    <h2 id="_2">
-     分析过程
-    </h2>
-    <p>
-     我们找到上次filter链的循环部分，里面对filter链进行了循环遍历，逐个对每个filter进行了调用，在filter里面对全局的exchange进行了修改，exchange承担了整个流程中的数据。
-    </p>
-    <p>
-     在 FilteringWebHandler 中找到了如何构造特定请求的定制filter链的代码。在下面的代码中，特定请求的filter存放到了exchange中，和全局的filter放到一起排序，形成了上次的filter链路
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">FilteringWebHandler</span> <span class="kd">implements</span> <span class="n">WebHandler</span> <span class="p">{</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-cloud-gateway-filter">
+      Spring Cloud Gateway （三） Filter 链的生成与触发
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在上篇中分析了请求在Filter中的传播过程，但不同的请求，应该是有不同的各自的定制的filter，今天来看看如何对请求定制filter链
+     </p>
+     <h2 id="_2">
+      分析过程
+     </h2>
+     <p>
+      我们找到上次filter链的循环部分，里面对filter链进行了循环遍历，逐个对每个filter进行了调用，在filter里面对全局的exchange进行了修改，exchange承担了整个流程中的数据。
+     </p>
+     <p>
+      在 FilteringWebHandler 中找到了如何构造特定请求的定制filter链的代码。在下面的代码中，特定请求的filter存放到了exchange中，和全局的filter放到一起排序，形成了上次的filter链路
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">FilteringWebHandler</span> <span class="kd">implements</span> <span class="n">WebHandler</span> <span class="p">{</span>
     <span class="nd">@Override</span>
     <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// 这里是获取特定转发的filter列表</span>
@@ -85,26 +72,26 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     想查询定位到exchange的路由路径独有filter是如何来的，但没有思路，后面看到Get Route的下面这句：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">Route</span> <span class="n">route</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequiredAttribute</span><span class="p">(</span><span class="n">GATEWAY_ROUTE_ATTR</span><span class="p">);</span>
+     </div>
+     <p>
+      想查询定位到exchange的路由路径独有filter是如何来的，但没有思路，后面看到Get Route的下面这句：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">Route</span> <span class="n">route</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequiredAttribute</span><span class="p">(</span><span class="n">GATEWAY_ROUTE_ATTR</span><span class="p">);</span>
 </code></pre>
-    </div>
-    <p>
-     查看相关代码中如何设置的代码，假设在代码中存在下面这句，把route放入其中的语句：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">GATEWAY_ROUTE_ATTR</span>
+     </div>
+     <p>
+      查看相关代码中如何设置的代码，假设在代码中存在下面这句，把route放入其中的语句：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">GATEWAY_ROUTE_ATTR</span>
 </code></pre>
-    </div>
-    <p>
-     经过搜索，找到了下面的类：RoutePredicateHandlerMapping
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RoutePredicateHandlerMapping</span> <span class="kd">extends</span> <span class="n">AbstractHandlerMapping</span> <span class="p">{</span>
+     </div>
+     <p>
+      经过搜索，找到了下面的类：RoutePredicateHandlerMapping
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RoutePredicateHandlerMapping</span> <span class="kd">extends</span> <span class="n">AbstractHandlerMapping</span> <span class="p">{</span>
 
     <span class="nd">@Override</span>
     <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;?&gt;</span> <span class="n">getHandlerInternal</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
@@ -138,28 +125,39 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     在上面的代码中，指定路由路径的定制filter是从这传入的，并且debug可以看到，这个可以跳转到filter的开始类中，那这个类是承接了route和filter的最后一个route相关的类。
+     </div>
+     <p>
+      在上面的代码中，指定路由路径的定制filter是从这传入的，并且debug可以看到，这个可以跳转到filter的开始类中，那这个类是承接了route和filter的最后一个route相关的类。
+     </p>
+     <p>
+      但其中还要一些疑问，为啥要把webHandler放入Mono中，不应该是系统启动的时候就配置好的吗，这里和我想象的不一样，后序看看能不能捋一捋
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <p>
-     但其中还要一些疑问，为啥要把webHandler放入Mono中，不应该是系统启动的时候就配置好的吗，这里和我想象的不一样，后序看看能不能捋一捋
-    </p>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

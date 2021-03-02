@@ -24,66 +24,53 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="nginx">
-     nginx 使用记录
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     安装
-    </h2>
-    <h3 id="linux">
-     Linux软件安装
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>yum install -y pcre
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="nginx">
+      nginx 使用记录
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      安装
+     </h2>
+     <h3 id="linux">
+      Linux软件安装
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>yum install -y pcre
 yum install -y pcre-devel
 yum install -y openssl-devel
 yum install -y epel-release
 yum install -y nginx
 </code></pre>
-    </div>
-    <h3 id="dockerlinuxwindows">
-     docker安装（linux，Windows）
-    </h3>
-    <p>
-     教程链接：https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-docker/#running-nginx-plus-in-a-docker-container
-    </p>
-    <h3 id="_2">
-     访问权限问题
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="k">user</span> <span class="n">root</span>
+     </div>
+     <h3 id="dockerlinuxwindows">
+      docker安装（linux，Windows）
+     </h3>
+     <p>
+      教程链接：https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-docker/#running-nginx-plus-in-a-docker-container
+     </p>
+     <h3 id="_2">
+      访问权限问题
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="k">user</span> <span class="n">root</span>
 
 <span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="n">xxxx</span>
 </code></pre>
-    </div>
-    <h3 id="_3">
-     配置不同路径访问不同的静态文件
-    </h3>
-    <p>
-     好像只能存在一个roo，另一个需要使用alias，例子如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">server</span> <span class="err">{</span>
+     </div>
+     <h3 id="_3">
+      配置不同路径访问不同的静态文件
+     </h3>
+     <p>
+      好像只能存在一个roo，另一个需要使用alias，例子如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">server</span> <span class="err">{</span>
         <span class="k">listen</span>       <span class="mi">80</span> <span class="n">default_server</span><span class="p">;</span>
         <span class="k">listen</span>       <span class="p">[::]:</span><span class="mi">80</span> <span class="n">default_server</span><span class="p">;</span>
         <span class="k">server_name</span>  <span class="n">_</span><span class="p">;</span>
@@ -112,72 +99,83 @@ yum install -y nginx
 <span class="cm">        }</span>
 <span class="cm">}</span>
 </code></pre>
-    </div>
-    <h3 id="_4">
-     文件服务器搭建
-    </h3>
-    <p>
-     进行location的配置即可，如下面的配置的话就是访问：/home/download/download,根据情况进行修改即可
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>location /download <span class="o">{</span>
+     </div>
+     <h3 id="_4">
+      文件服务器搭建
+     </h3>
+     <p>
+      进行location的配置即可，如下面的配置的话就是访问：/home/download/download,根据情况进行修改即可
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>location /download <span class="o">{</span>
     root /home/download<span class="p">;</span>
     autoindex on<span class="p">;</span>
     autoindex_exact_size on<span class="p">;</span>
     autoindex_localtime on<span class="p">;</span>
 <span class="o">}</span>
 </code></pre>
-    </div>
-    <h2 id="_5">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://www.jb51.net/article/99305.htm">
-       nginx配置访问图片路径以及html静态页面的调取方法
-      </a>
-     </li>
-     <li>
-      <a href="https://www.jianshu.com/p/e0dadb871894">
-       nginx 403 Forbidden 排错记录
-      </a>
-     </li>
-     <li>
-      <a href="https://www.jianshu.com/p/a195c2f42e15">
-       Nginx安装配置
-      </a>
-     </li>
-     <li>
-      <a href="https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-centos-7">
-       How To Install Nginx on CentOS 7
-      </a>
-     </li>
-     <li>
-      <a href="https://www.jianshu.com/p/a9363379f23b">
-       利用nginx搭建小型的文件服务器
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/bruce128/article/details/9665503">
-       snginx修改上传文件大小限制
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_5">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://www.jb51.net/article/99305.htm">
+        nginx配置访问图片路径以及html静态页面的调取方法
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/e0dadb871894">
+        nginx 403 Forbidden 排错记录
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/a195c2f42e15">
+        Nginx安装配置
+       </a>
+      </li>
+      <li>
+       <a href="https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-centos-7">
+        How To Install Nginx on CentOS 7
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/a9363379f23b">
+        利用nginx搭建小型的文件服务器
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/bruce128/article/details/9665503">
+        snginx修改上传文件大小限制
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

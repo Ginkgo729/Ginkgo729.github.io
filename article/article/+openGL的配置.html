@@ -24,78 +24,76 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="vsopengl">
-     VS中OpenGL的配置
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简单配置：
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">一、将</span><span class="n">glut</span><span class="p">.</span><span class="n">lib和glut32</span><span class="p">.</span><span class="n">lib复制到安装路径的</span> <span class="n">VC</span><span class="err">\</span><span class="n">lib</span> <span class="err">下</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="vsopengl">
+      VS中OpenGL的配置
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简单配置：
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">一、将</span><span class="n">glut</span><span class="p">.</span><span class="n">lib和glut32</span><span class="p">.</span><span class="n">lib复制到安装路径的</span> <span class="n">VC</span><span class="err">\</span><span class="n">lib</span> <span class="err">下</span>
 
 <span class="err">二、将</span><span class="n">glut</span><span class="p">.</span><span class="n">dll和glut32</span><span class="p">.</span><span class="n">dll复制到C</span><span class="p">:</span><span class="err">\</span><span class="n">Window</span><span class="err">\</span><span class="n">system32和C</span><span class="p">:</span><span class="err">\</span><span class="n">Window</span><span class="err">\</span><span class="n">SysWOW64</span>
 <span class="err">目录下</span>
 
 <span class="err">三、将</span><span class="n">glut</span><span class="p">.</span><span class="n">h复制到安装路径的</span> <span class="n">VC</span><span class="err">\</span><span class="n">include</span><span class="err">\</span><span class="n">GL</span> <span class="err">目录下，没有</span><span class="n">GL自己创建</span>
 </code></pre>
-    </div>
-    <h2 id="_2">
-     初始运行时会遇到的一些问题：
-    </h2>
-    <h3 id="1-exit">
-     1.无法识别标识符 exit
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">这里的原因是</span><span class="n">C</span><span class="o">++</span><span class="err">也有</span><span class="n">exit</span><span class="err">（）函数，这样就产生了问题。解决的办法是在包</span>
+     </div>
+     <h2 id="_2">
+      初始运行时会遇到的一些问题：
+     </h2>
+     <h3 id="1-exit">
+      1.无法识别标识符 exit
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">这里的原因是</span><span class="n">C</span><span class="o">++</span><span class="err">也有</span><span class="n">exit</span><span class="err">（）函数，这样就产生了问题。解决的办法是在包</span>
 <span class="err">含</span><span class="n">OpenGL头文件之前包含</span> <span class="n">C</span><span class="o">++</span> <span class="err">的</span> <span class="n">stdlib</span><span class="p">.</span><span class="n">h</span> <span class="err">头文件。像下面这样：</span>
 
 <span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;GL/glut.h&gt;</span><span class="cp"></span>
 </code></pre>
-    </div>
-    <h2 id="_3">
-     参考链接：
-    </h2>
-    <p>
-     <a href="http://zhidao.baidu.com/link?url=V4MwgfWWdpwZAeLYrAvJvNkYZTWrbmxGLGCnXwAdwgY8Zd469LJxraU9fNIMixDfIbuu4eR1y8FDZItNuvweIq">
-      http://zhidao.baidu.com/link?url=V4MwgfWWdpwZAeLYrAvJvNkYZTWrbmxGLGCnXwAdwgY8Zd469LJxraU9fNIMixDfIbuu4eR1y8FDZItNuvweIq
+     </div>
+     <h2 id="_3">
+      参考链接：
+     </h2>
+     <p>
+      <a href="http://zhidao.baidu.com/link?url=V4MwgfWWdpwZAeLYrAvJvNkYZTWrbmxGLGCnXwAdwgY8Zd469LJxraU9fNIMixDfIbuu4eR1y8FDZItNuvweIq">
+       http://zhidao.baidu.com/link?url=V4MwgfWWdpwZAeLYrAvJvNkYZTWrbmxGLGCnXwAdwgY8Zd469LJxraU9fNIMixDfIbuu4eR1y8FDZItNuvweIq
+      </a>
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
      </a>
+     .
     </p>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

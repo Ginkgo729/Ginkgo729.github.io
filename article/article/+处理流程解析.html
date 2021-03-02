@@ -24,49 +24,36 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="spring-cloud-gateway">
-     Spring Cloud Gateway （七）处理流程解析
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简介
-    </h2>
-    <p>
-     初步梳理 Spring Cloud Gateway 的处理流程
-    </p>
-    <h3 id="_2">
-     过程记录
-    </h3>
-    <h4 id="_3">
-     主要请求流程
-    </h4>
-    <p>
-     在前面的分析中，我们知道在 RoutePredicateHandlerMapping 中是实现了路由查找，于是在这个类中 getHandlerInternal 函数打上断点，通过调用栈向前追溯调用
-    </p>
-    <p>
-     向前我们追溯到了 DispatcherHandler ,在这个断点处通过断点调试发现有类似循环的操作，这个感觉是查找相应 handler 进行处理，细节部分暂时不够，后面再来详细看
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-cloud-gateway">
+      Spring Cloud Gateway （七）处理流程解析
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      初步梳理 Spring Cloud Gateway 的处理流程
+     </p>
+     <h3 id="_2">
+      过程记录
+     </h3>
+     <h4 id="_3">
+      主要请求流程
+     </h4>
+     <p>
+      在前面的分析中，我们知道在 RoutePredicateHandlerMapping 中是实现了路由查找，于是在这个类中 getHandlerInternal 函数打上断点，通过调用栈向前追溯调用
+     </p>
+     <p>
+      向前我们追溯到了 DispatcherHandler ,在这个断点处通过断点调试发现有类似循环的操作，这个感觉是查找相应 handler 进行处理，细节部分暂时不够，后面再来详细看
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="na">createNotFoundError</span><span class="p">()</span> <span class="p">:</span> <span class="n">Flux</span><span class="p">.</span><span class="na">fromIterable</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span><span class="p">).</span><span class="na">concatMap</span><span class="p">((</span><span class="n">mapping</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
             <span class="k">return</span> <span class="n">mapping</span><span class="p">.</span><span class="na">getHandler</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
         <span class="p">}).</span><span class="na">next</span><span class="p">().</span><span class="na">switchIfEmpty</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">createNotFoundError</span><span class="p">()).</span><span class="na">flatMap</span><span class="p">((</span><span class="n">handler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
@@ -76,12 +63,12 @@
         <span class="p">});</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     在上面函数打断点，再通过调用栈向前查找，找到 netty 相关的一个类： HttpServerHandle 。下面的函数中有类似 Mono 这里的代码，发布后触发调用
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStateChange</span><span class="p">(</span><span class="n">Connection</span> <span class="n">connection</span><span class="p">,</span> <span class="n">State</span> <span class="n">newState</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      在上面函数打断点，再通过调用栈向前查找，找到 netty 相关的一个类： HttpServerHandle 。下面的函数中有类似 Mono 这里的代码，发布后触发调用
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStateChange</span><span class="p">(</span><span class="n">Connection</span> <span class="n">connection</span><span class="p">,</span> <span class="n">State</span> <span class="n">newState</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">newState</span> <span class="o">==</span> <span class="n">HttpServerState</span><span class="p">.</span><span class="na">REQUEST_RECEIVED</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">try</span> <span class="p">{</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">log</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
@@ -98,12 +85,12 @@
         <span class="p">}</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     在上面注释的地方打上断点，进入相应类及其方法，跳入下面的 ReactorHttpHandlerAdapter , 其中再次调用了其他的 handler，进行参数的传递，我们再接着跟下去
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">apply</span><span class="p">(</span><span class="n">HttpServerRequest</span> <span class="n">reactorRequest</span><span class="p">,</span> <span class="n">HttpServerResponse</span> <span class="n">reactorResponse</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      在上面注释的地方打上断点，进入相应类及其方法，跳入下面的 ReactorHttpHandlerAdapter , 其中再次调用了其他的 handler，进行参数的传递，我们再接着跟下去
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">apply</span><span class="p">(</span><span class="n">HttpServerRequest</span> <span class="n">reactorRequest</span><span class="p">,</span> <span class="n">HttpServerResponse</span> <span class="n">reactorResponse</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">NettyDataBufferFactory</span> <span class="n">bufferFactory</span> <span class="o">=</span> <span class="k">new</span> <span class="n">NettyDataBufferFactory</span><span class="p">(</span><span class="n">reactorResponse</span><span class="p">.</span><span class="na">alloc</span><span class="p">());</span>
 
         <span class="k">try</span> <span class="p">{</span>
@@ -129,12 +116,12 @@
         <span class="p">}</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     接着跳到了：WebServerManager ，里面进行了一次调用，来到了 HttpWebHandlerAdapter ,
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="n">ServerHttpResponse</span> <span class="n">response</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      接着跳到了：WebServerManager ，里面进行了一次调用，来到了 HttpWebHandlerAdapter ,
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="n">ServerHttpResponse</span> <span class="n">response</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">forwardedHeaderTransformer</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
             <span class="n">request</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">forwardedHeaderTransformer</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
         <span class="p">}</span>
@@ -155,12 +142,12 @@
         <span class="k">return</span> <span class="n">var10000</span><span class="p">.</span><span class="na">then</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(</span><span class="n">response</span><span class="p">::</span><span class="n">setComplete</span><span class="p">));</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     接着到了： DispatcherHandler ，回到了最开始的切入点，看到其中大致是调用各个 mapping 进行处理
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      接着到了： DispatcherHandler ，回到了最开始的切入点，看到其中大致是调用各个 mapping 进行处理
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="na">createNotFoundError</span><span class="p">()</span> <span class="p">:</span> <span class="n">Flux</span><span class="p">.</span><span class="na">fromIterable</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span><span class="p">).</span><span class="na">concatMap</span><span class="p">((</span><span class="n">mapping</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
             <span class="k">return</span> <span class="n">mapping</span><span class="p">.</span><span class="na">getHandler</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
         <span class="p">}).</span><span class="na">next</span><span class="p">().</span><span class="na">switchIfEmpty</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">createNotFoundError</span><span class="p">()).</span><span class="na">flatMap</span><span class="p">((</span><span class="n">handler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
@@ -171,12 +158,12 @@
         <span class="p">});</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     查看 handlerMappings ，它有6个，routePredicateHandlerMapping 是熟悉的重要的，它会逐个调用各个 Mapping 的 getHandler 方法，不同的 Mapping 实现了不同的 getHandlerInternal 方法，成功的话返回 FilteringWebHandler
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="nf">getHandler</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      查看 handlerMappings ，它有6个，routePredicateHandlerMapping 是熟悉的重要的，它会逐个调用各个 Mapping 的 getHandler 方法，不同的 Mapping 实现了不同的 getHandlerInternal 方法，成功的话返回 FilteringWebHandler
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="nf">getHandler</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// 调用 getHandlerInternal ，不同的 Mapping 有各自的实现</span>
         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">getHandlerInternal</span><span class="p">(</span><span class="n">exchange</span><span class="p">).</span><span class="na">map</span><span class="p">((</span><span class="n">handler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">logger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
@@ -200,12 +187,12 @@
 
     <span class="kd">protected</span> <span class="kd">abstract</span> <span class="n">Mono</span><span class="o">&lt;?&gt;</span> <span class="n">getHandlerInternal</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">var1</span><span class="p">);</span>
 </code></pre>
-    </div>
-    <p>
-     getHandlerInternal(exchange) 调用跳到 RoutePredicateHandlerMapping ，其中关键的是绑定上定制化的 filter
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="nd">@Override</span>
+     </div>
+     <p>
+      getHandlerInternal(exchange) 调用跳到 RoutePredicateHandlerMapping ，其中关键的是绑定上定制化的 filter
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="nd">@Override</span>
     <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;?&gt;</span> <span class="n">getHandlerInternal</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// don't handle requests on management port if set and different than server port</span>
         <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">managementPortType</span> <span class="o">==</span> <span class="n">DIFFERENT</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="na">managementPort</span> <span class="o">!=</span> <span class="kc">null</span>
@@ -237,16 +224,16 @@
                 <span class="p">})));</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     在上面的 Mapping 中处理完成后，返回 handler ，然后this.invokeHandler(exchange, handler), 跳转到 FilteringWebHandler ,在其中从 exchange 中取出定制化的 filter，和 global filter 排序融合在一起，最后结合前面的：
-     <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E6%B5%81%E7%A8%8B%E7%B1%BB.md">
-      Spring cloud Gateway（二） 一个Http请求的流程解析
-     </a>
-     ，整个流程就串起来了
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      在上面的 Mapping 中处理完成后，返回 handler ，然后this.invokeHandler(exchange, handler), 跳转到 FilteringWebHandler ,在其中从 exchange 中取出定制化的 filter，和 global filter 排序融合在一起，最后结合前面的：
+      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E6%B5%81%E7%A8%8B%E7%B1%BB.md">
+       Spring cloud Gateway（二） 一个Http请求的流程解析
+      </a>
+      ，整个流程就串起来了
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">handle</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// 这里是获取特定转发的filter列表</span>
         <span class="n">Route</span> <span class="n">route</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequiredAttribute</span><span class="p">(</span><span class="n">GATEWAY_ROUTE_ATTR</span><span class="p">);</span>
         <span class="n">List</span><span class="o">&lt;</span><span class="n">GatewayFilter</span><span class="o">&gt;</span> <span class="n">gatewayFilters</span> <span class="o">=</span> <span class="n">route</span><span class="p">.</span><span class="na">getFilters</span><span class="p">();</span>
@@ -265,70 +252,81 @@
         <span class="k">return</span> <span class="k">new</span> <span class="n">DefaultGatewayFilterChain</span><span class="p">(</span><span class="n">combined</span><span class="p">).</span><span class="na">filter</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="_4">
-     总结
-    </h3>
-    <p>
-     结合前面的分析，那处理流程大致如下如下：
+     </div>
+     <h3 id="_4">
+      总结
+     </h3>
+     <p>
+      结合前面的分析，那处理流程大致如下如下：
+     </p>
+     <ul>
+      <li>
+       HttpServerHandle : netty 的服务端，接收客户端请求
+      </li>
+      <li>
+       ReactorHttpHandlerAdapter : 一个承接的作用
+      </li>
+      <li>
+       HttpWebHandlerAdapter : 对 exchange 这个重要变量的组装,触发跳转 DispatcherHandler
+      </li>
+      <li>
+       DispatcherHandler : 请求调度器，负责请求分发，首先调用到 route 匹配模块，对 exchange 传入定制化的 filter，成功后进行 filter 相关调用
+      </li>
+      <li>
+       RoutePredicateHandlerMapping : 路由匹配操作，绑定定制化的 filter 到 exchange 上
+      </li>
+      <li>
+       FilteringWebHandler : 使用 filter 链表处理请求
+      </li>
+      <li>
+       Filter : 一系列的操作， WebsocketRoutingFilter/NettyRoutingFilter 负责请求到后台服务器并接受请求， NettyWriteResponseFilter 返回响应到客户端
+      </li>
+     </ul>
+     <p>
+      完整的处理流程图大致如下：
+     </p>
+     <p>
+      <img alt="" src="./picture/fullyProcess.png"/>
+     </p>
+     <p>
+      想到之前秦老师说的：Spring Cloud Gateway基于spring体系，所以偷了个懒，可以直接用spring mvc作为请求接入。到这里有些名称，在图中前面都是使用的react-netty服务相关的(HttpServerHandle和ReactorHttpHandlerAdapter)，Spring web(HttpWebHandlerAdapter)类似做一个承接,后面开始路由匹配和filter。其中最有特色的是，请求和响应和发送都是在filter里面做的，可以说filter做了很多核心的功能了
+     </p>
+     <p>
+      后面的filter流程下面的文章链接中：
+     </p>
+     <ul>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E6%B5%81%E7%A8%8B%E7%B1%BB.md">
+        Spring cloud Gateway（二） 一个Http请求的流程解析
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <ul>
-     <li>
-      HttpServerHandle : netty 的服务端，接收客户端请求
-     </li>
-     <li>
-      ReactorHttpHandlerAdapter : 一个承接的作用
-     </li>
-     <li>
-      HttpWebHandlerAdapter : 对 exchange 这个重要变量的组装,触发跳转 DispatcherHandler
-     </li>
-     <li>
-      DispatcherHandler : 请求调度器，负责请求分发，首先调用到 route 匹配模块，对 exchange 传入定制化的 filter，成功后进行 filter 相关调用
-     </li>
-     <li>
-      RoutePredicateHandlerMapping : 路由匹配操作，绑定定制化的 filter 到 exchange 上
-     </li>
-     <li>
-      FilteringWebHandler : 使用 filter 链表处理请求
-     </li>
-     <li>
-      Filter : 一系列的操作， WebsocketRoutingFilter/NettyRoutingFilter 负责请求到后台服务器并接受请求， NettyWriteResponseFilter 返回响应到客户端
-     </li>
-    </ul>
-    <p>
-     完整的处理流程图大致如下：
-    </p>
-    <p>
-     <img alt="" src="./picture/fullyProcess.png"/>
-    </p>
-    <p>
-     想到之前秦老师说的：Spring Cloud Gateway基于spring体系，所以偷了个懒，可以直接用spring mvc作为请求接入。到这里有些名称，在图中前面都是使用的react-netty服务相关的(HttpServerHandle和ReactorHttpHandlerAdapter)，Spring web(HttpWebHandlerAdapter)类似做一个承接,后面开始路由匹配和filter。其中最有特色的是，请求和响应和发送都是在filter里面做的，可以说filter做了很多核心的功能了
-    </p>
-    <p>
-     后面的filter流程下面的文章链接中：
-    </p>
-    <ul>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E6%B5%81%E7%A8%8B%E7%B1%BB.md">
-       Spring cloud Gateway（二） 一个Http请求的流程解析
-      </a>
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

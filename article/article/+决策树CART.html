@@ -24,2235 +24,2233 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="cart">
-     决策树CART
-    </h1>
-    <hr/>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        天气
-       </th>
-       <th align="center">
-        温度
-       </th>
-       <th align="center">
-        湿度
-       </th>
-       <th align="center">
-        刮风
-       </th>
-       <th>
-        是否打篮球
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        晴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        否
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-      <tr>
-       <td>
-        晴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-      <tr>
-       <td>
-        阴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        否
-       </td>
-       <td>
-        是
-       </td>
-      </tr>
-      <tr>
-       <td>
-        小雨
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        否
-       </td>
-       <td>
-        是
-       </td>
-      </tr>
-      <tr>
-       <td>
-        小雨
-       </td>
-       <td align="center">
-        低
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        否
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-      <tr>
-       <td>
-        晴天
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        是
-       </td>
-      </tr>
-      <tr>
-       <td>
-        阴天
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <h2 id="_1">
-     相关概念阐述
-    </h2>
-    <h3 id="_2">
-     什么是分类树,什么是回归树
-    </h3>
-    <p>
-     以上面的表格数据为例
-    </p>
-    <p>
-     如果我构造了一颗决策树,想要基于数据判断这个人的职业身份,这个就属于分类树
-    </p>
-    <p>
-     如果我构造一颗决策树,给定数据,想要预测这个人的年龄,那就属于回归树
-    </p>
-    <h3 id="_3">
-     基尼系数
-    </h3>
-    <p>
-     基尼系数在经济学中用来衡量一个国家收入差距的常用指标.当基尼指数大于0.4的时候,说明财富差异悬殊.基尼系数在0.2-0.4之间说明分配合理,财富差距不大.扩展阅读下
-     <a href="https://zh.wikipedia.org/wiki/%E5%9F%BA%E5%B0%BC%E7%B3%BB%E6%95%B0">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="cart">
+      决策树CART
+     </h1>
+     <hr/>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         天气
+        </th>
+        <th align="center">
+         温度
+        </th>
+        <th align="center">
+         湿度
+        </th>
+        <th align="center">
+         刮风
+        </th>
+        <th>
+         是否打篮球
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         晴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         否
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+       <tr>
+        <td>
+         晴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+       <tr>
+        <td>
+         阴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         否
+        </td>
+        <td>
+         是
+        </td>
+       </tr>
+       <tr>
+        <td>
+         小雨
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         否
+        </td>
+        <td>
+         是
+        </td>
+       </tr>
+       <tr>
+        <td>
+         小雨
+        </td>
+        <td align="center">
+         低
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         否
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+       <tr>
+        <td>
+         晴天
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         是
+        </td>
+       </tr>
+       <tr>
+        <td>
+         阴天
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <h2 id="_1">
+      相关概念阐述
+     </h2>
+     <h3 id="_2">
+      什么是分类树,什么是回归树
+     </h3>
+     <p>
+      以上面的表格数据为例
+     </p>
+     <p>
+      如果我构造了一颗决策树,想要基于数据判断这个人的职业身份,这个就属于分类树
+     </p>
+     <p>
+      如果我构造一颗决策树,给定数据,想要预测这个人的年龄,那就属于回归树
+     </p>
+     <h3 id="_3">
       基尼系数
-     </a>
-    </p>
-    <p>
-     基尼系数本身反应了样本的不确定度.当基尼系数越小的时候,说明样本之间的差异性小,不确定程度低.
-    </p>
-    <p>
-     CART算法在构造分类树的时候,会选择基尼系数最小的属性作为属性的划分.
-    </p>
-    <p>
-     基尼系数的计算公式如下:
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">Gini = 1 – Σ (Pi)2 for i=1 to number of classes</span>
+     </h3>
+     <p>
+      基尼系数在经济学中用来衡量一个国家收入差距的常用指标.当基尼指数大于0.4的时候,说明财富差异悬殊.基尼系数在0.2-0.4之间说明分配合理,财富差距不大.扩展阅读下
+      <a href="https://zh.wikipedia.org/wiki/%E5%9F%BA%E5%B0%BC%E7%B3%BB%E6%95%B0">
+       基尼系数
+      </a>
+     </p>
+     <p>
+      基尼系数本身反应了样本的不确定度.当基尼系数越小的时候,说明样本之间的差异性小,不确定程度低.
+     </p>
+     <p>
+      CART算法在构造分类树的时候,会选择基尼系数最小的属性作为属性的划分.
+     </p>
+     <p>
+      基尼系数的计算公式如下:
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">Gini = 1 – Σ (Pi)2 for i=1 to number of classes</span>
 </code></pre>
-    </div>
-    <h2 id="_4">
-     举例说明
-    </h2>
-    <p>
-     这里结合下面3个链接进行说明,在参考链接3中有个非常好的举例说明,如果看我的这个还不是太清楚的话,可以去看链接中,这个不用图说明,没有他的形象
+     </div>
+     <h2 id="_4">
+      举例说明
+     </h2>
+     <p>
+      这里结合下面3个链接进行说明,在参考链接3中有个非常好的举例说明,如果看我的这个还不是太清楚的话,可以去看链接中,这个不用图说明,没有他的形象
+     </p>
+     <h3 id="_5">
+      根节点的选择
+     </h3>
+     <p>
+      在上面的列表中有四个属性:天气,温度,湿度,刮风.需要先计算出这四个属性的基尼系数
+     </p>
+     <h4 id="_6">
+      天气的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         天气状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         晴
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+       <tr>
+        <td>
+         阴
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+       <tr>
+        <td>
+         小雨
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(天气=晴)=1 - (1/3)^2 - (2/3)^2 = 1 - 1/9 - 4/9 = 4/9
+      </li>
+      <li>
+       Gini(天气=阴)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
+      </li>
+      <li>
+       Gini(天气=小雨)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
+      </li>
+     </ul>
+     <p>
+      CART是个二叉树,需要对属性进行再次的划分,其有下面三种组合
+     </p>
+     <ul>
+      <li>
+       Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 7/15 ~ 0.46666666666
+      </li>
+      <li>
+       Gini(天气=晴小雨)=(3/5) * 4/9 + (2/5)*0.5 = 7/15 ~ 0.4666666
+      </li>
+      <li>
+       Gini(天气=阴小雨)=(2/4)
+       <em>
+        0.5 + (2/4)
+       </em>
+       0.5 = 0.500000000
+      </li>
+     </ul>
+     <h4 id="_7">
+      温度的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         温度状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         高
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         4
+        </td>
+       </tr>
+       <tr>
+        <td>
+         中
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+       <tr>
+        <td>
+         低
+        </td>
+        <td align="center">
+         0
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         1
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(温度=高)=1 - (2/4)^2 - (2/4)^2 = 1 - 1/4 - 1/4 = 0.5
+      </li>
+      <li>
+       Gini(温度=中)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
+      </li>
+      <li>
+       Gini(温度=低)=1 - (0/1)^2 - (1/1)^2 = 1 - 0 - 1 = 0
+      </li>
+     </ul>
+     <p>
+      CART是个二叉树,需要对属性进行再次的划分,其有下面三种组合
+     </p>
+     <ul>
+      <li>
+       Gini(温度=高中)=(4/6)
+       <em>
+        0.5 + (2/6)
+       </em>
+       0.5 = 1/2 ~ 0.50000000
+      </li>
+      <li>
+       Gini(温度=高低)=(4/5)
+       <em>
+        0.5 + (1/5)
+       </em>
+       0 = 2/5 ~ 0.40000000
+      </li>
+      <li>
+       Gini(温度=中低)=(2/3)
+       <em>
+        0.5 + (1/3)
+       </em>
+       0 = 1/3 ~ 0.33333333
+      </li>
+     </ul>
+     <h4 id="_8">
+      湿度的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         湿度状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         高
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         4
+        </td>
+       </tr>
+       <tr>
+        <td>
+         中
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(湿度=高)=1 - (2/4)^2 - (2/4)^2 = 1 - 1/4 - 1/4 = 0.5
+      </li>
+      <li>
+       Gini(湿度=中)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
+      </li>
+      <li>
+       Gini(湿度)=(4/7) * 0.5 + (3/7) * 4/9 = 2/7 + 4/21 = 10/21 ~ 0.47619
+      </li>
+     </ul>
+     <h4 id="_9">
+      刮风的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         刮风状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         是
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+       <tr>
+        <td>
+         否
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         4
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(刮风=是)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
+      </li>
+      <li>
+       Gini(刮风=否)=1 - (2/4)^2 - (2/4)^2 = 1 - 1/4 - 1/4 = 0.5
+      </li>
+      <li>
+       Gini(刮风)=(4/7) * 0.5 + (3/7) * 4/9 = 2/7 + 4/21 = 10/21 ~ 0.47619
+      </li>
+     </ul>
+     <h4 id="_10">
+      根节点的选择
+     </h4>
+     <p>
+      如下汇总所有接口,可以看出温度=中低的基尼系数最低,则选择其为根节点
+     </p>
+     <ul>
+      <li>
+       Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 7/15 ~ 0.46666666666
+      </li>
+      <li>
+       Gini(天气=晴小雨)=(3/5) * 4/9 + (2/5)*0.5 = 7/15 ~ 0.4666666
+      </li>
+      <li>
+       Gini(天气=阴小雨)=(2/4)
+       <em>
+        0.5 + (2/4)
+       </em>
+       0.5 = 0.500000000
+      </li>
+      <li>
+       Gini(温度=高中)=(4/6)
+       <em>
+        0.5 + (2/6)
+       </em>
+       0.5 = 1/2 ~ 0.50000000
+      </li>
+      <li>
+       Gini(温度=高低)=(4/5)
+       <em>
+        0.5 + (1/5)
+       </em>
+       0 = 2/5 ~ 0.40000000
+      </li>
+      <li>
+       Gini(温度=中低)=(2/3)
+       <em>
+        0.5 + (1/3)
+       </em>
+       0 = 1/3 ~ 0.33333333
+      </li>
+      <li>
+       Gini(湿度)=(4/7) * 0.5 + (3/7) * 4/9 = 2/7 + 4/21 = 10/21 ~ 0.47619
+      </li>
+      <li>
+       Gini(刮风)=(4/7) * 0.5 + (3/7) * 4/9 = 2/7 + 4/21 = 10/21 ~ 0.47619
+      </li>
+     </ul>
+     <p>
+      确定跟节点以后,大致的树结构如下:
+     </p>
+     <ul>
+      <li>
+       根节点
+       <ul>
+        <li>
+         子节点1:需要进行再次的划分(温度=高中)
+        </li>
+        <li>
+         叶节点:温度=低=不打篮球(能直接确定为不打篮球)
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <h3 id="1">
+      子节点1的选择
+     </h3>
+     <p>
+      其剩下的数据集如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         天气
+        </th>
+        <th align="center">
+         温度
+        </th>
+        <th align="center">
+         湿度
+        </th>
+        <th align="center">
+         刮风
+        </th>
+        <th>
+         是否打篮球
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         晴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         否
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+       <tr>
+        <td>
+         晴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+       <tr>
+        <td>
+         阴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         否
+        </td>
+        <td>
+         是
+        </td>
+       </tr>
+       <tr>
+        <td>
+         小雨
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         否
+        </td>
+        <td>
+         是
+        </td>
+       </tr>
+       <tr>
+        <td>
+         晴天
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         是
+        </td>
+       </tr>
+       <tr>
+        <td>
+         阴天
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <h4 id="_11">
+      天气的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         天气状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         晴
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+       <tr>
+        <td>
+         阴
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+       <tr>
+        <td>
+         小雨
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         0
+        </td>
+        <td>
+         1
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(天气=晴)=1 - (1/3)^2 - (2/3)^2 = 1 - 1/9 - 4/9 = 4/9
+      </li>
+      <li>
+       Gini(天气=阴)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
+      </li>
+      <li>
+       Gini(天气=小雨)=1 - (1/1)^2 - (0/1)^2 = 1 - 1 - 0 = 0
+      </li>
+     </ul>
+     <p>
+      CART是个二叉树,需要对属性进行再次的划分,其有下面三种组合
+     </p>
+     <ul>
+      <li>
+       Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 7/15 ~ 0.46666666666
+      </li>
+      <li>
+       Gini(天气=晴小雨)=(3/4) * 4/9 + (1/4)*0 = 1/3 ~ 0.333333333
+      </li>
+      <li>
+       Gini(天气=阴小雨)=(2/3)
+       <em>
+        0.5 + (1/3)
+       </em>
+       0 = 1/3 ~ 0.33333333333
+      </li>
+     </ul>
+     <h4 id="_12">
+      温度的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         温度状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         高
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         4
+        </td>
+       </tr>
+       <tr>
+        <td>
+         中
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(温度=高)=1 - (2/4)^2 - (2/4)^2 = 1 - 1/4 - 1/4 = 0.5
+      </li>
+      <li>
+       Gini(温度=中)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
+      </li>
+      <li>
+       Gini(温度=高中)=(4/6) * 0.5 + (2/6) * 0.5 = 0.50000000000
+      </li>
+     </ul>
+     <h4 id="_13">
+      湿度的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         湿度状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         高
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+       <tr>
+        <td>
+         中
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(湿度=高)=1 - (2/3)^2 - (1/3)^2 = 1 - 1/9 - 4/9 = 4/9
+      </li>
+      <li>
+       Gini(湿度=中)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
+      </li>
+      <li>
+       Gini(湿度)=(3/6) * 4/9 + (3/6) * 4/9 = 4/9 ~ 0.444444444444
+      </li>
+     </ul>
+     <h4 id="_14">
+      刮风的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         刮风状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         是
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+       <tr>
+        <td>
+         否
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(刮风=是)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
+      </li>
+      <li>
+       Gini(刮风=否)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
+      </li>
+      <li>
+       Gini(刮风)=(3/6) * 4/9 + (3/6) * 4/9 = 4/9 ~ 0.444444444444
+      </li>
+     </ul>
+     <h4 id="1_1">
+      子节点1的选择
+     </h4>
+     <p>
+      如下汇总所有接口,可以看出天气=晴小雨和天气=阴小雨的基尼系数最低,那就随机选一个,选天气=晴小雨吧
+     </p>
+     <ul>
+      <li>
+       Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 7/15 ~ 0.46666666666
+      </li>
+      <li>
+       Gini(天气=晴小雨)=(3/4) * 4/9 + (1/4)*0 = 1/3 ~ 0.333333333
+      </li>
+      <li>
+       Gini(天气=阴小雨)=(2/3)
+       <em>
+        0.5 + (1/3)
+       </em>
+       0 = 1/3 ~ 0.33333333333
+      </li>
+      <li>
+       Gini(温度=高中)=(4/6) * 0.5 + (2/6) * 0.5 = 0.50000000000
+      </li>
+      <li>
+       Gini(湿度)=(3/6) * 4/9 + (3/6) * 4/9 = 4/9 ~ 0.444444444444
+      </li>
+      <li>
+       Gini(刮风)=(3/6) * 4/9 + (3/6) * 4/9 = 4/9 ~ 0.444444444444
+      </li>
+     </ul>
+     <p>
+      确定跟节点以后,大致的树结构如下:
+     </p>
+     <ul>
+      <li>
+       根节点
+       <ul>
+        <li>
+         子节点1(温度=高中)
+         <ul>
+          <li>
+           子节点2:需要进行进一步划分(天气=晴阴)
+          </li>
+          <li>
+           叶节点:天气=小雨=打篮球(能直接确定打篮球)
+          </li>
+         </ul>
+        </li>
+        <li>
+         叶节点:温度=低=不打篮球(能直接确定为不打篮球)
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <h3 id="2">
+      子节点2的选择
+     </h3>
+     <p>
+      子节点:天气=晴对应的数据集如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         天气
+        </th>
+        <th align="center">
+         温度
+        </th>
+        <th align="center">
+         湿度
+        </th>
+        <th align="center">
+         刮风
+        </th>
+        <th>
+         是否打篮球
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         晴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         否
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+       <tr>
+        <td>
+         晴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+       <tr>
+        <td>
+         阴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         否
+        </td>
+        <td>
+         是
+        </td>
+       </tr>
+       <tr>
+        <td>
+         晴天
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         是
+        </td>
+       </tr>
+       <tr>
+        <td>
+         阴天
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <h4 id="_15">
+      天气的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         天气状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         晴
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+       <tr>
+        <td>
+         阴
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(天气=晴)=1 - (1/3)^2 - (2/3)^2 = 1 - 1/9 - 4/9 = 4/9
+      </li>
+      <li>
+       Gini(天气=阴)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
+      </li>
+      <li>
+       Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 1/3 ~ 0.3333333333
+      </li>
+     </ul>
+     <h4 id="_16">
+      温度的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         温度状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         高
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+       <tr>
+        <td>
+         中
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(温度=高)=1 - (1/3)^2 - (2/3)^2 = 1 - 1/9 - 4/9 = 4/9
+      </li>
+      <li>
+       Gini(温度=中)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
+      </li>
+      <li>
+       Gini(温度=高中)=(3/5) * 4/9 + (2/5) * 0.5 = 1/3 ~ 0.33333333333
+      </li>
+     </ul>
+     <h4 id="_17">
+      湿度的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         湿度状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         高
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+       <tr>
+        <td>
+         中
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(湿度=高)=1 - (1/2)^2 - (1/2)^2 = 0.5
+      </li>
+      <li>
+       Gini(湿度=中)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
+      </li>
+      <li>
+       Gini(湿度)=(2/5) * 0.5 + (3/5) * 4/9 = 0.333333333333
+      </li>
+     </ul>
+     <h4 id="_18">
+      刮风的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         刮风状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         是
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+       <tr>
+        <td>
+         否
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(刮风=是)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
+      </li>
+      <li>
+       Gini(刮风=否)=1 - (1/2)^2 - (1/2)^2 = 0.5
+      </li>
+      <li>
+       Gini(刮风)=(3/5) * 4/9 + (2/5) * 0.5 = 0.33333333333333333
+      </li>
+     </ul>
+     <h4 id="2_1">
+      子节点2的选择
+     </h4>
+     <p>
+      如下汇总所有结果,所有的基尼系数相同,随机挑选一个,第一个天气=晴阴吧
+     </p>
+     <ul>
+      <li>
+       Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 1/3 ~ 0.3333333333
+      </li>
+      <li>
+       Gini(温度=高中)=(3/5) * 4/9 + (2/5) * 0.5 = 1/3 ~ 0.33333333333
+      </li>
+      <li>
+       Gini(湿度)=(2/5) * 0.5 + (3/5) * 4/9 = 0.333333333333
+      </li>
+      <li>
+       Gini(刮风)=(3/5) * 4/9 + (2/5) * 0.5 = 0.33333333333333333
+      </li>
+     </ul>
+     <p>
+      确定跟节点以后,大致的树结构如下:
+     </p>
+     <ul>
+      <li>
+       根节点
+       <ul>
+        <li>
+         子节点1(温度=高中)
+         <ul>
+          <li>
+           子节点2(天气=晴阴)
+           <ul>
+            <li>
+             子节点3:需要进一步划分(天气=晴)
+            </li>
+            <li>
+             子节点4:需要进一步划分(天气=阴)
+            </li>
+           </ul>
+          </li>
+          <li>
+           叶节点:天气=小雨=打篮球(能直接确定打篮球)
+          </li>
+         </ul>
+        </li>
+        <li>
+         叶节点:文档=低=不打篮球(能直接确定为不打篮球)
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <h3 id="3">
+      子节点3的选择
+     </h3>
+     <p>
+      子节点:天气=晴对应的数据集如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         天气
+        </th>
+        <th align="center">
+         温度
+        </th>
+        <th align="center">
+         湿度
+        </th>
+        <th align="center">
+         刮风
+        </th>
+        <th>
+         是否打篮球
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         晴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         否
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+       <tr>
+        <td>
+         晴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+       <tr>
+        <td>
+         晴天
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         是
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <h4 id="_19">
+      温度的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         温度状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         高
+        </td>
+        <td align="center">
+         0
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+       <tr>
+        <td>
+         中
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         0
+        </td>
+        <td>
+         1
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(温度=高)=1 - (0/2)^2 - (2/2)^2 = 0
+      </li>
+      <li>
+       Gini(温度=中)=1 - (1/1)^2 - (0/1)^2 = 0
+      </li>
+      <li>
+       Gini(温度=高中)=(2/3) * 0 + (1/2) * 0 = 0
+      </li>
+     </ul>
+     <h4 id="_20">
+      湿度的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         湿度状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         中
+        </td>
+        <td align="center">
+         2
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(湿度=中)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
+      </li>
+      <li>
+       Gini(湿度)= 1 * 4/9 = 4/9
+      </li>
+     </ul>
+     <h4 id="_21">
+      刮风的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         刮风状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         是
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+       <tr>
+        <td>
+         否
+        </td>
+        <td align="center">
+         0
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         1
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(刮风=是)=1 - (1/2)^2 - (1/2)^2 = 0.5
+      </li>
+      <li>
+       Gini(刮风=否)=1 - (0/1)^2 - (1/1)^2 = 0
+      </li>
+      <li>
+       Gini(刮风)=(2/3) * 0.5 + (1/3) * 0 = 0.33333333333333333
+      </li>
+     </ul>
+     <h4 id="3_1">
+      子节点3 的选择
+     </h4>
+     <p>
+      如下汇总所有结果,温度的基尼系数最低,选择温度
+     </p>
+     <ul>
+      <li>
+       Gini(温度=高中)=(2/3) * 0 + (1/2) * 0 = 0
+      </li>
+      <li>
+       Gini(湿度)= 1 * 4/9 = 4/9
+      </li>
+      <li>
+       Gini(刮风)=(2/3) * 0.5 + (1/3) * 0 = 0.33333333333333333
+      </li>
+     </ul>
+     <p>
+      确定跟节点以后,大致的树结构如下:
+     </p>
+     <ul>
+      <li>
+       根节点
+       <ul>
+        <li>
+         子节点1(温度=高中)
+         <ul>
+          <li>
+           子节点2(天气=晴阴)
+           <ul>
+            <li>
+             子节点3:(天气=晴)
+             <ul>
+              <li>
+               叶节点:温度=高(能确定不打篮球)
+              </li>
+              <li>
+               叶节点:温度=中(能确定打篮球)
+              </li>
+             </ul>
+            </li>
+            <li>
+             子节点4:需要进一步划分(天气=阴)
+            </li>
+           </ul>
+          </li>
+          <li>
+           叶节点:天气=小雨=打篮球(能直接确定打篮球)
+          </li>
+         </ul>
+        </li>
+        <li>
+         叶节点:文档=低=不打篮球(能直接确定为不打篮球)
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <h3 id="4">
+      子节点4的选择
+     </h3>
+     <p>
+      子节点:天气=晴对应的数据集如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         天气
+        </th>
+        <th align="center">
+         温度
+        </th>
+        <th align="center">
+         湿度
+        </th>
+        <th align="center">
+         刮风
+        </th>
+        <th>
+         是否打篮球
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         阴
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         否
+        </td>
+        <td>
+         是
+        </td>
+       </tr>
+       <tr>
+        <td>
+         阴天
+        </td>
+        <td align="center">
+         中
+        </td>
+        <td align="center">
+         高
+        </td>
+        <td align="center">
+         是
+        </td>
+        <td>
+         否
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <h4 id="_22">
+      温度的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         温度状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         高
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         0
+        </td>
+        <td>
+         1
+        </td>
+       </tr>
+       <tr>
+        <td>
+         中
+        </td>
+        <td align="center">
+         0
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         1
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(温度=高)=1 - (1/1)^2 - (0/1)^2 = 0
+      </li>
+      <li>
+       Gini(温度=中)=1 - (0/1)^2 - (1/1)^2 = 0
+      </li>
+      <li>
+       Gini(温度=高中)=(1/2) * 0 + (1/2) * 0 = 0
+      </li>
+     </ul>
+     <h4 id="_23">
+      湿度的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         湿度状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         高
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(湿度=高)=1 - (1/2)^2 - (1/2)^2 = 0.5
+      </li>
+      <li>
+       Gini(湿度)=(2/2) * 0.5 = 0.5
+      </li>
+     </ul>
+     <h4 id="_24">
+      刮风的基尼系数计算
+     </h4>
+     <p>
+      其数据表格如下:
+     </p>
+     <table>
+      <thead>
+       <tr>
+        <th>
+         刮风状态
+        </th>
+        <th align="center">
+         打篮球数量
+        </th>
+        <th align="center">
+         不打篮球数量
+        </th>
+        <th>
+         总数
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>
+         是
+        </td>
+        <td align="center">
+         0
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td>
+         1
+        </td>
+       </tr>
+       <tr>
+        <td>
+         否
+        </td>
+        <td align="center">
+         1
+        </td>
+        <td align="center">
+         0
+        </td>
+        <td>
+         1
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <ul>
+      <li>
+       Gini(刮风=是)=1 - (0/1)^2 - (1/1)^2 = 0
+      </li>
+      <li>
+       Gini(刮风=否)=1 - (1/1)^2 - (0/1)^2 = 0
+      </li>
+      <li>
+       Gini(刮风)=(1/2) * 0 + (1/2) * 0 = 0
+      </li>
+     </ul>
+     <h4 id="4_1">
+      子节点4的选择
+     </h4>
+     <p>
+      如下汇总所有结果,其中温度和刮风的基尼系数最低,随机选刮风
+     </p>
+     <ul>
+      <li>
+       Gini(温度=高中)=(1/2) * 0 + (1/2) * 0 = 0
+      </li>
+      <li>
+       Gini(湿度)=(2/2) * 0.5 = 0.5
+      </li>
+      <li>
+       Gini(刮风)=(1/2) * 0 + (1/2) * 0 = 0
+      </li>
+     </ul>
+     <p>
+      确定跟节点以后,大致的树结构如下:
+     </p>
+     <ul>
+      <li>
+       根节点
+       <ul>
+        <li>
+         子节点1(温度=高中)
+         <ul>
+          <li>
+           子节点2(天气=晴阴)
+           <ul>
+            <li>
+             子节点3:(天气=晴)
+             <ul>
+              <li>
+               叶节点:温度=高(能确定不打篮球)
+              </li>
+              <li>
+               叶节点:温度=中(能确定打篮球)
+              </li>
+             </ul>
+            </li>
+            <li>
+             子节点4:(天气=阴)
+             <ul>
+              <li>
+               叶节点:刮风=是(不打篮球)
+              </li>
+              <li>
+               叶节点:刮风=否(打篮球)
+              </li>
+             </ul>
+            </li>
+           </ul>
+          </li>
+          <li>
+           叶节点:天气=小雨=打篮球(能直接确定打篮球)
+          </li>
+         </ul>
+        </li>
+        <li>
+         叶节点:文档=低=不打篮球(能直接确定为不打篮球)
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <h3 id="_25">
+      最终的决策树
+     </h3>
+     <p>
+      最终形成的决策树如下:
+     </p>
+     <ul>
+      <li>
+       根节点
+       <ul>
+        <li>
+         叶节点:文档=低=不打篮球(能直接确定为不打篮球)
+        </li>
+        <li>
+         子节点1(温度=高中)
+         <ul>
+          <li>
+           叶节点:天气=小雨=打篮球(能直接确定打篮球)
+          </li>
+          <li>
+           子节点2(天气=晴阴)
+           <ul>
+            <li>
+             子节点3:(天气=晴)
+             <ul>
+              <li>
+               叶节点:温度=高(能确定不打篮球)
+              </li>
+              <li>
+               叶节点:温度=中(能确定打篮球)
+              </li>
+             </ul>
+            </li>
+            <li>
+             子节点4:(天气=阴)
+             <ul>
+              <li>
+               叶节点:刮风=是(不打篮球)
+              </li>
+              <li>
+               叶节点:刮风=否(打篮球)
+              </li>
+             </ul>
+            </li>
+           </ul>
+          </li>
+         </ul>
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <h2 id="_26">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       1.
+       <a href="https://blog.csdn.net/acdreamers/article/details/44664481">
+        决策树之CART算法
+       </a>
+      </li>
+      <li>
+       2.
+       <a href="https://machinelearningmastery.com/classification-and-regression-trees-for-machine-learning/">
+        Classification And Regression Trees for Machine Learning
+       </a>
+      </li>
+      <li>
+       3.
+       <a href="https://sefiks.com/2018/08/27/a-step-by-step-cart-decision-tree-example/">
+        强力推荐这个,例子解释的很好:A Step by Step CART Decision Tree Example
+       </a>
+      </li>
+      <li>
+       4.
+       <a href="https://blog.csdn.net/jiede1/article/details/76034328">
+        经典算法详解--CART分类决策树、回归树和模型树
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <h3 id="_5">
-     根节点的选择
-    </h3>
-    <p>
-     在上面的列表中有四个属性:天气,温度,湿度,刮风.需要先计算出这四个属性的基尼系数
-    </p>
-    <h4 id="_6">
-     天气的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        天气状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        晴
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-      <tr>
-       <td>
-        阴
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-      <tr>
-       <td>
-        小雨
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(天气=晴)=1 - (1/3)^2 - (2/3)^2 = 1 - 1/9 - 4/9 = 4/9
-     </li>
-     <li>
-      Gini(天气=阴)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
-     </li>
-     <li>
-      Gini(天气=小雨)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
-     </li>
-    </ul>
-    <p>
-     CART是个二叉树,需要对属性进行再次的划分,其有下面三种组合
-    </p>
-    <ul>
-     <li>
-      Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 7/15 ~ 0.46666666666
-     </li>
-     <li>
-      Gini(天气=晴小雨)=(3/5) * 4/9 + (2/5)*0.5 = 7/15 ~ 0.4666666
-     </li>
-     <li>
-      Gini(天气=阴小雨)=(2/4)
-      <em>
-       0.5 + (2/4)
-      </em>
-      0.5 = 0.500000000
-     </li>
-    </ul>
-    <h4 id="_7">
-     温度的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        温度状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        高
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        4
-       </td>
-      </tr>
-      <tr>
-       <td>
-        中
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-      <tr>
-       <td>
-        低
-       </td>
-       <td align="center">
-        0
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        1
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(温度=高)=1 - (2/4)^2 - (2/4)^2 = 1 - 1/4 - 1/4 = 0.5
-     </li>
-     <li>
-      Gini(温度=中)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
-     </li>
-     <li>
-      Gini(温度=低)=1 - (0/1)^2 - (1/1)^2 = 1 - 0 - 1 = 0
-     </li>
-    </ul>
-    <p>
-     CART是个二叉树,需要对属性进行再次的划分,其有下面三种组合
-    </p>
-    <ul>
-     <li>
-      Gini(温度=高中)=(4/6)
-      <em>
-       0.5 + (2/6)
-      </em>
-      0.5 = 1/2 ~ 0.50000000
-     </li>
-     <li>
-      Gini(温度=高低)=(4/5)
-      <em>
-       0.5 + (1/5)
-      </em>
-      0 = 2/5 ~ 0.40000000
-     </li>
-     <li>
-      Gini(温度=中低)=(2/3)
-      <em>
-       0.5 + (1/3)
-      </em>
-      0 = 1/3 ~ 0.33333333
-     </li>
-    </ul>
-    <h4 id="_8">
-     湿度的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        湿度状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        高
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        4
-       </td>
-      </tr>
-      <tr>
-       <td>
-        中
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(湿度=高)=1 - (2/4)^2 - (2/4)^2 = 1 - 1/4 - 1/4 = 0.5
-     </li>
-     <li>
-      Gini(湿度=中)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
-     </li>
-     <li>
-      Gini(湿度)=(4/7) * 0.5 + (3/7) * 4/9 = 2/7 + 4/21 = 10/21 ~ 0.47619
-     </li>
-    </ul>
-    <h4 id="_9">
-     刮风的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        刮风状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        是
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-      <tr>
-       <td>
-        否
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        4
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(刮风=是)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
-     </li>
-     <li>
-      Gini(刮风=否)=1 - (2/4)^2 - (2/4)^2 = 1 - 1/4 - 1/4 = 0.5
-     </li>
-     <li>
-      Gini(刮风)=(4/7) * 0.5 + (3/7) * 4/9 = 2/7 + 4/21 = 10/21 ~ 0.47619
-     </li>
-    </ul>
-    <h4 id="_10">
-     根节点的选择
-    </h4>
-    <p>
-     如下汇总所有接口,可以看出温度=中低的基尼系数最低,则选择其为根节点
-    </p>
-    <ul>
-     <li>
-      Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 7/15 ~ 0.46666666666
-     </li>
-     <li>
-      Gini(天气=晴小雨)=(3/5) * 4/9 + (2/5)*0.5 = 7/15 ~ 0.4666666
-     </li>
-     <li>
-      Gini(天气=阴小雨)=(2/4)
-      <em>
-       0.5 + (2/4)
-      </em>
-      0.5 = 0.500000000
-     </li>
-     <li>
-      Gini(温度=高中)=(4/6)
-      <em>
-       0.5 + (2/6)
-      </em>
-      0.5 = 1/2 ~ 0.50000000
-     </li>
-     <li>
-      Gini(温度=高低)=(4/5)
-      <em>
-       0.5 + (1/5)
-      </em>
-      0 = 2/5 ~ 0.40000000
-     </li>
-     <li>
-      Gini(温度=中低)=(2/3)
-      <em>
-       0.5 + (1/3)
-      </em>
-      0 = 1/3 ~ 0.33333333
-     </li>
-     <li>
-      Gini(湿度)=(4/7) * 0.5 + (3/7) * 4/9 = 2/7 + 4/21 = 10/21 ~ 0.47619
-     </li>
-     <li>
-      Gini(刮风)=(4/7) * 0.5 + (3/7) * 4/9 = 2/7 + 4/21 = 10/21 ~ 0.47619
-     </li>
-    </ul>
-    <p>
-     确定跟节点以后,大致的树结构如下:
-    </p>
-    <ul>
-     <li>
-      根节点
-      <ul>
-       <li>
-        子节点1:需要进行再次的划分(温度=高中)
-       </li>
-       <li>
-        叶节点:温度=低=不打篮球(能直接确定为不打篮球)
-       </li>
-      </ul>
-     </li>
-    </ul>
-    <h3 id="1">
-     子节点1的选择
-    </h3>
-    <p>
-     其剩下的数据集如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        天气
-       </th>
-       <th align="center">
-        温度
-       </th>
-       <th align="center">
-        湿度
-       </th>
-       <th align="center">
-        刮风
-       </th>
-       <th>
-        是否打篮球
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        晴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        否
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-      <tr>
-       <td>
-        晴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-      <tr>
-       <td>
-        阴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        否
-       </td>
-       <td>
-        是
-       </td>
-      </tr>
-      <tr>
-       <td>
-        小雨
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        否
-       </td>
-       <td>
-        是
-       </td>
-      </tr>
-      <tr>
-       <td>
-        晴天
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        是
-       </td>
-      </tr>
-      <tr>
-       <td>
-        阴天
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <h4 id="_11">
-     天气的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        天气状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        晴
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-      <tr>
-       <td>
-        阴
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-      <tr>
-       <td>
-        小雨
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        0
-       </td>
-       <td>
-        1
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(天气=晴)=1 - (1/3)^2 - (2/3)^2 = 1 - 1/9 - 4/9 = 4/9
-     </li>
-     <li>
-      Gini(天气=阴)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
-     </li>
-     <li>
-      Gini(天气=小雨)=1 - (1/1)^2 - (0/1)^2 = 1 - 1 - 0 = 0
-     </li>
-    </ul>
-    <p>
-     CART是个二叉树,需要对属性进行再次的划分,其有下面三种组合
-    </p>
-    <ul>
-     <li>
-      Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 7/15 ~ 0.46666666666
-     </li>
-     <li>
-      Gini(天气=晴小雨)=(3/4) * 4/9 + (1/4)*0 = 1/3 ~ 0.333333333
-     </li>
-     <li>
-      Gini(天气=阴小雨)=(2/3)
-      <em>
-       0.5 + (1/3)
-      </em>
-      0 = 1/3 ~ 0.33333333333
-     </li>
-    </ul>
-    <h4 id="_12">
-     温度的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        温度状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        高
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        4
-       </td>
-      </tr>
-      <tr>
-       <td>
-        中
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(温度=高)=1 - (2/4)^2 - (2/4)^2 = 1 - 1/4 - 1/4 = 0.5
-     </li>
-     <li>
-      Gini(温度=中)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
-     </li>
-     <li>
-      Gini(温度=高中)=(4/6) * 0.5 + (2/6) * 0.5 = 0.50000000000
-     </li>
-    </ul>
-    <h4 id="_13">
-     湿度的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        湿度状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        高
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-      <tr>
-       <td>
-        中
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(湿度=高)=1 - (2/3)^2 - (1/3)^2 = 1 - 1/9 - 4/9 = 4/9
-     </li>
-     <li>
-      Gini(湿度=中)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
-     </li>
-     <li>
-      Gini(湿度)=(3/6) * 4/9 + (3/6) * 4/9 = 4/9 ~ 0.444444444444
-     </li>
-    </ul>
-    <h4 id="_14">
-     刮风的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        刮风状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        是
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-      <tr>
-       <td>
-        否
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(刮风=是)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
-     </li>
-     <li>
-      Gini(刮风=否)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
-     </li>
-     <li>
-      Gini(刮风)=(3/6) * 4/9 + (3/6) * 4/9 = 4/9 ~ 0.444444444444
-     </li>
-    </ul>
-    <h4 id="1_1">
-     子节点1的选择
-    </h4>
-    <p>
-     如下汇总所有接口,可以看出天气=晴小雨和天气=阴小雨的基尼系数最低,那就随机选一个,选天气=晴小雨吧
-    </p>
-    <ul>
-     <li>
-      Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 7/15 ~ 0.46666666666
-     </li>
-     <li>
-      Gini(天气=晴小雨)=(3/4) * 4/9 + (1/4)*0 = 1/3 ~ 0.333333333
-     </li>
-     <li>
-      Gini(天气=阴小雨)=(2/3)
-      <em>
-       0.5 + (1/3)
-      </em>
-      0 = 1/3 ~ 0.33333333333
-     </li>
-     <li>
-      Gini(温度=高中)=(4/6) * 0.5 + (2/6) * 0.5 = 0.50000000000
-     </li>
-     <li>
-      Gini(湿度)=(3/6) * 4/9 + (3/6) * 4/9 = 4/9 ~ 0.444444444444
-     </li>
-     <li>
-      Gini(刮风)=(3/6) * 4/9 + (3/6) * 4/9 = 4/9 ~ 0.444444444444
-     </li>
-    </ul>
-    <p>
-     确定跟节点以后,大致的树结构如下:
-    </p>
-    <ul>
-     <li>
-      根节点
-      <ul>
-       <li>
-        子节点1(温度=高中)
-        <ul>
-         <li>
-          子节点2:需要进行进一步划分(天气=晴阴)
-         </li>
-         <li>
-          叶节点:天气=小雨=打篮球(能直接确定打篮球)
-         </li>
-        </ul>
-       </li>
-       <li>
-        叶节点:温度=低=不打篮球(能直接确定为不打篮球)
-       </li>
-      </ul>
-     </li>
-    </ul>
-    <h3 id="2">
-     子节点2的选择
-    </h3>
-    <p>
-     子节点:天气=晴对应的数据集如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        天气
-       </th>
-       <th align="center">
-        温度
-       </th>
-       <th align="center">
-        湿度
-       </th>
-       <th align="center">
-        刮风
-       </th>
-       <th>
-        是否打篮球
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        晴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        否
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-      <tr>
-       <td>
-        晴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-      <tr>
-       <td>
-        阴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        否
-       </td>
-       <td>
-        是
-       </td>
-      </tr>
-      <tr>
-       <td>
-        晴天
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        是
-       </td>
-      </tr>
-      <tr>
-       <td>
-        阴天
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <h4 id="_15">
-     天气的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        天气状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        晴
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-      <tr>
-       <td>
-        阴
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(天气=晴)=1 - (1/3)^2 - (2/3)^2 = 1 - 1/9 - 4/9 = 4/9
-     </li>
-     <li>
-      Gini(天气=阴)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
-     </li>
-     <li>
-      Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 1/3 ~ 0.3333333333
-     </li>
-    </ul>
-    <h4 id="_16">
-     温度的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        温度状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        高
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-      <tr>
-       <td>
-        中
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(温度=高)=1 - (1/3)^2 - (2/3)^2 = 1 - 1/9 - 4/9 = 4/9
-     </li>
-     <li>
-      Gini(温度=中)=1 - (1/2)^2 - (1/2)^2 = 1 - 1/4 - 1/4 = 0.5
-     </li>
-     <li>
-      Gini(温度=高中)=(3/5) * 4/9 + (2/5) * 0.5 = 1/3 ~ 0.33333333333
-     </li>
-    </ul>
-    <h4 id="_17">
-     湿度的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        湿度状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        高
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-      <tr>
-       <td>
-        中
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(湿度=高)=1 - (1/2)^2 - (1/2)^2 = 0.5
-     </li>
-     <li>
-      Gini(湿度=中)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
-     </li>
-     <li>
-      Gini(湿度)=(2/5) * 0.5 + (3/5) * 4/9 = 0.333333333333
-     </li>
-    </ul>
-    <h4 id="_18">
-     刮风的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        刮风状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        是
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-      <tr>
-       <td>
-        否
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(刮风=是)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
-     </li>
-     <li>
-      Gini(刮风=否)=1 - (1/2)^2 - (1/2)^2 = 0.5
-     </li>
-     <li>
-      Gini(刮风)=(3/5) * 4/9 + (2/5) * 0.5 = 0.33333333333333333
-     </li>
-    </ul>
-    <h4 id="2_1">
-     子节点2的选择
-    </h4>
-    <p>
-     如下汇总所有结果,所有的基尼系数相同,随机挑选一个,第一个天气=晴阴吧
-    </p>
-    <ul>
-     <li>
-      Gini(天气=晴阴)=(3/5) * 4/9 + (2/5)*0.5 = 4/15 + 1/5 = 1/3 ~ 0.3333333333
-     </li>
-     <li>
-      Gini(温度=高中)=(3/5) * 4/9 + (2/5) * 0.5 = 1/3 ~ 0.33333333333
-     </li>
-     <li>
-      Gini(湿度)=(2/5) * 0.5 + (3/5) * 4/9 = 0.333333333333
-     </li>
-     <li>
-      Gini(刮风)=(3/5) * 4/9 + (2/5) * 0.5 = 0.33333333333333333
-     </li>
-    </ul>
-    <p>
-     确定跟节点以后,大致的树结构如下:
-    </p>
-    <ul>
-     <li>
-      根节点
-      <ul>
-       <li>
-        子节点1(温度=高中)
-        <ul>
-         <li>
-          子节点2(天气=晴阴)
-          <ul>
-           <li>
-            子节点3:需要进一步划分(天气=晴)
-           </li>
-           <li>
-            子节点4:需要进一步划分(天气=阴)
-           </li>
-          </ul>
-         </li>
-         <li>
-          叶节点:天气=小雨=打篮球(能直接确定打篮球)
-         </li>
-        </ul>
-       </li>
-       <li>
-        叶节点:文档=低=不打篮球(能直接确定为不打篮球)
-       </li>
-      </ul>
-     </li>
-    </ul>
-    <h3 id="3">
-     子节点3的选择
-    </h3>
-    <p>
-     子节点:天气=晴对应的数据集如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        天气
-       </th>
-       <th align="center">
-        温度
-       </th>
-       <th align="center">
-        湿度
-       </th>
-       <th align="center">
-        刮风
-       </th>
-       <th>
-        是否打篮球
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        晴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        否
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-      <tr>
-       <td>
-        晴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-      <tr>
-       <td>
-        晴天
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        是
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <h4 id="_19">
-     温度的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        温度状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        高
-       </td>
-       <td align="center">
-        0
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-      <tr>
-       <td>
-        中
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        0
-       </td>
-       <td>
-        1
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(温度=高)=1 - (0/2)^2 - (2/2)^2 = 0
-     </li>
-     <li>
-      Gini(温度=中)=1 - (1/1)^2 - (0/1)^2 = 0
-     </li>
-     <li>
-      Gini(温度=高中)=(2/3) * 0 + (1/2) * 0 = 0
-     </li>
-    </ul>
-    <h4 id="_20">
-     湿度的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        湿度状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        中
-       </td>
-       <td align="center">
-        2
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        3
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(湿度=中)=1 - (2/3)^2 - (1/3)^2 = 1 - 4/9 - 1/9 = 4/9
-     </li>
-     <li>
-      Gini(湿度)= 1 * 4/9 = 4/9
-     </li>
-    </ul>
-    <h4 id="_21">
-     刮风的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        刮风状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        是
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-      <tr>
-       <td>
-        否
-       </td>
-       <td align="center">
-        0
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        1
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(刮风=是)=1 - (1/2)^2 - (1/2)^2 = 0.5
-     </li>
-     <li>
-      Gini(刮风=否)=1 - (0/1)^2 - (1/1)^2 = 0
-     </li>
-     <li>
-      Gini(刮风)=(2/3) * 0.5 + (1/3) * 0 = 0.33333333333333333
-     </li>
-    </ul>
-    <h4 id="3_1">
-     子节点3 的选择
-    </h4>
-    <p>
-     如下汇总所有结果,温度的基尼系数最低,选择温度
-    </p>
-    <ul>
-     <li>
-      Gini(温度=高中)=(2/3) * 0 + (1/2) * 0 = 0
-     </li>
-     <li>
-      Gini(湿度)= 1 * 4/9 = 4/9
-     </li>
-     <li>
-      Gini(刮风)=(2/3) * 0.5 + (1/3) * 0 = 0.33333333333333333
-     </li>
-    </ul>
-    <p>
-     确定跟节点以后,大致的树结构如下:
-    </p>
-    <ul>
-     <li>
-      根节点
-      <ul>
-       <li>
-        子节点1(温度=高中)
-        <ul>
-         <li>
-          子节点2(天气=晴阴)
-          <ul>
-           <li>
-            子节点3:(天气=晴)
-            <ul>
-             <li>
-              叶节点:温度=高(能确定不打篮球)
-             </li>
-             <li>
-              叶节点:温度=中(能确定打篮球)
-             </li>
-            </ul>
-           </li>
-           <li>
-            子节点4:需要进一步划分(天气=阴)
-           </li>
-          </ul>
-         </li>
-         <li>
-          叶节点:天气=小雨=打篮球(能直接确定打篮球)
-         </li>
-        </ul>
-       </li>
-       <li>
-        叶节点:文档=低=不打篮球(能直接确定为不打篮球)
-       </li>
-      </ul>
-     </li>
-    </ul>
-    <h3 id="4">
-     子节点4的选择
-    </h3>
-    <p>
-     子节点:天气=晴对应的数据集如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        天气
-       </th>
-       <th align="center">
-        温度
-       </th>
-       <th align="center">
-        湿度
-       </th>
-       <th align="center">
-        刮风
-       </th>
-       <th>
-        是否打篮球
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        阴
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        否
-       </td>
-       <td>
-        是
-       </td>
-      </tr>
-      <tr>
-       <td>
-        阴天
-       </td>
-       <td align="center">
-        中
-       </td>
-       <td align="center">
-        高
-       </td>
-       <td align="center">
-        是
-       </td>
-       <td>
-        否
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <h4 id="_22">
-     温度的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        温度状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        高
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        0
-       </td>
-       <td>
-        1
-       </td>
-      </tr>
-      <tr>
-       <td>
-        中
-       </td>
-       <td align="center">
-        0
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        1
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(温度=高)=1 - (1/1)^2 - (0/1)^2 = 0
-     </li>
-     <li>
-      Gini(温度=中)=1 - (0/1)^2 - (1/1)^2 = 0
-     </li>
-     <li>
-      Gini(温度=高中)=(1/2) * 0 + (1/2) * 0 = 0
-     </li>
-    </ul>
-    <h4 id="_23">
-     湿度的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        湿度状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        高
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        2
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(湿度=高)=1 - (1/2)^2 - (1/2)^2 = 0.5
-     </li>
-     <li>
-      Gini(湿度)=(2/2) * 0.5 = 0.5
-     </li>
-    </ul>
-    <h4 id="_24">
-     刮风的基尼系数计算
-    </h4>
-    <p>
-     其数据表格如下:
-    </p>
-    <table>
-     <thead>
-      <tr>
-       <th>
-        刮风状态
-       </th>
-       <th align="center">
-        打篮球数量
-       </th>
-       <th align="center">
-        不打篮球数量
-       </th>
-       <th>
-        总数
-       </th>
-      </tr>
-     </thead>
-     <tbody>
-      <tr>
-       <td>
-        是
-       </td>
-       <td align="center">
-        0
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td>
-        1
-       </td>
-      </tr>
-      <tr>
-       <td>
-        否
-       </td>
-       <td align="center">
-        1
-       </td>
-       <td align="center">
-        0
-       </td>
-       <td>
-        1
-       </td>
-      </tr>
-     </tbody>
-    </table>
-    <ul>
-     <li>
-      Gini(刮风=是)=1 - (0/1)^2 - (1/1)^2 = 0
-     </li>
-     <li>
-      Gini(刮风=否)=1 - (1/1)^2 - (0/1)^2 = 0
-     </li>
-     <li>
-      Gini(刮风)=(1/2) * 0 + (1/2) * 0 = 0
-     </li>
-    </ul>
-    <h4 id="4_1">
-     子节点4的选择
-    </h4>
-    <p>
-     如下汇总所有结果,其中温度和刮风的基尼系数最低,随机选刮风
-    </p>
-    <ul>
-     <li>
-      Gini(温度=高中)=(1/2) * 0 + (1/2) * 0 = 0
-     </li>
-     <li>
-      Gini(湿度)=(2/2) * 0.5 = 0.5
-     </li>
-     <li>
-      Gini(刮风)=(1/2) * 0 + (1/2) * 0 = 0
-     </li>
-    </ul>
-    <p>
-     确定跟节点以后,大致的树结构如下:
-    </p>
-    <ul>
-     <li>
-      根节点
-      <ul>
-       <li>
-        子节点1(温度=高中)
-        <ul>
-         <li>
-          子节点2(天气=晴阴)
-          <ul>
-           <li>
-            子节点3:(天气=晴)
-            <ul>
-             <li>
-              叶节点:温度=高(能确定不打篮球)
-             </li>
-             <li>
-              叶节点:温度=中(能确定打篮球)
-             </li>
-            </ul>
-           </li>
-           <li>
-            子节点4:(天气=阴)
-            <ul>
-             <li>
-              叶节点:刮风=是(不打篮球)
-             </li>
-             <li>
-              叶节点:刮风=否(打篮球)
-             </li>
-            </ul>
-           </li>
-          </ul>
-         </li>
-         <li>
-          叶节点:天气=小雨=打篮球(能直接确定打篮球)
-         </li>
-        </ul>
-       </li>
-       <li>
-        叶节点:文档=低=不打篮球(能直接确定为不打篮球)
-       </li>
-      </ul>
-     </li>
-    </ul>
-    <h3 id="_25">
-     最终的决策树
-    </h3>
-    <p>
-     最终形成的决策树如下:
-    </p>
-    <ul>
-     <li>
-      根节点
-      <ul>
-       <li>
-        叶节点:文档=低=不打篮球(能直接确定为不打篮球)
-       </li>
-       <li>
-        子节点1(温度=高中)
-        <ul>
-         <li>
-          叶节点:天气=小雨=打篮球(能直接确定打篮球)
-         </li>
-         <li>
-          子节点2(天气=晴阴)
-          <ul>
-           <li>
-            子节点3:(天气=晴)
-            <ul>
-             <li>
-              叶节点:温度=高(能确定不打篮球)
-             </li>
-             <li>
-              叶节点:温度=中(能确定打篮球)
-             </li>
-            </ul>
-           </li>
-           <li>
-            子节点4:(天气=阴)
-            <ul>
-             <li>
-              叶节点:刮风=是(不打篮球)
-             </li>
-             <li>
-              叶节点:刮风=否(打篮球)
-             </li>
-            </ul>
-           </li>
-          </ul>
-         </li>
-        </ul>
-       </li>
-      </ul>
-     </li>
-    </ul>
-    <h2 id="_26">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      1.
-      <a href="https://blog.csdn.net/acdreamers/article/details/44664481">
-       决策树之CART算法
-      </a>
-     </li>
-     <li>
-      2.
-      <a href="https://machinelearningmastery.com/classification-and-regression-trees-for-machine-learning/">
-       Classification And Regression Trees for Machine Learning
-      </a>
-     </li>
-     <li>
-      3.
-      <a href="https://sefiks.com/2018/08/27/a-step-by-step-cart-decision-tree-example/">
-       强力推荐这个,例子解释的很好:A Step by Step CART Decision Tree Example
-      </a>
-     </li>
-     <li>
-      4.
-      <a href="https://blog.csdn.net/jiede1/article/details/76034328">
-       经典算法详解--CART分类决策树、回归树和模型树
-      </a>
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

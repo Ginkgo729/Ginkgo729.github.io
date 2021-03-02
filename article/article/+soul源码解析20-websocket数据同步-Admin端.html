@@ -24,62 +24,49 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="soulwebsocket-admin">
-     Soul网关源码解析（二十）Websocket数据同步-Admin端
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简介
-    </h2>
-    <p>
-     本篇文章探索下Soul网关Admin的Websocket数据同步流程
-    </p>
-    <h2 id="_2">
-     概览
-    </h2>
-    <p>
-     首先使用Websocket同步方式启动下示例
-    </p>
-    <p>
-     根据前面Zookeeper和Nacos数据同步分析的经验，找到Websocket的事件监听处理的类，在其上打上断点，调试查看初始化流程
-    </p>
-    <p>
-     然后在Admin后台修改插件状态，调试查看数据变更处理流程
-    </p>
-    <p>
-     发现初始化都是从熟悉的syncAll开始，而事件变更处理都是从Controllers入口开始的，具体详情记录情况在源码Debug环节
-    </p>
-    <h2 id="_3">
-     示例运行
-    </h2>
-    <p>
-     启动数据库：
-    </p>
-    <p>
-     ```shell script
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="soulwebsocket-admin">
+      Soul网关源码解析（二十）Websocket数据同步-Admin端
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      本篇文章探索下Soul网关Admin的Websocket数据同步流程
+     </p>
+     <h2 id="_2">
+      概览
+     </h2>
+     <p>
+      首先使用Websocket同步方式启动下示例
+     </p>
+     <p>
+      根据前面Zookeeper和Nacos数据同步分析的经验，找到Websocket的事件监听处理的类，在其上打上断点，调试查看初始化流程
+     </p>
+     <p>
+      然后在Admin后台修改插件状态，调试查看数据变更处理流程
+     </p>
+     <p>
+      发现初始化都是从熟悉的syncAll开始，而事件变更处理都是从Controllers入口开始的，具体详情记录情况在源码Debug环节
+     </p>
+     <h2 id="_3">
+      示例运行
+     </h2>
+     <p>
+      启动数据库：
+     </p>
+     <p>
+      ```shell script
 docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">首先配置运行</span><span class="n">Soul</span><span class="o">-</span><span class="k">Admin</span><span class="err">，设置数据同步方式为</span><span class="n">Websocket</span>
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">首先配置运行</span><span class="n">Soul</span><span class="o">-</span><span class="k">Admin</span><span class="err">，设置数据同步方式为</span><span class="n">Websocket</span>
 
 <span class="o">```</span><span class="n">xml</span>
 <span class="n">soul</span><span class="p">:</span>
@@ -87,38 +74,38 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
     <span class="n">websocket</span><span class="p">:</span>
       <span class="n">enabled</span><span class="p">:</span> <span class="k">true</span>
 </code></pre>
-    </div>
-    <p>
-     配置Soul-Bootstrap，配置websocket同步方式，运行Soul-Bootstrap，大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>soul :
+     </div>
+     <p>
+      配置Soul-Bootstrap，配置websocket同步方式，运行Soul-Bootstrap，大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>soul :
     # 把 websocket 数据同步打开
     sync:
         websocket :
              urls: ws://localhost:9095/websocket
 </code></pre>
-    </div>
-    <p>
-     运行Soul-Example-HTTP，注册一些数据用于Debug测试
-    </p>
-    <h2 id="debug">
-     源码Debug
-    </h2>
-    <h3 id="_4">
-     初始化流程
-    </h3>
-    <p>
-     首先根据前面的经验在Soul-Admin模块，listener.websocket 目录包下找到相应的Websocket事件监听处理类：WebsocketDataChangedListener
-    </p>
-    <p>
-     我们找到插件变更处理的函数，在其上打上端口，重启Admin
-    </p>
-    <p>
-     成功进入断点，我们可以看到下面的函数大意是封装了Websocket格式的数据，然后用Websocket发送出去，细节后面再看，我们先看看调用栈
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketDataChangedListener</span> <span class="kd">implements</span> <span class="n">DataChangedListener</span> <span class="p">{</span>
+     </div>
+     <p>
+      运行Soul-Example-HTTP，注册一些数据用于Debug测试
+     </p>
+     <h2 id="debug">
+      源码Debug
+     </h2>
+     <h3 id="_4">
+      初始化流程
+     </h3>
+     <p>
+      首先根据前面的经验在Soul-Admin模块，listener.websocket 目录包下找到相应的Websocket事件监听处理类：WebsocketDataChangedListener
+     </p>
+     <p>
+      我们找到插件变更处理的函数，在其上打上端口，重启Admin
+     </p>
+     <p>
+      成功进入断点，我们可以看到下面的函数大意是封装了Websocket格式的数据，然后用Websocket发送出去，细节后面再看，我们先看看调用栈
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketDataChangedListener</span> <span class="kd">implements</span> <span class="n">DataChangedListener</span> <span class="p">{</span>
 
     <span class="nd">@Override</span>
     <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPluginChanged</span><span class="p">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">pluginDataList</span><span class="p">,</span> <span class="kd">final</span> <span class="n">DataEventTypeEnum</span> <span class="n">eventType</span><span class="p">)</span> <span class="p">{</span>
@@ -128,15 +115,15 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     PS：这个有个小细节，如果没有任何一台Bootstrap或者事件发送，那这个断点不会进入
-    </p>
-    <p>
-     我们跟踪调用栈来到前面文章中熟悉的事件处理分发，这里继续跟下去
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DataChangedEventDispatcher</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">DataChangedEvent</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">InitializingBean</span> <span class="p">{</span>
+     </div>
+     <p>
+      PS：这个有个小细节，如果没有任何一台Bootstrap或者事件发送，那这个断点不会进入
+     </p>
+     <p>
+      我们跟踪调用栈来到前面文章中熟悉的事件处理分发，这里继续跟下去
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DataChangedEventDispatcher</span> <span class="kd">implements</span> <span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">DataChangedEvent</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">InitializingBean</span> <span class="p">{</span>
 
     <span class="nd">@Override</span>
     <span class="nd">@SuppressWarnings</span><span class="p">(</span><span class="s">"unchecked"</span><span class="p">)</span>
@@ -166,12 +153,12 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     来到又是非常熟悉的全量数据同步函数：从数据库中读取所有的数据，然后发布事件，进行同步
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SyncDataServiceImpl</span> <span class="kd">implements</span> <span class="n">SyncDataService</span> <span class="p">{</span>
+     </div>
+     <p>
+      来到又是非常熟悉的全量数据同步函数：从数据库中读取所有的数据，然后发布事件，进行同步
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SyncDataServiceImpl</span> <span class="kd">implements</span> <span class="n">SyncDataService</span> <span class="p">{</span>
 
     <span class="nd">@Override</span>
     <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">syncAll</span><span class="p">(</span><span class="kd">final</span> <span class="n">DataEventTypeEnum</span> <span class="n">type</span><span class="p">)</span> <span class="p">{</span>
@@ -187,15 +174,15 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     再跟，来到了Websocket相关的，下面这个函数如果是写过Websocket的，那一定非常熟悉了，就是接收到消息，然后调用处理逻辑
-    </p>
-    <p>
-     在调试中，我们看到message的值是MYSELF，猜测Websocket的初始化通信约定应该是收到MYSELF，则同步全量数据给Bootstrap
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketCollector</span> <span class="p">{</span>
+     </div>
+     <p>
+      再跟，来到了Websocket相关的，下面这个函数如果是写过Websocket的，那一定非常熟悉了，就是接收到消息，然后调用处理逻辑
+     </p>
+     <p>
+      在调试中，我们看到message的值是MYSELF，猜测Websocket的初始化通信约定应该是收到MYSELF，则同步全量数据给Bootstrap
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketCollector</span> <span class="p">{</span>
 
     <span class="nd">@OnMessage</span>
     <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onMessage</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">message</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Session</span> <span class="n">session</span><span class="p">)</span> <span class="p">{</span>
@@ -212,27 +199,27 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     我们回过头去看看Websocket的发送函数，有两个点需要注意一下：
-    </p>
-    <p>
-     1.是当为MYSELF时，消息只发送给一个特定的客户端
-    </p>
-    <p>
-     在上面的函数中，使用ThreadLocal进行了session的保存，然后取出来，然后利用session进行消息发送
-    </p>
-    <p>
-     这种应该是针对新建立连接的Bootstrap的，发送全量的数据给它
-    </p>
-    <p>
-     2.不是MYSELF，则发送消息给所有的客户端
-    </p>
-    <p>
-     这个应该是事件变更，然后同步数据给所有的客户端
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketCollector</span> <span class="p">{</span>
+     </div>
+     <p>
+      我们回过头去看看Websocket的发送函数，有两个点需要注意一下：
+     </p>
+     <p>
+      1.是当为MYSELF时，消息只发送给一个特定的客户端
+     </p>
+     <p>
+      在上面的函数中，使用ThreadLocal进行了session的保存，然后取出来，然后利用session进行消息发送
+     </p>
+     <p>
+      这种应该是针对新建立连接的Bootstrap的，发送全量的数据给它
+     </p>
+     <p>
+      2.不是MYSELF，则发送消息给所有的客户端
+     </p>
+     <p>
+      这个应该是事件变更，然后同步数据给所有的客户端
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketCollector</span> <span class="p">{</span>
 
     <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">send</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">message</span><span class="p">,</span> <span class="kd">final</span> <span class="n">DataEventTypeEnum</span> <span class="n">type</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNotBlank</span><span class="p">(</span><span class="n">message</span><span class="p">))</span> <span class="p">{</span>
@@ -248,24 +235,24 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     在这里看到使用ThreadLocal进行标识获取，但SESSION_KEY都是一样的，它是原理好像自己还有点迷糊，后面再研究下
-    </p>
-    <p>
-     以前我们使用时候，都是在OnMessage中直接进行这种针对特定客户端的处理；或者客户端连接的时候自带ID
-    </p>
-    <p>
-     看了这个，感觉又学到了一手
-    </p>
-    <h3 id="_5">
-     数据变更
-    </h3>
-    <p>
-     数据同步走完了，我们在Admin后台管理界面，修改限流插件的状态，然后触发进入了最开始我们打上断点的函数：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketDataChangedListener</span> <span class="kd">implements</span> <span class="n">DataChangedListener</span> <span class="p">{</span>
+     </div>
+     <p>
+      在这里看到使用ThreadLocal进行标识获取，但SESSION_KEY都是一样的，它是原理好像自己还有点迷糊，后面再研究下
+     </p>
+     <p>
+      以前我们使用时候，都是在OnMessage中直接进行这种针对特定客户端的处理；或者客户端连接的时候自带ID
+     </p>
+     <p>
+      看了这个，感觉又学到了一手
+     </p>
+     <h3 id="_5">
+      数据变更
+     </h3>
+     <p>
+      数据同步走完了，我们在Admin后台管理界面，修改限流插件的状态，然后触发进入了最开始我们打上断点的函数：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebsocketDataChangedListener</span> <span class="kd">implements</span> <span class="n">DataChangedListener</span> <span class="p">{</span>
 
     <span class="nd">@Override</span>
     <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPluginChanged</span><span class="p">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">PluginData</span><span class="o">&gt;</span> <span class="n">pluginDataList</span><span class="p">,</span> <span class="kd">final</span> <span class="n">DataEventTypeEnum</span> <span class="n">eventType</span><span class="p">)</span> <span class="p">{</span>
@@ -275,12 +262,12 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     跟踪调用栈事件，事件分发跳过，又来到熟悉的：PluginServiceImpl，这里面进行插件数据的更新，然后发布事件
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PluginServiceImpl</span> <span class="kd">implements</span> <span class="n">PluginService</span> <span class="p">{</span>
+     </div>
+     <p>
+      跟踪调用栈事件，事件分发跳过，又来到熟悉的：PluginServiceImpl，这里面进行插件数据的更新，然后发布事件
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PluginServiceImpl</span> <span class="kd">implements</span> <span class="n">PluginService</span> <span class="p">{</span>
 
     <span class="nd">@Override</span>
     <span class="nd">@Transactional</span><span class="p">(</span><span class="n">rollbackFor</span> <span class="o">=</span> <span class="n">Exception</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
@@ -305,12 +292,12 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     继续跟踪来到属性的Controllers接口，从这里触发事件更新
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="nd">@RestController</span>
+     </div>
+     <p>
+      继续跟踪来到属性的Controllers接口，从这里触发事件更新
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@RestController</span>
 <span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">"/plugin"</span><span class="p">)</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">PluginController</span> <span class="p">{</span>
 
@@ -326,58 +313,69 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h2 id="_6">
-     总结
-    </h2>
-    <p>
-     本篇文章进行了初步探索的Admin端的Websocket数据同步的处理流程，大致可以分为初始化和数据更新（包括删除）的处理流程
+     </div>
+     <h2 id="_6">
+      总结
+     </h2>
+     <p>
+      本篇文章进行了初步探索的Admin端的Websocket数据同步的处理流程，大致可以分为初始化和数据更新（包括删除）的处理流程
+     </p>
+     <ul>
+      <li>
+       <p>
+        数据初始化：Boostrap发送MYSELF消息，触发所有数据同步
+       </p>
+      </li>
+      <li>
+       <p>
+        数据处理流程(监听类ZookeeperDataChangedListener)
+       </p>
+      </li>
+      <li>
+       HTTP接口调用：可以是管理后台；也可以是服务注册Client
+      </li>
+      <li>
+       Service调用：更新数据库中的数据，调用发布事件接口
+      </li>
+      <li>
+       发布事件：发布事件到数据同步监听中
+      </li>
+      <li>
+       数据更新：接收到事件后，进行更新（Websocket进行推送、Zookeeper写入、HTTP更新MD5、Nacos写入）
+      </li>
+     </ul>
+     <p>
+      这三篇：Zookeeper、Nacos、Websocket，发现处理流程都是基本相似的，前面的初始化入口、事件触发和分发都是同一个，具体的发送逻辑不一样而已
+     </p>
+     <p>
+      可以看出代码的结构是非常清晰的
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <ul>
-     <li>
-      <p>
-       数据初始化：Boostrap发送MYSELF消息，触发所有数据同步
-      </p>
-     </li>
-     <li>
-      <p>
-       数据处理流程(监听类ZookeeperDataChangedListener)
-      </p>
-     </li>
-     <li>
-      HTTP接口调用：可以是管理后台；也可以是服务注册Client
-     </li>
-     <li>
-      Service调用：更新数据库中的数据，调用发布事件接口
-     </li>
-     <li>
-      发布事件：发布事件到数据同步监听中
-     </li>
-     <li>
-      数据更新：接收到事件后，进行更新（Websocket进行推送、Zookeeper写入、HTTP更新MD5、Nacos写入）
-     </li>
-    </ul>
-    <p>
-     这三篇：Zookeeper、Nacos、Websocket，发现处理流程都是基本相似的，前面的初始化入口、事件触发和分发都是同一个，具体的发送逻辑不一样而已
-    </p>
-    <p>
-     可以看出代码的结构是非常清晰的
-    </p>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

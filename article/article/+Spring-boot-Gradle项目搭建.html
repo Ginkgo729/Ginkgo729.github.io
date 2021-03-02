@@ -24,104 +24,91 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="spring-boot-gradle">
-     Spring boot Gradle项目搭建
-    </h1>
-    <hr/>
-    <h3 id="ideagradle">
-     使用IDEA创建Gradle工程
-    </h3>
-    <p>
-     操作大致为：File-&gt;new-&gt;Project-&gt;Gradle(在左侧选项栏中)
-    </p>
-    <p>
-     创建常规以后生成的工程目录如下：
-    </p>
-    <ul>
-     <li>
-      build
-     </li>
-     <li>
-      gradle
-      <ul>
-       <li>
-        wrapper
-        <ul>
-         <li>
-          gradle-wrapper.jar
-         </li>
-         <li>
-          gradle-wrapper.properties
-         </li>
-        </ul>
-       </li>
-      </ul>
-     </li>
-     <li>
-      src
-      <ul>
-       <li>
-        java
-       </li>
-       <li>
-        resources
-       </li>
-      </ul>
-     </li>
-     <li>
-      test
-      <ul>
-       <li>
-        java
-       </li>
-       <li>
-        resources
-       </li>
-      </ul>
-     </li>
-     <li>
-      build.gradle
-     </li>
-     <li>
-      gradlew
-     </li>
-     <li>
-      gradlew.bat
-     </li>
-     <li>
-      settings.gradle
-     </li>
-    </ul>
-    <h3 id="spring-boot">
-     配置Spring boot
-    </h3>
-    <p>
-     下面需要对两个文件进行编辑：
-    </p>
-    <p>
-     build.gradle文件修改后的内容如下,依赖一般是前面是groupId，中间是artifactId，第三个一般是版本。在repositories配置使用阿里云的仓库，避免下载过慢。
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>plugins <span class="o">{</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-boot-gradle">
+      Spring boot Gradle项目搭建
+     </h1>
+     <hr/>
+     <h3 id="ideagradle">
+      使用IDEA创建Gradle工程
+     </h3>
+     <p>
+      操作大致为：File-&gt;new-&gt;Project-&gt;Gradle(在左侧选项栏中)
+     </p>
+     <p>
+      创建常规以后生成的工程目录如下：
+     </p>
+     <ul>
+      <li>
+       build
+      </li>
+      <li>
+       gradle
+       <ul>
+        <li>
+         wrapper
+         <ul>
+          <li>
+           gradle-wrapper.jar
+          </li>
+          <li>
+           gradle-wrapper.properties
+          </li>
+         </ul>
+        </li>
+       </ul>
+      </li>
+      <li>
+       src
+       <ul>
+        <li>
+         java
+        </li>
+        <li>
+         resources
+        </li>
+       </ul>
+      </li>
+      <li>
+       test
+       <ul>
+        <li>
+         java
+        </li>
+        <li>
+         resources
+        </li>
+       </ul>
+      </li>
+      <li>
+       build.gradle
+      </li>
+      <li>
+       gradlew
+      </li>
+      <li>
+       gradlew.bat
+      </li>
+      <li>
+       settings.gradle
+      </li>
+     </ul>
+     <h3 id="spring-boot">
+      配置Spring boot
+     </h3>
+     <p>
+      下面需要对两个文件进行编辑：
+     </p>
+     <p>
+      build.gradle文件修改后的内容如下,依赖一般是前面是groupId，中间是artifactId，第三个一般是版本。在repositories配置使用阿里云的仓库，避免下载过慢。
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>plugins <span class="o">{</span>
     id <span class="s1">'java'</span>
     id <span class="s1">'com.gradle.build-scan'</span> version <span class="s1">'2.0.2'</span>
     id <span class="s1">'org.springframework.boot'</span> version <span class="s1">'2.0.5.RELEASE'</span>
@@ -168,26 +155,26 @@ buildScan <span class="o">{</span>
     publishAlways<span class="o">()</span>
 <span class="o">}</span>
 </code></pre>
-    </div>
-    <p>
-     setting.gradle文件修改后的内容如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>rootProject.name <span class="o">=</span> <span class="s1">'seckill'</span>
+     </div>
+     <p>
+      setting.gradle文件修改后的内容如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>rootProject.name <span class="o">=</span> <span class="s1">'seckill'</span>
 enableFeaturePreview<span class="o">(</span><span class="s1">'IMPROVED_POM_SUPPORT'</span><span class="o">)</span>
 </code></pre>
-    </div>
-    <h3 id="_1">
-     编写类
-    </h3>
-    <p>
-     首先在src/java下生成源码目录com.seckill.spring(相当于com/seckill/spring)
-    </p>
-    <p>
-     在src/java下创建程序入口类Application.java,其内容如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kn">package</span> <span class="nn">com.seckill.spring</span><span class="p">;</span>
+     </div>
+     <h3 id="_1">
+      编写类
+     </h3>
+     <p>
+      首先在src/java下生成源码目录com.seckill.spring(相当于com/seckill/spring)
+     </p>
+     <p>
+      在src/java下创建程序入口类Application.java,其内容如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">package</span> <span class="nn">com.seckill.spring</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">org.springframework.boot.SpringApplication</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.springframework.boot.autoconfigure.SpringBootApplication</span><span class="p">;</span>
@@ -199,12 +186,12 @@ enableFeaturePreview<span class="o">(</span><span class="s1">'IMPROVED_POM_SUPPO
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     在src/java/com.seckill.spring下创建目录controllers，并在controllers目录创建类：HelloWorld，在其中定义根路由并返回Hello World，其代码如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kn">package</span> <span class="nn">com.seckill.spring.controllers</span><span class="p">;</span>
+     </div>
+     <p>
+      在src/java/com.seckill.spring下创建目录controllers，并在controllers目录创建类：HelloWorld，在其中定义根路由并返回Hello World，其代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">package</span> <span class="nn">com.seckill.spring.controllers</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMapping</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.RequestMethod</span><span class="p">;</span>
@@ -223,15 +210,15 @@ enableFeaturePreview<span class="o">(</span><span class="s1">'IMPROVED_POM_SUPPO
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="_2">
-     单元测试
-    </h3>
-    <p>
-     使用spring boot mockMVC测试非常方便
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kn">package</span> <span class="nn">code.controllers</span><span class="p">;</span>
+     </div>
+     <h3 id="_2">
+      单元测试
+     </h3>
+     <p>
+      使用spring boot mockMVC测试非常方便
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">package</span> <span class="nn">code.controllers</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">org.junit.Test</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.junit.runner.RunWith</span><span class="p">;</span>
@@ -258,68 +245,79 @@ enableFeaturePreview<span class="o">(</span><span class="s1">'IMPROVED_POM_SUPPO
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="_3">
-     运行访问
-    </h3>
-    <ul>
-     <li>
-      运行Application类，可以在控制台看到起默认监听在8080端口
-     </li>
-     <li>
-      浏览器访问:localhost:8080,可以看到返回字符串Hello World
-     </li>
-    </ul>
-    <h2 id="_4">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://guides.gradle.org/building-spring-boot-2-projects-with-gradle/">
-       1.Building Spring Boot 2 Applications with Gradle
-      </a>
-     </li>
-     <li>
-      <a href="https://www.baeldung.com/spring-boot">
-       2.Learn Spring Boot
-      </a>
-     </li>
-     <li>
-      <a href="https://spring.io/guides/gs/rest-service/">
-       3.Building a RESTful Web Service
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/ZZY1078689276/article/details/80364726">
-       Gradle配置阿里云Maven镜像仓库地址
-      </a>
-     </li>
-     <li>
-      <a href="https://howtodoinjava.com/spring-boot2/spring-boot-mockmvc-example/">
-       Spring boot MockMVC example
-      </a>
-     </li>
-     <li>
-      <a href="https://www.cnblogs.com/xiaoqi/p/6955288.html">
-       Spring Boot配置文件放在jar外部
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h3 id="_3">
+      运行访问
+     </h3>
+     <ul>
+      <li>
+       运行Application类，可以在控制台看到起默认监听在8080端口
+      </li>
+      <li>
+       浏览器访问:localhost:8080,可以看到返回字符串Hello World
+      </li>
+     </ul>
+     <h2 id="_4">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://guides.gradle.org/building-spring-boot-2-projects-with-gradle/">
+        1.Building Spring Boot 2 Applications with Gradle
+       </a>
+      </li>
+      <li>
+       <a href="https://www.baeldung.com/spring-boot">
+        2.Learn Spring Boot
+       </a>
+      </li>
+      <li>
+       <a href="https://spring.io/guides/gs/rest-service/">
+        3.Building a RESTful Web Service
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/ZZY1078689276/article/details/80364726">
+        Gradle配置阿里云Maven镜像仓库地址
+       </a>
+      </li>
+      <li>
+       <a href="https://howtodoinjava.com/spring-boot2/spring-boot-mockmvc-example/">
+        Spring boot MockMVC example
+       </a>
+      </li>
+      <li>
+       <a href="https://www.cnblogs.com/xiaoqi/p/6955288.html">
+        Spring Boot配置文件放在jar外部
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

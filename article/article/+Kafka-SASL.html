@@ -24,42 +24,29 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="kafka-sasl">
-     Kafka SASL 安全验证
-    </h1>
-    <hr/>
-    <p>
-     <em>
-      操作都在相应的软件安装目录下
-     </em>
-    </p>
-    <h2 id="_1">
-     配置文件编写
-    </h2>
-    <h3 id="kafka-server-jaasconf">
-     服务配置文件kafka-server-jaas.conf
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>vim config/kafka-server-jaas.conf
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="kafka-sasl">
+      Kafka SASL 安全验证
+     </h1>
+     <hr/>
+     <p>
+      <em>
+       操作都在相应的软件安装目录下
+      </em>
+     </p>
+     <h2 id="_1">
+      配置文件编写
+     </h2>
+     <h3 id="kafka-server-jaasconf">
+      服务配置文件kafka-server-jaas.conf
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>vim config/kafka-server-jaas.conf
 
 <span class="c1"># add</span>
 KafkaServer <span class="o">{</span>
@@ -76,12 +63,12 @@ KafkaClient <span class="o">{</span>
   <span class="nv">password</span><span class="o">=</span><span class="s2">"alice"</span><span class="p">;</span>
 <span class="o">}</span><span class="p">;</span>
 </code></pre>
-    </div>
-    <h3 id="serverproperties">
-     启动配置文件server.properties
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>cp config/server.properties config/sasl-server.properties
+     </div>
+     <h3 id="serverproperties">
+      启动配置文件server.properties
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>cp config/server.properties config/sasl-server.properties
 
 vim config/sasl-server.properties
 
@@ -93,12 +80,12 @@ security.inter.broker.protocol<span class="o">=</span>SASL_PLAINTEXT
 sasl.mechanism.inter.broker.protocol<span class="o">=</span>PLAIN
 sasl.enabled.mechanisms<span class="o">=</span>PLAIN
 </code></pre>
-    </div>
-    <h3 id="kafka-server-startsh">
-     启动文件kafka-server-start.sh
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>cp bin/kafka-server-start.sh bin/sasl-kafka-server-start.sh
+     </div>
+     <h3 id="kafka-server-startsh">
+      启动文件kafka-server-start.sh
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>cp bin/kafka-server-start.sh bin/sasl-kafka-server-start.sh
 vim bin/sasl-kafka-server-start.sh
 
 <span class="c1"># change the line from</span>
@@ -111,15 +98,15 @@ vim bin/sasl-kafka-server-start.sh
     <span class="nb">export</span> <span class="nv">KAFKA_HEAP_OPTS</span><span class="o">=</span><span class="s2">"-Xmx1G -Xms1G -Djava.security.auth.login.config=</span><span class="nv">$base_dir</span><span class="s2">/../config/kafka-server-jaas.conf"</span>
 <span class="k">fi</span>
 </code></pre>
-    </div>
-    <h3 id="_2">
-     生产者相关文件修改
-    </h3>
-    <h4 id="_3">
-     新建生产者客户端配置文件
-    </h4>
-    <div class="codehilite">
-     <pre><span></span><code>vim ./config/jaas-kafka-client.conf
+     </div>
+     <h3 id="_2">
+      生产者相关文件修改
+     </h3>
+     <h4 id="_3">
+      新建生产者客户端配置文件
+     </h4>
+     <div class="codehilite">
+      <pre><span></span><code>vim ./config/jaas-kafka-client.conf
 
 KafkaClient <span class="o">{</span>
   org.apache.kafka.common.security.plain.PlainLoginModule required
@@ -127,12 +114,12 @@ KafkaClient <span class="o">{</span>
   <span class="nv">password</span><span class="o">=</span><span class="s2">"alice"</span><span class="p">;</span>
 <span class="o">}</span><span class="p">;</span>
 </code></pre>
-    </div>
-    <h3 id="_4">
-     生产者配置文件修改
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>cp ./config/producer.properties ./config/sasl-producer.properties
+     </div>
+     <h3 id="_4">
+      生产者配置文件修改
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>cp ./config/producer.properties ./config/sasl-producer.properties
 vim ./config/sasl-producer.properties
 
 <span class="c1">#修改bootstrap.servers</span>
@@ -142,12 +129,12 @@ bootstrap.servers<span class="o">=</span><span class="m">10</span>.0.0.51:9092
 security.protocol<span class="o">=</span>SASL_PLAINTEXT
 sasl.mechanism<span class="o">=</span>PLAIN
 </code></pre>
-    </div>
-    <h4 id="_5">
-     生产者启动脚本修改
-    </h4>
-    <div class="codehilite">
-     <pre><span></span><code>cp ./bin/kafka-console-producer.sh ./bin/sasl-kafka-console-producer.sh
+     </div>
+     <h4 id="_5">
+      生产者启动脚本修改
+     </h4>
+     <div class="codehilite">
+      <pre><span></span><code>cp ./bin/kafka-console-producer.sh ./bin/sasl-kafka-console-producer.sh
 vim ./bin/sasl-kafka-console-producer.sh
 
 <span class="c1"># modifiy below</span>
@@ -162,15 +149,15 @@ vim ./bin/sasl-kafka-console-producer.sh
  <span class="k">fi</span>
  <span class="nb">exec</span> <span class="k">$(</span>dirname <span class="nv">$0</span><span class="k">)</span>/kafka-run-class.sh -Djava.security.auth.login.config<span class="o">=</span><span class="k">$(</span>dirname <span class="nv">$0</span><span class="k">)</span>/../config/jaas-kafka-client.conf kafka.tools.ConsoleProducer <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span>
 </code></pre>
-    </div>
-    <h3 id="_6">
-     消费者相关修改
-    </h3>
-    <h4 id="_7">
-     新建生产者客户端配置文件
-    </h4>
-    <div class="codehilite">
-     <pre><span></span><code>vim ./config/jaas-kafka-consumer.conf
+     </div>
+     <h3 id="_6">
+      消费者相关修改
+     </h3>
+     <h4 id="_7">
+      新建生产者客户端配置文件
+     </h4>
+     <div class="codehilite">
+      <pre><span></span><code>vim ./config/jaas-kafka-consumer.conf
 
 KafkaServer <span class="o">{</span>
     org.apache.kafka.common.security.plain.PlainLoginModule required
@@ -186,12 +173,12 @@ KafkaClient <span class="o">{</span>
   <span class="nv">password</span><span class="o">=</span><span class="s2">"alice"</span><span class="p">;</span>
 <span class="o">}</span><span class="p">;</span>
 </code></pre>
-    </div>
-    <h4 id="_8">
-     新建消费者配置文件
-    </h4>
-    <div class="codehilite">
-     <pre><span></span><code>cp ./config/consumer.properties ./config/sasl-consumer.properties
+     </div>
+     <h4 id="_8">
+      新建消费者配置文件
+     </h4>
+     <div class="codehilite">
+      <pre><span></span><code>cp ./config/consumer.properties ./config/sasl-consumer.properties
 vim ./config/sasl-consumer.properties
 
 <span class="c1">#修改bootstrap.servers</span>
@@ -201,12 +188,12 @@ bootstrap.servers<span class="o">=</span><span class="m">10</span>.0.0.51:9092
 security.protocol<span class="o">=</span>SASL_PLAINTEXT
 sasl.mechanism<span class="o">=</span>PLAIN
 </code></pre>
-    </div>
-    <h4 id="_9">
-     消费者启动脚本修改
-    </h4>
-    <div class="codehilite">
-     <pre><span></span><code>cp ./bin/kafka-console-consumer.sh ./bin/sasl-kafka-console-consumer.sh
+     </div>
+     <h4 id="_9">
+      消费者启动脚本修改
+     </h4>
+     <div class="codehilite">
+      <pre><span></span><code>cp ./bin/kafka-console-consumer.sh ./bin/sasl-kafka-console-consumer.sh
 vim ./bin/sasl-kafka-console-consumer.sh
 
 <span class="c1"># modifiy below</span>
@@ -251,17 +238,17 @@ consumer.subscribe<span class="o">([</span><span class="s2">"test"</span><span c
 producer.send<span class="o">(</span><span class="s2">"test"</span>, bytes<span class="o">(</span>str<span class="o">(</span>msg<span class="o">)</span>.replace<span class="o">(</span><span class="s2">"'"</span>, <span class="s1">'"'</span><span class="o">)</span>, <span class="s2">"utf-8"</span><span class="o">))</span>
 time.sleep<span class="o">(</span><span class="m">1</span><span class="o">)</span>
 </code></pre>
-    </div>
-    <h3 id="java">
-     Java
-    </h3>
-    <p>
-     <em>
-      kafka_server_jaas.conf kafka_client_jaas.conf是上面新建文件：jaas-kafka-client.conf jaas-kafka-consumer.conf的复制，对应的原理是将kafka验证文件进行加载读取即可
-     </em>
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="cm">/***</span>
+     </div>
+     <h3 id="java">
+      Java
+     </h3>
+     <p>
+      <em>
+       kafka_server_jaas.conf kafka_client_jaas.conf是上面新建文件：jaas-kafka-client.conf jaas-kafka-consumer.conf的复制，对应的原理是将kafka验证文件进行加载读取即可
+      </em>
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="cm">/***</span>
 <span class="cm">     * 生成特定Topic的消费者并返回(为了避免消息丢失，采用手动提交位移方式）</span>
 <span class="cm">     * @param topic</span>
 <span class="cm">     * @param groupName</span>
@@ -308,62 +295,73 @@ time.sleep<span class="o">(</span><span class="m">1</span><span class="o">)</spa
         <span class="k">return</span> <span class="k">new</span> <span class="n">KafkaProducer</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span><span class="p">(</span><span class="n">properties</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <h2 id="_10">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://developer.ibm.com/tutorials/kafka-authn-authz/">
-       User authentication and authorization in Apache Kafka
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/Sjdjjdnfjf/article/details/78386726">
-       Java Api Consumer 连接启用Kerberos认证的Kafka
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/tototuzuoquan/article/details/73430874">
-       Kafka集群安装配置，kafka后台运行的方式，Kafka配置文件中的参数说明
-      </a>
-     </li>
-     <li>
-      <a href="https://kafka.apache.org/documentation/#quickstart">
-       Documentation
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/u010416101/article/details/81165578">
-       Kafka常用命令(带SASL权限版)
-      </a>
-     </li>
-     <li>
-      <a href="https://www.jianshu.com/p/102606f8a795">
-       Kafka 0.10.0 SASL/PLAIN身份认证及权限实现
-      </a>
-     </li>
-     <li>
-      <a href="http://www.voidcn.com/article/p-vkewulnr-bqg.html">
-       Kakfa-SASL身份验证登陆
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_10">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://developer.ibm.com/tutorials/kafka-authn-authz/">
+        User authentication and authorization in Apache Kafka
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/Sjdjjdnfjf/article/details/78386726">
+        Java Api Consumer 连接启用Kerberos认证的Kafka
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/tototuzuoquan/article/details/73430874">
+        Kafka集群安装配置，kafka后台运行的方式，Kafka配置文件中的参数说明
+       </a>
+      </li>
+      <li>
+       <a href="https://kafka.apache.org/documentation/#quickstart">
+        Documentation
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/u010416101/article/details/81165578">
+        Kafka常用命令(带SASL权限版)
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/102606f8a795">
+        Kafka 0.10.0 SASL/PLAIN身份认证及权限实现
+       </a>
+      </li>
+      <li>
+       <a href="http://www.voidcn.com/article/p-vkewulnr-bqg.html">
+        Kakfa-SASL身份验证登陆
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

@@ -24,58 +24,45 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="soul-sofa">
-     Soul 网关源码解析（五）Sofa请求处理概览
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简介
-    </h2>
-    <p>
-     今天来探索一下Sofa请求处理流程，看看和前面的HTTP、Dubbo有什么异同
-    </p>
-    <h2 id="sofa">
-     Sofa示例运行
-    </h2>
-    <p>
-     <em>
-      PS：如果请求加上参数运行不成功，请更新最新版本，此问题在新版本中已经修复：https://blog.csdn.net/baidu_27627251/article/details/112726694
-     </em>
-     <em>
-      <a href="https://github.com/dromara/soul/pull/992">
-       Add sofa param resolve service
-      </a>
-     </em>
-    </p>
-    <p>
-     首先运行下官方的Sofa示例，首先启动下mysql和zookeeper，这里使用docker启动：
-    </p>
-    <p>
-     ```shell script
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="soul-sofa">
+      Soul 网关源码解析（五）Sofa请求处理概览
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      今天来探索一下Sofa请求处理流程，看看和前面的HTTP、Dubbo有什么异同
+     </p>
+     <h2 id="sofa">
+      Sofa示例运行
+     </h2>
+     <p>
+      <em>
+       PS：如果请求加上参数运行不成功，请更新最新版本，此问题在新版本中已经修复：https://blog.csdn.net/baidu_27627251/article/details/112726694
+      </em>
+      <em>
+       <a href="https://github.com/dromara/soul/pull/992">
+        Add sofa param resolve service
+       </a>
+      </em>
+     </p>
+     <p>
+      首先运行下官方的Sofa示例，首先启动下mysql和zookeeper，这里使用docker启动：
+     </p>
+     <p>
+      ```shell script
 docker run -dit --name zk -p 2181:2181 zookeepe
 docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">然后运行Soul</span><span class="o">-</span><span class="k">admin</span><span class="err">，</span><span class="n">Soul</span><span class="o">-</span><span class="n">Bootst</span><span class="err">，</span><span class="n">在管理图界面起用sofa插件</span><span class="w"></span>
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">然后运行Soul</span><span class="o">-</span><span class="k">admin</span><span class="err">，</span><span class="n">Soul</span><span class="o">-</span><span class="n">Bootst</span><span class="err">，</span><span class="n">在管理图界面起用sofa插件</span><span class="w"></span>
 
 <span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">运行官方示例</span><span class="err">：</span><span class="n">soul</span><span class="o">-</span><span class="n">examples</span><span class="w"> </span><span class="c1">--&gt; soul-examples-sofa</span>
 
@@ -109,15 +96,15 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SoulWebHandler</span><span class="p">(</span><span class="n">soulPlugins</span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="err">}</span><span class="w"></span>
 </code></pre>
-    </div>
-    <p>
-     经过探索和老哥的讨论，发现是没有起用sofa的相关依赖
-    </p>
-    <p>
-     我们在Bootstrap的pom.xml文件中添加下面的依赖，然后重启
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>        <span class="c">&lt;!--        sofa plugin start--&gt;</span>
+     </div>
+     <p>
+      经过探索和老哥的讨论，发现是没有起用sofa的相关依赖
+     </p>
+     <p>
+      我们在Bootstrap的pom.xml文件中添加下面的依赖，然后重启
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>        <span class="c">&lt;!--        sofa plugin start--&gt;</span>
         <span class="nt">&lt;dependency&gt;</span>
             <span class="nt">&lt;groupId&gt;</span>com.alipay.sofa<span class="nt">&lt;/groupId&gt;</span>
             <span class="nt">&lt;artifactId&gt;</span>sofa-rpc-all<span class="nt">&lt;/artifactId&gt;</span>
@@ -145,12 +132,12 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
         <span class="nt">&lt;/dependency&gt;</span>
         <span class="c">&lt;!--        sofa plugin end--&gt;</span>
 </code></pre>
-    </div>
-    <p>
-     然后查看日志打印，出现了sofa相关的插件
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>o.d.s.w.configuration.SoulConfiguration  : load plugin:[global] [org.dromara.soul.plugin.global.GlobalPlugin]
+     </div>
+     <p>
+      然后查看日志打印，出现了sofa相关的插件
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>o.d.s.w.configuration.SoulConfiguration  : load plugin:[global] [org.dromara.soul.plugin.global.GlobalPlugin]
 o.d.s.w.configuration.SoulConfiguration  : load plugin:[sign] [org.dromara.soul.plugin.sign.SignPlugin]
 o.d.s.w.configuration.SoulConfiguration  : load plugin:[waf] [org.dromara.soul.plugin.waf.WafPlugin]
 o.d.s.w.configuration.SoulConfiguration  : load plugin:[rate_limiter] [org.dromara.soul.plugin.ratelimiter.RateLimiterPlugin]
@@ -169,21 +156,21 @@ o.d.s.w.configuration.SoulConfiguration  : load plugin:[response] [org.dromara.s
 // 新出现的sofa相关的
 o.d.s.w.configuration.SoulConfiguration  : load plugin:[response] [org.dromara.soul.plugin.sofa.response.SofaResponsePlugin]
 </code></pre>
-    </div>
-    <p>
-     日志中还打印了成功加载sofa相关的metadata
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there meteData is :MetaData
+     </div>
+     <p>
+      日志中还打印了成功加载sofa相关的metadata
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there meteData is :MetaData
 o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there meteData is :MetaData
 o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there meteData is :MetaData
 </code></pre>
-    </div>
-    <p>
-     访问链接： http://localhost:9195/sofa/findAll ，成功返回如下请求
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="p">{</span>
+     </div>
+     <p>
+      访问链接： http://localhost:9195/sofa/findAll ，成功返回如下请求
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="p">{</span>
     <span class="nt">"code"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
     <span class="nt">"message"</span><span class="p">:</span> <span class="s2">"Access to success!"</span><span class="p">,</span>
     <span class="nt">"data"</span><span class="p">:</span> <span class="p">{</span>
@@ -192,20 +179,20 @@ o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there met
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h2 id="_2">
-     源码解析
-    </h2>
-    <p>
-     <em>
-      PS:Debug时间过程，会导致超时，这是正常的
-     </em>
-    </p>
-    <p>
-     首先找到我们非常熟悉的切入点函数： SoulWebHandler ，在下面的方法中打上断点，然后逐步进入每个plugin观察其行为
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>        <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <h2 id="_2">
+      源码解析
+     </h2>
+     <p>
+      <em>
+       PS:Debug时间过程，会导致超时，这是正常的
+      </em>
+     </p>
+     <p>
+      首先找到我们非常熟悉的切入点函数： SoulWebHandler ，在下面的方法中打上断点，然后逐步进入每个plugin观察其行为
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>        <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
                 <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">index</span> <span class="o">&lt;</span> <span class="n">plugins</span><span class="p">.</span><span class="na">size</span><span class="p">())</span> <span class="p">{</span>
                     <span class="n">SoulPlugin</span> <span class="n">plugin</span> <span class="o">=</span> <span class="n">plugins</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">index</span><span class="o">++</span><span class="p">);</span>
@@ -219,33 +206,33 @@ o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there met
             <span class="p">});</span>
         <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="globalplugin">
-     GlobalPlugin
-    </h3>
-    <p>
-     进入其中，执行处理逻辑，通过上篇的分析，我们知道大致作用是将请求类型放入exchange中
-    </p>
-    <h3 id="signpluginwafpluginratelimiterpluginhystrixpluginresilience4jplugin">
-     SignPlugin/WafPlugin/RateLimiterPlugin/HystrixPlugin/Resilience4JPlugin
-    </h3>
-    <p>
-     进入其中，但plugin没有起用，不执行逻辑
-    </p>
-    <h3 id="dividepluginwebclientpluginwebsocketplugin">
-     DividePlugin/WebClientPlugin/WebSocketPlugin
-    </h3>
-    <p>
-     通过类型判断，跳过，不执行
-    </p>
-    <h3 id="bodyparamplugin">
-     BodyParamPlugin
-    </h3>
-    <p>
-     这个plugin在dubbo的时候也是要执行，我们来看看它干了写啥事。从下面逻辑中大概能看出先判断是否符合执行条件，然后将请求地址替换成真实的后端地址
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <h3 id="globalplugin">
+      GlobalPlugin
+     </h3>
+     <p>
+      进入其中，执行处理逻辑，通过上篇的分析，我们知道大致作用是将请求类型放入exchange中
+     </p>
+     <h3 id="signpluginwafpluginratelimiterpluginhystrixpluginresilience4jplugin">
+      SignPlugin/WafPlugin/RateLimiterPlugin/HystrixPlugin/Resilience4JPlugin
+     </h3>
+     <p>
+      进入其中，但plugin没有起用，不执行逻辑
+     </p>
+     <h3 id="dividepluginwebclientpluginwebsocketplugin">
+      DividePlugin/WebClientPlugin/WebSocketPlugin
+     </h3>
+     <p>
+      通过类型判断，跳过，不执行
+     </p>
+     <h3 id="bodyparamplugin">
+      BodyParamPlugin
+     </h3>
+     <p>
+      这个plugin在dubbo的时候也是要执行，我们来看看它干了写啥事。从下面逻辑中大概能看出先判断是否符合执行条件，然后将请求地址替换成真实的后端地址
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
         <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
         <span class="c1">// 判断类型是不是sofa</span>
@@ -270,27 +257,27 @@ o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there met
         <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     这里有个非常有趣的现象，我们第四篇分析中，dubbo也走了一模一样的类，在上面函数逻辑中，我们看出它并不能兼容dubbo，那dubbo是如何走这个类的呢？
-    </p>
-    <p>
-     通过调试我们发现，当同时启动dubbo和sofa的时候，会生成两个BodyParamPlugin,名称是一模一样的，但里面的判断类型换了，很神奇，猜测这个类是动态生成之类的手段，这里先不探索了，可以后面研究研究
-    </p>
-    <h3 id="alibabadubboplugin">
-     AlibabaDubboPlugin
-    </h3>
-    <p>
-     通过类型判断，跳过
-    </p>
-    <h3 id="sofaplugin">
-     SofaPlugin
-    </h3>
-    <p>
-     这个从名字就看出来是核心类，我们看看它具体干了啥。通过下面注释的地方，可以看出和dubbo请求的非常的相像。进行路由匹配，成功后rpc调用，获得结果后放入exchange中
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">AbstractSoulPlugin</span>
+     </div>
+     <p>
+      这里有个非常有趣的现象，我们第四篇分析中，dubbo也走了一模一样的类，在上面函数逻辑中，我们看出它并不能兼容dubbo，那dubbo是如何走这个类的呢？
+     </p>
+     <p>
+      通过调试我们发现，当同时启动dubbo和sofa的时候，会生成两个BodyParamPlugin,名称是一模一样的，但里面的判断类型换了，很神奇，猜测这个类是动态生成之类的手段，这里先不探索了，可以后面研究研究
+     </p>
+     <h3 id="alibabadubboplugin">
+      AlibabaDubboPlugin
+     </h3>
+     <p>
+      通过类型判断，跳过
+     </p>
+     <h3 id="sofaplugin">
+      SofaPlugin
+     </h3>
+     <p>
+      这个从名字就看出来是核心类，我们看看它具体干了啥。通过下面注释的地方，可以看出和dubbo请求的非常的相像。进行路由匹配，成功后rpc调用，获得结果后放入exchange中
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">AbstractSoulPlugin</span>
     <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">String</span> <span class="n">pluginName</span> <span class="o">=</span> <span class="n">named</span><span class="p">();</span>
         <span class="kd">final</span> <span class="n">PluginData</span> <span class="n">pluginData</span> <span class="o">=</span> <span class="n">BaseDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">obtainPluginData</span><span class="p">(</span><span class="n">pluginName</span><span class="p">);</span>
@@ -393,27 +380,27 @@ o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there met
         <span class="p">})).</span><span class="na">onErrorMap</span><span class="p">(</span><span class="n">SoulException</span><span class="p">::</span><span class="k">new</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="monitorplugin">
-     MonitorPlugin
-    </h3>
-    <p>
-     不跳过，但插件没有开启
-    </p>
-    <h3 id="dubboresponsepluginwebclientresponseplugin">
-     DubboResponsePlugin/WebClientResponsePlugin
-    </h3>
-    <p>
-     通过类型判断，跳过执行
-    </p>
-    <h3 id="sofaresponseplugin">
-     SofaResponsePlugin
-    </h3>
-    <p>
-     通过上几篇分析和名字能猜出来是将响应返回给客户端的，通过下面代码的逻辑也可以看出
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <h3 id="monitorplugin">
+      MonitorPlugin
+     </h3>
+     <p>
+      不跳过，但插件没有开启
+     </p>
+     <h3 id="dubboresponsepluginwebclientresponseplugin">
+      DubboResponsePlugin/WebClientResponsePlugin
+     </h3>
+     <p>
+      通过类型判断，跳过执行
+     </p>
+     <h3 id="sofaresponseplugin">
+      SofaResponsePlugin
+     </h3>
+     <p>
+      通过上几篇分析和名字能猜出来是将响应返回给客户端的，通过下面代码的逻辑也可以看出
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">).</span><span class="na">then</span><span class="p">(</span><span class="n">Mono</span><span class="p">.</span><span class="na">defer</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
             <span class="c1">// 从exchange中获取结果</span>
             <span class="kd">final</span> <span class="n">Object</span> <span class="n">result</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SOFA_RPC_RESULT</span><span class="p">);</span>
@@ -427,153 +414,164 @@ o.d.s.p.s.cache.ApplicationConfigCache   : init sofa reference success there met
         <span class="p">}));</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <h2 id="_3">
-     总结
-    </h2>
-    <p>
-     上面的plugin流程大致如下：
+     </div>
+     <h2 id="_3">
+      总结
+     </h2>
+     <p>
+      上面的plugin流程大致如下：
+     </p>
+     <ul>
+      <li>
+       GlobalPlugin : 将请求类型置入
+      </li>
+      <li>
+       SignPlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       WafPlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       RateLimiterPlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       HystrixPlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       Resilience4JPlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       DividePlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       WebClientPlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       WebSocketPlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       BodyParamPlugin : 执行RPC的请求路径替换，替换成真实的服务器后端路径，作用类似于dividePlugin；不同rpc有相关的这个插件名，也就是会有多个BodyParamPlugin
+      </li>
+      <li>
+       AlibabaDubboPlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       SofaPlugin : 发送请求到后台服务器，拿到结果，写入exchange
+      </li>
+      <li>
+       MonitorPlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       DubboResponsePlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       WebClientResponsePlugin : 跳过不执行逻辑
+      </li>
+      <li>
+       SofaResponsePlugin : 从exchange中拿到响应，发送给客户端
+      </li>
+     </ul>
+     <p>
+      经过这几篇的分析，我们进一步优化我们对Soul网关的请求流程，大致如下：
+     </p>
+     <p>
+      <img alt="" src="./picture/Soulprocessfirst.png"/>
+     </p>
+     <p>
+      更新了我们对处理流程中一些类的认知：
+     </p>
+     <ul>
+      <li>
+       通过上篇分析，得到GlobalPlugin的具体作用，是置入请求类型
+      </li>
+      <li>
+       BodyParamPlugin 作用类似于 dividePlugin，能进行路由匹配，匹配后将路径修改真实的后端服务器路径；并且能动态的生成同名的但针对不同rpc实现的plugin
+      </li>
+     </ul>
+     <h2 id="soul">
+      Soul网关源码分析文章列表
+     </h2>
+     <h3 id="github">
+      Github
+     </h3>
+     <ul>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB1-%E6%A6%82%E8%A7%88.md">
+        Soul 源码阅读（一） 概览
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB2-%E5%88%9D%E6%AD%A5%E8%BF%90%E8%A1%8C.md">
+        Soul 源码阅读（二）代码初步运行
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB3-%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
+        Soul 源码阅读（三）HTTP请求处理概览
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB4-dubbo%E8%AF%B7%E6%B1%82%E6%A6%82%E8%A7%88.md">
+        Soul 网关源码阅读（四）Dubbo请求概览
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB5-%E8%AF%B7%E6%B1%82%E7%B1%BB%E5%9E%8B%E6%8E%A2%E7%B4%A2.md">
+        Soul网关源码阅读（五）请求类型探索
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB6-sofa%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
+        Soul 网关源码阅读（六）Sofa请求处理概览
+       </a>
+      </li>
+     </ul>
+     <h3 id="_4">
+      掘金
+     </h3>
+     <ul>
+      <li>
+       Soul 网关源码阅读（一） 概览 #掘金文章# https://juejin.cn/post/6917864624423436296
+      </li>
+      <li>
+       Soul 网关源码阅读（二）代码初步运行 #掘金文章# https://juejin.cn/post/6917865804121767944
+      </li>
+      <li>
+       Soul 网关源码阅读（三）请求处理概览 #掘金文章# https://juejin.cn/post/6917866538712334343
+      </li>
+      <li>
+       Soul 网关源码阅读（四）Dubbo请求概览 #掘金文章# https://juejin.cn/post/6917867369909977102
+      </li>
+      <li>
+       Soul网关源码阅读（五）请求类型探索 #掘金文章# https://juejin.cn/post/6918575905962983438
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <ul>
-     <li>
-      GlobalPlugin : 将请求类型置入
-     </li>
-     <li>
-      SignPlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      WafPlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      RateLimiterPlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      HystrixPlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      Resilience4JPlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      DividePlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      WebClientPlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      WebSocketPlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      BodyParamPlugin : 执行RPC的请求路径替换，替换成真实的服务器后端路径，作用类似于dividePlugin；不同rpc有相关的这个插件名，也就是会有多个BodyParamPlugin
-     </li>
-     <li>
-      AlibabaDubboPlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      SofaPlugin : 发送请求到后台服务器，拿到结果，写入exchange
-     </li>
-     <li>
-      MonitorPlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      DubboResponsePlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      WebClientResponsePlugin : 跳过不执行逻辑
-     </li>
-     <li>
-      SofaResponsePlugin : 从exchange中拿到响应，发送给客户端
-     </li>
-    </ul>
-    <p>
-     经过这几篇的分析，我们进一步优化我们对Soul网关的请求流程，大致如下：
-    </p>
-    <p>
-     <img alt="" src="./picture/Soulprocessfirst.png"/>
-    </p>
-    <p>
-     更新了我们对处理流程中一些类的认知：
-    </p>
-    <ul>
-     <li>
-      通过上篇分析，得到GlobalPlugin的具体作用，是置入请求类型
-     </li>
-     <li>
-      BodyParamPlugin 作用类似于 dividePlugin，能进行路由匹配，匹配后将路径修改真实的后端服务器路径；并且能动态的生成同名的但针对不同rpc实现的plugin
-     </li>
-    </ul>
-    <h2 id="soul">
-     Soul网关源码分析文章列表
-    </h2>
-    <h3 id="github">
-     Github
-    </h3>
-    <ul>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB1-%E6%A6%82%E8%A7%88.md">
-       Soul 源码阅读（一） 概览
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB2-%E5%88%9D%E6%AD%A5%E8%BF%90%E8%A1%8C.md">
-       Soul 源码阅读（二）代码初步运行
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB3-%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
-       Soul 源码阅读（三）HTTP请求处理概览
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB4-dubbo%E8%AF%B7%E6%B1%82%E6%A6%82%E8%A7%88.md">
-       Soul 网关源码阅读（四）Dubbo请求概览
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB5-%E8%AF%B7%E6%B1%82%E7%B1%BB%E5%9E%8B%E6%8E%A2%E7%B4%A2.md">
-       Soul网关源码阅读（五）请求类型探索
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB6-sofa%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
-       Soul 网关源码阅读（六）Sofa请求处理概览
-      </a>
-     </li>
-    </ul>
-    <h3 id="_4">
-     掘金
-    </h3>
-    <ul>
-     <li>
-      Soul 网关源码阅读（一） 概览 #掘金文章# https://juejin.cn/post/6917864624423436296
-     </li>
-     <li>
-      Soul 网关源码阅读（二）代码初步运行 #掘金文章# https://juejin.cn/post/6917865804121767944
-     </li>
-     <li>
-      Soul 网关源码阅读（三）请求处理概览 #掘金文章# https://juejin.cn/post/6917866538712334343
-     </li>
-     <li>
-      Soul 网关源码阅读（四）Dubbo请求概览 #掘金文章# https://juejin.cn/post/6917867369909977102
-     </li>
-     <li>
-      Soul网关源码阅读（五）请求类型探索 #掘金文章# https://juejin.cn/post/6918575905962983438
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

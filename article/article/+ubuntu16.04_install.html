@@ -24,85 +24,72 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="ubuntu1604-sublime-text-2">
-     Ubuntu16.04 下的 sublime text 2配置记录
-    </h1>
-    <hr/>
-    <div class="toc">
-     <ul>
-      <li>
-       <a href="#ubuntu1604-sublime-text-2">
-        Ubuntu16.04 下的 sublime text 2配置记录
-       </a>
-       <ul>
-        <li>
-         <a href="#sublime">
-          一、安装sublime
-         </a>
-        </li>
-        <li>
-         <a href="#_1">
-          二、解决中文不能输入的问题
-         </a>
-        </li>
-        <li>
-         <a href="#markdown">
-          三、配置Markdown编辑
-         </a>
-        </li>
-        <li>
-         <a href="#_2">
-          参考链接
-         </a>
-        </li>
-       </ul>
-      </li>
-     </ul>
-    </div>
-    <h2 id="sublime">
-     一、安装sublime
-    </h2>
-    <p>
-     通过命令行进行安装，这样比较方便,其默认安装在/opt/下面：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">sudo add-apt-repository ppa:webupd8team/sublime-text-2</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="ubuntu1604-sublime-text-2">
+      Ubuntu16.04 下的 sublime text 2配置记录
+     </h1>
+     <hr/>
+     <div class="toc">
+      <ul>
+       <li>
+        <a href="#ubuntu1604-sublime-text-2">
+         Ubuntu16.04 下的 sublime text 2配置记录
+        </a>
+        <ul>
+         <li>
+          <a href="#sublime">
+           一、安装sublime
+          </a>
+         </li>
+         <li>
+          <a href="#_1">
+           二、解决中文不能输入的问题
+          </a>
+         </li>
+         <li>
+          <a href="#markdown">
+           三、配置Markdown编辑
+          </a>
+         </li>
+         <li>
+          <a href="#_2">
+           参考链接
+          </a>
+         </li>
+        </ul>
+       </li>
+      </ul>
+     </div>
+     <h2 id="sublime">
+      一、安装sublime
+     </h2>
+     <p>
+      通过命令行进行安装，这样比较方便,其默认安装在/opt/下面：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">sudo add-apt-repository ppa:webupd8team/sublime-text-2</span>
 <span class="err">sudo apt-get update</span>
 <span class="err">sudo apt-get install sublime-text</span>
 </code></pre>
-    </div>
-    <p>
-     有的人在第二步会特别费时间，这时候可以在软件安装源中去掉不必要的源
-    </p>
-    <h2 id="_1">
-     二、解决中文不能输入的问题
-    </h2>
-    <ul>
-     <li>
-      1.首先在安装的目录下新建一个sublime_imfix.c文件，并将下面的代码复制到里面：
-     </li>
-    </ul>
-    <div class="codehilite">
-     <pre><span></span><code><span class="cm">/*</span>
+     </div>
+     <p>
+      有的人在第二步会特别费时间，这时候可以在软件安装源中去掉不必要的源
+     </p>
+     <h2 id="_1">
+      二、解决中文不能输入的问题
+     </h2>
+     <ul>
+      <li>
+       1.首先在安装的目录下新建一个sublime_imfix.c文件，并将下面的代码复制到里面：
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="cm">/*</span>
 <span class="cm">sublime-imfix.c</span>
 <span class="cm">Use LD_PRELOAD to interpose some function to fix sublime input method support for linux.</span>
 <span class="cm">By Cjacker Huang &lt;jianzhong.huang at i-soft.com.cn&gt;</span>
@@ -182,79 +169,90 @@
   <span class="n">gdk_window_add_filter</span> <span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">event_filter</span><span class="p">,</span> <span class="n">context</span><span class="p">);</span> 
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <ul>
-     <li>
-      2.安装相应的编译环境
-     </li>
-    </ul>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">sudo apt-get install build-essential</span>
+     </div>
+     <ul>
+      <li>
+       2.安装相应的编译环境
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">sudo apt-get install build-essential</span>
 <span class="err">sudo apt-get install libgtk2.0-dev</span>
 </code></pre>
-    </div>
-    <ul>
-     <li>
-      3.进行编译
-     </li>
-    </ul>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">gcc -shared -o libsublime-imfix.so sublime_imfix.c  `pkg-config --libs --cflags gtk+-2.0` -fPIC</span>
+     </div>
+     <ul>
+      <li>
+       3.进行编译
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">gcc -shared -o libsublime-imfix.so sublime_imfix.c  `pkg-config --libs --cflags gtk+-2.0` -fPIC</span>
 </code></pre>
-    </div>
-    <ul>
-     <li>
-      4.运行解决
-     </li>
-    </ul>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">LD_PRELOAD=./libsublime-imfix.so subl</span>
+     </div>
+     <ul>
+      <li>
+       4.运行解决
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">LD_PRELOAD=./libsublime-imfix.so subl</span>
 </code></pre>
-    </div>
-    <p>
-     <em>
-      注意命令的运行都是在sublime的安装目录下进行的
-     </em>
-    </p>
-    <h2 id="markdown">
-     三、配置Markdown编辑
-    </h2>
-    <p>
-     &amp;esnp  在Ubuntu中的Markdown编辑也是有很多问题，其中就是浏览器不能自动启动的问题，这个我只能临时提供一个解决方案了：在点击浏览快捷键以后使用Ctrl+`调出控制台，里面有相应的网页地址，只能手动输入进去查看了，也行吧，不是不能接收
-    </p>
-    <h2 id="_2">
-     参考链接
-    </h2>
-    <p>
-     <a href="http://blog.csdn.net/u011982340/article/details/45843413">
-      http://blog.csdn.net/u011982340/article/details/45843413
+     </div>
+     <p>
+      <em>
+       注意命令的运行都是在sublime的安装目录下进行的
+      </em>
+     </p>
+     <h2 id="markdown">
+      三、配置Markdown编辑
+     </h2>
+     <p>
+      &amp;esnp  在Ubuntu中的Markdown编辑也是有很多问题，其中就是浏览器不能自动启动的问题，这个我只能临时提供一个解决方案了：在点击浏览快捷键以后使用Ctrl+`调出控制台，里面有相应的网页地址，只能手动输入进去查看了，也行吧，不是不能接收
+     </p>
+     <h2 id="_2">
+      参考链接
+     </h2>
+     <p>
+      <a href="http://blog.csdn.net/u011982340/article/details/45843413">
+       http://blog.csdn.net/u011982340/article/details/45843413
+      </a>
+     </p>
+     <p>
+      <a href="https://www.findhao.net/res/291">
+       https://www.findhao.net/res/291
+      </a>
+     </p>
+     <p>
+      <a href="http://blog.csdn.net/youngdze/article/details/21125719">
+       http://blog.csdn.net/youngdze/article/details/21125719
+      </a>
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
      </a>
+     .
     </p>
-    <p>
-     <a href="https://www.findhao.net/res/291">
-      https://www.findhao.net/res/291
-     </a>
-    </p>
-    <p>
-     <a href="http://blog.csdn.net/youngdze/article/details/21125719">
-      http://blog.csdn.net/youngdze/article/details/21125719
-     </a>
-    </p>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

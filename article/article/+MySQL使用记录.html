@@ -24,37 +24,24 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="mysql">
-     MySQL使用记录
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     安装
-    </h2>
-    <h3 id="centos7">
-     centos7
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>wget <span class="s1">'https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm'</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="mysql">
+      MySQL使用记录
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      安装
+     </h2>
+     <h3 id="centos7">
+      centos7
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>wget <span class="s1">'https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm'</span>
 rpm -Uvh mysql57-community-release-el7-11.noarch.rpm
 yum install mysql-community-server
 systemctl start mysqld
@@ -66,12 +53,12 @@ ALTER USER <span class="s1">'root'</span>@<span class="s1">'localhost'</span> ID
 grant all privileges on *.* to <span class="s1">'root'</span>@<span class="s1">'%'</span> identified by <span class="s2">"123456"</span> with grant option<span class="p">;</span>
 flush privileges<span class="p">;</span>
 </code></pre>
-    </div>
-    <h2 id="_2">
-     常用命令记录
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code><span class="k">create</span> <span class="k">user</span> <span class="k">share</span><span class="o">@</span><span class="s1">'%'</span> <span class="n">identified</span> <span class="k">by</span> <span class="s1">'password'</span><span class="p">;</span>
+     </div>
+     <h2 id="_2">
+      常用命令记录
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="k">create</span> <span class="k">user</span> <span class="k">share</span><span class="o">@</span><span class="s1">'%'</span> <span class="n">identified</span> <span class="k">by</span> <span class="s1">'password'</span><span class="p">;</span>
 <span class="k">set</span> <span class="n">password</span> <span class="k">for</span> <span class="s1">'share'</span><span class="o">@</span><span class="s1">'%'</span><span class="o">=</span><span class="n">password</span><span class="p">(</span><span class="s1">'share'</span><span class="p">);</span>
 <span class="k">grant</span> <span class="k">select</span> <span class="k">on</span> <span class="n">bachang</span><span class="p">.</span><span class="n">index1</span> <span class="k">to</span> <span class="k">share</span><span class="o">@</span><span class="s1">'%'</span> <span class="p">;</span>
 <span class="k">grant</span> <span class="k">select</span> <span class="k">on</span> <span class="n">bachang</span><span class="p">.</span><span class="n">index2</span> <span class="k">to</span> <span class="k">share</span><span class="o">@</span><span class="s1">'%'</span> <span class="p">;</span>
@@ -82,15 +69,15 @@ flush privileges<span class="p">;</span>
 
 <span class="k">drop</span> <span class="k">database</span> <span class="n">databasename</span><span class="p">;</span>
 </code></pre>
-    </div>
-    <h2 id="_3">
-     语句使用
-    </h2>
-    <h3 id="_4">
-     建库、建表一般语句
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="o">#</span> <span class="err">用于用户数据库及表的初始化</span>
+     </div>
+     <h2 id="_3">
+      语句使用
+     </h2>
+     <h3 id="_4">
+      建库、建表一般语句
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">#</span> <span class="err">用于用户数据库及表的初始化</span>
 
 <span class="k">CREATE</span> <span class="k">DATABASE</span> <span class="k">if</span> <span class="k">not</span> <span class="k">exists</span> <span class="o">`</span><span class="n">mall</span><span class="o">`</span><span class="p">;</span>
 
@@ -124,12 +111,12 @@ flush privileges<span class="p">;</span>
                                                                                     <span class="mi">1</span><span class="p">);</span>
 <span class="ss">"value"</span><span class="err">}'</span><span class="p">);</span>
 </code></pre>
-    </div>
-    <h3 id="_5">
-     初始化数据：循环插入、随机数、字符串拼接
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="k">DROP</span> <span class="k">PROCEDURE</span> <span class="k">IF</span> <span class="k">EXISTS</span> <span class="n">users_initData</span><span class="p">;</span>
+     </div>
+     <h3 id="_5">
+      初始化数据：循环插入、随机数、字符串拼接
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="k">DROP</span> <span class="k">PROCEDURE</span> <span class="k">IF</span> <span class="k">EXISTS</span> <span class="n">users_initData</span><span class="p">;</span>
 <span class="k">DELIMITER</span> <span class="err">$</span>
 <span class="k">CREATE</span> <span class="k">PROCEDURE</span> <span class="n">users_initData</span><span class="p">()</span>
 <span class="k">BEGIN</span>
@@ -155,47 +142,58 @@ flush privileges<span class="p">;</span>
 <span class="k">END</span> <span class="err">$</span>
 <span class="k">CALL</span> <span class="n">goods_initData</span><span class="p">();</span>
 </code></pre>
-    </div>
-    <h2 id="_6">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://www.cnblogs.com/gpdm/p/6492449.html">
-       mysql-创建用户并授权，设置允许远程连接
-      </a>
-     </li>
-     <li>
-      <a href="https://www.cnblogs.com/wuyifu/p/7580494.html">
-       创建MySQL用户 赋予某指定库表的权限
-      </a>
-     </li>
-     <li>
-      <a href="https://www.jianshu.com/p/7cccdaa2d177">
-       Centos 7 安装 MySQL
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/song634/article/details/80394965">
-       centos7下mysql配置远程连接
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_6">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://www.cnblogs.com/gpdm/p/6492449.html">
+        mysql-创建用户并授权，设置允许远程连接
+       </a>
+      </li>
+      <li>
+       <a href="https://www.cnblogs.com/wuyifu/p/7580494.html">
+        创建MySQL用户 赋予某指定库表的权限
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/7cccdaa2d177">
+        Centos 7 安装 MySQL
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/song634/article/details/80394965">
+        centos7下mysql配置远程连接
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

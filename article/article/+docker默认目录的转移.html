@@ -24,43 +24,30 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="docker">
-     docker默认目录的转移
-    </h1>
-    <hr/>
-    <h2 id="ctenos">
-     Ctenos
-    </h2>
-    <p>
-     在后面发现docker的文件的占用空间越来越到，而系统盘的空间较小，需要将其转入另一个比较大的磁盘中
-    </p>
-    <h4 id="_1">
-     软链接方式
-    </h4>
-    <p>
-     此方式较为简单，无须修改配置文件
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">mv</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="k">data</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="docker">
+      docker默认目录的转移
+     </h1>
+     <hr/>
+     <h2 id="ctenos">
+      Ctenos
+     </h2>
+     <p>
+      在后面发现docker的文件的占用空间越来越到，而系统盘的空间较小，需要将其转入另一个比较大的磁盘中
+     </p>
+     <h4 id="_1">
+      软链接方式
+     </h4>
+     <p>
+      此方式较为简单，无须修改配置文件
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">mv</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="k">data</span>
 <span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="k">data</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
 
 <span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">home</span>
@@ -68,32 +55,43 @@
 <span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="k">data</span>
 <span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">docker</span>
 </code></pre>
-    </div>
-    <h2 id="_2">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://blog.csdn.net/qq_37674858/article/details/79976751">
-       docker容器存放目录磁盘空间满了，转移数据修改Docker默认存储位置
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_2">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://blog.csdn.net/qq_37674858/article/details/79976751">
+        docker容器存放目录磁盘空间满了，转移数据修改Docker默认存储位置
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

@@ -24,87 +24,74 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="centos">
-     Centos 使用记录
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     安装
-    </h2>
-    <ul>
-     <li>
-      <a href="https://getfedora.org/en/workstation/download/">
-       Download Fedora 33 Workstation
-      </a>
-     </li>
-     <li>
-      启动盘制作使用Linux的专用工具，避免安装时不必要的麻烦，推荐：
-      <a href="https://rufus.ie/">
-       rufus
-      </a>
-     </li>
-     <li>
-      <a href="https://www.balena.io/etcher/">
-       balenaEtcher
-      </a>
-     </li>
-    </ul>
-    <h2 id="_2">
-     网络配置
-    </h2>
-    <ul>
-     <li>
-      ip addr 查看网络配置
-     </li>
-     <li>
-      进入：/etc/sysconfig/network-xxx/ifcfg-xxxx,修改onboot选项为yes即可，service network restart 重启网络设置
-     </li>
-     <li>
-      systemctl stop firewalld.service #停止firewall
-     </li>
-     <li>
-      systemctl disable firewalld.service #禁止firewall开机启动
-     </li>
-     <li>
-      centos8:nmcli c reload
-     </li>
-    </ul>
-    <h3 id="ip">
-     设置静态IP
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>vim /etc/sysconfig/network-script/ifcfg-xxxx
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="centos">
+      Centos 使用记录
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      安装
+     </h2>
+     <ul>
+      <li>
+       <a href="https://getfedora.org/en/workstation/download/">
+        Download Fedora 33 Workstation
+       </a>
+      </li>
+      <li>
+       启动盘制作使用Linux的专用工具，避免安装时不必要的麻烦，推荐：
+       <a href="https://rufus.ie/">
+        rufus
+       </a>
+      </li>
+      <li>
+       <a href="https://www.balena.io/etcher/">
+        balenaEtcher
+       </a>
+      </li>
+     </ul>
+     <h2 id="_2">
+      网络配置
+     </h2>
+     <ul>
+      <li>
+       ip addr 查看网络配置
+      </li>
+      <li>
+       进入：/etc/sysconfig/network-xxx/ifcfg-xxxx,修改onboot选项为yes即可，service network restart 重启网络设置
+      </li>
+      <li>
+       systemctl stop firewalld.service #停止firewall
+      </li>
+      <li>
+       systemctl disable firewalld.service #禁止firewall开机启动
+      </li>
+      <li>
+       centos8:nmcli c reload
+      </li>
+     </ul>
+     <h3 id="ip">
+      设置静态IP
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>vim /etc/sysconfig/network-script/ifcfg-xxxx
 <span class="nv">BOOTPROTO</span><span class="o">=</span>static
 <span class="nv">ONBOOT</span><span class="o">=</span>yes
 <span class="nv">IPADDR</span><span class="o">=</span><span class="m">0</span>.0.0.0
 <span class="nv">NETMASK</span><span class="o">=</span><span class="m">255</span>.255.255.0
 <span class="nv">GATEWAY</span><span class="o">=</span><span class="m">192</span>.168.1.1
 </code></pre>
-    </div>
-    <h2 id="_3">
-     源配置
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># centos 7</span>
+     </div>
+     <h2 id="_3">
+      源配置
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># centos 7</span>
 /etc/yum.repos.d/
 wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
 yum -y update
@@ -114,123 +101,134 @@ curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-
 yum makecache
 yum -y update
 </code></pre>
-    </div>
-    <h2 id="cc">
-     C/C++环境配置
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code>yum install -y gcc
+     </div>
+     <h2 id="cc">
+      C/C++环境配置
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code>yum install -y gcc
 yum install -y gcc-c++
 yum install -y gdb
 yum install -y cmake
 yum install -y make
 </code></pre>
-    </div>
-    <h2 id="_4">
-     硬盘挂载
-    </h2>
-    <ul>
-     <li>
-      fdist -l:查看相应的硬盘信息
-     </li>
-     <li>
-      mkfs.ext4 /dev/xxxx:格式化话硬盘
-     </li>
-     <li>
-      mount /dev/hdb1 /mnt/hdb1：挂载到相应的目录
-     </li>
-     <li>
-      vim /ets/fstab,这种自动挂载，/dev/hdb1 /mnt/hdb1 ext4 defaults 0 0，后面的分区与硬盘的分区相关，没有进行分区默认为0即可
-     </li>
-    </ul>
-    <h2 id="vmware">
-     VMware相关
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err"># 挂载共享文件夹</span>
+     </div>
+     <h2 id="_4">
+      硬盘挂载
+     </h2>
+     <ul>
+      <li>
+       fdist -l:查看相应的硬盘信息
+      </li>
+      <li>
+       mkfs.ext4 /dev/xxxx:格式化话硬盘
+      </li>
+      <li>
+       mount /dev/hdb1 /mnt/hdb1：挂载到相应的目录
+      </li>
+      <li>
+       vim /ets/fstab,这种自动挂载，/dev/hdb1 /mnt/hdb1 ext4 defaults 0 0，后面的分区与硬盘的分区相关，没有进行分区默认为0即可
+      </li>
+     </ul>
+     <h2 id="vmware">
+      VMware相关
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err"># 挂载共享文件夹</span>
 <span class="err">systemctl enable vmtoolsd</span>
 <span class="err">systemctl start vmtoolsd</span>
 <span class="err">vmhgfs-fuse .host:/ /mnt/hgfs</span>
 </code></pre>
-    </div>
-    <h2 id="_5">
-     查看链接
-    </h2>
-    <ul>
-     <li>
-      <a href="http://blog.51cto.com/simonhu/1588971">
-       CentOS 7 网络配置详解
-      </a>
-     </li>
-     <li>
-      <a href="https://segmentfault.com/a/1190000008007157">
-       CentOS 7 下挂载新硬盘
-      </a>
-     </li>
-     <li>
-      <p>
-       <a href="https://www.jianshu.com/p/d6414b5295b8">
-        centos7 关闭防火墙和selinux
+     </div>
+     <h2 id="_5">
+      查看链接
+     </h2>
+     <ul>
+      <li>
+       <a href="http://blog.51cto.com/simonhu/1588971">
+        CentOS 7 网络配置详解
        </a>
-      </p>
-     </li>
-     <li>
-      <p>
-       <a href="https://blog.csdn.net/dengshulei/article/details/103704285">
-        怎么给CentOS Linux 8更换国内源（阿里源）
+      </li>
+      <li>
+       <a href="https://segmentfault.com/a/1190000008007157">
+        CentOS 7 下挂载新硬盘
        </a>
-      </p>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/KLKFL/article/details/102994442">
-       centos8 网络配置
-      </a>
-     </li>
-     <li>
-      <a href="https://www.cnblogs.com/zbseoag/p/11736006.html">
-       centos8 安装 docker
-      </a>
-     </li>
-     <li>
-      <p>
-       <a href="https://download.docker.com/linux/centos/7/x86_64/stable/Packages/">
-        containerd.io-1.2.6-3.3.el7.x86_64.rpm
+      </li>
+      <li>
+       <p>
+        <a href="https://www.jianshu.com/p/d6414b5295b8">
+         centos7 关闭防火墙和selinux
+        </a>
+       </p>
+      </li>
+      <li>
+       <p>
+        <a href="https://blog.csdn.net/dengshulei/article/details/103704285">
+         怎么给CentOS Linux 8更换国内源（阿里源）
+        </a>
+       </p>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/KLKFL/article/details/102994442">
+        centos8 网络配置
        </a>
-      </p>
-     </li>
-     <li>
-      <p>
-       <a href="ftp://ftp.mondorescue.org/centos/8/x86_64/">
-        mondorescue/centos/8/x86_64/ 的索引
+      </li>
+      <li>
+       <a href="https://www.cnblogs.com/zbseoag/p/11736006.html">
+        centos8 安装 docker
        </a>
-      </p>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/whatday/article/details/105789362">
-       linux 使用 mondo rescue 备份 还原系统 iso u盘
-      </a>
-     </li>
-     <li>
-      <a href="https://www.joe0.com/2015/11/14/how-to-create-a-bare-metal-iso-image-backup-of-a-liverunning-linux-server-centos-7-instructions/">
-       How to create a bare metal (.iso image) backup of a live/running Linux server (CentOS 7 instructions).
-      </a>
-     </li>
-    </ul>
-   </article>
+      </li>
+      <li>
+       <p>
+        <a href="https://download.docker.com/linux/centos/7/x86_64/stable/Packages/">
+         containerd.io-1.2.6-3.3.el7.x86_64.rpm
+        </a>
+       </p>
+      </li>
+      <li>
+       <p>
+        <a href="ftp://ftp.mondorescue.org/centos/8/x86_64/">
+         mondorescue/centos/8/x86_64/ 的索引
+        </a>
+       </p>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/whatday/article/details/105789362">
+        linux 使用 mondo rescue 备份 还原系统 iso u盘
+       </a>
+      </li>
+      <li>
+       <a href="https://www.joe0.com/2015/11/14/how-to-create-a-bare-metal-iso-image-backup-of-a-liverunning-linux-server-centos-7-instructions/">
+        How to create a bare metal (.iso image) backup of a live/running Linux server (CentOS 7 instructions).
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

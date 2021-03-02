@@ -24,59 +24,46 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="java">
-     Java安装
-    </h1>
-    <hr/>
-    <h2 id="centos">
-     Centos
-    </h2>
-    <ul>
-     <li>
-      <p>
-       查找OpenJDK安装包
-      </p>
-      <ul>
-       <li>
-        rpm -qa | grep openjdk
-       </li>
-      </ul>
-     </li>
-     <li>
-      <p>
-       卸载OpenJDK安装包
-      </p>
-      <ul>
-       <li>
-        yum -y remove java-1.7.0-openjdk-headless.x86_64
-       </li>
-      </ul>
-     </li>
-    </ul>
-    <h2 id="ubuntulinux-mint">
-     Ubuntu或者linux mint
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code>sudo apt-get update <span class="o">&amp;&amp;</span> apt-get remove openjdk*
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="java">
+      Java安装
+     </h1>
+     <hr/>
+     <h2 id="centos">
+      Centos
+     </h2>
+     <ul>
+      <li>
+       <p>
+        查找OpenJDK安装包
+       </p>
+       <ul>
+        <li>
+         rpm -qa | grep openjdk
+        </li>
+       </ul>
+      </li>
+      <li>
+       <p>
+        卸载OpenJDK安装包
+       </p>
+       <ul>
+        <li>
+         yum -y remove java-1.7.0-openjdk-headless.x86_64
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <h2 id="ubuntulinux-mint">
+      Ubuntu或者linux mint
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code>sudo apt-get update <span class="o">&amp;&amp;</span> apt-get remove openjdk*
 sudo tar zxvf jdk-7u80-linux-x64.tar.gz -C /usr/lib/java
 
 vim /etc/profile
@@ -88,37 +75,48 @@ vim /etc/profile
 <span class="nb">source</span> /etc/profile
 java -version
 </code></pre>
-    </div>
-    <h2 id="_1">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://blog.csdn.net/zitong_ccnu/article/details/40041533">
-       CentOS7卸载OpenJDK安装Oracle JDK
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/enterys/article/details/53781356">
-       Linux Mint 安装JDK
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_1">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://blog.csdn.net/zitong_ccnu/article/details/40041533">
+        CentOS7卸载OpenJDK安装Oracle JDK
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/enterys/article/details/53781356">
+        Linux Mint 安装JDK
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

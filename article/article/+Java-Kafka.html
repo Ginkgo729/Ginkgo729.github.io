@@ -24,52 +24,39 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="java-kafka">
-     Java Kafka 简单示例
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简介
-    </h2>
-    <p>
-     Java kafka 简单代码示例
-    </p>
-    <h3 id="maven">
-     maven依赖配置
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="o">&lt;!--</span> <span class="n">kafka</span> <span class="o">--&gt;</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="java-kafka">
+      Java Kafka 简单示例
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      Java kafka 简单代码示例
+     </p>
+     <h3 id="maven">
+      maven依赖配置
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">&lt;!--</span> <span class="n">kafka</span> <span class="o">--&gt;</span>
 <span class="o">&lt;</span><span class="n">dependency</span><span class="o">&gt;</span>
     <span class="o">&lt;</span><span class="n">groupId</span><span class="o">&gt;</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">kafka</span><span class="o">&lt;/</span><span class="n">groupId</span><span class="o">&gt;</span>
     <span class="o">&lt;</span><span class="n">artifactId</span><span class="o">&gt;</span><span class="n">kafka</span><span class="o">-</span><span class="n">clients</span><span class="o">&lt;/</span><span class="n">artifactId</span><span class="o">&gt;</span>
     <span class="o">&lt;</span><span class="n">version</span><span class="o">&gt;</span><span class="mf">0.11.0.0</span><span class="o">&lt;/</span><span class="n">version</span><span class="o">&gt;</span>
 <span class="o">&lt;/</span><span class="n">dependency</span><span class="o">&gt;</span>
 </code></pre>
-    </div>
-    <h3 id="kakfa">
-     kakfa生产和消费者生成
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kn">import</span> <span class="nn">org.apache.kafka.clients.consumer.ConsumerRecord</span><span class="p">;</span>
+     </div>
+     <h3 id="kakfa">
+      kakfa生产和消费者生成
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">import</span> <span class="nn">org.apache.kafka.clients.consumer.ConsumerRecord</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.apache.kafka.clients.consumer.ConsumerRecords</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.apache.kafka.clients.consumer.KafkaConsumer</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.apache.kafka.clients.producer.KafkaProducer</span><span class="p">;</span>
@@ -127,12 +114,12 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="_2">
-     运行
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Main</span> <span class="p">{</span>
+     </div>
+     <h3 id="_2">
+      运行
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Main</span> <span class="p">{</span>
 
     <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">String</span> <span class="n">servers</span> <span class="o">=</span> <span class="s">"localhost:9092,localhost:9093,localhost:9094"</span><span class="p">;</span>
@@ -147,72 +134,83 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h2 id="_3">
-     使用心得
-    </h2>
-    <h3 id="_4">
-     总是读取最老的消息
-    </h3>
-    <p>
-     可能是group-id的问题，新起一个group-id名称
+     </div>
+     <h2 id="_3">
+      使用心得
+     </h2>
+     <h3 id="_4">
+      总是读取最老的消息
+     </h3>
+     <p>
+      可能是group-id的问题，新起一个group-id名称
+     </p>
+     <ul>
+      <li>
+       earliest:当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时，从头开始消费
+      </li>
+      <li>
+       latest:当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时，消费新产生的该分区下的数据
+      </li>
+      <li>
+       none:topic各分区都存在已提交的offset时，从offset后开始消费；只要有一个分区不存在已提交的offset，则抛出异常
+      </li>
+     </ul>
+     <h2 id="_5">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://blog.csdn.net/beExcellentOne/article/details/53641953">
+        java 实现kafka消息生产者和消费者
+       </a>
+      </li>
+      <li>
+       <a href="https://segmentfault.com/a/1190000015886487">
+        kafka（三）—Kafka的Java代码示例和配置说明
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/u011669700/article/details/80053313">
+        Kafka - 偏移量提交
+       </a>
+      </li>
+      <li>
+       <a href="http://www.dengshenyu.com/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/2017/11/14/kafka-consumer.html">
+        Kafka系列（四）Kafka消费者：从Kafka中读取数据
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/lishuangzhe7047/article/details/74530417">
+        Kafka auto.offset.reset值详解
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <ul>
-     <li>
-      earliest:当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时，从头开始消费
-     </li>
-     <li>
-      latest:当各分区下有已提交的offset时，从提交的offset开始消费；无提交的offset时，消费新产生的该分区下的数据
-     </li>
-     <li>
-      none:topic各分区都存在已提交的offset时，从offset后开始消费；只要有一个分区不存在已提交的offset，则抛出异常
-     </li>
-    </ul>
-    <h2 id="_5">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://blog.csdn.net/beExcellentOne/article/details/53641953">
-       java 实现kafka消息生产者和消费者
-      </a>
-     </li>
-     <li>
-      <a href="https://segmentfault.com/a/1190000015886487">
-       kafka（三）—Kafka的Java代码示例和配置说明
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/u011669700/article/details/80053313">
-       Kafka - 偏移量提交
-      </a>
-     </li>
-     <li>
-      <a href="http://www.dengshenyu.com/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/2017/11/14/kafka-consumer.html">
-       Kafka系列（四）Kafka消费者：从Kafka中读取数据
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/lishuangzhe7047/article/details/74530417">
-       Kafka auto.offset.reset值详解
-      </a>
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

@@ -24,97 +24,84 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="shardingsphere-proxy">
-     ShardingSphere Proxy 主从读写 入门使用
-    </h1>
-    <hr/>
-    <p>
-     <em>
-      基于ShardingSphere5.0.0Alpha
-     </em>
-    </p>
-    <h2 id="_1">
-     环境准备
-    </h2>
-    <h3 id="mysql">
-     MySQL搭建
-    </h3>
-    <p>
-     准备MySQL
-    </p>
-    <ul>
-     <li>
-      准备三个mysql，一主二从，搭建教程链接：
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/system/software/MySQL/MysqlDocker%E4%B8%BB%E4%BB%8E%E9%85%8D%E7%BD%AE.md">
-       Mysql docker 主从配置
-      </a>
-      <ul>
-       <li>
-        3306:主库
-       </li>
-       <li>
-        3309、3310：从库
-       </li>
-      </ul>
-     </li>
-    </ul>
-    <h3 id="shardingsphere-proxy_1">
-     配置ShardingSphere-Proxy
-    </h3>
-    <p>
-     这里使用5.0.0版本的
-    </p>
-    <ul>
-     <li>
-      1.
-      <a href="https://www.apache.org/dyn/closer.cgi/shardingsphere/5.0.0-alpha/apache-shardingsphere-5.0.0-alpha-shardingsphere-proxy-bin.tar.gz">
-       下载ShardingSphere-Proxy
-      </a>
-     </li>
-     <li>
-      2.下载完成后解压放到自己的目录下,比如我这里是放到：D:/temp/ssp
-     </li>
-     <li>
-      3.
-      <a href="https://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.47/mysql-connector-java-5.1.47.jar">
-       下载MySQL-connect.jar
-      </a>
-     </li>
-     <li>
-      <p>
-       4.将MySQL-connect.jar，放到ShardingSphere-Proxy根目录的lib下，比如我这里是：D:/temp/ssp/lib/
-      </p>
-     </li>
-     <li>
-      <p>
-       5.写入配置文件，里面本身就有配置文件，这里需要写入的有两份，如果之前存在的就直接替换：server.xml和config-master_slave.yaml
-      </p>
-     </li>
-    </ul>
-    <p>
-     server.xml 这份感觉不用改，如果和下面的一样就不用改
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">######################################################################################################</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shardingsphere-proxy">
+      ShardingSphere Proxy 主从读写 入门使用
+     </h1>
+     <hr/>
+     <p>
+      <em>
+       基于ShardingSphere5.0.0Alpha
+      </em>
+     </p>
+     <h2 id="_1">
+      环境准备
+     </h2>
+     <h3 id="mysql">
+      MySQL搭建
+     </h3>
+     <p>
+      准备MySQL
+     </p>
+     <ul>
+      <li>
+       准备三个mysql，一主二从，搭建教程链接：
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/system/software/MySQL/MysqlDocker%E4%B8%BB%E4%BB%8E%E9%85%8D%E7%BD%AE.md">
+        Mysql docker 主从配置
+       </a>
+       <ul>
+        <li>
+         3306:主库
+        </li>
+        <li>
+         3309、3310：从库
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <h3 id="shardingsphere-proxy_1">
+      配置ShardingSphere-Proxy
+     </h3>
+     <p>
+      这里使用5.0.0版本的
+     </p>
+     <ul>
+      <li>
+       1.
+       <a href="https://www.apache.org/dyn/closer.cgi/shardingsphere/5.0.0-alpha/apache-shardingsphere-5.0.0-alpha-shardingsphere-proxy-bin.tar.gz">
+        下载ShardingSphere-Proxy
+       </a>
+      </li>
+      <li>
+       2.下载完成后解压放到自己的目录下,比如我这里是放到：D:/temp/ssp
+      </li>
+      <li>
+       3.
+       <a href="https://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.47/mysql-connector-java-5.1.47.jar">
+        下载MySQL-connect.jar
+       </a>
+      </li>
+      <li>
+       <p>
+        4.将MySQL-connect.jar，放到ShardingSphere-Proxy根目录的lib下，比如我这里是：D:/temp/ssp/lib/
+       </p>
+      </li>
+      <li>
+       <p>
+        5.写入配置文件，里面本身就有配置文件，这里需要写入的有两份，如果之前存在的就直接替换：server.xml和config-master_slave.yaml
+       </p>
+      </li>
+     </ul>
+     <p>
+      server.xml 这份感觉不用改，如果和下面的一样就不用改
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">######################################################################################################</span>
 <span class="err">#</span>
 <span class="err">#</span> <span class="n">If</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">configure</span> <span class="n">orchestration</span><span class="p">,</span> <span class="n">authorization</span> <span class="n">and</span> <span class="n">proxy</span> <span class="n">properties</span><span class="p">,</span> <span class="n">please</span> <span class="n">refer</span> <span class="n">to</span> <span class="k">this</span> <span class="n">file</span><span class="p">.</span>
 <span class="err">#</span>
@@ -149,12 +136,12 @@
   <span class="n">query</span><span class="p">.</span><span class="na">with</span><span class="p">.</span><span class="na">cipher</span><span class="p">.</span><span class="na">column</span><span class="p">:</span> <span class="kc">true</span>
   <span class="n">sql</span><span class="p">.</span><span class="na">show</span><span class="p">:</span> <span class="kc">false</span>
 </code></pre>
-    </div>
-    <p>
-     config-master_slave.yaml,这个文件的配置关键字一定不要安装官方example的那个来，完全不行，要按照官方文档来，比如JDBCURL需要改成url，大致的文件内容如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">######################################################################################################</span>
+     </div>
+     <p>
+      config-master_slave.yaml,这个文件的配置关键字一定不要安装官方example的那个来，完全不行，要按照官方文档来，比如JDBCURL需要改成url，大致的文件内容如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">######################################################################################################</span>
 <span class="err">#</span> 
 <span class="err">#</span> <span class="n">Here</span> <span class="n">you</span> <span class="n">can</span> <span class="n">configure</span> <span class="n">the</span> <span class="n">rules</span> <span class="k">for</span> <span class="n">the</span> <span class="n">proxy</span><span class="p">.</span>
 <span class="err">#</span> <span class="n">This</span> <span class="n">example</span> <span class="n">is</span> <span class="n">configuration</span> <span class="n">of</span> <span class="n">master</span><span class="o">-</span><span class="n">slave</span> <span class="n">rule</span><span class="p">.</span>
@@ -202,23 +189,23 @@
         <span class="o">-</span> <span class="n">slave_ds_0</span>
         <span class="o">-</span> <span class="n">slave_ds_1</span>
 </code></pre>
-    </div>
-    <h2 id="_2">
-     运行
-    </h2>
-    <p>
-     经过前面的步骤基本配置差不多了，现在只需要运行Sharding-Proxy根目录下的 bin/start.bat就行了，运行命令大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># 进入相应的目录下，指定在13306端口运行，不指定默认运行在3307端口</span>
+     </div>
+     <h2 id="_2">
+      运行
+     </h2>
+     <p>
+      经过前面的步骤基本配置差不多了，现在只需要运行Sharding-Proxy根目录下的 bin/start.bat就行了，运行命令大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># 进入相应的目录下，指定在13306端口运行，不指定默认运行在3307端口</span>
 .<span class="se">\s</span>tart.bat <span class="m">13306</span>
 </code></pre>
-    </div>
-    <p>
-     这里需要注意的是，Java11运行好像有点问题，需要用1.8来运行，而不确定Java运行版本的，可以直接写个脚本：start.bat(start.sh类似),整个脚本修改大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>@rem
+     </div>
+     <p>
+      这里需要注意的是，Java11运行好像有点问题，需要用1.8来运行，而不确定Java运行版本的，可以直接写个脚本：start.bat(start.sh类似),整个脚本修改大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>@rem
 @rem Licensed to the Apache Software Foundation <span class="o">(</span>ASF<span class="o">)</span> under one or more
 @rem contributor license agreements.  See the NOTICE file distributed with
 @rem this work <span class="k">for</span> additional information regarding copyright ownership.
@@ -285,30 +272,30 @@ goto <span class="nb">exit</span>
 :exit
  pause
 </code></pre>
-    </div>
-    <p>
-     运行正常的话，就可以看到刷刷刷的一排正常日志打出，这样就OK了
-    </p>
-    <h2 id="shardingsphere-proxy_2">
-     ShardingSphere Proxy连接测试
-    </h2>
-    <p>
-     使用docker mysql命令有问题，成功连接了但是有bug，但使用MySQL workbench连接和程序连接是没有问题的
-    </p>
-    <h3 id="mysql-workbench">
-     MySQL Workbench链接
-    </h3>
-    <p>
-     使用图形化界面MySQL Workbench连接：本地ip、13306端口、root、root，连接成功，查询和删除，相应数据变化正确
-    </p>
-    <h3 id="java-jdbc">
-     Java JDBC连接测试
-    </h3>
-    <p>
-     下面是整个测试代码，可直接运行，运行下来也没有问题：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo.shardingsphere.proxy.jdbc</span><span class="p">;</span>
+     </div>
+     <p>
+      运行正常的话，就可以看到刷刷刷的一排正常日志打出，这样就OK了
+     </p>
+     <h2 id="shardingsphere-proxy_2">
+      ShardingSphere Proxy连接测试
+     </h2>
+     <p>
+      使用docker mysql命令有问题，成功连接了但是有bug，但使用MySQL workbench连接和程序连接是没有问题的
+     </p>
+     <h3 id="mysql-workbench">
+      MySQL Workbench链接
+     </h3>
+     <p>
+      使用图形化界面MySQL Workbench连接：本地ip、13306端口、root、root，连接成功，查询和删除，相应数据变化正确
+     </p>
+     <h3 id="java-jdbc">
+      Java JDBC连接测试
+     </h3>
+     <p>
+      下面是整个测试代码，可直接运行，运行下来也没有问题：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo.shardingsphere.proxy.jdbc</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">com.zaxxer.hikari.HikariDataSource</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.junit.jupiter.api.Test</span><span class="p">;</span>
@@ -380,37 +367,48 @@ goto <span class="nb">exit</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h2 id="_3">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://developer.aliyun.com/article/771099">
-       Sharding-Proxy的基本功能使用
-      </a>
-     </li>
-     <li>
-      <a href="https://www.programmersought.com/article/48586082376/">
-       The sharding-proxy read-write separation study notes of shardingsphere
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_3">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://developer.aliyun.com/article/771099">
+        Sharding-Proxy的基本功能使用
+       </a>
+      </li>
+      <li>
+       <a href="https://www.programmersought.com/article/48586082376/">
+        The sharding-proxy read-write separation study notes of shardingsphere
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

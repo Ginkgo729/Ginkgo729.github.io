@@ -24,60 +24,47 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="docker-java">
-     Docker Java程序镜像制作
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     制作前的准备
-    </h2>
-    <ul>
-     <li>
-      jre：不需要完整的jdk，jre即可，到Oracle进行下载即可，
-      <a href="https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">
-       下载链接
-      </a>
-      ,根据自己的情况进行选择，这里选择jre-8u221-linux-x64.tar.gz，一般只能使用解压安装了，rpm的可以直接使用yum命令进行安装，但我们这里用不了
-     </li>
-     <li>
-      jar包：自己写好的程序的可执行jar，放到镜像中直接运行即可
-     </li>
-    </ul>
-    <h2 id="_2">
-     制作步骤
-    </h2>
-    <ul>
-     <li>
-      mkdir docker：创建一个制作镜像的工作目录，里面用于存放构建镜像需要的文件，如jre和jar包，还有镜像构建文件Dockfile
-     </li>
-     <li>
-      在目录下放入jar包和jre
-     </li>
-     <li>
-      生产Dockfile文件并进行编写，编写示例和说明如下,下面的操作环境是centos7
-     </li>
-    </ul>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># 创建镜像制作目录</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="docker-java">
+      Docker Java程序镜像制作
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      制作前的准备
+     </h2>
+     <ul>
+      <li>
+       jre：不需要完整的jdk，jre即可，到Oracle进行下载即可，
+       <a href="https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">
+        下载链接
+       </a>
+       ,根据自己的情况进行选择，这里选择jre-8u221-linux-x64.tar.gz，一般只能使用解压安装了，rpm的可以直接使用yum命令进行安装，但我们这里用不了
+      </li>
+      <li>
+       jar包：自己写好的程序的可执行jar，放到镜像中直接运行即可
+      </li>
+     </ul>
+     <h2 id="_2">
+      制作步骤
+     </h2>
+     <ul>
+      <li>
+       mkdir docker：创建一个制作镜像的工作目录，里面用于存放构建镜像需要的文件，如jre和jar包，还有镜像构建文件Dockfile
+      </li>
+      <li>
+       在目录下放入jar包和jre
+      </li>
+      <li>
+       生产Dockfile文件并进行编写，编写示例和说明如下,下面的操作环境是centos7
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># 创建镜像制作目录</span>
 mkdir docker
 <span class="nb">cd</span> docker
 
@@ -104,90 +91,101 @@ docker run --name seckill -p <span class="m">8080</span>:8080 seckill
 <span class="c1"># 查看当前seckill容器的输出，这里会打印显示Java的控制台输出内容</span>
 docker logs seckill
 </code></pre>
-    </div>
-    <p>
-     下面讲解下Dockfile文件的内容：
+     </div>
+     <p>
+      下面讲解下Dockfile文件的内容：
+     </p>
+     <ul>
+      <li>
+       FROM docker.io/jeanblanchard/alpine-glibc：docker的linux镜像有很多，比如Ubuntu、centos之类的，但他们的体积都比较大，单纯一个镜像的都是400M以上的，而其中的alpine镜像只用不到10M，非常的小巧，所以这里就选用它作为基础的构建镜像。但是alpine是基于MUSL libs（mini libc）的，而Java是基于GUN Standard C （glibc）library的，如果不做任何处理的话Java不能在其上运行，而在网上有大佬已经制造安装了glibc的alpine镜像，我们直接使用即可
+      </li>
+      <li>
+       ADD jre-8u221-linux-x64.tar.gz /usr/java/jdk：解压并添加jre压缩包到/usr/java/jdk目录下
+      </li>
+      <li>
+       ENV JAVA_HOME /usr/java/jdk/jre1.8.0_221、ENV PATH ${PATH}:${JAVA_HOME}/bin:这种Java环境变量，这里踩过一个坑，需要注意的是JAVA_HOME的路径设置，如果你的jre包的版本和我不一样话，需要进行修改，我这里解压后是jre1.8.0_221
+      </li>
+      <li>
+       COPY seckill-1.0-SNAPSHOT.jar /home/seckill-1.0-SNAPSHOT.jar：复制添加Java程序到指定目录
+      </li>
+      <li>
+       CMD java -jar /home/seckill-1.0-SNAPSHOT.jar：设置在容器运行后启动Java程序
+      </li>
+     </ul>
+     <p>
+      如果对docker不是太了解的话，可以查看下面的我制作过程中参考的链接
+     </p>
+     <h2 id="_3">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://blog.csdn.net/Dannyvon/article/details/80092834">
+        Alpine制作JDK8镜像的坑
+       </a>
+      </li>
+      <li>
+       <a href="https://www.infoq.cn/article/3-simple-tricks-for-smaller-docker-images">
+        三个技巧，将 Docker 镜像体积减小 90%
+       </a>
+      </li>
+      <li>
+       <a href="https://zhuanlan.zhihu.com/p/38552260">
+        Docker最佳实践：构建最小镜像
+       </a>
+      </li>
+      <li>
+       <a href="https://hub.docker.com/_/alpine/">
+        alpine
+       </a>
+      </li>
+      <li>
+       <a href="https://yeasy.gitbooks.io/docker_practice/image/build.html">
+        使用 Dockerfile 定制镜像
+       </a>
+      </li>
+      <li>
+       <a href="https://www.cnblogs.com/sparkdev/p/9573248.html">
+        Dockerfile 中的 COPY 与 ADD 命令
+       </a>
+      </li>
+      <li>
+       <a href="https://www.java.com/en/download/manual.jsp">
+        jre 下载
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/AaronSimon/article/details/82711629">
+        构建最小JDK Docker镜像
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <ul>
-     <li>
-      FROM docker.io/jeanblanchard/alpine-glibc：docker的linux镜像有很多，比如Ubuntu、centos之类的，但他们的体积都比较大，单纯一个镜像的都是400M以上的，而其中的alpine镜像只用不到10M，非常的小巧，所以这里就选用它作为基础的构建镜像。但是alpine是基于MUSL libs（mini libc）的，而Java是基于GUN Standard C （glibc）library的，如果不做任何处理的话Java不能在其上运行，而在网上有大佬已经制造安装了glibc的alpine镜像，我们直接使用即可
-     </li>
-     <li>
-      ADD jre-8u221-linux-x64.tar.gz /usr/java/jdk：解压并添加jre压缩包到/usr/java/jdk目录下
-     </li>
-     <li>
-      ENV JAVA_HOME /usr/java/jdk/jre1.8.0_221、ENV PATH ${PATH}:${JAVA_HOME}/bin:这种Java环境变量，这里踩过一个坑，需要注意的是JAVA_HOME的路径设置，如果你的jre包的版本和我不一样话，需要进行修改，我这里解压后是jre1.8.0_221
-     </li>
-     <li>
-      COPY seckill-1.0-SNAPSHOT.jar /home/seckill-1.0-SNAPSHOT.jar：复制添加Java程序到指定目录
-     </li>
-     <li>
-      CMD java -jar /home/seckill-1.0-SNAPSHOT.jar：设置在容器运行后启动Java程序
-     </li>
-    </ul>
-    <p>
-     如果对docker不是太了解的话，可以查看下面的我制作过程中参考的链接
-    </p>
-    <h2 id="_3">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://blog.csdn.net/Dannyvon/article/details/80092834">
-       Alpine制作JDK8镜像的坑
-      </a>
-     </li>
-     <li>
-      <a href="https://www.infoq.cn/article/3-simple-tricks-for-smaller-docker-images">
-       三个技巧，将 Docker 镜像体积减小 90%
-      </a>
-     </li>
-     <li>
-      <a href="https://zhuanlan.zhihu.com/p/38552260">
-       Docker最佳实践：构建最小镜像
-      </a>
-     </li>
-     <li>
-      <a href="https://hub.docker.com/_/alpine/">
-       alpine
-      </a>
-     </li>
-     <li>
-      <a href="https://yeasy.gitbooks.io/docker_practice/image/build.html">
-       使用 Dockerfile 定制镜像
-      </a>
-     </li>
-     <li>
-      <a href="https://www.cnblogs.com/sparkdev/p/9573248.html">
-       Dockerfile 中的 COPY 与 ADD 命令
-      </a>
-     </li>
-     <li>
-      <a href="https://www.java.com/en/download/manual.jsp">
-       jre 下载
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/AaronSimon/article/details/82711629">
-       构建最小JDK Docker镜像
-      </a>
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

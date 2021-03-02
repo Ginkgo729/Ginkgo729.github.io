@@ -24,37 +24,24 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="spring-cloud-gateway">
-     Spring Cloud Gateway 克隆配置
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     工程构建
-    </h2>
-    <p>
-     下载工程到本地
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># 先去github fork项目到自己的repo，然后克隆到自己本地</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-cloud-gateway">
+      Spring Cloud Gateway 克隆配置
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      工程构建
+     </h2>
+     <p>
+      下载工程到本地
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># 先去github fork项目到自己的repo，然后克隆到自己本地</span>
 git clone --depth<span class="o">=</span><span class="m">1</span> https://github.com/lw1243925457/spring-cloud-gateway.git
 
 <span class="c1"># 切换</span>
@@ -62,12 +49,12 @@ git clone --depth<span class="o">=</span><span class="m">1</span> https://github
 git fetch origin v2.2.6.RELEASE:v2.2.6.RELEASE
 git checkout v2.2.6.RELEASE
 </code></pre>
-    </div>
-    <p>
-     在依赖安装的时候（为了快速，使用的阿里云）可能会遇到依赖找不到的问题，如下面两个，解决方法指定 version，配置如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>&lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+     </div>
+     <p>
+      在依赖安装的时候（为了快速，使用的阿里云）可能会遇到依赖找不到的问题，如下面两个，解决方法指定 version，配置如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>&lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
 &lt;artifactId&gt;flatten-maven-plugin&lt;/artifactId&gt;
 &lt;version&gt;1.2.5&lt;/version&gt;
 
@@ -75,25 +62,36 @@ git checkout v2.2.6.RELEASE
 &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
 &lt;version&gt;1.4.30-M1&lt;/version&gt;
 </code></pre>
-    </div>
-    <p>
-     正常运行 spring-cloud-gateway-sample，正常访问网页：http://httpbin.org/
+     </div>
+     <p>
+      正常运行 spring-cloud-gateway-sample，正常访问网页：http://httpbin.org/
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

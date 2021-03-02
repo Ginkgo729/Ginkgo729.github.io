@@ -24,149 +24,136 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="soul">
-     Soul网关源码解析（五）请求类型探索
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简介
-    </h2>
-    <p>
-     在上几篇文章中分析了请求的处理流程，HTTP和RPC请求处理是互斥的，通过请求类型来判断，这篇文章来探索下请求类型的前世今生
-    </p>
-    <h2 id="_2">
-     源码分析
-    </h2>
-    <p>
-     通过前面的分析，通过请求类型判断是否进入这个plugin进行执行，大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="soul">
+      Soul网关源码解析（五）请求类型探索
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在上几篇文章中分析了请求的处理流程，HTTP和RPC请求处理是互斥的，通过请求类型来判断，这篇文章来探索下请求类型的前世今生
+     </p>
+     <h2 id="_2">
+      源码分析
+     </h2>
+     <p>
+      通过前面的分析，通过请求类型判断是否进入这个plugin进行执行，大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
         <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">soulContext</span><span class="p">).</span><span class="na">getRpcType</span><span class="p">(),</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="plugin-skip">
-     Plugin Skip 函数
-    </h3>
-    <p>
-     我们探索下那些plugin有实现skip函数
-    </p>
-    <p>
-     DividePlugin,判断是不是HTTP
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <h3 id="plugin-skip">
+      Plugin Skip 函数
+     </h3>
+     <p>
+      我们探索下那些plugin有实现skip函数
+     </p>
+     <p>
+      DividePlugin,判断是不是HTTP
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
         <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">soulContext</span><span class="p">).</span><span class="na">getRpcType</span><span class="p">(),</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
     <span class="p">}</span><span class="err">`</span>
 </code></pre>
-    </div>
-    <p>
-     WebClientPlugin,是HTTP或者SPRING_CLOUD
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      WebClientPlugin,是HTTP或者SPRING_CLOUD
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
         <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">())</span>
                 <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">SPRING_CLOUD</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">());</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     WebsocketPlugin,是WEB_SOCKET
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      WebsocketPlugin,是WEB_SOCKET
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">body</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
         <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">Objects</span><span class="p">.</span><span class="na">requireNonNull</span><span class="p">(</span><span class="n">body</span><span class="p">).</span><span class="na">getRpcType</span><span class="p">(),</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">WEB_SOCKET</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     AlibabaDubboPlugin,类型是DUBBO
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      AlibabaDubboPlugin,类型是DUBBO
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
         <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">(),</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">DUBBO</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     WebClientResponsePlugin，类型是HTTP或者SPRING_CLOUD
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      WebClientResponsePlugin，类型是HTTP或者SPRING_CLOUD
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
         <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">HTTP</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">())</span>
                 <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">SPRING_CLOUD</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">());</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     DubboResponsePlugin，类型是DUBBO
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      DubboResponsePlugin，类型是DUBBO
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Boolean</span> <span class="nf">skip</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
         <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
         <span class="k">return</span> <span class="o">!</span><span class="n">Objects</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">(),</span> <span class="n">RpcTypeEnum</span><span class="p">.</span><span class="na">DUBBO</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     两个类型看着有点怪，有时候转不过弯了，需要注意
-    </p>
-    <h3 id="_3">
-     源码追踪
-    </h3>
-    <p>
-     我们看下取类似相关的代码，大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
+     </div>
+     <p>
+      两个类型看着有点怪，有时候转不过弯了，需要注意
+     </p>
+     <h3 id="_3">
+      源码追踪
+     </h3>
+     <p>
+      我们看下取类似相关的代码，大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
 <span class="n">soulContext</span><span class="p">.</span><span class="na">getRpcType</span><span class="p">()</span>
 </code></pre>
-    </div>
-    <p>
-     看看将响应放到exchange中的代码，可以猜测到把Constants.CONTEXT放到exchange的大致代码：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CLIENT_RESPONSE_RESULT_TYPE</span><span class="p">,</span> <span class="n">ResultEnum</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+     </div>
+     <p>
+      看看将响应放到exchange中的代码，可以猜测到把Constants.CONTEXT放到exchange的大致代码：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CLIENT_RESPONSE_RESULT_TYPE</span><span class="p">,</span> <span class="n">ResultEnum</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
 
 <span class="c1">// 可以得到放Constants.CONTEXT的大致代码如下：</span>
 <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">,</span>
 </code></pre>
-    </div>
-    <p>
-     在IDEA中使用ctrl+shift+R，全局搜索，发现在 GlobalPlugin 中有嫌疑代码：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
+     </div>
+     <p>
+      在IDEA中使用ctrl+shift+R，全局搜索，发现在 GlobalPlugin 中有嫌疑代码：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
 
     <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
@@ -186,12 +173,12 @@
         <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     有两处嫌疑：build和transformMap，我们在看看build函数具体细节
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">DefaultSoulContextBuilder</span> <span class="nf">build</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span>
+     </div>
+     <p>
+      有两处嫌疑：build和transformMap，我们在看看build函数具体细节
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">DefaultSoulContextBuilder</span> <span class="nf">build</span><span class="p">(</span><span class="n">exchange</span><span class="p">)</span>
 
     <span class="kd">public</span> <span class="n">SoulContext</span> <span class="nf">build</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
@@ -239,12 +226,12 @@
         <span class="k">return</span> <span class="n">soulContext</span><span class="p">;</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     类型是从MetaData中取出来的，我们详细去看看类： MetaDataCache
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">MetaDataCache</span>
+     </div>
+     <p>
+      类型是从MetaData中取出来的，我们详细去看看类： MetaDataCache
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">MetaDataCache</span>
 
     <span class="c1">// 从Map中取出数据</span>
     <span class="kd">public</span> <span class="n">MetaData</span> <span class="nf">obtain</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">path</span><span class="p">)</span> <span class="p">{</span>
@@ -261,12 +248,12 @@
         <span class="n">META_DATA_MAP</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="na">getPath</span><span class="p">(),</span> <span class="n">data</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     在上面的 cache 函数打上端口，它应该是启动的时候初始化的，我们打上断点以后重启Bootstrap程序，调用栈的相关类和函数如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">MetaDataAllSubscriber</span> <span class="err">，</span><span class="n">再往上看</span>
+     </div>
+     <p>
+      在上面的 cache 函数打上端口，它应该是启动的时候初始化的，我们打上断点以后重启Bootstrap程序，调用栈的相关类和函数如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">MetaDataAllSubscriber</span> <span class="err">，</span><span class="n">再往上看</span>
     <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onSubscribe</span><span class="p">(</span><span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">MetaDataCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">cache</span><span class="p">(</span><span class="n">metaData</span><span class="p">);</span>
     <span class="p">}</span>
@@ -319,12 +306,12 @@
         <span class="n">handleResult</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     我们查看下 result 是个什么都行，内容大致如下（太长了，删了一些）：可以看到每个路径都有配置，并且都是RPCType这个属性，那我们基本就找到了，类型是客户端注册的时候自己传入的！
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="p">{</span>
+     </div>
+     <p>
+      我们查看下 result 是个什么都行，内容大致如下（太长了，删了一些）：可以看到每个路径都有配置，并且都是RPCType这个属性，那我们基本就找到了，类型是客户端注册的时候自己传入的！
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="p">{</span>
     <span class="nt">"groupType"</span><span class="p">:</span> <span class="s2">"META_DATA"</span><span class="p">,</span>
     <span class="nt">"eventType"</span><span class="p">:</span> <span class="s2">"REFRESH"</span><span class="p">,</span>
     <span class="nt">"data"</span><span class="p">:</span> <span class="p">[{</span>
@@ -349,12 +336,12 @@
     <span class="p">}]</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     看下另外一个transformMap，看看它的请求类型是怎么来的
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
+     </div>
+     <p>
+      看下另外一个transformMap，看看它的请求类型是怎么来的
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
 
     <span class="kd">private</span> <span class="n">SoulContext</span> <span class="nf">transformMap</span><span class="p">(</span><span class="kd">final</span> <span class="n">MultiValueMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">queryParams</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SoulContext</span><span class="p">();</span>
@@ -364,113 +351,113 @@
         <span class="k">return</span> <span class="n">soulContext</span><span class="p">;</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     queryParams是从 request 取得的，那应该不是初始化配置来的了，看看 GlobalPlugin 前面的类有没有对其进行处理了
-    </p>
-    <p>
-     通过前几篇，我们可以总结得到下面的处理链路经过的类
-    </p>
-    <ul>
-     <li>
-      HttpServerOperations : 明显的netty的请求接收的地方，请求入口
-     </li>
-     <li>
-      TcpServerBind
-     </li>
-     <li>
-      HttpServerHandle
-     </li>
-     <li>
-      ReactorHttpHandlerAdapter ：生成response和request
-     </li>
-     <li>
-      ReactiveWebServerApplicationContext
-     </li>
-     <li>
-      HttpWebHandlerAdapter ：exchange 的生成
-     </li>
-     <li>
-      ExceptionHandlingWebHandler
-     </li>
-     <li>
-      WebHandlerDecorator
-     </li>
-     <li>
-      FilteringWebHandler
-     </li>
-     <li>
-      DefaultWebFilterChain
-     </li>
-     <li>
-      MetricsWebFilter
-     </li>
-     <li>
-      HealthFilter
-     </li>
-     <li>
-      FileSizeFilter
-     </li>
-     <li>
-      WebSocketParamFilter
-     </li>
-     <li>
-      HiddenHttpMethodFilter
-     </li>
-     <li>
-      SoulWebHandler ：plugins调用链，后面带type的表明是需要去类型处理判断的
-     </li>
-     <li>
-      GlobalPlugin
-     </li>
-     <li>
-      SignPlugin
-     </li>
-     <li>
-      WafPlugin
-     </li>
-     <li>
-      RateLimiterPlugin
-     </li>
-     <li>
-      HystrixPlugin
-     </li>
-     <li>
-      Resilience4JPlugin
-     </li>
-     <li>
-      DividePlugin : type
-     </li>
-     <li>
-      WebClientPlugin : type
-     </li>
-     <li>
-      WebsocketPlugin : type
-     </li>
-     <li>
-      BodyParamPlugin
-     </li>
-     <li>
-      AlibabaDubblePlugin : type
-     </li>
-     <li>
-      MonitorPlugin
-     </li>
-     <li>
-      WebClientResponsePlugin : type
-     </li>
-     <li>
-      DubboResponsePlugin : type
-     </li>
-    </ul>
-    <p>
-     快捷没有思路，就一个一个看看（SoulWebHandler，也没多少），大概瞄了一眼，没有看到设置相关的代码，就头疼
-    </p>
-    <p>
-     在回去看看 GlobalPlugin，我们仔细看看判断，发现一个有趣的逻辑：判断为空或者不为websocket，那是不是下面那个就是websocket？
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
+     </div>
+     <p>
+      queryParams是从 request 取得的，那应该不是初始化配置来的了，看看 GlobalPlugin 前面的类有没有对其进行处理了
+     </p>
+     <p>
+      通过前几篇，我们可以总结得到下面的处理链路经过的类
+     </p>
+     <ul>
+      <li>
+       HttpServerOperations : 明显的netty的请求接收的地方，请求入口
+      </li>
+      <li>
+       TcpServerBind
+      </li>
+      <li>
+       HttpServerHandle
+      </li>
+      <li>
+       ReactorHttpHandlerAdapter ：生成response和request
+      </li>
+      <li>
+       ReactiveWebServerApplicationContext
+      </li>
+      <li>
+       HttpWebHandlerAdapter ：exchange 的生成
+      </li>
+      <li>
+       ExceptionHandlingWebHandler
+      </li>
+      <li>
+       WebHandlerDecorator
+      </li>
+      <li>
+       FilteringWebHandler
+      </li>
+      <li>
+       DefaultWebFilterChain
+      </li>
+      <li>
+       MetricsWebFilter
+      </li>
+      <li>
+       HealthFilter
+      </li>
+      <li>
+       FileSizeFilter
+      </li>
+      <li>
+       WebSocketParamFilter
+      </li>
+      <li>
+       HiddenHttpMethodFilter
+      </li>
+      <li>
+       SoulWebHandler ：plugins调用链，后面带type的表明是需要去类型处理判断的
+      </li>
+      <li>
+       GlobalPlugin
+      </li>
+      <li>
+       SignPlugin
+      </li>
+      <li>
+       WafPlugin
+      </li>
+      <li>
+       RateLimiterPlugin
+      </li>
+      <li>
+       HystrixPlugin
+      </li>
+      <li>
+       Resilience4JPlugin
+      </li>
+      <li>
+       DividePlugin : type
+      </li>
+      <li>
+       WebClientPlugin : type
+      </li>
+      <li>
+       WebsocketPlugin : type
+      </li>
+      <li>
+       BodyParamPlugin
+      </li>
+      <li>
+       AlibabaDubblePlugin : type
+      </li>
+      <li>
+       MonitorPlugin
+      </li>
+      <li>
+       WebClientResponsePlugin : type
+      </li>
+      <li>
+       DubboResponsePlugin : type
+      </li>
+     </ul>
+     <p>
+      快捷没有思路，就一个一个看看（SoulWebHandler，也没多少），大概瞄了一眼，没有看到设置相关的代码，就头疼
+     </p>
+     <p>
+      在回去看看 GlobalPlugin，我们仔细看看判断，发现一个有趣的逻辑：判断为空或者不为websocket，那是不是下面那个就是websocket？
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
     <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
         <span class="kd">final</span> <span class="n">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">();</span>
@@ -490,30 +477,30 @@
         <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     于是我们找个websocket测试一下，下面websocket的测试攻击和websocket的官方说明文档：
-    </p>
-    <ul>
-     <li>
-      <a href="http://www.easyswoole.com/wstool.html">
-       http://www.easyswoole.com/wstool.html
-      </a>
-     </li>
-     <li>
-      <a href="https://dromara.org/zh-cn/docs/soul/plugin-websocket.html">
-       Soul网关Websocket支持
-      </a>
-     </li>
-    </ul>
-    <p>
-     我们在ReactorHttpHandlerAdapter/HttpWebHandlerAdapter/DefaultWebFilterChain 这三个上面打上断点，进行逐步调试
-    </p>
-    <p>
-     断点来到 filter 的 WebSocketParamFilter ,看到了非常可疑的代码
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">WebSocketParamFilter</span>
+     </div>
+     <p>
+      于是我们找个websocket测试一下，下面websocket的测试攻击和websocket的官方说明文档：
+     </p>
+     <ul>
+      <li>
+       <a href="http://www.easyswoole.com/wstool.html">
+        http://www.easyswoole.com/wstool.html
+       </a>
+      </li>
+      <li>
+       <a href="https://dromara.org/zh-cn/docs/soul/plugin-websocket.html">
+        Soul网关Websocket支持
+       </a>
+      </li>
+     </ul>
+     <p>
+      我们在ReactorHttpHandlerAdapter/HttpWebHandlerAdapter/DefaultWebFilterChain 这三个上面打上断点，进行逐步调试
+     </p>
+     <p>
+      断点来到 filter 的 WebSocketParamFilter ,看到了非常可疑的代码
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">WebSocketParamFilter</span>
     <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span> <span class="nf">doFilter</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">WebFilterChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
         <span class="kd">final</span> <span class="n">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">();</span>
@@ -532,98 +519,109 @@
                 <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isBlank</span><span class="p">(</span><span class="n">queryParams</span><span class="p">.</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">RPC_TYPE</span><span class="p">));</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     通过上面的代码，我们基本可以判断，GlobalPlugin 的 transformMap(queryParams) 基本是 websocket 的，而 websocket 类似是随着客户端的请求传入的
+     </div>
+     <p>
+      通过上面的代码，我们基本可以判断，GlobalPlugin 的 transformMap(queryParams) 基本是 websocket 的，而 websocket 类似是随着客户端的请求传入的
+     </p>
+     <h2 id="_4">
+      总结
+     </h2>
+     <p>
+      梳理一下本篇文章的研究目标，大致如下图：
+     </p>
+     <p>
+      <img alt="" src="picture/soulRequestType.png"/>
+     </p>
+     <p>
+      我们知道了 GlobalPlugin 的具体作用就是将请求类型放入soulContext，那后面的 plugin 就能拿到数据的请求类型
+     </p>
+     <p>
+      还知道了网关初始化的时候获取路由时，路由的信息自带请求类型；而Websocket请求比较特殊，它从客户端传入就自带请求类型
+     </p>
+     <h2 id="soul_1">
+      Soul网关源码分析文章列表
+     </h2>
+     <h3 id="github">
+      Github
+     </h3>
+     <ul>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB1-%E6%A6%82%E8%A7%88.md">
+        Soul 源码阅读（一） 概览
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB2-%E5%88%9D%E6%AD%A5%E8%BF%90%E8%A1%8C.md">
+        Soul 源码阅读（二）代码初步运行
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB3-%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
+        Soul 源码阅读（三）HTTP请求处理概览
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB4-dubbo%E8%AF%B7%E6%B1%82%E6%A6%82%E8%A7%88.md">
+        Soul 网关源码阅读（四）Dubbo请求概览
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB5-%E8%AF%B7%E6%B1%82%E7%B1%BB%E5%9E%8B%E6%8E%A2%E7%B4%A2.md">
+        Soul网关源码阅读（五）请求类型探索
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB6-sofa%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
+        Soul 网关源码阅读（六）Sofa请求处理概览
+       </a>
+      </li>
+     </ul>
+     <h3 id="_5">
+      掘金
+     </h3>
+     <ul>
+      <li>
+       Soul 网关源码阅读（一） 概览 #掘金文章# https://juejin.cn/post/6917864624423436296
+      </li>
+      <li>
+       Soul 网关源码阅读（二）代码初步运行 #掘金文章# https://juejin.cn/post/6917865804121767944
+      </li>
+      <li>
+       Soul 网关源码阅读（三）请求处理概览 #掘金文章# https://juejin.cn/post/6917866538712334343
+      </li>
+      <li>
+       Soul 网关源码阅读（四）Dubbo请求概览 #掘金文章# https://juejin.cn/post/6917867369909977102
+      </li>
+      <li>
+       Soul网关源码阅读（五）请求类型探索 #掘金文章# https://juejin.cn/post/6918575905962983438
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <h2 id="_4">
-     总结
-    </h2>
-    <p>
-     梳理一下本篇文章的研究目标，大致如下图：
-    </p>
-    <p>
-     <img alt="" src="picture/soulRequestType.png"/>
-    </p>
-    <p>
-     我们知道了 GlobalPlugin 的具体作用就是将请求类型放入soulContext，那后面的 plugin 就能拿到数据的请求类型
-    </p>
-    <p>
-     还知道了网关初始化的时候获取路由时，路由的信息自带请求类型；而Websocket请求比较特殊，它从客户端传入就自带请求类型
-    </p>
-    <h2 id="soul_1">
-     Soul网关源码分析文章列表
-    </h2>
-    <h3 id="github">
-     Github
-    </h3>
-    <ul>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB1-%E6%A6%82%E8%A7%88.md">
-       Soul 源码阅读（一） 概览
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB2-%E5%88%9D%E6%AD%A5%E8%BF%90%E8%A1%8C.md">
-       Soul 源码阅读（二）代码初步运行
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB3-%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
-       Soul 源码阅读（三）HTTP请求处理概览
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB4-dubbo%E8%AF%B7%E6%B1%82%E6%A6%82%E8%A7%88.md">
-       Soul 网关源码阅读（四）Dubbo请求概览
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB5-%E8%AF%B7%E6%B1%82%E7%B1%BB%E5%9E%8B%E6%8E%A2%E7%B4%A2.md">
-       Soul网关源码阅读（五）请求类型探索
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB6-sofa%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
-       Soul 网关源码阅读（六）Sofa请求处理概览
-      </a>
-     </li>
-    </ul>
-    <h3 id="_5">
-     掘金
-    </h3>
-    <ul>
-     <li>
-      Soul 网关源码阅读（一） 概览 #掘金文章# https://juejin.cn/post/6917864624423436296
-     </li>
-     <li>
-      Soul 网关源码阅读（二）代码初步运行 #掘金文章# https://juejin.cn/post/6917865804121767944
-     </li>
-     <li>
-      Soul 网关源码阅读（三）请求处理概览 #掘金文章# https://juejin.cn/post/6917866538712334343
-     </li>
-     <li>
-      Soul 网关源码阅读（四）Dubbo请求概览 #掘金文章# https://juejin.cn/post/6917867369909977102
-     </li>
-     <li>
-      Soul网关源码阅读（五）请求类型探索 #掘金文章# https://juejin.cn/post/6918575905962983438
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

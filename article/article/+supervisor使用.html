@@ -24,51 +24,38 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="supervisor">
-     Supervisor 使用
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     功能
-    </h2>
-    <ul>
-     <li>
-      重启异常退出程序
-     </li>
-     <li>
-      便捷启动程序
-     </li>
-     <li>
-      自动管理程序日志，防止日志文件过大
-     </li>
-     <li>
-      提供网页管理方式
-     </li>
-    </ul>
-    <h2 id="_2">
-     使用方式
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code>yum -y install epel-release
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="supervisor">
+      Supervisor 使用
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      功能
+     </h2>
+     <ul>
+      <li>
+       重启异常退出程序
+      </li>
+      <li>
+       便捷启动程序
+      </li>
+      <li>
+       自动管理程序日志，防止日志文件过大
+      </li>
+      <li>
+       提供网页管理方式
+      </li>
+     </ul>
+     <h2 id="_2">
+      使用方式
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code>yum -y install epel-release
 yum install python-pip -y
 
 <span class="c1"># 安装</span>
@@ -92,12 +79,12 @@ start<span class="p">|</span>stop<span class="p">|</span>restart pcl_simulate
 <span class="c1"># 也可以通过网页操作</span>
 http://服务器地址:9001
 </code></pre>
-    </div>
-    <h2 id="_3">
-     配置说明
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code><span class="o">#</span> <span class="err">如果找不到配置文件，可以使用下面的命令进行生成</span>
+     </div>
+     <h2 id="_3">
+      配置说明
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">#</span> <span class="err">如果找不到配置文件，可以使用下面的命令进行生成</span>
 <span class="n">echo_supervisord_conf</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">supervisord</span><span class="p">.</span><span class="n">conf</span>
 
 <span class="o">#</span> <span class="err">配置文件</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">supervisord</span><span class="p">.</span><span class="n">conf</span><span class="err">，更多详细使用文件中有说明</span>
@@ -123,49 +110,60 @@ http://服务器地址:9001
 <span class="o">#</span> <span class="err">设置运行上面的</span><span class="n">command命令之前需要进入的文件夹目录</span>
 <span class="p">;</span><span class="n">directory</span><span class="o">=/</span><span class="n">tmp</span>                <span class="p">;</span> <span class="n">directory</span> <span class="k">to</span> <span class="n">cwd</span> <span class="k">to</span> <span class="k">before</span> <span class="k">exec</span> <span class="p">(</span><span class="n">def</span> <span class="k">no</span> <span class="n">cwd</span><span class="p">)</span>
 </code></pre>
-    </div>
-    <h2 id="_4">
-     开机自动重启设置
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code><span class="o">#</span> <span class="err">编辑</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">rc</span><span class="p">.</span><span class="k">local</span> <span class="err">文件</span>
+     </div>
+     <h2 id="_4">
+      开机自动重启设置
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">#</span> <span class="err">编辑</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">rc</span><span class="p">.</span><span class="k">local</span> <span class="err">文件</span>
 
 <span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">rc</span><span class="p">.</span><span class="k">local</span>
 
 <span class="o">#</span> <span class="err">在文件中加入下面的内容</span>
 <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">supervisord</span> <span class="o">-</span><span class="k">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">supervisord</span><span class="p">.</span><span class="n">conf</span>
 </code></pre>
-    </div>
-    <h2 id="_5">
-     多配置文件
-    </h2>
-    <p>
-     同include的机制，在最后开启include，并添加自己的配置文件路径，在自己的配置文件中只需要写program部分
+     </div>
+     <h2 id="_5">
+      多配置文件
+     </h2>
+     <p>
+      同include的机制，在最后开启include，并添加自己的配置文件路径，在自己的配置文件中只需要写program部分
+     </p>
+     <h2 id="_6">
+      问题
+     </h2>
+     <h3 id="python">
+      启动Python程序日志无输出问题
+     </h3>
+     <p>
+      在命令行后面加 -u 选项强制刷新输出缓存即可： python -u xxx.py
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <h2 id="_6">
-     问题
-    </h2>
-    <h3 id="python">
-     启动Python程序日志无输出问题
-    </h3>
-    <p>
-     在命令行后面加 -u 选项强制刷新输出缓存即可： python -u xxx.py
-    </p>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

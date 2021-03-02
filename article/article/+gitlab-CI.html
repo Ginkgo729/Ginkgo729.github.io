@@ -24,70 +24,57 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="gitlab-ci">
-     GitLab CI 部署
-    </h1>
-    <hr/>
-    <p>
-     <em>
-      部署环境 Centos7
-     </em>
-    </p>
-    <h2 id="_1">
-     安装
-    </h2>
-    <h3 id="gitlab-ci-multi-runner">
-     gitlab-ci-multi-runner
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.rpm.sh <span class="p">|</span> sudo bash
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="gitlab-ci">
+      GitLab CI 部署
+     </h1>
+     <hr/>
+     <p>
+      <em>
+       部署环境 Centos7
+      </em>
+     </p>
+     <h2 id="_1">
+      安装
+     </h2>
+     <h3 id="gitlab-ci-multi-runner">
+      gitlab-ci-multi-runner
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.rpm.sh <span class="p">|</span> sudo bash
 yum install gitlab-ci-multi-runner
 </code></pre>
-    </div>
-    <h3 id="token">
-     获取项目的地址、token
-    </h3>
-    <ul>
-     <li>
-      点进项目
-     </li>
-     <li>
-      Setting
-     </li>
-     <li>
-      CI/CD
-     </li>
-     <li>
-      runner
-     </li>
-     <li>
-      Set up a specific Runner manually
-     </li>
-    </ul>
-    <h3 id="token_1">
-     设置项目地址、token
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>gitlab-ci-multi-runner register
+     </div>
+     <h3 id="token">
+      获取项目的地址、token
+     </h3>
+     <ul>
+      <li>
+       点进项目
+      </li>
+      <li>
+       Setting
+      </li>
+      <li>
+       CI/CD
+      </li>
+      <li>
+       runner
+      </li>
+      <li>
+       Set up a specific Runner manually
+      </li>
+     </ul>
+     <h3 id="token_1">
+      设置项目地址、token
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>gitlab-ci-multi-runner register
 
 Please enter the gitlab-ci coordinator URL: gitlab地址
 Please enter the gitlab-ci token <span class="k">for</span> this runner: 项目的token
@@ -96,22 +83,22 @@ Please enter the gitlab-ci tags <span class="k">for</span> this runner <span cla
 Whether to run untagged builds <span class="o">[</span>true/false<span class="o">]</span>: 询问是否在未加标签的Build上运行 <span class="nb">true</span>
 Please enter the executor: 询问是否锁定最近项目  <span class="nb">true</span>
 </code></pre>
-    </div>
-    <h3 id="_2">
-     运行
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code>gitlab-runner restart <span class="p">|</span> start <span class="p">|</span> stop
+     </div>
+     <h3 id="_2">
+      运行
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>gitlab-runner restart <span class="p">|</span> start <span class="p">|</span> stop
 </code></pre>
-    </div>
-    <h2 id="_3">
-     项目配置
-    </h2>
-    <p>
-     在项目根目录下新建文件：.gitlab-ci.yml（gitlab会自动识别），填入下面的内容
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>stages:
+     </div>
+     <h2 id="_3">
+      项目配置
+     </h2>
+     <p>
+      在项目根目录下新建文件：.gitlab-ci.yml（gitlab会自动识别），填入下面的内容
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>stages:
   - deploy
 deploy:
   stage: deploy <span class="c1"># 对应stages的步骤</span>
@@ -125,96 +112,107 @@ deploy:
   tags:
     - master <span class="c1"># 触发标签为master的runner</span>
 </code></pre>
-    </div>
-    <h2 id="_4">
-     运行自动集成
-    </h2>
-    <p>
-     <em>
-      需要确保文件的权限正确，chown gitlab-runner:gitlab-runner /home/nssas/projects/Visual/target/ -R
-     </em>
-     代码进行提交即可进行自动集成
+     </div>
+     <h2 id="_4">
+      运行自动集成
+     </h2>
+     <p>
+      <em>
+       需要确保文件的权限正确，chown gitlab-runner:gitlab-runner /home/nssas/projects/Visual/target/ -R
+      </em>
+      代码进行提交即可进行自动集成
+     </p>
+     <h2 id="_5">
+      持续集成的步骤
+     </h2>
+     <ul>
+      <li>
+       复制主分支用于提交代码测试（CI的触发条件是提交代码，如果失败了那代码就处于异常状态，导致不能允许，当测试分支通过以后合并）
+      </li>
+      <li>
+       检查代码格式是不是符合规范（这个怎么运行这个检查？这种应该放到本地）,Alibaba Java Coding Guidelines
+      </li>
+      <li>
+       运行单元测试代码（测试覆盖率这个怎么搞？这种应该放到本地）
+      </li>
+      <li>
+       运行集成测试（脚本实现？复杂的测试放到集成服务器上）
+      </li>
+      <li>
+       <p>
+        部署上线流程（DevOps？生成Docker Image，对Image进行测试？）
+       </p>
+      </li>
+      <li>
+       <p>
+        如果保证测试唯一性，在测试不通过的时候不能提交代码？
+       </p>
+      </li>
+      <li>
+       GitLab有可视化的集成监视器吗？
+      </li>
+     </ul>
+     <h2 id="_6">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="http://blog.sciencenet.cn/blog-350278-743765.html">
+        Linux下递归改变目录及其子目录属性
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/u011215669/article/details/80446624">
+        超详细Gitlab Runner环境配置中文教程
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.im/entry/5ad8627d6fb9a045d639b043">
+        利用GitLab提供的GitLab-CI以及GitLab-Runner搭建持续集成/部署环境
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/2b43151fb92e">
+        GitLab-CI与GitLab-Runner
+       </a>
+      </li>
+      <li>
+       <a href="https://segmentfault.com/a/1190000007180257">
+        GitLab-CI 从安装到差点放弃
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/benpaodelulu_guajian/article/details/83822059">
+        Git gitlab私库clone地址
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <h2 id="_5">
-     持续集成的步骤
-    </h2>
-    <ul>
-     <li>
-      复制主分支用于提交代码测试（CI的触发条件是提交代码，如果失败了那代码就处于异常状态，导致不能允许，当测试分支通过以后合并）
-     </li>
-     <li>
-      检查代码格式是不是符合规范（这个怎么运行这个检查？这种应该放到本地）,Alibaba Java Coding Guidelines
-     </li>
-     <li>
-      运行单元测试代码（测试覆盖率这个怎么搞？这种应该放到本地）
-     </li>
-     <li>
-      运行集成测试（脚本实现？复杂的测试放到集成服务器上）
-     </li>
-     <li>
-      <p>
-       部署上线流程（DevOps？生成Docker Image，对Image进行测试？）
-      </p>
-     </li>
-     <li>
-      <p>
-       如果保证测试唯一性，在测试不通过的时候不能提交代码？
-      </p>
-     </li>
-     <li>
-      GitLab有可视化的集成监视器吗？
-     </li>
-    </ul>
-    <h2 id="_6">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="http://blog.sciencenet.cn/blog-350278-743765.html">
-       Linux下递归改变目录及其子目录属性
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/u011215669/article/details/80446624">
-       超详细Gitlab Runner环境配置中文教程
-      </a>
-     </li>
-     <li>
-      <a href="https://juejin.im/entry/5ad8627d6fb9a045d639b043">
-       利用GitLab提供的GitLab-CI以及GitLab-Runner搭建持续集成/部署环境
-      </a>
-     </li>
-     <li>
-      <a href="https://www.jianshu.com/p/2b43151fb92e">
-       GitLab-CI与GitLab-Runner
-      </a>
-     </li>
-     <li>
-      <a href="https://segmentfault.com/a/1190000007180257">
-       GitLab-CI 从安装到差点放弃
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/benpaodelulu_guajian/article/details/83822059">
-       Git gitlab私库clone地址
-      </a>
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

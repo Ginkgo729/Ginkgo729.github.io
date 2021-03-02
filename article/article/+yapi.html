@@ -24,58 +24,45 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="yapi">
-     yapi 安装配置
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     安装依赖
-    </h2>
-    <ul>
-     <li>
-      nodejs
-     </li>
-     <li>
-      git
-     </li>
-     <li>
-      MongoDB
-     </li>
-    </ul>
-    <div class="codehilite">
-     <pre><span></span><code>curl -sL https://rpm.nodesource.com/setup_10.x <span class="p">|</span> sudo bash -
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="yapi">
+      yapi 安装配置
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      安装依赖
+     </h2>
+     <ul>
+      <li>
+       nodejs
+      </li>
+      <li>
+       git
+      </li>
+      <li>
+       MongoDB
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code>curl -sL https://rpm.nodesource.com/setup_10.x <span class="p">|</span> sudo bash -
 yum install nodejs -y
 npm install pm2@latest -g
 </code></pre>
-    </div>
-    <div class="codehilite">
-     <pre><span></span><code>mkdir yapi <span class="o">&amp;&amp;</span> <span class="nb">cd</span> yapi
+     </div>
+     <div class="codehilite">
+      <pre><span></span><code>mkdir yapi <span class="o">&amp;&amp;</span> <span class="nb">cd</span> yapi
 git clone https://github.com/YMFE/yapi.git vendors --depth<span class="o">=</span><span class="m">1</span>
 cp vendors/config_example.json ./config.json
 vi ./config.json
 </code></pre>
-    </div>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">#</span> <span class="err">db.user</span> <span class="err">和</span> <span class="err">db.pass</span> <span class="err">是</span> <span class="err">mongodb</span> <span class="err">的用户名和密码，如果没有开启</span> <span class="err">mongo</span> <span class="err">认证功能，请删除这两个选项</span>
+     </div>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">#</span> <span class="err">db.user</span> <span class="err">和</span> <span class="err">db.pass</span> <span class="err">是</span> <span class="err">mongodb</span> <span class="err">的用户名和密码，如果没有开启</span> <span class="err">mongo</span> <span class="err">认证功能，请删除这两个选项</span>
 <span class="p">{</span>
   <span class="nt">"port"</span><span class="p">:</span> <span class="s2">"3011"</span><span class="p">,</span>
   <span class="nt">"adminAccount"</span><span class="p">:</span> <span class="s2">"admin@admin.com"</span><span class="p">,</span>
@@ -98,77 +85,88 @@ vi ./config.json
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <div class="codehilite">
-     <pre><span></span><code><span class="nb">cd</span> vendors
+     </div>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nb">cd</span> vendors
 npm install  --registry https://registry.npm.taobao.org
 pm2 start server/app.js
 </code></pre>
-    </div>
-    <h2 id="_2">
-     运行
-    </h2>
-    <ul>
-     <li>
-      /usr/local/node-v8.9.3-linux-x64/bin/pm2 start server/app.js
-     </li>
-    </ul>
-    <h2 id="_3">
-     访问
-    </h2>
-    <ul>
-     <li>
-      http://nssas.eelantech.com:40008/
-     </li>
-    </ul>
-    <h2 id="_4">
-     信息记录
-    </h2>
-    <ul>
-     <li>
-      初始化管理员账号成功,账号名："admin@admin.com"，密码："ymfe.org"
-     </li>
-    </ul>
-    <h2 id="_5">
-     使用说明
-    </h2>
-    <p>
-     <em>
-      登录时使用注册邮箱进行登录，所有请记住自己的邮箱
-     </em>
-     首先进行注册后联系管理员添加进相应的分组
+     </div>
+     <h2 id="_2">
+      运行
+     </h2>
+     <ul>
+      <li>
+       /usr/local/node-v8.9.3-linux-x64/bin/pm2 start server/app.js
+      </li>
+     </ul>
+     <h2 id="_3">
+      访问
+     </h2>
+     <ul>
+      <li>
+       http://nssas.eelantech.com:40008/
+      </li>
+     </ul>
+     <h2 id="_4">
+      信息记录
+     </h2>
+     <ul>
+      <li>
+       初始化管理员账号成功,账号名："admin@admin.com"，密码："ymfe.org"
+      </li>
+     </ul>
+     <h2 id="_5">
+      使用说明
+     </h2>
+     <p>
+      <em>
+       登录时使用注册邮箱进行登录，所有请记住自己的邮箱
+      </em>
+      首先进行注册后联系管理员添加进相应的分组
+     </p>
+     <h2 id="_6">
+      迁移说明
+     </h2>
+     <p>
+      迁移的时候只要复制MongoDB的中yapi数据库到新迁移环境中的MongoDB中即可
+     </p>
+     <h2 id="_7">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://yapi.ymfe.org/documents/redev.html">
+        安装YApi
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <h2 id="_6">
-     迁移说明
-    </h2>
-    <p>
-     迁移的时候只要复制MongoDB的中yapi数据库到新迁移环境中的MongoDB中即可
-    </p>
-    <h2 id="_7">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://yapi.ymfe.org/documents/redev.html">
-       安装YApi
-      </a>
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

@@ -24,45 +24,32 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="redis-cluster">
-     Redis Cluster 配置
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简介
-    </h2>
-    <p>
-     在 Centos8 上部署 redis Cluster
-    </p>
-    <p>
-     <em>
-      这里就写一个大概，比较好的，可以参考后面的链接，进行更详细，完整的设置
-     </em>
-    </p>
-    <h3 id="_2">
-     配置详情与记录
-    </h3>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># 安装</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="redis-cluster">
+      Redis Cluster 配置
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在 Centos8 上部署 redis Cluster
+     </p>
+     <p>
+      <em>
+       这里就写一个大概，比较好的，可以参考后面的链接，进行更详细，完整的设置
+      </em>
+     </p>
+     <h3 id="_2">
+      配置详情与记录
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># 安装</span>
 dnf module install redis -y
 
 <span class="c1"># 修改配置文件</span>
@@ -87,37 +74,48 @@ redis-cli -h <span class="m">192</span>.168.101.105 -p <span class="m">6379</spa
 redis-cli -h <span class="m">192</span>.168.101.105 -p <span class="m">6379</span> cluster nodes  <span class="p">|</span> grep master
 redis-cli -h <span class="m">192</span>.168.101.105 -p <span class="m">6379</span> cluster nodes  <span class="p">|</span> grep slave
 </code></pre>
-    </div>
-    <h2 id="_3">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://blog.csdn.net/baidu_27627251/article/details/112143714">
-       Windows下部署redis主从、哨兵（sentinel）、集群（cluster）
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/Johar77/JAVA-000/tree/main/Week_12">
-       配置 redis 的主从复制，sentinel 高可用，Cluster 集群
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_3">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://blog.csdn.net/baidu_27627251/article/details/112143714">
+        Windows下部署redis主从、哨兵（sentinel）、集群（cluster）
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/Johar77/JAVA-000/tree/main/Week_12">
+        配置 redis 的主从复制，sentinel 高可用，Cluster 集群
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

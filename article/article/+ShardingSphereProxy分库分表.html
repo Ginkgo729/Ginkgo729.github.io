@@ -24,70 +24,57 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="sharding-sphere-proxy">
-     Sharding-Sphere Proxy 分库分表 简单示例
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简要说明
-    </h2>
-    <p>
-     对一张简单的订单表数据表进行水平分库分表，拆分2个库，每个库16张表并在新结构在演示常见的增删改查操作
-    </p>
-    <h3 id="_2">
-     环境配置
-    </h3>
-    <h4 id="mysql">
-     设置MySQL
-    </h4>
-    <p>
-     使用docker设置mysql
-    </p>
-    <p>
-     ```shell script
-    </p>
-    <h1 id="mysql_1">
-     启动两个mysql
-    </h1>
-    <p>
-     docker run --name mysql11 -p 3311:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_ROOT_HOST=% -d mysql:latest
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="sharding-sphere-proxy">
+      Sharding-Sphere Proxy 分库分表 简单示例
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简要说明
+     </h2>
+     <p>
+      对一张简单的订单表数据表进行水平分库分表，拆分2个库，每个库16张表并在新结构在演示常见的增删改查操作
+     </p>
+     <h3 id="_2">
+      环境配置
+     </h3>
+     <h4 id="mysql">
+      设置MySQL
+     </h4>
+     <p>
+      使用docker设置mysql
+     </p>
+     <p>
+      ```shell script
+     </p>
+     <h1 id="mysql_1">
+      启动两个mysql
+     </h1>
+     <p>
+      docker run --name mysql11 -p 3311:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_ROOT_HOST=% -d mysql:latest
 docker run --name mysql12 -p 3312:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_ROOT_HOST=% -d mysql:latest
-    </p>
-    <h1 id="11demo_ds_0">
-     在11上创建数据库demo_ds_0
-    </h1>
-    <p>
-     docker exec -ti mysql11 mysql -u root -p
+     </p>
+     <h1 id="11demo_ds_0">
+      在11上创建数据库demo_ds_0
+     </h1>
+     <p>
+      docker exec -ti mysql11 mysql -u root -p
 create database demo_ds_0;
-    </p>
-    <h1 id="12demo_ds_1">
-     在12上创建数据库demo_ds_1
-    </h1>
-    <p>
-     docker exec -ti mysql11 mysql -u root -p
+     </p>
+     <h1 id="12demo_ds_1">
+      在12上创建数据库demo_ds_1
+     </h1>
+     <p>
+      docker exec -ti mysql11 mysql -u root -p
 create database demo_ds_1;
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="o">####</span> <span class="n">ShardingSphere</span><span class="o">-</span><span class="n">Proxy</span> <span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="n">alpha</span> <span class="err">设置</span>
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">####</span> <span class="n">ShardingSphere</span><span class="o">-</span><span class="n">Proxy</span> <span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="n">alpha</span> <span class="err">设置</span>
 <span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">docker一直不能设置成功</span><span class="err">，有点奇怪，这里就直接下载使用了</span>
 
 <span class="o">-</span> <span class="mi">1</span><span class="p">.</span><span class="err">下载</span><span class="p">[</span><span class="n">ShardingSphere</span><span class="o">-</span><span class="n">Proxy</span><span class="p">](</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="p">.</span><span class="n">apache</span><span class="p">.</span><span class="n">org</span><span class="o">/</span><span class="n">dyn</span><span class="o">/</span><span class="n">closer</span><span class="p">.</span><span class="n">cgi</span><span class="o">/</span><span class="n">shardingsphere</span><span class="o">/</span><span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="n">apache</span><span class="o">-</span><span class="n">shardingsphere</span><span class="o">-</span><span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="o">-</span><span class="n">alpha</span><span class="o">-</span><span class="n">shardingsphere</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">bin</span><span class="p">.</span><span class="n">tar</span><span class="p">.</span><span class="n">gz</span><span class="p">)</span><span class="err">，下载完成后放到自己相应的目录下</span>
@@ -156,12 +143,12 @@ create database demo_ds_1;
   <span class="k">sql</span><span class="o">-</span><span class="k">show</span><span class="p">:</span> <span class="k">true</span>
   <span class="k">check</span><span class="o">-</span><span class="k">table</span><span class="o">-</span><span class="n">metadata</span><span class="o">-</span><span class="n">enabled</span><span class="p">:</span> <span class="k">false</span>
 </code></pre>
-    </div>
-    <p>
-     config-sharding.yaml
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1">######################################################################################################</span>
+     </div>
+     <p>
+      config-sharding.yaml
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1">######################################################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># If you want to connect to MySQL, you should manually copy MySQL driver to lib directory.</span>
 <span class="c1">#</span>
@@ -235,21 +222,21 @@ create database demo_ds_1;
 <span class="c1">#      props:</span>
 <span class="c1">#        worker-id: 123</span>
 </code></pre>
-    </div>
-    <p>
-     OK，一切准备就绪，直接进入sharding的根目录下的bin目录中运行：start.bat即可（也可以在命令行中运行）
-    </p>
-    <p>
-     ```shell script
-    </p>
-    <h1 id="_3">
-     使用命令行运行可以指定运行端口
-    </h1>
-    <p>
-     ./start.bat 13306
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">成功以后刷刷刷的一排日志打出，没有错误就说明可以运行了</span>
+     </div>
+     <p>
+      OK，一切准备就绪，直接进入sharding的根目录下的bin目录中运行：start.bat即可（也可以在命令行中运行）
+     </p>
+     <p>
+      ```shell script
+     </p>
+     <h1 id="_3">
+      使用命令行运行可以指定运行端口
+     </h1>
+     <p>
+      ./start.bat 13306
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">成功以后刷刷刷的一排日志打出，没有错误就说明可以运行了</span>
 
 <span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">使用</span><span class="n">mysql命令或者mysqlworkbench连接上sharding</span><span class="err">，运行下面的</span><span class="n">SQL语句生成测试的表</span><span class="err">，运行成功看到日志中一大批</span><span class="n">SQL语句</span><span class="err">，</span>
 
@@ -260,15 +247,15 @@ create database demo_ds_1;
 <span class="ss">    PRIMARY KEY (`</span><span class="n">order_id</span><span class="o">`</span><span class="p">)</span>
 <span class="p">)</span> <span class="kp">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span> <span class="kp">AUTO_INCREMENT</span><span class="o">=</span><span class="mi">1</span> <span class="k">DEFAULT</span> <span class="kp">CHARSET</span><span class="o">=</span><span class="n">latin1</span><span class="p">;</span>
 </code></pre>
-    </div>
-    <h3 id="springboot-mybatis">
-     SpringBoot Mybatis配置
-    </h3>
-    <p>
-     需要修改数据库连接配置，大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c"># mybatis的config文件位置配置</span>
+     </div>
+     <h3 id="springboot-mybatis">
+      SpringBoot Mybatis配置
+     </h3>
+     <p>
+      需要修改数据库连接配置，大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c"># mybatis的config文件位置配置</span>
 <span class="na">mybatis.config-location</span><span class="o">=</span><span class="s">classpath:mybatis/mybatis-config.xml</span>
 <span class="c"># 各个表的xml文件位置配置</span>
 <span class="na">mybatis.mapper-locations</span><span class="o">=</span><span class="s">classpath:mybatis/mapper/*.xml</span>
@@ -281,19 +268,19 @@ create database demo_ds_1;
 <span class="na">spring.datasource.password</span><span class="o">=</span><span class="s">root</span>
 <span class="na">spring.datasource.driver-class-name</span><span class="o">=</span><span class="s">com.mysql.cj.jdbc.Driver</span>
 </code></pre>
-    </div>
-    <p>
-     实体类、Mapper设置这里就不详细赘述了，看
-     <a href="https://github.com/lw1243925457/JAVA-000/tree/main/homework/week0802/">
-      GitHub上的工程
-     </a>
-     即可
-    </p>
-    <p>
-     测试类进行测试，代码如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kn">package</span> <span class="nn">week0802.week0802.mappers</span><span class="p">;</span>
+     </div>
+     <p>
+      实体类、Mapper设置这里就不详细赘述了，看
+      <a href="https://github.com/lw1243925457/JAVA-000/tree/main/homework/week0802/">
+       GitHub上的工程
+      </a>
+      即可
+     </p>
+     <p>
+      测试类进行测试，代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">package</span> <span class="nn">week0802.week0802.mappers</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">com.zaxxer.hikari.HikariDataSource</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.junit.jupiter.api.Test</span><span class="p">;</span>
@@ -363,22 +350,33 @@ create database demo_ds_1;
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-   </article>
+     </div>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

@@ -24,80 +24,67 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="mysql-docker">
-     Mysql Docker 主从配置
-    </h1>
-    <hr/>
-    <p>
-     <em>
-      操作系统：Windows10 使用的MySQL8.0的docker镜像
-     </em>
-    </p>
-    <h2 id="_1">
-     总览
-    </h2>
-    <h3 id="_2">
-     前置环境说明
-    </h3>
-    <p>
-     首先在系统中起了一个MySQL8.0的docker镜像，并在其中插入了初始数据，容器名就叫mysql（视为主库），从库在主从分离前还没有启动
-    </p>
-    <p>
-     操作日志如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># 拉取MySQL8.0版本镜像并启动，监听在3306端口，设置root用户密码为root</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="mysql-docker">
+      Mysql Docker 主从配置
+     </h1>
+     <hr/>
+     <p>
+      <em>
+       操作系统：Windows10 使用的MySQL8.0的docker镜像
+      </em>
+     </p>
+     <h2 id="_1">
+      总览
+     </h2>
+     <h3 id="_2">
+      前置环境说明
+     </h3>
+     <p>
+      首先在系统中起了一个MySQL8.0的docker镜像，并在其中插入了初始数据，容器名就叫mysql（视为主库），从库在主从分离前还没有启动
+     </p>
+     <p>
+      操作日志如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># 拉取MySQL8.0版本镜像并启动，监听在3306端口，设置root用户密码为root</span>
 docker run --name mysql -p <span class="m">3306</span>:3306 -e <span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>root -e <span class="nv">MYSQL_ROOT_HOST</span><span class="o">=</span>% -d mysql:latest
 </code></pre>
-    </div>
-    <p>
-     其中使用了脚本，自动生成了表和插入数据，下面有脚本链接，可进行点击查看：
-    </p>
-    <ul>
-     <li>
-      <a href="https://github.com/lw1243925457/JAVA-000/blob/main/Week_06/init.sql">
-       数据库表初始化脚本
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/JAVA-000/blob/main/Week_06/fillData1.0.sql">
-       数据库数据插入初始化脚本
-      </a>
-     </li>
-    </ul>
-    <h3 id="_3">
-     数据导入导出
-    </h3>
-    <p>
-     这里不使用脚本对从库进行初始化，而是从主库中导出数据，导入到从库中
-    </p>
-    <p>
-     注意：如果主库有在使用，需要停掉相关的使用程序，或者对主库进行加锁
-    </p>
-    <p>
-     操作日志如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># 首先从主库中备份数据到本地（在sh中提前进入准备好的目录）</span>
+     </div>
+     <p>
+      其中使用了脚本，自动生成了表和插入数据，下面有脚本链接，可进行点击查看：
+     </p>
+     <ul>
+      <li>
+       <a href="https://github.com/lw1243925457/JAVA-000/blob/main/Week_06/init.sql">
+        数据库表初始化脚本
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/JAVA-000/blob/main/Week_06/fillData1.0.sql">
+        数据库数据插入初始化脚本
+       </a>
+      </li>
+     </ul>
+     <h3 id="_3">
+      数据导入导出
+     </h3>
+     <p>
+      这里不使用脚本对从库进行初始化，而是从主库中导出数据，导入到从库中
+     </p>
+     <p>
+      注意：如果主库有在使用，需要停掉相关的使用程序，或者对主库进行加锁
+     </p>
+     <p>
+      操作日志如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># 首先从主库中备份数据到本地（在sh中提前进入准备好的目录）</span>
 docker <span class="nb">exec</span> mysql /usr/bin/mysqldump -u root --password<span class="o">=</span>root <span class="nb">test</span> &gt; backup.sql
 
 <span class="c1"># 运行一个新的mysql，作为从库</span>
@@ -114,15 +101,15 @@ create database test<span class="p">;</span>
 <span class="c1"># Ctrl-D退出，执行下面的命令导入数据到新开的mysql中，这个需要花费好几分钟，请耐心等待；当然也可以docker cp backup.sql文件到容器中，然后连上数据库使用source backup.sql</span>
 cat backup.sql <span class="p">|</span> docker <span class="nb">exec</span> -i mysql_bk1 /usr/bin/mysql -u root --password<span class="o">=</span>root <span class="nb">test</span>
 </code></pre>
-    </div>
-    <h3 id="_4">
-     主库设置
-    </h3>
-    <p>
-     首先在本地编写配置文件，这里使用的配置文件如下，根据情况进行修改即可：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.</span>
+     </div>
+     <h3 id="_4">
+      主库设置
+     </h3>
+     <p>
+      首先在本地编写配置文件，这里使用的配置文件如下，根据情况进行修改即可：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># This program is free software; you can redistribute it and/or modify</span>
 <span class="c1"># it under the terms of the GNU General Public License as published by</span>
@@ -172,12 +159,12 @@ log-slave-updates
 <span class="c1">#将函数复制到slave  </span>
 <span class="nv">log_bin_trust_function_creators</span> <span class="o">=</span> <span class="m">1</span>    
 </code></pre>
-    </div>
-    <p>
-     操作日志如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># 将宿主机本地的配置文件复制替换MySQL的配置文件，并重启mysql</span>
+     </div>
+     <p>
+      操作日志如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># 将宿主机本地的配置文件复制替换MySQL的配置文件，并重启mysql</span>
 docker cp .<span class="se">\m</span>ysql_master.conf mysql:/etc/mysql/my.cnf
 docker restart mysql
 
@@ -193,15 +180,15 @@ show master status<span class="se">\G</span><span class="p">;</span>
 Executed_Gtid_Set:
 <span class="m">1</span> row in <span class="nb">set</span> <span class="o">(</span><span class="m">0</span>.00 sec<span class="o">)</span>
 </code></pre>
-    </div>
-    <h3 id="_5">
-     从库设置
-    </h3>
-    <p>
-     首先在本地编写配置文件，这里使用的配置文件链接如下，根据情况进行修改即可：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.</span>
+     </div>
+     <h3 id="_5">
+      从库设置
+     </h3>
+     <p>
+      首先在本地编写配置文件，这里使用的配置文件链接如下，根据情况进行修改即可：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># This program is free software; you can redistribute it and/or modify</span>
 <span class="c1"># it under the terms of the GNU General Public License as published by</span>
@@ -249,12 +236,12 @@ log-slave-updates
 slave-net-timeout <span class="o">=</span> <span class="m">60</span>                    
 <span class="nv">log_bin_trust_function_creators</span> <span class="o">=</span> <span class="m">1</span>
 </code></pre>
-    </div>
-    <p>
-     操作日志如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="c1"># 将宿主机本地的配置文件复制替换MySQL的配置文件，并重启mysql</span>
+     </div>
+     <p>
+      操作日志如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># 将宿主机本地的配置文件复制替换MySQL的配置文件，并重启mysql</span>
 docker cp .<span class="se">\m</span>ysql_slave1.conf mysql_bk1:/etc/mysql/my.cnf
 docker restart mysql_bk1
 
@@ -338,62 +325,73 @@ Master_SSL_Verify_Server_Cert: No
             Network_Namespace:
 <span class="m">1</span> row in set, <span class="m">1</span> warning <span class="o">(</span><span class="m">0</span>.01 sec<span class="o">)</span>
 </code></pre>
-    </div>
-    <p>
-     另外一个从库，配置和上面的命令完全一样，只是将mysql_bk1换成mysql_bk2即可
-    </p>
-    <h3 id="_6">
-     主从测试
-    </h3>
-    <p>
-     进入到主库中，插入一条数据，在从库中查询可以看到即可
-    </p>
-    <p>
-     操作日志如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>docker <span class="nb">exec</span> -ti mysql mysql -u root -p
+     </div>
+     <p>
+      另外一个从库，配置和上面的命令完全一样，只是将mysql_bk1换成mysql_bk2即可
+     </p>
+     <h3 id="_6">
+      主从测试
+     </h3>
+     <p>
+      进入到主库中，插入一条数据，在从库中查询可以看到即可
+     </p>
+     <p>
+      操作日志如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>docker <span class="nb">exec</span> -ti mysql mysql -u root -p
 insert into stores <span class="o">(</span>name, description<span class="o">)</span> VALUES <span class="o">(</span><span class="s2">"name103"</span>, <span class="s2">"description103"</span><span class="o">)</span><span class="p">;</span>
 
 docker <span class="nb">exec</span> -ti mysql mysql_bk1 -u root -p
 <span class="k">select</span> * from stores<span class="p">;</span>
 </code></pre>
-    </div>
-    <h2 id="_7">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://www.cnblogs.com/summertime-wu/p/11637520.html">
-       Mysql 主从复制搭建-极简版
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/u013068184/article/details/107691389">
-       MySQL8.0主从复制的配置
-      </a>
-     </li>
-     <li>
-      <a href="https://www.jianshu.com/p/b0cf461451fb">
-       MySQL主从配置详解
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_7">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://www.cnblogs.com/summertime-wu/p/11637520.html">
+        Mysql 主从复制搭建-极简版
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/u013068184/article/details/107691389">
+        MySQL8.0主从复制的配置
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/b0cf461451fb">
+        MySQL主从配置详解
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

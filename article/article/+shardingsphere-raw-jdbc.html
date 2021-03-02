@@ -24,75 +24,62 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shardingsphere-raw-jdbc">
+      ShardingSphere Raw JDBC 主从示例
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      总览
+     </h2>
+     <p>
+      这个示例不结合ORM之类的，直接执行SQL语句。通过写两个简单的文件就可以了，大致的步骤如下：
+     </p>
+     <ul>
+      <li>
+       1.配置Maven依赖
+      </li>
+      <li>
+       2.配置文件写入相关配置
+      </li>
+      <li>
+       3.获取DataSource类编写
+      </li>
+      <li>
+       4.测试
+      </li>
+     </ul>
+     <h3 id="maven">
+      配置Maven依赖
+     </h3>
+     <p>
+      其主要依赖如下，还有一些spring、mysql的依赖，总的Maven文件链接在这：
+      <a href="">
+       pom.xml
       </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="shardingsphere-raw-jdbc">
-     ShardingSphere Raw JDBC 主从示例
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     总览
-    </h2>
-    <p>
-     这个示例不结合ORM之类的，直接执行SQL语句。通过写两个简单的文件就可以了，大致的步骤如下：
-    </p>
-    <ul>
-     <li>
-      1.配置Maven依赖
-     </li>
-     <li>
-      2.配置文件写入相关配置
-     </li>
-     <li>
-      3.获取DataSource类编写
-     </li>
-     <li>
-      4.测试
-     </li>
-    </ul>
-    <h3 id="maven">
-     配置Maven依赖
-    </h3>
-    <p>
-     其主要依赖如下，还有一些spring、mysql的依赖，总的Maven文件链接在这：
-     <a href="">
-      pom.xml
-     </a>
-     ，自定查找添加吧
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="o">&lt;</span><span class="n">dependency</span><span class="o">&gt;</span>
+      ，自定查找添加吧
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">&lt;</span><span class="n">dependency</span><span class="o">&gt;</span>
     <span class="o">&lt;</span><span class="n">groupId</span><span class="o">&gt;</span><span class="n">org</span><span class="p">.</span><span class="na">apache</span><span class="p">.</span><span class="na">shardingsphere</span><span class="o">&lt;/</span><span class="n">groupId</span><span class="o">&gt;</span>
     <span class="o">&lt;</span><span class="n">artifactId</span><span class="o">&gt;</span><span class="n">shardingsphere</span><span class="o">-</span><span class="n">jdbc</span><span class="o">-</span><span class="n">core</span><span class="o">&lt;/</span><span class="n">artifactId</span><span class="o">&gt;</span>
     <span class="o">&lt;</span><span class="n">version</span><span class="o">&gt;</span><span class="mf">5.0.0</span><span class="o">-</span><span class="n">alpha</span><span class="o">&lt;/</span><span class="n">version</span><span class="o">&gt;</span>
 <span class="o">&lt;/</span><span class="n">dependency</span><span class="o">&gt;</span>
 </code></pre>
-    </div>
-    <h3 id="applicationproperties">
-     application.properties文件写入
-    </h3>
-    <p>
-     写入主从库的相关配置
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">#</span> <span class="n">读写分离</span> <span class="o">-</span> <span class="n">数据库框架版本</span> <span class="mf">2.0</span> <span class="n">ShardingSphere</span><span class="o">-</span><span class="n">jdbc</span> <span class="mf">5.0.0</span><span class="o">-</span><span class="n">alpha</span>
+     </div>
+     <h3 id="applicationproperties">
+      application.properties文件写入
+     </h3>
+     <p>
+      写入主从库的相关配置
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">#</span> <span class="n">读写分离</span> <span class="o">-</span> <span class="n">数据库框架版本</span> <span class="mf">2.0</span> <span class="n">ShardingSphere</span><span class="o">-</span><span class="n">jdbc</span> <span class="mf">5.0.0</span><span class="o">-</span><span class="n">alpha</span>
 <span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">names</span><span class="o">=</span><span class="n">master</span><span class="p">,</span><span class="n">slave0</span><span class="p">,</span><span class="n">slave1</span>
 
 <span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">master</span><span class="p">.</span><span class="na">driver</span><span class="o">-</span><span class="n">class</span><span class="o">-</span><span class="n">name</span><span class="o">=</span><span class="n">com</span><span class="p">.</span><span class="na">mysql</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">Driver</span>
@@ -115,15 +102,15 @@
 <span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">slave1</span><span class="p">.</span><span class="na">username</span><span class="o">=</span><span class="n">root</span>
 <span class="n">sharding</span><span class="p">.</span><span class="na">jdbc</span><span class="p">.</span><span class="na">datasource</span><span class="p">.</span><span class="na">ds</span><span class="o">-</span><span class="n">slave1</span><span class="p">.</span><span class="na">password</span><span class="o">=</span><span class="n">root</span>
 </code></pre>
-    </div>
-    <h3 id="shardingmasterslavedatasource">
-     ShardingMasterSlaveDataSource编写
-    </h3>
-    <p>
-     这里默认使用HikariDataSource,思路主要是生成各个主从库的链接，放到Sharding中，代码中也有说明，总体比较简单：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo.shardingsphere.raw.jdbc</span><span class="p">;</span>
+     </div>
+     <h3 id="shardingmasterslavedatasource">
+      ShardingMasterSlaveDataSource编写
+     </h3>
+     <p>
+      这里默认使用HikariDataSource,思路主要是生成各个主从库的链接，放到Sharding中，代码中也有说明，总体比较简单：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo.shardingsphere.raw.jdbc</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">com.zaxxer.hikari.HikariDataSource</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">io.shardingsphere.api.config.MasterSlaveRuleConfiguration</span><span class="p">;</span>
@@ -199,15 +186,15 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="_2">
-     测试
-    </h3>
-    <p>
-     直接生写SQL了，就不结合ORM之类的了，这里是通过日志看出是否生效的，日志大致如下
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">Rule</span> <span class="n">Type</span><span class="p">:</span> <span class="n">master</span><span class="o">-</span><span class="n">slave</span>
+     </div>
+     <h3 id="_2">
+      测试
+     </h3>
+     <p>
+      直接生写SQL了，就不结合ORM之类的了，这里是通过日志看出是否生效的，日志大致如下
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">Rule</span> <span class="n">Type</span><span class="p">:</span> <span class="n">master</span><span class="o">-</span><span class="n">slave</span>
 <span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">SQL</span><span class="p">:</span> <span class="n">select</span> <span class="o">*</span> <span class="n">from</span> <span class="n">stores</span> <span class="n">limit</span> <span class="mi">5</span> <span class="p">:::</span> <span class="n">DataSources</span><span class="p">:</span> <span class="n">slave0</span>
 <span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">Rule</span> <span class="n">Type</span><span class="p">:</span> <span class="n">master</span><span class="o">-</span><span class="n">slave</span>
 <span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">SQL</span><span class="p">:</span> <span class="n">select</span> <span class="o">*</span> <span class="n">from</span> <span class="n">stores</span> <span class="n">limit</span> <span class="mi">5</span> <span class="p">:::</span> <span class="n">DataSources</span><span class="p">:</span> <span class="n">slave1</span>
@@ -216,12 +203,12 @@
 <span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">Rule</span> <span class="n">Type</span><span class="p">:</span> <span class="n">master</span><span class="o">-</span><span class="n">slave</span>
 <span class="n">Sharding</span><span class="o">-</span><span class="n">Sphere</span><span class="o">-</span><span class="n">SQL</span>                      <span class="p">:</span> <span class="n">SQL</span><span class="p">:</span> <span class="n">select</span> <span class="o">*</span> <span class="n">from</span> <span class="n">stores</span> <span class="n">limit</span> <span class="mi">5</span> <span class="p">:::</span> <span class="n">DataSources</span><span class="p">:</span> <span class="n">master</span>
 </code></pre>
-    </div>
-    <p>
-     代码如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo.shardingsphere.raw.jdbc</span><span class="p">;</span>
+     </div>
+     <p>
+      代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo.shardingsphere.raw.jdbc</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.junit.jupiter.api.Test</span><span class="p">;</span>
@@ -267,22 +254,33 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-   </article>
+     </div>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

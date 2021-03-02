@@ -24,71 +24,58 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="springcloudgateway">
+      SpringCloudGateway(一) 概览
+     </h1>
+     <hr/>
+     <h3 id="spring-cloud-gateway">
+      Spring Cloud Gateway 的数据流图
+     </h3>
+     <p>
+      通读了两遍官方文档：
+      <a href="https://docs.spring.io/spring-cloud-gateway/docs/2.2.6.RELEASE/reference/html/#the-loadbalancerclient-filter">
+       Spring Cloud Gateway
       </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="springcloudgateway">
-     SpringCloudGateway(一) 概览
-    </h1>
-    <hr/>
-    <h3 id="spring-cloud-gateway">
-     Spring Cloud Gateway 的数据流图
-    </h3>
-    <p>
-     通读了两遍官方文档：
-     <a href="https://docs.spring.io/spring-cloud-gateway/docs/2.2.6.RELEASE/reference/html/#the-loadbalancerclient-filter">
-      Spring Cloud Gateway
-     </a>
-     ,对其数据的流向，各部分的处理组件，还有在各个阶段能做哪些事情又了大致的了解，做了下面的大致思维导图（有些部分还不太了解，后面可能需要写代码看看）
-    </p>
-    <p>
-     <img alt="" src="./picture/GatewayLine.png"/>
-    </p>
-    <p>
-     给人感觉就是两点模块：
-    </p>
-    <ul>
-     <li>
-      路由匹配：对初始的请求进行路由匹配，如果匹配，放入后面进行处理。这块看着还有下面两个作用
-     </li>
-     <li>
-      负载均衡：后面的好像也有LoadBalance，这里还没有摸清楚
-     </li>
-     <li>
-      <p>
-       DNS：好像可以定义ip与域名之类的转换
-      </p>
-     </li>
-     <li>
-      <p>
-       Filter模块：这块功能最为丰富，针对请求（request）和响应（response）的各种增删改操作，还有一些高级的操作：降级限流之类的；还有其他协议的配置，WS、RPC，这块暂时也没摸清楚
-      </p>
-     </li>
-    </ul>
-    <h3 id="_1">
-     一个简单的转发百度的示例
-    </h3>
-    <p>
-     一个路由定义最关键的是三个地方：匹配（path）、filter（可以多个filter处理）、目标（uri），这样访问此应用就转到了百度
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="nd">@SpringBootApplication</span>
+      ,对其数据的流向，各部分的处理组件，还有在各个阶段能做哪些事情又了大致的了解，做了下面的大致思维导图（有些部分还不太了解，后面可能需要写代码看看）
+     </p>
+     <p>
+      <img alt="" src="./picture/GatewayLine.png"/>
+     </p>
+     <p>
+      给人感觉就是两点模块：
+     </p>
+     <ul>
+      <li>
+       路由匹配：对初始的请求进行路由匹配，如果匹配，放入后面进行处理。这块看着还有下面两个作用
+      </li>
+      <li>
+       负载均衡：后面的好像也有LoadBalance，这里还没有摸清楚
+      </li>
+      <li>
+       <p>
+        DNS：好像可以定义ip与域名之类的转换
+       </p>
+      </li>
+      <li>
+       <p>
+        Filter模块：这块功能最为丰富，针对请求（request）和响应（response）的各种增删改操作，还有一些高级的操作：降级限流之类的；还有其他协议的配置，WS、RPC，这块暂时也没摸清楚
+       </p>
+      </li>
+     </ul>
+     <h3 id="_1">
+      一个简单的转发百度的示例
+     </h3>
+     <p>
+      一个路由定义最关键的是三个地方：匹配（path）、filter（可以多个filter处理）、目标（uri），这样访问此应用就转到了百度
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@SpringBootApplication</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">Application</span> <span class="p">{</span>
 
     <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
@@ -106,22 +93,33 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-   </article>
+     </div>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

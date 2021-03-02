@@ -24,37 +24,24 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="spring-cloud-gateway-filter">
-     Spring Cloud Gateway (八) 定制化filter的配置(路由匹配概览)
-    </h1>
-    <hr/>
-    <h3 id="filter">
-     定制化filter的来源
-    </h3>
-    <p>
-     非 global filter 从 routeLocator 中获取的，跟踪 routeLocator 看其的来源
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">#</span> <span class="kd">class</span> <span class="nc">RoutePredicateHandlerMapping</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-cloud-gateway-filter">
+      Spring Cloud Gateway (八) 定制化filter的配置(路由匹配概览)
+     </h1>
+     <hr/>
+     <h3 id="filter">
+      定制化filter的来源
+     </h3>
+     <p>
+      非 global filter 从 routeLocator 中获取的，跟踪 routeLocator 看其的来源
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">#</span> <span class="kd">class</span> <span class="nc">RoutePredicateHandlerMapping</span>
     <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Route</span><span class="o">&gt;</span> <span class="nf">lookupRoute</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// routeLocator 跟踪堆栈发现是 CachingRouteLocator</span>
         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">routeLocator</span><span class="p">.</span><span class="na">getRoutes</span><span class="p">()</span>
@@ -68,12 +55,12 @@
                 <span class="p">});</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     再跟踪 CachingRouteLocator ，发现是从 CompositeRouteLocator 来的
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">public</span> <span class="nf">CachingRouteLocator</span><span class="p">(</span><span class="n">RouteLocator</span> <span class="n">delegate</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      再跟踪 CachingRouteLocator ，发现是从 CompositeRouteLocator 来的
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="nf">CachingRouteLocator</span><span class="p">(</span><span class="n">RouteLocator</span> <span class="n">delegate</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">this</span><span class="p">.</span><span class="na">delegate</span> <span class="o">=</span> <span class="n">delegate</span><span class="p">;</span>
 
         <span class="c1">// 这里提供一种Flux流缓存构造方式，他的意思是，当cache没有的时候，</span>
@@ -102,15 +89,15 @@
         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">delegates</span><span class="p">.</span><span class="na">flatMapSequential</span><span class="p">(</span><span class="n">RouteLocator</span><span class="p">::</span><span class="n">getRoutes</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     跟踪 CompositeRouteLocator 发现是初始化加载就初始化好了，大致流程是知道，细节后面再看，因为这部分属于加载了，后面分析这部分的时候再分析
-    </p>
-    <p>
-     下面回头来看route的匹配，在下面的一段代码中，好像是相关匹配功能的
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Route</span><span class="o">&gt;</span> <span class="nf">lookupRoute</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      跟踪 CompositeRouteLocator 发现是初始化加载就初始化好了，大致流程是知道，细节后面再看，因为这部分属于加载了，后面分析这部分的时候再分析
+     </p>
+     <p>
+      下面回头来看route的匹配，在下面的一段代码中，好像是相关匹配功能的
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Route</span><span class="o">&gt;</span> <span class="nf">lookupRoute</span><span class="p">(</span><span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">routeLocator</span><span class="p">.</span><span class="na">getRoutes</span><span class="p">()</span>
                 <span class="c1">// filterWhen 是返回的 true 和 false ，应该是起过滤的作用，但它后面的逻辑没有搞懂，不知道具体是怎么匹配的</span>
                 <span class="p">.</span><span class="na">concatMap</span><span class="p">(</span><span class="n">route</span> <span class="o">-&gt;</span> <span class="n">Mono</span><span class="p">.</span><span class="na">just</span><span class="p">(</span><span class="n">route</span><span class="p">).</span><span class="na">filterWhen</span><span class="p">(</span><span class="n">r</span> <span class="o">-&gt;</span> <span class="p">{</span>
@@ -131,25 +118,25 @@
                 <span class="p">});</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     跟踪调用栈来到下面这段代码，可以看到返回的bool，但具体是怎么匹配的，没有搞懂
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>        <span class="kd">public</span> <span class="n">Publisher</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span> <span class="nf">apply</span><span class="p">(</span><span class="n">T</span> <span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      跟踪调用栈来到下面这段代码，可以看到返回的bool，但具体是怎么匹配的，没有搞懂
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>        <span class="kd">public</span> <span class="n">Publisher</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span> <span class="nf">apply</span><span class="p">(</span><span class="n">T</span> <span class="n">t</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="n">Mono</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">left</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">t</span><span class="p">)).</span><span class="na">flatMap</span><span class="p">(</span>
                     <span class="n">result</span> <span class="o">-&gt;</span> <span class="o">!</span><span class="n">result</span> <span class="o">?</span> <span class="n">Mono</span><span class="p">.</span><span class="na">just</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span> <span class="p">:</span> <span class="n">Mono</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">right</span><span class="p">.</span><span class="na">apply</span><span class="p">(</span><span class="n">t</span><span class="p">)));</span>
         <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     上面到这一直找不到这部分的细节，于是是看了骆老哥的相关于 predicate （断言）的一些学习笔记，知道了断言在一开始需要进行配置加载，接口类是： RoutePredicateFactory ，于是我们搜索定位到这个类，看看有哪些实现类，发现了两个和本次程序示例非常相关的两个： PathRoutePredicateFactory ， MethodRoutePredicateFactory ，寻找匹配相关的代码，给打上断点，在 PathRoutePredicateFactory 中打断点的相关代码如下：
-    </p>
-    <p>
-     这里看到明显的返回布尔值的相关代码，在之前的分析中就是需要返回布尔值，打上断点后，调式确实进入了，到这终于找到了相关的匹配逻辑
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">#</span> <span class="kd">class</span> <span class="nc">PathRoutePredicateFactory</span>
+     </div>
+     <p>
+      上面到这一直找不到这部分的细节，于是是看了骆老哥的相关于 predicate （断言）的一些学习笔记，知道了断言在一开始需要进行配置加载，接口类是： RoutePredicateFactory ，于是我们搜索定位到这个类，看看有哪些实现类，发现了两个和本次程序示例非常相关的两个： PathRoutePredicateFactory ， MethodRoutePredicateFactory ，寻找匹配相关的代码，给打上断点，在 PathRoutePredicateFactory 中打断点的相关代码如下：
+     </p>
+     <p>
+      这里看到明显的返回布尔值的相关代码，在之前的分析中就是需要返回布尔值，打上断点后，调式确实进入了，到这终于找到了相关的匹配逻辑
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">#</span> <span class="kd">class</span> <span class="nc">PathRoutePredicateFactory</span>
     <span class="kd">public</span> <span class="n">Predicate</span><span class="o">&lt;</span><span class="n">ServerWebExchange</span><span class="o">&gt;</span> <span class="nf">apply</span><span class="p">(</span><span class="n">Config</span> <span class="n">config</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">PathPattern</span><span class="o">&gt;</span> <span class="n">pathPatterns</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
         <span class="kd">synchronized</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">pathPatternParser</span><span class="p">)</span> <span class="p">{</span>
@@ -190,12 +177,12 @@
         <span class="p">};</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     Path 的匹配逻辑可能有点复杂，看起来不是很直观，但 Method 的就很清晰了，大致如下,明显的匹配逻辑：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">#</span> <span class="kd">class</span> <span class="nc">MethodRoutePredicateFactory</span>
+     </div>
+     <p>
+      Path 的匹配逻辑可能有点复杂，看起来不是很直观，但 Method 的就很清晰了，大致如下,明显的匹配逻辑：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">#</span> <span class="kd">class</span> <span class="nc">MethodRoutePredicateFactory</span>
     <span class="kd">public</span> <span class="n">Predicate</span><span class="o">&lt;</span><span class="n">ServerWebExchange</span><span class="o">&gt;</span> <span class="nf">apply</span><span class="p">(</span><span class="n">Config</span> <span class="n">config</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span> <span class="k">new</span> <span class="n">GatewayPredicate</span><span class="p">()</span> <span class="p">{</span>
             <span class="nd">@Override</span>
@@ -207,12 +194,12 @@
         <span class="p">};</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     接下来看看匹配的和或非之类的逻辑是如何实现的，相关的代码都在之前阻塞的 AsyncPredicate ，配置组合是在 combinePredicates ,可以大致看出在程序启动的时候就配置加载好了。和或非的匹配具体逻辑大致应该是递归之类实现的吧
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">private</span> <span class="n">AsyncPredicate</span><span class="o">&lt;</span><span class="n">ServerWebExchange</span><span class="o">&gt;</span> <span class="nf">combinePredicates</span><span class="p">(</span>
+     </div>
+     <p>
+      接下来看看匹配的和或非之类的逻辑是如何实现的，相关的代码都在之前阻塞的 AsyncPredicate ，配置组合是在 combinePredicates ,可以大致看出在程序启动的时候就配置加载好了。和或非的匹配具体逻辑大致应该是递归之类实现的吧
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">private</span> <span class="n">AsyncPredicate</span><span class="o">&lt;</span><span class="n">ServerWebExchange</span><span class="o">&gt;</span> <span class="nf">combinePredicates</span><span class="p">(</span>
             <span class="n">RouteDefinition</span> <span class="n">routeDefinition</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">List</span><span class="o">&lt;</span><span class="n">PredicateDefinition</span><span class="o">&gt;</span> <span class="n">predicates</span> <span class="o">=</span> <span class="n">routeDefinition</span><span class="p">.</span><span class="na">getPredicates</span><span class="p">();</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">predicates</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">predicates</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span> <span class="p">{</span>
@@ -232,22 +219,33 @@
         <span class="k">return</span> <span class="n">predicate</span><span class="p">;</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-   </article>
+     </div>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

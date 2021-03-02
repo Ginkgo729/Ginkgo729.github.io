@@ -24,34 +24,21 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <p>
-     # Nagios 客户端安装指南
-    </p>
-    <hr/>
-    <h2 id="_1">
-     一、相应命令安装
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">sudo</span> <span class="n">useradd</span> <span class="n">nagios</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <p>
+      # Nagios 客户端安装指南
+     </p>
+     <hr/>
+     <h2 id="_1">
+      一、相应命令安装
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">sudo</span> <span class="n">useradd</span> <span class="n">nagios</span>
 <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="k">get</span> <span class="k">update</span>
 <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="k">get</span> <span class="n">install</span> <span class="n">build</span><span class="o">-</span><span class="n">essential</span> <span class="n">libgd2</span><span class="o">-</span><span class="n">xpm</span><span class="o">-</span><span class="n">dev</span> <span class="n">openssl</span> <span class="n">libssl</span><span class="o">-</span><span class="n">dev</span> <span class="n">unzip</span>
 
@@ -73,32 +60,32 @@
 <span class="n">sudo</span> <span class="n">make</span> <span class="n">install</span><span class="o">-</span><span class="n">config</span>
 <span class="n">sudo</span> <span class="n">make</span> <span class="n">install</span><span class="o">-</span><span class="n">init</span>
 </code></pre>
-    </div>
-    <h2 id="_2">
-     二、相应文件配置
-    </h2>
-    <p>
-     修改文件 /usr/local/nagios/etc/nrpe.cfg，填上服务端nagios的IP地址,第二个填上客户端本机的
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">allowed_hosts=127.0.0.1,::1,your_nagios_server_private_ip</span>
+     </div>
+     <h2 id="_2">
+      二、相应文件配置
+     </h2>
+     <p>
+      修改文件 /usr/local/nagios/etc/nrpe.cfg，填上服务端nagios的IP地址,第二个填上客户端本机的
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">allowed_hosts=127.0.0.1,::1,your_nagios_server_private_ip</span>
 <span class="err">server_address=monitored_server_private_ip</span>
 </code></pre>
-    </div>
-    <p>
-     启动和查看客户端
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">sudo ufw allow 5666/tcp </span>
+     </div>
+     <p>
+      启动和查看客户端
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">sudo ufw allow 5666/tcp </span>
 <span class="err">sudo systemctl start nrpe.service</span>
 <span class="err">sudo systemctl status nrpe.service</span>
 </code></pre>
-    </div>
-    <p>
-     正常的输出如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">Output</span>
+     </div>
+     <p>
+      正常的输出如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">Output</span>
 <span class="err">...</span>
 <span class="err">Oct 16 07:10:00 nagios systemd[1]: Started Nagios Remote Plugin Executor.</span>
 <span class="err">Oct 16 07:10:00 nagios nrpe[14653]: Starting up daemon</span>
@@ -107,30 +94,30 @@
 <span class="err">Oct 16 07:10:00 nagios nrpe[14653]: Listening for connections on port 5666</span>
 <span class="err">Oct 16 07:10:00 nagios nrpe[14653]: Allowing connections from: 127.0.0.1,::1,207.154.249.232</span>
 </code></pre>
-    </div>
-    <h2 id="_3">
-     三、测试
-    </h2>
-    <p>
-     在服务端输入下面命令进行测试，最后填客户端IP地址
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">/usr/local/nagios/libexec/check_nrpe -H remote_host_ip</span>
+     </div>
+     <h2 id="_3">
+      三、测试
+     </h2>
+     <p>
+      在服务端输入下面命令进行测试，最后填客户端IP地址
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">/usr/local/nagios/libexec/check_nrpe -H remote_host_ip</span>
 </code></pre>
-    </div>
-    <p>
-     正常的输出如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">Output</span>
+     </div>
+     <p>
+      正常的输出如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">Output</span>
 <span class="err">NRPE v3.2.1</span>
 </code></pre>
-    </div>
-    <p>
-     在服务端新建文件 /usr/local/nagios/etc/servers/your_monitored_server_host_name.cfg，命名为客户端IP地址
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">define</span> <span class="k">host</span> <span class="err">{</span>
+     </div>
+     <p>
+      在服务端新建文件 /usr/local/nagios/etc/servers/your_monitored_server_host_name.cfg，命名为客户端IP地址
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">define</span> <span class="k">host</span> <span class="err">{</span>
         <span class="n">use</span>                             <span class="n">linux</span><span class="o">-</span><span class="n">server</span>
         <span class="n">host_name</span>                       <span class="n">your_monitored_server_host_name</span>
         <span class="k">alias</span>                           <span class="n">My</span> <span class="n">client</span> <span class="n">server</span>
@@ -148,49 +135,60 @@
         <span class="n">check_command</span>                   <span class="n">check_nrpe</span><span class="o">!</span><span class="n">check_load</span>
 <span class="err">}</span>
 </code></pre>
-    </div>
-    <p>
-     重启nagios，访问相应的网页就可以看到新添加的主机了
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="err">sudo systemctl restart nagios</span>
+     </div>
+     <p>
+      重启nagios，访问相应的网页就可以看到新添加的主机了
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">sudo systemctl restart nagios</span>
 </code></pre>
-    </div>
-    <h2 id="_4">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://www.digitalocean.com/community/tutorials/how-to-install-nagios-4-and-monitor-your-servers-on-ubuntu-16-04">
-       How To Install Nagios 4 and Monitor Your Servers on Ubuntu 16.04
-      </a>
-     </li>
-     <li>
-      <a href="https://askubuntu.com/questions/817827/no-output-on-stdout-stderr-execvp-usr-local-nagios-libexec-check-ping-in-ub">
-       (No output on stdout) stderr: execvp(/usr/local/nagios/libexec/check_ping) in ubuntu
-      </a>
-     </li>
-     <li>
-      <a href="https://community.spiceworks.com/topic/551475-nagios-no-output-on-stdout-stderr-usr-local-nagios-libexec-check_nt-1-usr">
-       Nagios (No output on stdout) stderr: /usr/local/nagios/libexec/check_nt: 1: /usr
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="_4">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://www.digitalocean.com/community/tutorials/how-to-install-nagios-4-and-monitor-your-servers-on-ubuntu-16-04">
+        How To Install Nagios 4 and Monitor Your Servers on Ubuntu 16.04
+       </a>
+      </li>
+      <li>
+       <a href="https://askubuntu.com/questions/817827/no-output-on-stdout-stderr-execvp-usr-local-nagios-libexec-check-ping-in-ub">
+        (No output on stdout) stderr: execvp(/usr/local/nagios/libexec/check_ping) in ubuntu
+       </a>
+      </li>
+      <li>
+       <a href="https://community.spiceworks.com/topic/551475-nagios-no-output-on-stdout-stderr-usr-local-nagios-libexec-check_nt-1-usr">
+        Nagios (No output on stdout) stderr: /usr/local/nagios/libexec/check_nt: 1: /usr
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

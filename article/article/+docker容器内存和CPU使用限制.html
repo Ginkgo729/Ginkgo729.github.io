@@ -24,128 +24,126 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="dockercpu">
-     docker容器内存和CPU使用限制
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     示例如下
-    </h2>
-    <div class="codehilite">
-     <pre><span></span><code>sudo docker run --name seckill0 -p <span class="m">8080</span>:8080 -m 1024M --cpus<span class="o">=</span><span class="m">0</span>.2 -d seckill:v0
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="dockercpu">
+      docker容器内存和CPU使用限制
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      示例如下
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code>sudo docker run --name seckill0 -p <span class="m">8080</span>:8080 -m 1024M --cpus<span class="o">=</span><span class="m">0</span>.2 -d seckill:v0
 sudo docker run --name seckill1 -p <span class="m">8081</span>:8080 -m 1024M --cpus<span class="o">=</span><span class="m">0</span>.2 -d seckill:v0
 sudo docker run --name seckill2 -p <span class="m">8082</span>:8080 -m 1024M --cpus<span class="o">=</span><span class="m">0</span>.2 -d seckill:v0
 </code></pre>
-    </div>
-    <ul>
-     <li>
-      -m:限制内存使用为1G
-     </li>
-     <li>
-      --cpus：限制CPU使用的百分比，这里设置为100%
-     </li>
-    </ul>
-    <h2 id="_2">
-     相关命令
-    </h2>
-    <ul>
-     <li>
-      查看容器的内存CPU等情况：docker stats
-     </li>
-     <li>
-      压力测试攻击：webbench
-      <ul>
-       <li>
-        出现编译错误缺失ctag时需要安装
-       </li>
-       <li>
-        webbench -c 5 -t 30 http://10.33.8.187/goods/findAll
-        <ul>
-         <li>
-          -c表示要模拟的并发客户端数量
-         </li>
-         <li>
-          -t表示并发时间
-         </li>
-        </ul>
-       </li>
-      </ul>
-     </li>
-    </ul>
-    <h2 id="_3">
-     相关链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://blog.csdn.net/essity/article/details/79999369">
-       高并发测试工具
-      </a>
-     </li>
-     <li>
-      <a href="https://gist.github.com/lxneng/435451">
-       网站压力测试工具webbench
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/xanxng/article/details/7588133">
-       Centos安装webbench时出现/bin/sh: ctags: command not found解决方法
-      </a>
-     </li>
-     <li>
-      <a href="https://blog.csdn.net/weixin_36146275/article/details/79320638">
-       apache jmeter：接口压力测试
-      </a>
-     </li>
-     <li>
-      <a href="https://jmeter.apache.org/download_jmeter.cgi">
-       Download Apache JMeter
-      </a>
-     </li>
-     <li>
-      <a href="https://www.cnblogs.com/sparkdev/p/8052522.html">
-       Docker: 限制容器可用的 CPU
-      </a>
-     </li>
-     <li>
-      <a href="https://www.cnblogs.com/sparkdev/p/8032330.html">
-       Docker: 限制容器可用的内存
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <ul>
+      <li>
+       -m:限制内存使用为1G
+      </li>
+      <li>
+       --cpus：限制CPU使用的百分比，这里设置为100%
+      </li>
+     </ul>
+     <h2 id="_2">
+      相关命令
+     </h2>
+     <ul>
+      <li>
+       查看容器的内存CPU等情况：docker stats
+      </li>
+      <li>
+       压力测试攻击：webbench
+       <ul>
+        <li>
+         出现编译错误缺失ctag时需要安装
+        </li>
+        <li>
+         webbench -c 5 -t 30 http://10.33.8.187/goods/findAll
+         <ul>
+          <li>
+           -c表示要模拟的并发客户端数量
+          </li>
+          <li>
+           -t表示并发时间
+          </li>
+         </ul>
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <h2 id="_3">
+      相关链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://blog.csdn.net/essity/article/details/79999369">
+        高并发测试工具
+       </a>
+      </li>
+      <li>
+       <a href="https://gist.github.com/lxneng/435451">
+        网站压力测试工具webbench
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/xanxng/article/details/7588133">
+        Centos安装webbench时出现/bin/sh: ctags: command not found解决方法
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/weixin_36146275/article/details/79320638">
+        apache jmeter：接口压力测试
+       </a>
+      </li>
+      <li>
+       <a href="https://jmeter.apache.org/download_jmeter.cgi">
+        Download Apache JMeter
+       </a>
+      </li>
+      <li>
+       <a href="https://www.cnblogs.com/sparkdev/p/8052522.html">
+        Docker: 限制容器可用的 CPU
+       </a>
+      </li>
+      <li>
+       <a href="https://www.cnblogs.com/sparkdev/p/8032330.html">
+        Docker: 限制容器可用的内存
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

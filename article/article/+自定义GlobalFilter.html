@@ -24,57 +24,44 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="spring-cloud-gateway-global-filter">
-     Spring Cloud Gateway (六) 自定义 Global Filter
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简介
-    </h2>
-    <p>
-     在前面五篇的分析中，对 Spring Cloud Gateway 的 filter 组件有了一个大概的认知，今天就练练手，写一个统计请求返回时长的 global filter
-    </p>
-    <h2 id="_2">
-     思路整理
-    </h2>
-    <p>
-     阅读官方文档和在前面读源码的过程中，大致知道 global filter 需要继承 GlobalFilter 、 Ordered
-    </p>
-    <ul>
-     <li>
-      GlobalFilter : 需要重写 filter 方法，在其中实现自己的处理逻辑，很大部分都是对 exchange 进行操作，取值赋值等等
-     </li>
-     <li>
-      Ordered ： 需要重写 getOrder 方法，决定自定义 filter 在链中的位置，按照数字大小进行的排序
-     </li>
-    </ul>
-    <h3 id="filter">
-     自定义时长统计 filter 编写
-    </h3>
-    <p>
-     这里就简单的借鉴下 GatewayMetricsFilter 的写法，在 filter 链触发完成后，无论失败或者成功，都进行统计。filter 次序就简单的取 WRITE_RESPONSE_FILTER_ORDER 之后（用它定义的次序减一）。代码大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="cm">/**</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-cloud-gateway-global-filter">
+      Spring Cloud Gateway (六) 自定义 Global Filter
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在前面五篇的分析中，对 Spring Cloud Gateway 的 filter 组件有了一个大概的认知，今天就练练手，写一个统计请求返回时长的 global filter
+     </p>
+     <h2 id="_2">
+      思路整理
+     </h2>
+     <p>
+      阅读官方文档和在前面读源码的过程中，大致知道 global filter 需要继承 GlobalFilter 、 Ordered
+     </p>
+     <ul>
+      <li>
+       GlobalFilter : 需要重写 filter 方法，在其中实现自己的处理逻辑，很大部分都是对 exchange 进行操作，取值赋值等等
+      </li>
+      <li>
+       Ordered ： 需要重写 getOrder 方法，决定自定义 filter 在链中的位置，按照数字大小进行的排序
+      </li>
+     </ul>
+     <h3 id="filter">
+      自定义时长统计 filter 编写
+     </h3>
+     <p>
+      这里就简单的借鉴下 GatewayMetricsFilter 的写法，在 filter 链触发完成后，无论失败或者成功，都进行统计。filter 次序就简单的取 WRITE_RESPONSE_FILTER_ORDER 之后（用它定义的次序减一）。代码大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="cm">/**</span>
 <span class="cm"> * 统计一次请求在filter链中的时长</span>
 <span class="cm"> *</span>
 <span class="cm"> * @author lw1243925457</span>
@@ -117,15 +104,15 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="_3">
-     主函数配置运行
-    </h3>
-    <p>
-     需要在主函数中配置 bean，整个代码大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="nd">@SpringBootApplication</span>
+     </div>
+     <h3 id="_3">
+      主函数配置运行
+     </h3>
+     <p>
+      需要在主函数中配置 bean，整个代码大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@SpringBootApplication</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">Application</span> <span class="p">{</span>
 
     <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
@@ -152,65 +139,76 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     很简单，大致就这些，运行起来，浏览器访问，可以看到下面的输出，over
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>o.s.c.g.sample.DurationStatisticsFilter  : duration statistics filter
+     </div>
+     <p>
+      很简单，大致就这些，运行起来，浏览器访问，可以看到下面的输出，over
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>o.s.c.g.sample.DurationStatisticsFilter  : duration statistics filter
 o.s.c.g.sample.DurationStatisticsFilter  : duration filter <span class="nb">time</span> : <span class="m">349</span> ms
 </code></pre>
-    </div>
-    <h2 id="filter_1">
-     Filter 相关分析记录
-    </h2>
-    <ul>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/SpringCloudGateway%E6%A6%82%E8%A7%88.md">
-       Spring cloud Gateway (一) 代码拉取与运行示例
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E6%B5%81%E7%A8%8B%E7%B1%BB.md">
-       Spring cloud Gateway（二） 一个Http请求的流程解析
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/Filter%E9%93%BE.md">
-       Spring Cloud Gateway （三） Filter 链
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6.md">
-       Spring Cloud Gateway(四) 请求重试机制
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E9%99%90%E6%B5%81.md">
-       Spring Cloud Gateway(五) 限流
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E8%87%AA%E5%AE%9A%E4%B9%89GlobalFilter.md">
-       Spring Cloud Gateway (六) 自定义 Global Filter
-      </a>
-     </li>
-    </ul>
-   </article>
+     </div>
+     <h2 id="filter_1">
+      Filter 相关分析记录
+     </h2>
+     <ul>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/SpringCloudGateway%E6%A6%82%E8%A7%88.md">
+        Spring cloud Gateway (一) 代码拉取与运行示例
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E6%B5%81%E7%A8%8B%E7%B1%BB.md">
+        Spring cloud Gateway（二） 一个Http请求的流程解析
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/Filter%E9%93%BE.md">
+        Spring Cloud Gateway （三） Filter 链
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6.md">
+        Spring Cloud Gateway(四) 请求重试机制
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E9%99%90%E6%B5%81.md">
+        Spring Cloud Gateway(五) 限流
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/java/spring/springcloudGateway/%E8%87%AA%E5%AE%9A%E4%B9%89GlobalFilter.md">
+        Spring Cloud Gateway (六) 自定义 Global Filter
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

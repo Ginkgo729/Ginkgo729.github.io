@@ -24,85 +24,72 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="shardingsphere-raw-jdbc-atomikos-xa">
-     ShardingSphere RAW JDBC 分布式事务 Atomikos XA 代码示例
-    </h1>
-    <hr/>
-    <p>
-     <em>
-      项目工程在：
-      <a href="https://github.com/lw1243925457/JAVA-000/tree/main/homework/shardingSphere-jdbc-example/transaction-example/transaction-2pc-xa-raw-jdbc-example">
-       transaction-2pc-xa-raw-jdbc-example
-      </a>
-     </em>
-    </p>
-    <h2 id="_1">
-     代码简介
-    </h2>
-    <p>
-     基于ShardingSphere的Atomikos XA实现一个简单的分布式事务应用demo
-    </p>
-    <h3 id="_2">
-     环境配置
-    </h3>
-    <p>
-     启动两个MySQL5.7的docker镜像（8.0的一直报事务相关的错的，不知啥原因，换成5.7就好了），下面命令直接复制运行即可：
-    </p>
-    <p>
-     ```shell script
-    </p>
-    <h1 id="mysql">
-     启动两个mysql
-    </h1>
-    <p>
-     docker run --name mysql11 -p 3311:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_ROOT_HOST=% -d mysql:5.7
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shardingsphere-raw-jdbc-atomikos-xa">
+      ShardingSphere RAW JDBC 分布式事务 Atomikos XA 代码示例
+     </h1>
+     <hr/>
+     <p>
+      <em>
+       项目工程在：
+       <a href="https://github.com/lw1243925457/JAVA-000/tree/main/homework/shardingSphere-jdbc-example/transaction-example/transaction-2pc-xa-raw-jdbc-example">
+        transaction-2pc-xa-raw-jdbc-example
+       </a>
+      </em>
+     </p>
+     <h2 id="_1">
+      代码简介
+     </h2>
+     <p>
+      基于ShardingSphere的Atomikos XA实现一个简单的分布式事务应用demo
+     </p>
+     <h3 id="_2">
+      环境配置
+     </h3>
+     <p>
+      启动两个MySQL5.7的docker镜像（8.0的一直报事务相关的错的，不知啥原因，换成5.7就好了），下面命令直接复制运行即可：
+     </p>
+     <p>
+      ```shell script
+     </p>
+     <h1 id="mysql">
+      启动两个mysql
+     </h1>
+     <p>
+      docker run --name mysql11 -p 3311:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_ROOT_HOST=% -d mysql:5.7
 docker run --name mysql12 -p 3312:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_ROOT_HOST=% -d mysql:5.7
-    </p>
-    <h1 id="11demo_ds_0sql">
-     在11上创建数据库demo_ds_0，运行下面的SQL语句初始化数据库和表
-    </h1>
-    <p>
-     docker exec -ti mysql11 mysql -u root -p
-    </p>
-    <p>
-     create database demo_ds_0;
+     </p>
+     <h1 id="11demo_ds_0sql">
+      在11上创建数据库demo_ds_0，运行下面的SQL语句初始化数据库和表
+     </h1>
+     <p>
+      docker exec -ti mysql11 mysql -u root -p
+     </p>
+     <p>
+      create database demo_ds_0;
 use demo_ds_0;
 CREATE TABLE IF NOT EXISTS t_order_0 (order_id BIGINT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (order_id));
 CREATE TABLE IF NOT EXISTS t_order_1 (order_id BIGINT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (order_id));
-    </p>
-    <h1 id="12demo_ds_1sql">
-     在12上创建数据库demo_ds_1，运行下面的SQL语句初始化数据库和表
-    </h1>
-    <p>
-     docker exec -ti mysql12 mysql -u root -p
-    </p>
-    <p>
-     create database demo_ds_1;
+     </p>
+     <h1 id="12demo_ds_1sql">
+      在12上创建数据库demo_ds_1，运行下面的SQL语句初始化数据库和表
+     </h1>
+     <p>
+      docker exec -ti mysql12 mysql -u root -p
+     </p>
+     <p>
+      create database demo_ds_1;
 use demo_ds_1;
 CREATE TABLE IF NOT EXISTS t_order_0 (order_id BIGINT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (order_id));
 CREATE TABLE IF NOT EXISTS t_order_1 (order_id BIGINT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (order_id));
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>### 程序配置
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>### 程序配置
 #### Maven依赖
 <span class="ni">&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;</span>核心依赖下面几个：
 
@@ -163,15 +150,15 @@ CREATE TABLE IF NOT EXISTS t_order_1 (order_id BIGINT NOT NULL, user_id INT NOT 
 
 <span class="nt">&lt;/project&gt;</span>
 </code></pre>
-    </div>
-    <h3 id="shardingsphere">
-     shardingSphere数据库配置文件
-    </h3>
-    <p>
-     如上面的docker数据库配置，这里设置了两个数据库，各自有两张表
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="nt">dataSources</span><span class="p">:</span>
+     </div>
+     <h3 id="shardingsphere">
+      shardingSphere数据库配置文件
+     </h3>
+     <p>
+      如上面的docker数据库配置，这里设置了两个数据库，各自有两张表
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nt">dataSources</span><span class="p">:</span>
   <span class="nt">ds_0</span><span class="p">:</span> <span class="kt">!!com.zaxxer.hikari.HikariDataSource</span>
     <span class="nt">driverClassName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">com.mysql.cj.jdbc.Driver</span>
     <span class="nt">jdbcUrl</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://localhost:3311/demo_ds_0?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</span>
@@ -214,15 +201,15 @@ CREATE TABLE IF NOT EXISTS t_order_1 (order_id BIGINT NOT NULL, user_id INT NOT 
 <span class="nt">props</span><span class="p">:</span>
   <span class="nt">sql-show</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre>
-    </div>
-    <h3 id="_3">
-     主程序
-    </h3>
-    <p>
-     暴力直接的原生测试，代码如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo</span><span class="p">;</span>
+     </div>
+     <h3 id="_3">
+      主程序
+     </h3>
+     <p>
+      暴力直接的原生测试，代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">package</span> <span class="nn">com.example.demo</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">org.apache.shardingsphere.driver.api.yaml.YamlShardingSphereDataSourceFactory</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">org.apache.shardingsphere.transaction.core.TransactionType</span><span class="p">;</span>
@@ -310,22 +297,33 @@ CREATE TABLE IF NOT EXISTS t_order_1 (order_id BIGINT NOT NULL, user_id INT NOT 
 
 <span class="p">}</span>
 </code></pre>
-    </div>
-   </article>
+     </div>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

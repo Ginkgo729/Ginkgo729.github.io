@@ -24,43 +24,30 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="spring-cloud-gateway">
-     Spring Cloud Gateway(五) 限流
-    </h1>
-    <hr/>
-    <h2 id="_1">
-     简介
-    </h2>
-    <p>
-     简单查看限流的处理流程，看限流filter在filters中的顺序
-    </p>
-    <h2 id="_2">
-     分析
-    </h2>
-    <p>
-     这次配置使用Redis的令牌桶，主函数代码如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="nd">@SpringBootApplication</span>
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-cloud-gateway">
+      Spring Cloud Gateway(五) 限流
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      简单查看限流的处理流程，看限流filter在filters中的顺序
+     </p>
+     <h2 id="_2">
+      分析
+     </h2>
+     <p>
+      这次配置使用Redis的令牌桶，主函数代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@SpringBootApplication</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">Application</span> <span class="p">{</span>
 
     <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
@@ -112,29 +99,29 @@
 
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="_3">
-     限流实现分析
-    </h3>
-    <p>
-     在不加断点的情况下，查看输出日志，初步定位限流相关逻辑类
-    </p>
-    <p>
-     通过查找，找到下面两个类
-    </p>
-    <ul>
-     <li>
-      RequestRateLimiterGatewayFilterFactory：filter实现类
-     </li>
-     <li>
-      RedisRateLimiter ：具体令牌桶实现类
-     </li>
-    </ul>
-    <p>
-     通过debug，找到其相应filter次序，位于 RouteToRequestUrlFilter 之前。其核心如下：调用 RedisRateLimiter 的判断方法，得到结果后判断其状态，处于限流状态则直接返回，不触发下面的filter；反之，调用触发调用后面的filter
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RequestRateLimiterGatewayFilterFactory</span> <span class="kd">extends</span> 
+     </div>
+     <h3 id="_3">
+      限流实现分析
+     </h3>
+     <p>
+      在不加断点的情况下，查看输出日志，初步定位限流相关逻辑类
+     </p>
+     <p>
+      通过查找，找到下面两个类
+     </p>
+     <ul>
+      <li>
+       RequestRateLimiterGatewayFilterFactory：filter实现类
+      </li>
+      <li>
+       RedisRateLimiter ：具体令牌桶实现类
+      </li>
+     </ul>
+     <p>
+      通过debug，找到其相应filter次序，位于 RouteToRequestUrlFilter 之前。其核心如下：调用 RedisRateLimiter 的判断方法，得到结果后判断其状态，处于限流状态则直接返回，不触发下面的filter；反之，调用触发调用后面的filter
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RequestRateLimiterGatewayFilterFactory</span> <span class="kd">extends</span> 
     <span class="n">AbstractGatewayFilterFactory</span><span class="o">&lt;</span><span class="n">RequestRateLimiterGatewayFilterFactory</span><span class="p">.</span><span class="na">Config</span><span class="o">&gt;</span> <span class="p">{</span>
     <span class="nd">@SuppressWarnings</span><span class="p">(</span><span class="s">"unchecked"</span><span class="p">)</span>
     <span class="nd">@Override</span>
@@ -182,97 +169,108 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <h3 id="_4">
-     其他的思考
-    </h3>
-    <p>
-     个人感觉限流可以直接放到filter链的最前面，通过调整主函数的filter次序，限流filter确实可以前置，但还是要位于 GatewayMetricsFilter 后面
+     </div>
+     <h3 id="_4">
+      其他的思考
+     </h3>
+     <p>
+      个人感觉限流可以直接放到filter链的最前面，通过调整主函数的filter次序，限流filter确实可以前置，但还是要位于 GatewayMetricsFilter 后面
+     </p>
+     <p>
+      感觉filter链可以分为三类：
+     </p>
+     <ul>
+      <li>
+       前置处理：
+      </li>
+      <li>
+       RemoveCachedBodyFilter
+      </li>
+      <li>
+       AdaptCachedBodyGlobalFilter
+      </li>
+      <li>
+       NettyWriteResponseFilter : 用户返回响应给客户端
+      </li>
+      <li>
+       ForwardPathFilter : 感觉是路径替换，有点域名查找替换的感觉
+      </li>
+      <li>
+       <p>
+        GatewayMetricsFilter ：
+       </p>
+      </li>
+      <li>
+       <p>
+        特定路由处理：针对特定路由的filter，如AddRequestParameter、AddResponseHeader等待
+       </p>
+      </li>
+      <li>
+       <p>
+        后置处理：
+       </p>
+      </li>
+      <li>
+       RouteToRequestUrlFilter ：好像是改path的，但具体啥作用不太清楚
+      </li>
+      <li>
+       LoadBalancerClientFilter : 负载均衡，但已经标为将来废弃
+      </li>
+      <li>
+       WebsocketRoutingFilter : Websocket请求的
+      </li>
+      <li>
+       NettyRoutingFilter ：HTTP请求
+      </li>
+      <li>
+       ForwardRoutingFilter ：
+      </li>
+     </ul>
+     <p>
+      不知道有没有全局的限流的需求，如果有的话是不是可以通过实现 global filter 进行全局限流
+     </p>
+     <h3 id="filter">
+      Filter的小总结
+     </h3>
+     <p>
+      在理解了request和response的处理流程以后，filter一套流程下来感觉很轻爽。它的这个思路感觉在 rpc 框架上也可以使用，进行 tag路由、负载均衡、黑名单、限流等等
+     </p>
+     <h2 id="_5">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://blog.csdn.net/weixin_38405253/article/details/108891772">
+        这可能是全网Spring Cloud Gateway限流最完整的方案了！
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <p>
-     感觉filter链可以分为三类：
-    </p>
-    <ul>
-     <li>
-      前置处理：
-     </li>
-     <li>
-      RemoveCachedBodyFilter
-     </li>
-     <li>
-      AdaptCachedBodyGlobalFilter
-     </li>
-     <li>
-      NettyWriteResponseFilter : 用户返回响应给客户端
-     </li>
-     <li>
-      ForwardPathFilter : 感觉是路径替换，有点域名查找替换的感觉
-     </li>
-     <li>
-      <p>
-       GatewayMetricsFilter ：
-      </p>
-     </li>
-     <li>
-      <p>
-       特定路由处理：针对特定路由的filter，如AddRequestParameter、AddResponseHeader等待
-      </p>
-     </li>
-     <li>
-      <p>
-       后置处理：
-      </p>
-     </li>
-     <li>
-      RouteToRequestUrlFilter ：好像是改path的，但具体啥作用不太清楚
-     </li>
-     <li>
-      LoadBalancerClientFilter : 负载均衡，但已经标为将来废弃
-     </li>
-     <li>
-      WebsocketRoutingFilter : Websocket请求的
-     </li>
-     <li>
-      NettyRoutingFilter ：HTTP请求
-     </li>
-     <li>
-      ForwardRoutingFilter ：
-     </li>
-    </ul>
-    <p>
-     不知道有没有全局的限流的需求，如果有的话是不是可以通过实现 global filter 进行全局限流
-    </p>
-    <h3 id="filter">
-     Filter的小总结
-    </h3>
-    <p>
-     在理解了request和response的处理流程以后，filter一套流程下来感觉很轻爽。它的这个思路感觉在 rpc 框架上也可以使用，进行 tag路由、负载均衡、黑名单、限流等等
-    </p>
-    <h2 id="_5">
-     参考链接
-    </h2>
-    <ul>
-     <li>
-      <a href="https://blog.csdn.net/weixin_38405253/article/details/108891772">
-       这可能是全网Spring Cloud Gateway限流最完整的方案了！
-      </a>
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>

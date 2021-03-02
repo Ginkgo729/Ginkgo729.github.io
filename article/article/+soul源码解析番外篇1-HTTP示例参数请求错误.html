@@ -24,67 +24,54 @@
   </div>
   <!-- built files will be auto injected -->
  </body>
- <body class="is-article-visible">
-  <!--	<body class="is-preload">-->
+ <body class="is-preload">
   <!-- Wrapper -->
   <div id="wrapper">
-   <nav>
-    <ul>
-     <li>
-      <a href="#intro">
-       主页
-      </a>
-     </li>
-     <li>
-      <a href="#experience">
-       文章列表
-      </a>
-     </li>
-    </ul>
-   </nav>
-   <article class="active" id="article" style="display: block">
-    <h1 id="soul-http">
-     Soul网关源码解析番外篇（一） HTTP参数请求错误
-    </h1>
-    <hr/>
-    <ul>
-     <li>
-      共同作者：石立 萧 *
-     </li>
-    </ul>
-    <h2 id="_1">
-     简介
-    </h2>
-    <p>
-     在Soul网关2.2.1版本源码阅读中，遇到了HTTP请求加上参数返回404的错误，此篇文章基于此进行探索
-    </p>
-    <h2 id="bug">
-     Bug复现
-    </h2>
-    <h3 id="_2">
-     相关环境配置
-    </h3>
-    <p>
-     首先把代码拉下来，然后切换到2.2.1版本，命令大致如下：
-    </p>
-    <p>
-     ```shell script
-    </p>
-    <h1 id="_3">
-     加速拉取
-    </h1>
-    <p>
-     git clone https://github.com.cnpmjs.org/lw1243925457/soul.git
-    </p>
-    <h1 id="221">
-     切换到2.2.1版本
-    </h1>
-    <p>
-     git fetch origin 2.2.1:2.2.1
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="soul-http">
+      Soul网关源码解析番外篇（一） HTTP参数请求错误
+     </h1>
+     <hr/>
+     <ul>
+      <li>
+       共同作者：石立 萧 *
+      </li>
+     </ul>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在Soul网关2.2.1版本源码阅读中，遇到了HTTP请求加上参数返回404的错误，此篇文章基于此进行探索
+     </p>
+     <h2 id="bug">
+      Bug复现
+     </h2>
+     <h3 id="_2">
+      相关环境配置
+     </h3>
+     <p>
+      首先把代码拉下来，然后切换到2.2.1版本，命令大致如下：
+     </p>
+     <p>
+      ```shell script
+     </p>
+     <h1 id="_3">
+      加速拉取
+     </h1>
+     <p>
+      git clone https://github.com.cnpmjs.org/lw1243925457/soul.git
+     </p>
+     <h1 id="221">
+      切换到2.2.1版本
+     </h1>
+     <p>
+      git fetch origin 2.2.1:2.2.1
 git checkout 2.2.1
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">如果之前运行过</span><span class="n">Soul网关的</span><span class="err">，需要清理下数据库，这里删除原来的</span><span class="n">soul数据库</span><span class="err">，让</span><span class="mi">2</span><span class="p">.</span><span class="mi">2</span><span class="p">.</span><span class="mi">1</span><span class="err">版本自己重新建立一个</span>
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">如果之前运行过</span><span class="n">Soul网关的</span><span class="err">，需要清理下数据库，这里删除原来的</span><span class="n">soul数据库</span><span class="err">，让</span><span class="mi">2</span><span class="p">.</span><span class="mi">2</span><span class="p">.</span><span class="mi">1</span><span class="err">版本自己重新建立一个</span>
 
 <span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
 <span class="o">#</span> <span class="err">使用</span><span class="n">docker启动mysql</span>
@@ -96,60 +83,60 @@ git checkout 2.2.1
 <span class="n">docker</span> <span class="k">exec</span> <span class="o">-</span><span class="n">ti</span> <span class="n">mysql</span> <span class="n">mysql</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="o">-</span><span class="n">p</span>
 <span class="o">&gt;</span> <span class="k">drop</span> <span class="k">database</span> <span class="n">soul</span><span class="p">;</span>
 </code></pre>
-    </div>
-    <h3 id="souladmin">
-     Soul——Admin启动
-    </h3>
-    <p>
-     修改Soul-admin模块下的配置文件：soul-admin --&gt; application-local.yml
-    </p>
-    <p>
-     修改mysql用户和密码： root root
-    </p>
-    <p>
-     修改链接配置：jdbc:mysql://localhost:3306/soul?useUnicode=true&amp;characterEncoding=utf-8&amp;allowPublicKeyRetrieval=true&amp;&amp;useSSL=false
-    </p>
-    <p>
-     启动soul-admin --&gt; SoulAdminBootstrap
-    </p>
-    <p>
-     如果出现SelectorTypeEnum相关的错误，请切换到jdk8
-    </p>
-    <h3 id="soul-bootstrap">
-     启动Soul-Bootstrap
-    </h3>
-    <p>
-     启动soul-bootstrap --&gt; SoulBootstrapApplication
-    </p>
-    <h3 id="http-test">
-     启动HTTP test
-    </h3>
-    <p>
-     首先右键soul-test根目录下的pom.xml，选择 add as maven project,导入工程
+     </div>
+     <h3 id="souladmin">
+      Soul——Admin启动
+     </h3>
+     <p>
+      修改Soul-admin模块下的配置文件：soul-admin --&gt; application-local.yml
+     </p>
+     <p>
+      修改mysql用户和密码： root root
+     </p>
+     <p>
+      修改链接配置：jdbc:mysql://localhost:3306/soul?useUnicode=true&amp;characterEncoding=utf-8&amp;allowPublicKeyRetrieval=true&amp;&amp;useSSL=false
+     </p>
+     <p>
+      启动soul-admin --&gt; SoulAdminBootstrap
+     </p>
+     <p>
+      如果出现SelectorTypeEnum相关的错误，请切换到jdk8
+     </p>
+     <h3 id="soul-bootstrap">
+      启动Soul-Bootstrap
+     </h3>
+     <p>
+      启动soul-bootstrap --&gt; SoulBootstrapApplication
+     </p>
+     <h3 id="http-test">
+      启动HTTP test
+     </h3>
+     <p>
+      首先右键soul-test根目录下的pom.xml，选择 add as maven project,导入工程
     可能会出现依赖错误，将其版本替换为2.2.1，大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>        <span class="nt">&lt;dependency&gt;</span>
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>        <span class="nt">&lt;dependency&gt;</span>
             <span class="nt">&lt;groupId&gt;</span>org.dromara<span class="nt">&lt;/groupId&gt;</span>
             <span class="nt">&lt;artifactId&gt;</span>soul-spring-boot-starter-client-springmvc<span class="nt">&lt;/artifactId&gt;</span>
             <span class="nt">&lt;version&gt;</span>2.2.1<span class="nt">&lt;/version&gt;</span>
         <span class="nt">&lt;/dependency&gt;</span>
 </code></pre>
-    </div>
-    <p>
-     启动soul-test --&gt; soul-test-http --&gt; SoulTestHttpApplication
-    </p>
-    <h3 id="_4">
-     请求复现
-    </h3>
-    <p>
-     访问管理界面： http://localhost:9095/ ，查看插件列表 --&gt; divide ,表现正常
-    </p>
-    <p>
-     访问问题链接： http://localhost:9195/http/order/findById?id=1 ，可以看到出现了404
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="p">{</span>
+     </div>
+     <p>
+      启动soul-test --&gt; soul-test-http --&gt; SoulTestHttpApplication
+     </p>
+     <h3 id="_4">
+      请求复现
+     </h3>
+     <p>
+      访问管理界面： http://localhost:9095/ ，查看插件列表 --&gt; divide ,表现正常
+     </p>
+     <p>
+      访问问题链接： http://localhost:9195/http/order/findById?id=1 ，可以看到出现了404
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="p">{</span>
     <span class="nt">"timestamp"</span><span class="p">:</span> <span class="s2">"2021-01-18T02:18:19.557+0000"</span><span class="p">,</span>
     <span class="nt">"path"</span><span class="p">:</span> <span class="s2">"/"</span><span class="p">,</span>
     <span class="nt">"status"</span><span class="p">:</span> <span class="mi">404</span><span class="p">,</span>
@@ -158,40 +145,40 @@ git checkout 2.2.1
     <span class="nt">"requestId"</span><span class="p">:</span> <span class="s2">"84752141"</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     直接访问： http://localhost:8187/order/findById?id=11 ，正常的
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="p">{</span>
+     </div>
+     <p>
+      直接访问： http://localhost:8187/order/findById?id=11 ，正常的
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="p">{</span>
     <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"11"</span><span class="p">,</span>
     <span class="nt">"name"</span><span class="p">:</span> <span class="s2">"hello world findById"</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     OK，到这问题基本复现，下面开始debug
-    </p>
-    <h2 id="debug">
-     源码Debug
-    </h2>
-    <h3 id="_5">
-     查看日志进行切入
-    </h3>
-    <p>
-     根据老哥的提示，我们也看到了这个问题请求的相关日志，大致如下
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>o.d.soul.plugin.base.AbstractSoulPlugin  : divide selector success match , selector name :/http
+     </div>
+     <p>
+      OK，到这问题基本复现，下面开始debug
+     </p>
+     <h2 id="debug">
+      源码Debug
+     </h2>
+     <h3 id="_5">
+      查看日志进行切入
+     </h3>
+     <p>
+      根据老哥的提示，我们也看到了这个问题请求的相关日志，大致如下
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>o.d.soul.plugin.base.AbstractSoulPlugin  : divide selector success match , selector name :/http
 o.d.soul.plugin.base.AbstractSoulPlugin  : divide rule success match ,rule name :/http/order/findById
 o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is :http://192.168.101.104:8187?id=1111
 </code></pre>
-    </div>
-    <p>
-     最后一句urlpath非常的诡异，完整路径不对。我们就直接看下这个类： WebClientPlugin
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">WebClientPlugin</span>
+     </div>
+     <p>
+      最后一句urlpath非常的诡异，完整路径不对。我们就直接看下这个类： WebClientPlugin
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">WebClientPlugin</span>
     <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
         <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
@@ -208,18 +195,18 @@ o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is 
         <span class="k">return</span> <span class="n">handleRequestBody</span><span class="p">(</span><span class="n">requestBodySpec</span><span class="p">,</span> <span class="n">exchange</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">chain</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     在上面这个类中，可以看到就是单纯取路径，我们需要跟踪这个路径的来源
-    </p>
-    <h3 id="divide">
-     Divide查看
-    </h3>
-    <p>
-     在前面几篇分析中，我们知道divide plugin 是进行路由配置，并写入真实路径到exchange中的，我们去 DividePlugin 看看
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">DividePlugin</span>
+     </div>
+     <p>
+      在上面这个类中，可以看到就是单纯取路径，我们需要跟踪这个路径的来源
+     </p>
+     <h3 id="divide">
+      Divide查看
+     </h3>
+     <p>
+      在前面几篇分析中，我们知道divide plugin 是进行路由配置，并写入真实路径到exchange中的，我们去 DividePlugin 看看
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">DividePlugin</span>
     <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">doExecute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selector</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RuleData</span> <span class="n">rule</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CONTEXT</span><span class="p">);</span>
         <span class="k">assert</span> <span class="n">soulContext</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">;</span>
@@ -267,39 +254,39 @@ o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is 
         <span class="k">return</span> <span class="n">path</span><span class="p">;</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     在上面的分析中，发现取出来的都是null，而且没有看到url的设置之类的操作，divide竟然也是单纯的取值
-    </p>
-    <h3 id="url">
-     URL设置探索
-    </h3>
-    <p>
-     那我们需要继续探索url的是怎么设置进去的，通过上面的分析，目前有两者设置url的方式，如下面两段代码：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="kd">final</span> <span class="n">String</span> <span class="n">rewriteURI</span> <span class="o">=</span> <span class="p">(</span><span class="n">String</span><span class="p">)</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">REWRITE_URI</span><span class="p">);</span>
+     </div>
+     <p>
+      在上面的分析中，发现取出来的都是null，而且没有看到url的设置之类的操作，divide竟然也是单纯的取值
+     </p>
+     <h3 id="url">
+      URL设置探索
+     </h3>
+     <p>
+      那我们需要继续探索url的是怎么设置进去的，通过上面的分析，目前有两者设置url的方式，如下面两段代码：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">final</span> <span class="n">String</span> <span class="n">rewriteURI</span> <span class="o">=</span> <span class="p">(</span><span class="n">String</span><span class="p">)</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">REWRITE_URI</span><span class="p">);</span>
 <span class="kd">final</span> <span class="n">String</span> <span class="n">realUrl</span> <span class="o">=</span> <span class="n">soulContext</span><span class="p">.</span><span class="na">getRealUrl</span><span class="p">();</span>
 </code></pre>
-    </div>
-    <h4 id="exchangegetattributesgetconstantsrewrite_uri">
-     exchange.getAttributes().get(Constants.REWRITE_URI) 方式探索
-    </h4>
-    <p>
-     我们类比响应的设置方式，可以得到第一种URL设置的方式大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CLIENT_RESPONSE_RESULT_TYPE</span><span class="p">,</span> <span class="n">ResultEnum</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+     </div>
+     <h4 id="exchangegetattributesgetconstantsrewrite_uri">
+      exchange.getAttributes().get(Constants.REWRITE_URI) 方式探索
+     </h4>
+     <p>
+      我们类比响应的设置方式，可以得到第一种URL设置的方式大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CLIENT_RESPONSE_RESULT_TYPE</span><span class="p">,</span> <span class="n">ResultEnum</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
 
 <span class="c1">// 可以得到放Constants.REWRITE_URI的大致代码如下：</span>
 <span class="n">exchange</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">REWRITE_URI</span>
 </code></pre>
-    </div>
-    <p>
-     然后使用全局搜索：ctrl+shift+r ，exchange.getAttributes().put(Constants.REWRITE_URI
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">RewritePlugin</span>
+     </div>
+     <p>
+      然后使用全局搜索：ctrl+shift+r ，exchange.getAttributes().put(Constants.REWRITE_URI
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">RewritePlugin</span>
     <span class="kd">protected</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">doExecute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SelectorData</span> <span class="n">selector</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RuleData</span> <span class="n">rule</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">String</span> <span class="n">handle</span> <span class="o">=</span> <span class="n">rule</span><span class="p">.</span><span class="na">getHandle</span><span class="p">();</span>
         <span class="kd">final</span> <span class="n">RewriteHandle</span> <span class="n">rewriteHandle</span> <span class="o">=</span> <span class="n">GsonUtils</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">RewriteHandle</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
@@ -311,21 +298,21 @@ o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is 
         <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     搜索到唯一一处有这个代码的类： RewritePlugin ,然后我们打断点，然后并不能进入这个逻辑，查看控制台，它是关闭的。那就先放着，看第二种设置方式
-    </p>
-    <h3 id="soulcontextgetrealurl">
-     soulContext.getRealUrl() 的设置探索
-    </h3>
-    <p>
-     运用类比，我们可以猜测设置的代码应该是： soulContext.setRealUrl
-    </p>
-    <p>
-     我们进行搜索，也成功的找到了唯一的一处代码，在类 DefaultSoulContextBuilder 中，大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">DefaultSoulContextBuilder</span>
+     </div>
+     <p>
+      搜索到唯一一处有这个代码的类： RewritePlugin ,然后我们打断点，然后并不能进入这个逻辑，查看控制台，它是关闭的。那就先放着，看第二种设置方式
+     </p>
+     <h3 id="soulcontextgetrealurl">
+      soulContext.getRealUrl() 的设置探索
+     </h3>
+     <p>
+      运用类比，我们可以猜测设置的代码应该是： soulContext.setRealUrl
+     </p>
+     <p>
+      我们进行搜索，也成功的找到了唯一的一处代码，在类 DefaultSoulContextBuilder 中，大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">DefaultSoulContextBuilder</span>
     <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setSoulContextByHttp</span><span class="p">(</span><span class="kd">final</span> <span class="n">SoulContext</span> <span class="n">soulContext</span><span class="p">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">path</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">String</span> <span class="n">contextPath</span> <span class="o">=</span> <span class="s">"/"</span><span class="p">;</span>
         <span class="n">String</span><span class="o">[]</span> <span class="n">splitList</span> <span class="o">=</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">split</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">"/"</span><span class="p">);</span>
@@ -340,15 +327,15 @@ o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is 
         <span class="n">soulContext</span><span class="p">.</span><span class="na">setRealUrl</span><span class="p">(</span><span class="n">realUrl</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     我们在这个函数上打上断点，然而非常不幸的是，也没有进入。瞬间头上？？？？？？？，这是怎么肥事啊，都没设置
-    </p>
-    <p>
-     不抛弃不放弃，咱继续。看到realURL是从path来的，我们继续往上追求其来源，发现调用的是同一个类的下面这个函数 transform ,再上一层是 build
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">DefaultSoulContextBuilder</span>
+     </div>
+     <p>
+      我们在这个函数上打上断点，然而非常不幸的是，也没有进入。瞬间头上？？？？？？？，这是怎么肥事啊，都没设置
+     </p>
+     <p>
+      不抛弃不放弃，咱继续。看到realURL是从path来的，我们继续往上追求其来源，发现调用的是同一个类的下面这个函数 transform ,再上一层是 build
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">DefaultSoulContextBuilder</span>
     <span class="kd">private</span> <span class="n">SoulContext</span> <span class="nf">transform</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">String</span> <span class="n">appKey</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">APP_KEY</span><span class="p">);</span>
         <span class="kd">final</span> <span class="n">String</span> <span class="n">sign</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SIGN</span><span class="p">);</span>
@@ -385,12 +372,12 @@ o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is 
         <span class="k">return</span> <span class="n">transform</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">metaData</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     在build函数上打上断点，感谢老天，成功进入，通过调用栈发现，竟然是熟悉的 GlobalPlugin 进行调用的
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
+     </div>
+     <p>
+      在build函数上打上断点，感谢老天，成功进入，通过调用栈发现，竟然是熟悉的 GlobalPlugin 进行调用的
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">GlobalPlugin</span>
     <span class="kd">public</span> <span class="n">Mono</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerWebExchange</span> <span class="n">exchange</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SoulPluginChain</span> <span class="n">chain</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">.</span><span class="na">getRequest</span><span class="p">();</span>
         <span class="kd">final</span> <span class="n">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">();</span>
@@ -406,12 +393,12 @@ o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is 
         <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">exchange</span><span class="p">);</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     在下面的函数打上端口，逐步debug。在下面注释的地方可以看到：我们的是HTTP请求，但竟然走到Dubbo的逻辑里面去，这非常的不对劲
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">private</span> <span class="n">SoulContext</span> <span class="nf">transform</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      在下面的函数打上端口，逐步debug。在下面注释的地方可以看到：我们的是HTTP请求，但竟然走到Dubbo的逻辑里面去，这非常的不对劲
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">private</span> <span class="n">SoulContext</span> <span class="nf">transform</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// http://127.0.0.1:9195/http/order/findById?id=1111</span>
         <span class="kd">final</span> <span class="n">String</span> <span class="n">appKey</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">APP_KEY</span><span class="p">);</span>
         <span class="kd">final</span> <span class="n">String</span> <span class="n">sign</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SIGN</span><span class="p">);</span>
@@ -440,28 +427,28 @@ o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is 
         <span class="k">return</span> <span class="n">soulContext</span><span class="p">;</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     我们使用下面的diff工具，看看最新版本的代码和目前版本有什么区别：
-    </p>
-    <ul>
-     <li>
-      <a href="https://www.appinn.com/diffinity-for-win/">
-       Diffinity – 轻量级文件对比比较工具Windows
-      </a>
-     </li>
-    </ul>
-    <p>
-     <img alt="" src="./picture/httperror.png"/>
-    </p>
-    <p>
-     通过上图我们可以发现，最新版本中进行了更严谨的判断，并将默认的请求类型设置为了HTTP，这样再新版本代码中，就能走HTTP的处理逻辑
-    </p>
-    <p>
-     我们将代码修改一下，将HTTP设置为默认处理，代码大致如下：
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code>    <span class="kd">private</span> <span class="n">SoulContext</span> <span class="nf">transform</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">)</span> <span class="p">{</span>
+     </div>
+     <p>
+      我们使用下面的diff工具，看看最新版本的代码和目前版本有什么区别：
+     </p>
+     <ul>
+      <li>
+       <a href="https://www.appinn.com/diffinity-for-win/">
+        Diffinity – 轻量级文件对比比较工具Windows
+       </a>
+      </li>
+     </ul>
+     <p>
+      <img alt="" src="./picture/httperror.png"/>
+     </p>
+     <p>
+      通过上图我们可以发现，最新版本中进行了更严谨的判断，并将默认的请求类型设置为了HTTP，这样再新版本代码中，就能走HTTP的处理逻辑
+     </p>
+     <p>
+      我们将代码修改一下，将HTTP设置为默认处理，代码大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">private</span> <span class="n">SoulContext</span> <span class="nf">transform</span><span class="p">(</span><span class="kd">final</span> <span class="n">ServerHttpRequest</span> <span class="n">request</span><span class="p">,</span> <span class="kd">final</span> <span class="n">MetaData</span> <span class="n">metaData</span><span class="p">)</span> <span class="p">{</span>
         <span class="kd">final</span> <span class="n">String</span> <span class="n">appKey</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">APP_KEY</span><span class="p">);</span>
         <span class="kd">final</span> <span class="n">String</span> <span class="n">sign</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">SIGN</span><span class="p">);</span>
         <span class="kd">final</span> <span class="n">String</span> <span class="n">timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getHeaders</span><span class="p">().</span><span class="na">getFirst</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">TIMESTAMP</span><span class="p">);</span>
@@ -491,117 +478,128 @@ o.d.s.plugin.httpclient.WebClientPlugin  : you request,The resulting urlPath is 
         <span class="k">return</span> <span class="n">soulContext</span><span class="p">;</span>
     <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     重启，发送请求： http://127.0.0.1:9195/http/order/findById?id=1111 ，OK，非常感人的成功了
-    </p>
-    <div class="codehilite">
-     <pre><span></span><code><span class="p">{</span>
+     </div>
+     <p>
+      重启，发送请求： http://127.0.0.1:9195/http/order/findById?id=1111 ，OK，非常感人的成功了
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="p">{</span>
     <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"1111"</span><span class="p">,</span>
     <span class="nt">"name"</span><span class="p">:</span> <span class="s2">"hello world findById"</span>
 <span class="p">}</span>
 </code></pre>
-    </div>
-    <p>
-     到这，我们成功的定位并修复了这个错误（虽然没有啥用，但开心啊）
+     </div>
+     <p>
+      到这，我们成功的定位并修复了这个错误（虽然没有啥用，但开心啊）
+     </p>
+     <p>
+      这个bug的修复还可以从if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) 这端逻辑入手，需要跟踪一下metadata，这里就不展开讲，搞的话又是一篇番外
+     </p>
+     <h2 id="_6">
+      总结
+     </h2>
+     <p>
+      本篇文章中对Soul网关2.2.1版本中HTTP请求出现404的错误进行了详细的分析
+     </p>
+     <p>
+      通过上面的分析可以看出，在2.2.1中，不是Spring cloud的HTTP请求，都会发生错误，这个bug还是有点厉害的
+     </p>
+     <p>
+      还认识到了GlobalPlugin这个插件的重要作用，不仅设置了类型，还设置了真实的后端服务器路径，可以说这个插件很核心。rewrite插件也有设置路径这个功能
+     </p>
+     <p>
+      又有了新的认识，更新下我们请求处理图：
+     </p>
+     <p>
+      <img alt="" src="./picture/Soulprocessfirst.png"/>
+     </p>
+     <h2 id="soul">
+      Soul网关源码分析文章列表
+     </h2>
+     <h3 id="github">
+      Github
+     </h3>
+     <ul>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB1-%E6%A6%82%E8%A7%88.md">
+        Soul 源码阅读（一） 概览
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB2-%E5%88%9D%E6%AD%A5%E8%BF%90%E8%A1%8C.md">
+        Soul 源码阅读（二）代码初步运行
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB3-%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
+        Soul 源码阅读（三）HTTP请求处理概览
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB4-dubbo%E8%AF%B7%E6%B1%82%E6%A6%82%E8%A7%88.md">
+        Soul 网关源码阅读（四）Dubbo请求概览
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB5-%E8%AF%B7%E6%B1%82%E7%B1%BB%E5%9E%8B%E6%8E%A2%E7%B4%A2.md">
+        Soul网关源码阅读（五）请求类型探索
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB6-sofa%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
+        Soul 网关源码阅读（六）Sofa请求处理概览
+       </a>
+      </li>
+     </ul>
+     <h3 id="_7">
+      掘金
+     </h3>
+     <ul>
+      <li>
+       Soul 网关源码阅读（一） 概览 #掘金文章# https://juejin.cn/post/6917864624423436296
+      </li>
+      <li>
+       Soul 网关源码阅读（二）代码初步运行 #掘金文章# https://juejin.cn/post/6917865804121767944
+      </li>
+      <li>
+       Soul 网关源码阅读（三）请求处理概览 #掘金文章# https://juejin.cn/post/6917866538712334343
+      </li>
+      <li>
+       Soul 网关源码阅读（四）Dubbo请求概览 #掘金文章# https://juejin.cn/post/6917867369909977102
+      </li>
+      <li>
+       Soul网关源码阅读（五）请求类型探索 #掘金文章# https://juejin.cn/post/6918575905962983438
+      </li>
+      <li>
+       Soul 网关源码阅读（六）Sofa请求处理概览 #掘金文章# https://juejin.cn/post/6918736260467015693
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
     </p>
-    <p>
-     这个bug的修复还可以从if (Objects.nonNull(metaData) &amp;&amp; metaData.getEnabled()) 这端逻辑入手，需要跟踪一下metadata，这里就不展开讲，搞的话又是一篇番外
-    </p>
-    <h2 id="_6">
-     总结
-    </h2>
-    <p>
-     本篇文章中对Soul网关2.2.1版本中HTTP请求出现404的错误进行了详细的分析
-    </p>
-    <p>
-     通过上面的分析可以看出，在2.2.1中，不是Spring cloud的HTTP请求，都会发生错误，这个bug还是有点厉害的
-    </p>
-    <p>
-     还认识到了GlobalPlugin这个插件的重要作用，不仅设置了类型，还设置了真实的后端服务器路径，可以说这个插件很核心。rewrite插件也有设置路径这个功能
-    </p>
-    <p>
-     又有了新的认识，更新下我们请求处理图：
-    </p>
-    <p>
-     <img alt="" src="./picture/Soulprocessfirst.png"/>
-    </p>
-    <h2 id="soul">
-     Soul网关源码分析文章列表
-    </h2>
-    <h3 id="github">
-     Github
-    </h3>
-    <ul>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB1-%E6%A6%82%E8%A7%88.md">
-       Soul 源码阅读（一） 概览
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB2-%E5%88%9D%E6%AD%A5%E8%BF%90%E8%A1%8C.md">
-       Soul 源码阅读（二）代码初步运行
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB3-%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
-       Soul 源码阅读（三）HTTP请求处理概览
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB4-dubbo%E8%AF%B7%E6%B1%82%E6%A6%82%E8%A7%88.md">
-       Soul 网关源码阅读（四）Dubbo请求概览
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB5-%E8%AF%B7%E6%B1%82%E7%B1%BB%E5%9E%8B%E6%8E%A2%E7%B4%A2.md">
-       Soul网关源码阅读（五）请求类型探索
-      </a>
-     </li>
-     <li>
-      <a href="https://github.com/lw1243925457/SE-Notes/blob/master/profession/program/%E5%BC%80%E6%BA%90/soul/soul%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB6-sofa%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%A6%82%E8%A7%88.md">
-       Soul 网关源码阅读（六）Sofa请求处理概览
-      </a>
-     </li>
-    </ul>
-    <h3 id="_7">
-     掘金
-    </h3>
-    <ul>
-     <li>
-      Soul 网关源码阅读（一） 概览 #掘金文章# https://juejin.cn/post/6917864624423436296
-     </li>
-     <li>
-      Soul 网关源码阅读（二）代码初步运行 #掘金文章# https://juejin.cn/post/6917865804121767944
-     </li>
-     <li>
-      Soul 网关源码阅读（三）请求处理概览 #掘金文章# https://juejin.cn/post/6917866538712334343
-     </li>
-     <li>
-      Soul 网关源码阅读（四）Dubbo请求概览 #掘金文章# https://juejin.cn/post/6917867369909977102
-     </li>
-     <li>
-      Soul网关源码阅读（五）请求类型探索 #掘金文章# https://juejin.cn/post/6918575905962983438
-     </li>
-     <li>
-      Soul 网关源码阅读（六）Sofa请求处理概览 #掘金文章# https://juejin.cn/post/6918736260467015693
-     </li>
-    </ul>
-   </article>
+   </footer>
   </div>
   <!-- BG -->
   <div id="bg">
   </div>
   <!-- Scripts -->
-  <script src="../../assets/js/jquery.min.js">
+  <script src="../assets/js/jquery.min.js">
   </script>
-  <script src="../../assets/js/browser.min.js">
+  <script src="../assets/js/browser.min.js">
   </script>
-  <script src="../../assets/js/breakpoints.min.js">
+  <script src="../assets/js/breakpoints.min.js">
   </script>
-  <script src="../../assets/js/util.js">
+  <script src="../assets/js/util.js">
   </script>
-  <script src="../../assets/js/main.js">
+  <script src="../assets/js/main.js">
   </script>
  </body>
 </html>
