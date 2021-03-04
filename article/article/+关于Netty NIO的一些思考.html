@@ -1,0 +1,179 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="netty-nio">
+      关于Netty NIO的一些思考
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      介绍Netty NIO网络编程的高性能原理
+     </p>
+     <h2 id="_2">
+      高性能之道
+     </h2>
+     <p>
+      首先明确高性能的切入点：填充I/O操作的CPU空闲时间，提升CPU运行效率，重复使用CPU达到高性能目的
+     </p>
+     <p>
+      利用下面的三个手段到达高性能目标：
+     </p>
+     <ul>
+      <li>
+       1.reactor网络模型
+      </li>
+      <li>
+       2.多线程
+      </li>
+      <li>
+       3.零拷贝:这里就不进行讲解，Netty这块的核心是使用对外内存，减少拷贝次数
+      </li>
+     </ul>
+     <h3 id="reactor">
+      reactor网络模型和多线程
+     </h3>
+     <p>
+      在单线程的模式下，由于线程进行网络I/O操作会发生阻塞，导致CPU处于空闲
+     </p>
+     <p>
+      而reactor网络模型加多线程能充分的利用的CPU资源
+     </p>
+     <p>
+      如下图所示，NIO简化的关键模型如下：
+     </p>
+     <p>
+      <img alt="" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/acfbfb2ab24e466ebf33c76b4a46cdf5~tplv-k3u1fbpfcp-watermark.image"/>
+      )
+     </p>
+     <p>
+      两个关键地方：
+     </p>
+     <ul>
+      <li>
+       Boss线程池
+      </li>
+      <li>
+       Worker线程池
+      </li>
+     </ul>
+     <p>
+      在Boss线程池中，运行接收请求建立连接工作的线程，这部分工作不多，大部分情况一个线程就够。主要的目的就是不就行逻辑处理，先建立连接，把请求放到后面Worker中
+     </p>
+     <p>
+      Worker线程池的工作就相对比较多，所有也比较核心
+     </p>
+     <p>
+      首先明确一个概念：Worker线程池中一个线程会绑定多个Socket，而该线程会轮询绑定的所有Socket，逐一的对读写事件进行操作
+     </p>
+     <p>
+      比如当前线程绑定了三个Socket，第二三分别来了读写事件：
+     </p>
+     <ul>
+      <li>
+       Socket1：无事件
+      </li>
+      <li>
+       Socket2：读事件
+      </li>
+      <li>
+       Socket3：写事件
+      </li>
+     </ul>
+     <p>
+      那线程的工作流程就会如下：
+     </p>
+     <ul>
+      <li>
+       轮询到Socket1，发现没有事件，直接跳过
+      </li>
+      <li>
+       轮询到Socket2，发现读事件，读取相应的数据，进行处理（处理不应该阻塞，便于进行下一个Socket的事件处理）
+      </li>
+      <li>
+       上一步处理完成后，轮询Socket3，发现写事件，调用相应的接口，发送数据出去
+      </li>
+     </ul>
+     <p>
+      结合上非阻塞异步编程，发现线程基本上都是在工作的，效率极高
+     </p>
+     <p>
+      通过上面的分析也发现，在Netty使用中，不要在Handler中使用阻塞操作，耗时的操作请使用多线程进行异步
+     </p>
+     <p>
+      更多的详情请查看下面的两个参考链接，特别是kafka的，我是看了这篇文章才想通了一直不懂的Worker处理那块
+     </p>
+     <h2 id="_3">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://www.infoq.cn/article/netty-high-performance">
+        Netty 系列之 Netty 高性能之道
+       </a>
+      </li>
+      <li>
+       <a href="https://time.geekbang.org/column/article/231139">
+        07 | SocketServer（上）：Kafka到底是怎么应用NIO实现网络通信的？
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
