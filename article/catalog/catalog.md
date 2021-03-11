@@ -13,9 +13,9 @@
     - [zsh.md](./article/article/+zsh.html)
 - software
     - docker
-        - [docker中各数据库使用.md](./article/article/+docker中各数据库使用.html)
         - [docker使用记录.md](./article/article/+docker使用记录.html)
         - [docker容器内存和CPU使用限制.md](./article/article/+docker容器内存和CPU使用限制.html)
+        - [docker常用容器命令记录.md](./article/article/+docker常用容器命令记录.html)
         - [docker镜像使用记录.md](./article/article/+docker镜像使用记录.html)
         - [docker默认目录的转移.md](./article/article/+docker默认目录的转移.html)
         - [Java程序镜像制作.md](./article/article/+Java程序镜像制作.html)
@@ -130,6 +130,7 @@
         - [soul源码解析9-插件配置加载初探.md](./article/article/+soul源码解析9-插件配置加载初探.html)
         - [soul源码解析番外篇1-HTTP示例参数请求错误.md](./article/article/+soul源码解析番外篇1-HTTP示例参数请求错误.html)
         - [Soul源码解析目录.md](./article/article/+Soul源码解析目录.html)
+        - [Soul网关源码解析27-Zookeeper注册中心.md](./article/article/+Soul网关源码解析27-Zookeeper注册中心.html)
     - springcloudGateway
         - [Filter链的生成与触发.md](./article/article/+Filter链的生成与触发.html)
         - [SpringCloudGateway.md](./article/article/+SpringCloudGateway.html)

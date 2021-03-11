@@ -1,0 +1,112 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="docker">
+      Docker中数据库的使用
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      数据库
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code>docker run --name mysql -p <span class="m">3306</span>:3306 -e <span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>root -d mysql:latest
+docker run -dit --name neo4j -p <span class="m">7474</span>:7474 -p <span class="m">7687</span>:7687 --env<span class="o">=</span><span class="nv">NEO4J_AUTH</span><span class="o">=</span>none neo4j:3.5.13
+docker run -dit --name redis -p <span class="m">6379</span>:6379 redis
+docker run -dit --name mongo -p <span class="m">27017</span>:27017 mongo
+</code></pre>
+     </div>
+     <h2 id="_2">
+      服务发现
+     </h2>
+     <h3 id="etcd">
+      etcd
+     </h3>
+     <p>
+      ```shell script
+NODE1=192.168.1.21
+DATA_DIR="etcd-data"
+     </p>
+     <h1 id="v3">
+      v3
+     </h1>
+     <p>
+      REGISTRY=gcr.io/etcd-development/etcd
+     </p>
+     <p>
+      docker run \
+  -p 2379:2379 \
+  -p 2380:2380 \
+  --volume=${DATA_DIR}:/etcd-data \
+  --name etcd ${REGISTRY}:latest \
+  /usr/local/bin/etcd \
+  --data-dir=/etcd-data --name node1 \
+  --initial-advertise-peer-urls http://${NODE1}:2380 --listen-peer-urls http://0.0.0.0:2380 \
+  --advertise-client-urls http://${NODE1}:2379 --listen-client-urls http://0.0.0.0:2379 \
+  --initial-cluster node1=http://${NODE1}:2380
+     </p>
+     <p>
+      docker run -p 2379:2379 -p 2380:2380 --volume=D:\temp\etcd:/etcd-data --name etcd quay.io/coreos/etcd:latest /usr/local/bin/etcd --data-dir=/etcd-data --name node1 --initial-advertise-peer-urls http://192.168.101.104:2380 --listen-peer-urls http://0.0.0.0:2380 --advertise-client-urls http://192.168.101.104:2379 --listen-client-urls http://0.0.0.0:2379 --initial-cluster node1=http://192.168.101.104:2380
+     </p>
+     <p>
+      docker pull buddho/etcd-browser
+docker run --rm --name etcd-browser -p 0.0.0.0:8000:8000 --env ETCD_HOST=10.10.0.1 --env AUTH_PASS=doe -t -i buddho/etcd-browser
+```
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
