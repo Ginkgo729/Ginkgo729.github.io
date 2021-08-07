@@ -51,22 +51,22 @@
 docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">首先运行</span><span class="n">Soul</span><span class="o">-</span><span class="k">Admin</span>
+      <pre><span></span><code>&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;首先运行Soul-Admin
 
-<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">配置</span><span class="n">Soul</span><span class="o">-</span><span class="n">Bootstrap</span><span class="err">，配置</span><span class="n">websocket同步方式</span><span class="err">，运行</span><span class="n">Soul</span><span class="o">-</span><span class="n">Bootstrap</span><span class="err">，大致如下：</span>
+&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;配置Soul-Bootstrap，配置websocket同步方式，运行Soul-Bootstrap，大致如下：
 
-<span class="o">```</span><span class="n">xml</span>
-<span class="n">soul</span> <span class="p">:</span>
-    <span class="n">file</span><span class="p">:</span>
-      <span class="n">enabled</span><span class="p">:</span> <span class="k">true</span>
-    <span class="n">corss</span><span class="p">:</span>
-      <span class="n">enabled</span><span class="p">:</span> <span class="k">true</span>
-    <span class="n">dubbo</span> <span class="p">:</span>
-      <span class="k">parameter</span><span class="p">:</span> <span class="n">multi</span>
-    <span class="o">#</span> <span class="err">把</span> <span class="n">websocket</span> <span class="err">数据同步打开</span>
-    <span class="n">sync</span><span class="p">:</span>
-        <span class="n">websocket</span> <span class="p">:</span>
-             <span class="n">urls</span><span class="p">:</span> <span class="n">ws</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">9095</span><span class="o">/</span><span class="n">websocket</span>
+```xml
+soul :
+    file:
+      enabled: true
+    corss:
+      enabled: true
+    dubbo :
+      parameter: multi
+    # 把 websocket 数据同步打开
+    sync:
+        websocket :
+             urls: ws://localhost:9095/websocket
 </code></pre>
      </div>
      <p>

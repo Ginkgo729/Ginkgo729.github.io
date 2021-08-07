@@ -74,12 +74,12 @@ docker <span class="nb">exec</span> -ti redis redis-cli shutdown
       外网访问
      </h3>
      <div class="codehilite">
-      <pre><span></span><code><span class="err"># 打开配置文件把下面对应的注释掉</span>
-<span class="err"># bind 127.0.0.1 </span>
-<span class="err"># Redis默认不是以守护进程的方式运行，可以通过该配置项修改，使用yes启用守护进程，设置为no</span>
-<span class="err">daemonize no</span>
-<span class="err"># 保护模式</span>
-<span class="err">protected-mode no </span>
+      <pre><span></span><code># 打开配置文件把下面对应的注释掉
+# bind 127.0.0.1 
+# Redis默认不是以守护进程的方式运行，可以通过该配置项修改，使用yes启用守护进程，设置为no
+daemonize no
+# 保护模式
+protected-mode no 
 </code></pre>
      </div>
      <h3 id="_4">

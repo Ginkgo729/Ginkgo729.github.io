@@ -58,6 +58,335 @@ vim zshInstall.sh
 sh zshInstall.sh
 </code></pre>
      </div>
+     <p>
+      install.sh 相关内容：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="ch">#!/bin/sh</span>
+<span class="c1">#</span>
+<span class="c1"># This script should be run via curl:</span>
+<span class="c1">#   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"</span>
+<span class="c1"># or via wget:</span>
+<span class="c1">#   sh -c "$(wget -qO- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"</span>
+<span class="c1"># or via fetch:</span>
+<span class="c1">#   sh -c "$(fetch -o - https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"</span>
+<span class="c1">#</span>
+<span class="c1"># As an alternative, you can first download the install script and run it afterwards:</span>
+<span class="c1">#   wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh</span>
+<span class="c1">#   sh install.sh</span>
+<span class="c1">#</span>
+<span class="c1"># You can tweak the install behavior by setting variables when running the script. For</span>
+<span class="c1"># example, to change the path to the Oh My Zsh repository:</span>
+<span class="c1">#   ZSH=~/.zsh sh install.sh</span>
+<span class="c1">#</span>
+<span class="c1"># Respects the following environment variables:</span>
+<span class="c1">#   ZSH     - path to the Oh My Zsh repository folder (default: $HOME/.oh-my-zsh)</span>
+<span class="c1">#   REPO    - name of the GitHub repo to install from (default: ohmyzsh/ohmyzsh)</span>
+<span class="c1">#   REMOTE  - full remote URL of the git repo to install (default: GitHub via HTTPS)</span>
+<span class="c1">#   BRANCH  - branch to check out immediately after install (default: master)</span>
+<span class="c1">#</span>
+<span class="c1"># Other options:</span>
+<span class="c1">#   CHSH       - 'no' means the installer will not change the default shell (default: yes)</span>
+<span class="c1">#   RUNZSH     - 'no' means the installer will not run zsh after the install (default: yes)</span>
+<span class="c1">#   KEEP_ZSHRC - 'yes' means the installer will not replace an existing .zshrc (default: no)</span>
+<span class="c1">#</span>
+<span class="c1"># You can also pass some arguments to the install script to set some these options:</span>
+<span class="c1">#   --skip-chsh: has the same behavior as setting CHSH to 'no'</span>
+<span class="c1">#   --unattended: sets both CHSH and RUNZSH to 'no'</span>
+<span class="c1">#   --keep-zshrc: sets KEEP_ZSHRC to 'yes'</span>
+<span class="c1"># For example:</span>
+<span class="c1">#   sh install.sh --unattended</span>
+<span class="c1"># or:</span>
+<span class="c1">#   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended</span>
+<span class="c1">#</span>
+<span class="nb">set</span> -e
+
+<span class="c1"># Track if $ZSH was provided</span>
+<span class="nv">custom_zsh</span><span class="o">=</span><span class="si">${</span><span class="nv">ZSH</span><span class="p">:+yes</span><span class="si">}</span>
+
+<span class="c1"># Default settings</span>
+<span class="nv">ZSH</span><span class="o">=</span><span class="si">${</span><span class="nv">ZSH</span><span class="k">:-</span><span class="p">~/.oh-my-zsh</span><span class="si">}</span>
+<span class="nv">REPO</span><span class="o">=</span><span class="si">${</span><span class="nv">REPO</span><span class="k">:-</span><span class="nv">ohmyzsh</span><span class="p">/ohmyzsh</span><span class="si">}</span>
+<span class="nv">REMOTE</span><span class="o">=</span><span class="si">${</span><span class="nv">REMOTE</span><span class="k">:-</span><span class="nv">https</span><span class="p">://github.com/</span><span class="si">${</span><span class="nv">REPO</span><span class="si">}</span><span class="p">.git</span><span class="si">}</span>
+<span class="nv">BRANCH</span><span class="o">=</span><span class="si">${</span><span class="nv">BRANCH</span><span class="k">:-</span><span class="nv">master</span><span class="si">}</span>
+
+<span class="c1"># Other options</span>
+<span class="nv">CHSH</span><span class="o">=</span><span class="si">${</span><span class="nv">CHSH</span><span class="k">:-</span><span class="nv">yes</span><span class="si">}</span>
+<span class="nv">RUNZSH</span><span class="o">=</span><span class="si">${</span><span class="nv">RUNZSH</span><span class="k">:-</span><span class="nv">yes</span><span class="si">}</span>
+<span class="nv">KEEP_ZSHRC</span><span class="o">=</span><span class="si">${</span><span class="nv">KEEP_ZSHRC</span><span class="k">:-</span><span class="nv">no</span><span class="si">}</span>
+
+
+command_exists<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">command</span> -v <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span> &gt;/dev/null <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+<span class="o">}</span>
+
+fmt_error<span class="o">()</span> <span class="o">{</span>
+  <span class="nb">printf</span> <span class="s1">'%sError: %s%s\n'</span> <span class="s2">"</span><span class="nv">$BOLD$RED</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$*</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$RESET</span><span class="s2">"</span> &gt;<span class="p">&amp;</span><span class="m">2</span>
+<span class="o">}</span>
+
+fmt_underline<span class="o">()</span> <span class="o">{</span>
+  <span class="nb">printf</span> <span class="s1">'\033[4m%s\033[24m\n'</span> <span class="s2">"</span><span class="nv">$*</span><span class="s2">"</span>
+<span class="o">}</span>
+
+fmt_code<span class="o">()</span> <span class="o">{</span>
+  <span class="c1"># shellcheck disable=SC2016 # backtic in single-quote</span>
+  <span class="nb">printf</span> <span class="s1">'`\033[38;5;247m%s%s`\n'</span> <span class="s2">"</span><span class="nv">$*</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$RESET</span><span class="s2">"</span>
+<span class="o">}</span>
+
+setup_color<span class="o">()</span> <span class="o">{</span>
+    <span class="c1"># Only use colors if connected to a terminal</span>
+    <span class="k">if</span> <span class="o">[</span> -t <span class="m">1</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+        <span class="nv">RED</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s1">'\033[31m'</span><span class="k">)</span>
+        <span class="nv">GREEN</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s1">'\033[32m'</span><span class="k">)</span>
+        <span class="nv">YELLOW</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s1">'\033[33m'</span><span class="k">)</span>
+        <span class="nv">BLUE</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s1">'\033[34m'</span><span class="k">)</span>
+        <span class="nv">BOLD</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s1">'\033[1m'</span><span class="k">)</span>
+        <span class="nv">RESET</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span> <span class="s1">'\033[m'</span><span class="k">)</span>
+    <span class="k">else</span>
+        <span class="nv">RED</span><span class="o">=</span><span class="s2">""</span>
+        <span class="nv">GREEN</span><span class="o">=</span><span class="s2">""</span>
+        <span class="nv">YELLOW</span><span class="o">=</span><span class="s2">""</span>
+        <span class="nv">BLUE</span><span class="o">=</span><span class="s2">""</span>
+        <span class="nv">BOLD</span><span class="o">=</span><span class="s2">""</span>
+        <span class="nv">RESET</span><span class="o">=</span><span class="s2">""</span>
+    <span class="k">fi</span>
+<span class="o">}</span>
+
+setup_ohmyzsh<span class="o">()</span> <span class="o">{</span>
+  <span class="c1"># Prevent the cloned repository from having insecure permissions. Failing to do</span>
+  <span class="c1"># so causes compinit() calls to fail with "command not found: compdef" errors</span>
+  <span class="c1"># for users with insecure umasks (e.g., "002", allowing group writability). Note</span>
+  <span class="c1"># that this will be ignored under Cygwin by default, as Windows ACLs take</span>
+  <span class="c1"># precedence over umasks except for filesystems mounted with option "noacl".</span>
+  <span class="nb">umask</span> g-w,o-w
+
+  <span class="nb">echo</span> <span class="s2">"</span><span class="si">${</span><span class="nv">BLUE</span><span class="si">}</span><span class="s2">Cloning Oh My Zsh...</span><span class="si">${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2">"</span>
+
+  command_exists git <span class="o">||</span> <span class="o">{</span>
+    fmt_error <span class="s2">"git is not installed"</span>
+    <span class="nb">exit</span> <span class="m">1</span>
+  <span class="o">}</span>
+
+  <span class="nv">ostype</span><span class="o">=</span><span class="k">$(</span>uname<span class="k">)</span>
+  <span class="k">if</span> <span class="o">[</span> -z <span class="s2">"</span><span class="si">${</span><span class="nv">ostype</span><span class="p">%CYGWIN*</span><span class="si">}</span><span class="s2">"</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> git --version <span class="p">|</span> grep -q msysgit<span class="p">;</span> <span class="k">then</span>
+    fmt_error <span class="s2">"Windows/MSYS Git is not supported on Cygwin"</span>
+    fmt_error <span class="s2">"Make sure the Cygwin git package is installed and is first on the \$PATH"</span>
+    <span class="nb">exit</span> <span class="m">1</span>
+  <span class="k">fi</span>
+
+  git clone -c core.eol<span class="o">=</span>lf -c core.autocrlf<span class="o">=</span><span class="nb">false</span> <span class="se">\</span>
+    -c fsck.zeroPaddedFilemode<span class="o">=</span>ignore <span class="se">\</span>
+    -c fetch.fsck.zeroPaddedFilemode<span class="o">=</span>ignore <span class="se">\</span>
+    -c receive.fsck.zeroPaddedFilemode<span class="o">=</span>ignore <span class="se">\</span>
+    --depth<span class="o">=</span><span class="m">1</span> --branch <span class="s2">"</span><span class="nv">$BRANCH</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$REMOTE</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$ZSH</span><span class="s2">"</span> <span class="o">||</span> <span class="o">{</span>
+    fmt_error <span class="s2">"git clone of oh-my-zsh repo failed"</span>
+    <span class="nb">exit</span> <span class="m">1</span>
+  <span class="o">}</span>
+
+  <span class="nb">echo</span>
+<span class="o">}</span>
+
+setup_zshrc<span class="o">()</span> <span class="o">{</span>
+  <span class="c1"># Keep most recent old .zshrc at .zshrc.pre-oh-my-zsh, and older ones</span>
+  <span class="c1"># with datestamp of installation that moved them aside, so we never actually</span>
+  <span class="c1"># destroy a user's original zshrc</span>
+  <span class="nb">echo</span> <span class="s2">"</span><span class="si">${</span><span class="nv">BLUE</span><span class="si">}</span><span class="s2">Looking for an existing zsh config...</span><span class="si">${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2">"</span>
+
+  <span class="c1"># Must use this exact name so uninstall.sh can find it</span>
+  <span class="nv">OLD_ZSHRC</span><span class="o">=</span>~/.zshrc.pre-oh-my-zsh
+  <span class="k">if</span> <span class="o">[</span> -f ~/.zshrc <span class="o">]</span> <span class="o">||</span> <span class="o">[</span> -h ~/.zshrc <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="c1"># Skip this if the user doesn't want to replace an existing .zshrc</span>
+    <span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$KEEP_ZSHRC</span><span class="s2">"</span> <span class="o">=</span> yes <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+      <span class="nb">echo</span> <span class="s2">"</span><span class="si">${</span><span class="nv">YELLOW</span><span class="si">}</span><span class="s2">Found ~/.zshrc.</span><span class="si">${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2"> </span><span class="si">${</span><span class="nv">GREEN</span><span class="si">}</span><span class="s2">Keeping...</span><span class="si">${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">return</span>
+    <span class="k">fi</span>
+    <span class="k">if</span> <span class="o">[</span> -e <span class="s2">"</span><span class="nv">$OLD_ZSHRC</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+      <span class="nv">OLD_OLD_ZSHRC</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">OLD_ZSHRC</span><span class="si">}</span><span class="s2">-</span><span class="k">$(</span>date +%Y-%m-%d_%H-%M-%S<span class="k">)</span><span class="s2">"</span>
+      <span class="k">if</span> <span class="o">[</span> -e <span class="s2">"</span><span class="nv">$OLD_OLD_ZSHRC</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+        fmt_error <span class="s2">"</span><span class="nv">$OLD_OLD_ZSHRC</span><span class="s2"> exists. Can't back up </span><span class="si">${</span><span class="nv">OLD_ZSHRC</span><span class="si">}</span><span class="s2">"</span>
+        fmt_error <span class="s2">"re-run the installer again in a couple of seconds"</span>
+        <span class="nb">exit</span> <span class="m">1</span>
+      <span class="k">fi</span>
+      mv <span class="s2">"</span><span class="nv">$OLD_ZSHRC</span><span class="s2">"</span> <span class="s2">"</span><span class="si">${</span><span class="nv">OLD_OLD_ZSHRC</span><span class="si">}</span><span class="s2">"</span>
+
+      <span class="nb">echo</span> <span class="s2">"</span><span class="si">${</span><span class="nv">YELLOW</span><span class="si">}</span><span class="s2">Found old ~/.zshrc.pre-oh-my-zsh."</span> <span class="se">\</span>
+        <span class="s2">"</span><span class="si">${</span><span class="nv">GREEN</span><span class="si">}</span><span class="s2">Backing up to </span><span class="si">${</span><span class="nv">OLD_OLD_ZSHRC</span><span class="si">}${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">fi</span>
+    <span class="nb">echo</span> <span class="s2">"</span><span class="si">${</span><span class="nv">YELLOW</span><span class="si">}</span><span class="s2">Found ~/.zshrc.</span><span class="si">${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2"> </span><span class="si">${</span><span class="nv">GREEN</span><span class="si">}</span><span class="s2">Backing up to </span><span class="si">${</span><span class="nv">OLD_ZSHRC</span><span class="si">}${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2">"</span>
+    mv ~/.zshrc <span class="s2">"</span><span class="nv">$OLD_ZSHRC</span><span class="s2">"</span>
+  <span class="k">fi</span>
+
+  <span class="nb">echo</span> <span class="s2">"</span><span class="si">${</span><span class="nv">GREEN</span><span class="si">}</span><span class="s2">Using the Oh My Zsh template file and adding it to ~/.zshrc.</span><span class="si">${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2">"</span>
+
+  sed <span class="s2">"/^export ZSH=/ c\\</span>
+<span class="s2">export ZSH=\"</span><span class="nv">$ZSH</span><span class="s2">\"</span>
+<span class="s2">"</span> <span class="s2">"</span><span class="nv">$ZSH</span><span class="s2">/templates/zshrc.zsh-template"</span> &gt; ~/.zshrc-omztemp
+    mv -f ~/.zshrc-omztemp ~/.zshrc
+
+    <span class="nb">echo</span>
+<span class="o">}</span>
+
+setup_shell<span class="o">()</span> <span class="o">{</span>
+  <span class="c1"># Skip setup if the user wants or stdin is closed (not running interactively).</span>
+  <span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$CHSH</span><span class="s2">"</span> <span class="o">=</span> no <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="k">return</span>
+  <span class="k">fi</span>
+
+  <span class="c1"># If this user's login shell is already "zsh", do not attempt to switch.</span>
+  <span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="k">$(</span>basename -- <span class="s2">"</span><span class="nv">$SHELL</span><span class="s2">"</span><span class="k">)</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"zsh"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="k">return</span>
+  <span class="k">fi</span>
+
+  <span class="c1"># If this platform doesn't provide a "chsh" command, bail out.</span>
+  <span class="k">if</span> ! command_exists chsh<span class="p">;</span> <span class="k">then</span>
+    cat <span class="s">&lt;&lt;EOF</span>
+<span class="s">I can't change your shell automatically because this system does not have chsh.</span>
+<span class="s">${BLUE}Please manually change your default shell to zsh${RESET}</span>
+<span class="s">EOF</span>
+    <span class="k">return</span>
+  <span class="k">fi</span>
+
+  <span class="nb">echo</span> <span class="s2">"</span><span class="si">${</span><span class="nv">BLUE</span><span class="si">}</span><span class="s2">Time to change your default shell to zsh:</span><span class="si">${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2">"</span>
+
+  <span class="c1"># Prompt for user choice on changing the default login shell</span>
+  <span class="nb">printf</span> <span class="s1">'%sDo you want to change your default shell to zsh? [Y/n]%s '</span> <span class="se">\</span>
+    <span class="s2">"</span><span class="nv">$YELLOW</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$RESET</span><span class="s2">"</span>
+  <span class="nb">read</span> -r opt
+  <span class="k">case</span> <span class="nv">$opt</span> <span class="k">in</span>
+    y*<span class="p">|</span>Y*<span class="p">|</span><span class="s2">""</span><span class="o">)</span> <span class="nb">echo</span> <span class="s2">"Changing the shell..."</span> <span class="p">;;</span>
+    n*<span class="p">|</span>N*<span class="o">)</span> <span class="nb">echo</span> <span class="s2">"Shell change skipped."</span><span class="p">;</span> <span class="k">return</span> <span class="p">;;</span>
+    *<span class="o">)</span> <span class="nb">echo</span> <span class="s2">"Invalid choice. Shell change skipped."</span><span class="p">;</span> <span class="k">return</span> <span class="p">;;</span>
+  <span class="k">esac</span>
+
+  <span class="c1"># Check if we're running on Termux</span>
+  <span class="k">case</span> <span class="s2">"</span><span class="nv">$PREFIX</span><span class="s2">"</span> <span class="k">in</span>
+    *com.termux*<span class="o">)</span> <span class="nv">termux</span><span class="o">=</span>true<span class="p">;</span> <span class="nv">zsh</span><span class="o">=</span>zsh <span class="p">;;</span>
+    *<span class="o">)</span> <span class="nv">termux</span><span class="o">=</span><span class="nb">false</span> <span class="p">;;</span>
+  <span class="k">esac</span>
+
+  <span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$termux</span><span class="s2">"</span> !<span class="o">=</span> <span class="nb">true</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="c1"># Test for the right location of the "shells" file</span>
+    <span class="k">if</span> <span class="o">[</span> -f /etc/shells <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+      <span class="nv">shells_file</span><span class="o">=</span>/etc/shells
+    <span class="k">elif</span> <span class="o">[</span> -f /usr/share/defaults/etc/shells <span class="o">]</span><span class="p">;</span> <span class="k">then</span> <span class="c1"># Solus OS</span>
+      <span class="nv">shells_file</span><span class="o">=</span>/usr/share/defaults/etc/shells
+    <span class="k">else</span>
+      fmt_error <span class="s2">"could not find /etc/shells file. Change your default shell manually."</span>
+      <span class="k">return</span>
+    <span class="k">fi</span>
+
+    <span class="c1"># Get the path to the right zsh binary</span>
+    <span class="c1"># 1. Use the most preceding one based on $PATH, then check that it's in the shells file</span>
+    <span class="c1"># 2. If that fails, get a zsh path from the shells file, then check it actually exists</span>
+    <span class="k">if</span> ! <span class="nv">zsh</span><span class="o">=</span><span class="k">$(</span><span class="nb">command</span> -v zsh<span class="k">)</span> <span class="o">||</span> ! grep -qx <span class="s2">"</span><span class="nv">$zsh</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$shells_file</span><span class="s2">"</span><span class="p">;</span> <span class="k">then</span>
+      <span class="k">if</span> ! <span class="nv">zsh</span><span class="o">=</span><span class="k">$(</span>grep <span class="s1">'^/.*/zsh$'</span> <span class="s2">"</span><span class="nv">$shells_file</span><span class="s2">"</span> <span class="p">|</span> tail -1<span class="k">)</span> <span class="o">||</span> <span class="o">[</span> ! -f <span class="s2">"</span><span class="nv">$zsh</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+        fmt_error <span class="s2">"no zsh binary found or not present in '</span><span class="nv">$shells_file</span><span class="s2">'"</span>
+        fmt_error <span class="s2">"change your default shell manually."</span>
+        <span class="k">return</span>
+      <span class="k">fi</span>
+    <span class="k">fi</span>
+  <span class="k">fi</span>
+
+  <span class="c1"># We're going to change the default shell, so back up the current one</span>
+  <span class="k">if</span> <span class="o">[</span> -n <span class="s2">"</span><span class="nv">$SHELL</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span> <span class="s2">"</span><span class="nv">$SHELL</span><span class="s2">"</span> &gt; ~/.shell.pre-oh-my-zsh
+  <span class="k">else</span>
+    grep <span class="s2">"^</span><span class="nv">$USERNAME</span><span class="s2">:"</span> /etc/passwd <span class="p">|</span> awk -F: <span class="s1">'{print $7}'</span> &gt; ~/.shell.pre-oh-my-zsh
+  <span class="k">fi</span>
+
+  <span class="c1"># Actually change the default shell to zsh</span>
+  <span class="k">if</span> ! chsh -s <span class="s2">"</span><span class="nv">$zsh</span><span class="s2">"</span><span class="p">;</span> <span class="k">then</span>
+    fmt_error <span class="s2">"chsh command unsuccessful. Change your default shell manually."</span>
+  <span class="k">else</span>
+    <span class="nb">export</span> <span class="nv">SHELL</span><span class="o">=</span><span class="s2">"</span><span class="nv">$zsh</span><span class="s2">"</span>
+    <span class="nb">echo</span> <span class="s2">"</span><span class="si">${</span><span class="nv">GREEN</span><span class="si">}</span><span class="s2">Shell successfully changed to '</span><span class="nv">$zsh</span><span class="s2">'.</span><span class="si">${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">fi</span>
+
+  <span class="nb">echo</span>
+<span class="o">}</span>
+
+main<span class="o">()</span> <span class="o">{</span>
+  <span class="c1"># Run as unattended if stdin is not a tty</span>
+  <span class="k">if</span> <span class="o">[</span> ! -t <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nv">RUNZSH</span><span class="o">=</span>no
+    <span class="nv">CHSH</span><span class="o">=</span>no
+  <span class="k">fi</span>
+
+  <span class="c1"># Parse arguments</span>
+  <span class="k">while</span> <span class="o">[</span> <span class="nv">$#</span> -gt <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="nv">$1</span> <span class="k">in</span>
+      --unattended<span class="o">)</span> <span class="nv">RUNZSH</span><span class="o">=</span>no<span class="p">;</span> <span class="nv">CHSH</span><span class="o">=</span>no <span class="p">;;</span>
+      --skip-chsh<span class="o">)</span> <span class="nv">CHSH</span><span class="o">=</span>no <span class="p">;;</span>
+      --keep-zshrc<span class="o">)</span> <span class="nv">KEEP_ZSHRC</span><span class="o">=</span>yes <span class="p">;;</span>
+    <span class="k">esac</span>
+    <span class="nb">shift</span>
+  <span class="k">done</span>
+
+  setup_color
+
+  <span class="k">if</span> ! command_exists zsh<span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span> <span class="s2">"</span><span class="si">${</span><span class="nv">YELLOW</span><span class="si">}</span><span class="s2">Zsh is not installed.</span><span class="si">${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2"> Please install zsh first."</span>
+    <span class="nb">exit</span> <span class="m">1</span>
+  <span class="k">fi</span>
+
+  <span class="k">if</span> <span class="o">[</span> -d <span class="s2">"</span><span class="nv">$ZSH</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span> <span class="s2">"</span><span class="si">${</span><span class="nv">YELLOW</span><span class="si">}</span><span class="s2">The \$ZSH folder already exists (</span><span class="nv">$ZSH</span><span class="s2">).</span><span class="si">${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$custom_zsh</span><span class="s2">"</span> <span class="o">=</span> yes <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+      cat <span class="s">&lt;&lt;EOF</span>
+
+<span class="s">You ran the installer with the \$ZSH setting or the \$ZSH variable is</span>
+<span class="s">exported. You have 3 options:</span>
+
+<span class="s">1. Unset the ZSH variable when calling the installer:</span>
+<span class="s">   $(fmt_code "ZSH= sh install.sh")</span>
+<span class="s">2. Install Oh My Zsh to a directory that doesn't exist yet:</span>
+<span class="s">   $(fmt_code "ZSH=path/to/new/ohmyzsh/folder sh install.sh")</span>
+<span class="s">3. (Caution) If the folder doesn't contain important information,</span>
+<span class="s">   you can just remove it with $(fmt_code "rm -r $ZSH")</span>
+
+<span class="s">EOF</span>
+    <span class="k">else</span>
+      <span class="nb">echo</span> <span class="s2">"You'll need to remove it if you want to reinstall."</span>
+    <span class="k">fi</span>
+    <span class="nb">exit</span> <span class="m">1</span>
+  <span class="k">fi</span>
+
+  setup_ohmyzsh
+  setup_zshrc
+  setup_shell
+
+  <span class="nb">printf</span> %s <span class="s2">"</span><span class="nv">$GREEN</span><span class="s2">"</span>
+  cat <span class="s">&lt;&lt;'EOF'</span>
+<span class="s">         __                                     __</span>
+<span class="s">  ____  / /_     ____ ___  __  __   ____  _____/ /_</span>
+<span class="s"> / __ \/ __ \   / __ `__ \/ / / /  /_  / / ___/ __ \</span>
+<span class="s">/ /_/ / / / /  / / / / / / /_/ /    / /_(__  ) / / /</span>
+<span class="s">\____/_/ /_/  /_/ /_/ /_/\__, /    /___/____/_/ /_/</span>
+<span class="s">                        /____/                       ....is now installed!</span>
+
+
+<span class="s">EOF</span>
+  cat <span class="s">&lt;&lt;EOF</span>
+<span class="s">Before you scream Oh My Zsh! please look over the ~/.zshrc file to select plugins, themes, and options.</span>
+
+<span class="s">• Follow us on Twitter: $(fmt_underline https://twitter.com/ohmyzsh)</span>
+<span class="s">• Join our Discord server: $(fmt_underline https://discord.gg/ohmyzsh)</span>
+<span class="s">• Get stickers, shirts, coffee mugs and other swag: $(fmt_underline https://shop.planetargon.com/collections/oh-my-zsh)</span>
+
+<span class="s">EOF</span>
+  <span class="nb">printf</span> %s <span class="s2">"</span><span class="nv">$RESET</span><span class="s2">"</span>
+
+  <span class="k">if</span> <span class="o">[</span> <span class="nv">$RUNZSH</span> <span class="o">=</span> no <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span> <span class="s2">"</span><span class="si">${</span><span class="nv">YELLOW</span><span class="si">}</span><span class="s2">Run zsh to try it out.</span><span class="si">${</span><span class="nv">RESET</span><span class="si">}</span><span class="s2">"</span>
+    <span class="nb">exit</span>
+  <span class="k">fi</span>
+
+  <span class="nb">exec</span> zsh -l
+<span class="o">}</span>
+
+main <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span>
+</code></pre>
+     </div>
      <h2 id="_1">
       参考链接
      </h2>

@@ -167,15 +167,25 @@ cat C:<span class="se">\W</span>indows<span class="se">\S</span>ystem32<span cla
      <h3 id="_6">
       导出镜像到本地
      </h3>
-     <p>
-      docker save co &gt; file
-     </p>
+     <div class="codehilite">
+      <pre><span></span><code># linux
+docker save co &gt; file
+
+# windows
+docker save --output test.tar test:test
+</code></pre>
+     </div>
      <h3 id="tardocker">
       导入tar包到本地docker镜像
      </h3>
-     <p>
-      docker load &lt; /tmp/new-image.tar
-     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># linux</span>
+<span class="n">docker</span> <span class="nb">load</span> <span class="o">&lt;</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">new</span><span class="o">-</span><span class="n">image</span><span class="o">.</span><span class="n">tar</span>
+
+<span class="c1"># windows </span>
+<span class="n">docker</span> <span class="nb">load</span> <span class="o">--</span><span class="n">input</span> <span class="o">.</span>\<span class="n">test</span><span class="o">.</span><span class="n">tar</span>
+</code></pre>
+     </div>
      <h3 id="ip">
       查看ip地址
      </h3>
@@ -241,7 +251,25 @@ docker info
 <span class="c1"># docker安装需要最新的boot2docker.iso，从docker的安装界面复制网址，我安装的日期是20180823，此时的boot2docker.iso地址为boot2docker.iso，这个地址貌似被墙了，需要翻墙下载，将下载好的文件放到对应文件夹下，我的电脑上为C:\Users\lzy\.docker\machine\cache</span>
 </code></pre>
      </div>
-     <h2 id="_9">
+     <h4 id="_9">
+      自动启动
+     </h4>
+     <div class="codehilite">
+      <pre><span></span><code># –restart参数有三个可选值：no,on-failure,always
+
+docker run ****** --restart=always
+
+docker update --restart=on-failure:3 [容器名]
+</code></pre>
+     </div>
+     <h4 id="_10">
+      公用宿主机网络
+     </h4>
+     <div class="codehilite">
+      <pre><span></span><code><span class="k">docker</span> <span class="s">run</span> <span class="s">-tid</span> <span class="s">--name</span> <span class="s">centos8</span> <span class="s">--network</span> <span class="s">host</span> <span class="n">centos</span><span class="p">:</span><span class="mi">8</span>
+</code></pre>
+     </div>
+     <h2 id="_11">
       一些问题
      </h2>
      <h3 id="win10-docker-wsl">
@@ -266,7 +294,7 @@ wsl --export docker-desktop-data <span class="s2">"D:\Docker\wsl\data\docker-des
 Unregister docker-desktop-data from wsl, note that after this, your ext4.vhdx file would automatically be removed
 
 wsl --unregister docker-desktop-data
-Import the docker-desktop-data back to wsl, but now the ext4.vhdx would reside in different drive/directory:
+Import the docker-desktop-data back to wsl, but now the ext4.vhdx would reside <span class="k">in</span> different drive/directory:
 
 wsl --import docker-desktop-data <span class="s2">"D:\Docker\wsl\data"</span> <span class="s2">"D:\Docker\wsl\data\docker-desktop-data.tar"</span> --version <span class="m">2</span>
 Start the Docker Desktop again and it should work
@@ -274,13 +302,44 @@ Start the Docker Desktop again and it should work
 You may delete the <span class="s2">"D:\Docker\wsl\data\docker-desktop-data.tar"</span> file <span class="o">(</span>NOT the ext4.vhdx file<span class="o">)</span> <span class="k">if</span> everything looks good <span class="k">for</span> you after verifying
 </code></pre>
      </div>
-     <h3 id="_10">
+     <h3 id="_12">
       重新启动镜像
      </h3>
      <p>
       docker system prune -a
      </p>
-     <h2 id="_11">
+     <h3 id="none">
+      清理为None的镜像
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code># linux
+docker rmi -f $(docker images | grep "none" | awk '{print $3}')
+
+# linux
+</code></pre>
+     </div>
+     <h3 id="_13">
+      清理已经停止的容器
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>docker container prune
+</code></pre>
+     </div>
+     <ul>
+      <li>
+       <a href="https://www.jianshu.com/p/6978cc343150">
+        删除Docker没用的镜像，容器，网络，卷，为你的主机“瘦身”
+       </a>
+      </li>
+     </ul>
+     <h3 id="dockertagtag">
+      docker重新打tag并删除原tag的镜像
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>docker tag repository:tag repository:newTag
+</code></pre>
+     </div>
+     <h2 id="_14">
       常用仓库链接
      </h2>
      <ul>
@@ -290,7 +349,7 @@ You may delete the <span class="s2">"D:\Docker\wsl\data\docker-desktop-data.tar"
        </a>
       </li>
      </ul>
-     <h2 id="_12">
+     <h2 id="_15">
       参考链接
      </h2>
      <ul>

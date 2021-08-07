@@ -55,17 +55,17 @@ docker run -dit --name zk -p 2181:2181 zookeepe
 docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="o">###</span> <span class="n">Soul</span><span class="o">-</span><span class="n">Admin配置</span>
-<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">启动时候，我们先把</span><span class="n">Soul</span><span class="o">-</span><span class="n">admin和Soul</span><span class="o">-</span><span class="n">Bootstrap的Websocket同步给关了</span><span class="err">，开启</span><span class="n">HTTP同步</span><span class="err">，配置大致如下：</span>
+      <pre><span></span><code>### Soul-Admin配置
+&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;启动时候，我们先把Soul-admin和Soul-Bootstrap的Websocket同步给关了，开启HTTP同步，配置大致如下：
 
-<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">Soul</span><span class="o">-</span><span class="n">Admin的HTTP同步方式配置</span><span class="err">，暂时把其他同步方式给注释关闭</span>
+&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;Soul-Admin的HTTP同步方式配置，暂时把其他同步方式给注释关闭
 
-<span class="o">```</span><span class="n">xml</span>
-  <span class="n">sync</span><span class="p">:</span>
-      <span class="n">zookeeper</span><span class="p">:</span>
-          <span class="n">url</span><span class="p">:</span> <span class="n">localhost</span><span class="p">:</span><span class="mi">2181</span>
-          <span class="n">sessionTimeout</span><span class="p">:</span> <span class="mi">5000</span>
-          <span class="n">connectionTimeout</span><span class="p">:</span> <span class="mi">2000</span>
+```xml
+  sync:
+      zookeeper:
+          url: localhost:2181
+          sessionTimeout: 5000
+          connectionTimeout: 2000
 </code></pre>
      </div>
      <h3 id="soul-bootstrap">

@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shenyu28-">
+      ShenYu网关源码解析28-注册中心原理解析
+     </h1>
+     <hr/>
+     <p>
+      <em>
+       原Soul高性能网关，现进入Apache孵化项目，改名ShenYu网关
+      </em>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      本文介绍ShenYu网关中的注册中心模块的原理及设计
+     </p>
+     <h2 id="_2">
+      概览
+     </h2>
+     <p>
+      作为一个API网关，动态的路由配置是一个很重要的功能了，下图是目前ShenYu网关的路由配置界面：
+     </p>
+     <p>
+      <img alt="HTTP1" src="./picture/HTTP1.png"/>
+     </p>
+     <p>
+      <img alt="HTTP2" src="./picture/HTTP2.png"/>
+     </p>
+     <p>
+      上图是HTTP请求的代理路由配置显示界面，通过客户端自动注入或者手动输入。第一张图中右部分是转发匹配规则，请求到来时会根据上面的路径进行匹配
+     </p>
+     <p>
+      第二张是集群配置相关的，用于负载均衡，HTTP请求类型在ShenYu中需要配置集群列表，图中的处理处便是填个集群中的各个机器
+     </p>
+     <p>
+      当然不是所有的请求类型都需要配置集群列表，想Dubbo、SpringCloud就不需要，因为Dubbo客户端之类自己有相应的负载均衡功能，就不需要在ShenYu中进行配置
+     </p>
+     <p>
+      下图便是SpringCloud的配置界面，第二张图中可以看到，不需要配置集群列表
+     </p>
+     <p>
+      <img alt="SpringCloud1" src="./picture/SpringCloud1.png"/>
+     </p>
+     <p>
+      <img alt="SpringCloud2" src="./picture/SpringCloud2.png"/>
+     </p>
+     <p>
+      首先明确注册中心主要注册的是什么：
+     </p>
+     <ul>
+      <li>
+       匹配转发规则：根据规则转发请求到对应的服务器
+      </li>
+      <li>
+       集群列表：需要ShenYu做负载均衡的请求类型需要配置
+      </li>
+     </ul>
+     <h2 id="_3">
+      注册中心的设计
+     </h2>
+     <p>
+      <em>
+       也可参考官方文档：https://dromara.org/zh/projects/soul/register-center-design/
+      </em>
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

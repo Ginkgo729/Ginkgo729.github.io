@@ -1,0 +1,142 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-boot-lombok">
+      Spring Boot Lombok配置
+     </h1>
+     <hr/>
+     <h3 id="_1">
+      依赖添加
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>dependencies <span class="o">{</span>
+    annotationProcessor <span class="s1">'org.projectlombok:lombok:1.18.2'</span>
+    compileOnly <span class="s1">'org.projectlombok:lombok:1.18.2'</span>
+    testAnnotationProcessor <span class="s1">'org.projectlombok:lombok:1.18.2'</span>
+    testCompileOnly <span class="s1">'org.projectlombok:lombok:1.18.2'</span>
+<span class="o">}</span>
+</code></pre>
+     </div>
+     <h3 id="idealombok">
+      IDEA下载Lombok插件
+     </h3>
+     <p>
+      需要在插件中心中下载相应的插件，这样就不会提示代码错误
+     </p>
+     <h3 id="_2">
+      使用
+     </h3>
+     <p>
+      简单的使用的话，Data和Builder注解应该就够了，详细的可以参考官方文档，大致的示例代码如下，代码中会自动生成id，name，和amount的get和set方法。
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">package</span> <span class="nn">com.seckill.spring.entity</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">lombok.Builder</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">lombok.Data</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.persistence.Entity</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">javax.persistence.GeneratedValue</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">javax.persistence.GenerationType</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">javax.persistence.Id</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">javax.validation.constraints.Size</span><span class="p">;</span>
+
+<span class="nd">@Entity</span>
+<span class="nd">@Data</span>
+<span class="nd">@Builder</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Goods</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="nf">Goods</span><span class="p">(</span><span class="kt">int</span> <span class="n">id</span><span class="p">,</span> <span class="n">String</span> <span class="n">name</span><span class="p">,</span> <span class="kt">int</span> <span class="n">amount</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">amount</span> <span class="o">=</span> <span class="n">amount</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Id</span>
+    <span class="nd">@GeneratedValue</span><span class="p">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">GenerationType</span><span class="p">.</span><span class="na">AUTO</span><span class="p">)</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">id</span><span class="p">;</span>
+
+    <span class="nd">@Size</span><span class="p">(</span><span class="n">min</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">max</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">name</span><span class="p">;</span>
+
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">amount</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_3">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://blog.csdn.net/kcp606/article/details/81269184">
+        Gradle使用Lombok的正确方式 避免Gradle deprecated annotation processor warnings for lombok
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.frognew.com/2019/02/spring-boot-guides-lombok.html">
+        Spring Boot中使用Lombok
+       </a>
+      </li>
+      <li>
+       <a href="http://jnb.ociweb.com/jnb/jnbJan2010.html">
+        Reducing Boilerplate Code with Project Lombok
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

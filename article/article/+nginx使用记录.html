@@ -58,9 +58,9 @@ yum install -y nginx
       访问权限问题
      </h3>
      <div class="codehilite">
-      <pre><span></span><code><span class="k">user</span> <span class="n">root</span>
+      <pre><span></span><code>user root
 
-<span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="n">xxxx</span>
+chmod a+x xxxx
 </code></pre>
      </div>
      <h3 id="_3">
@@ -70,20 +70,20 @@ yum install -y nginx
       好像只能存在一个roo，另一个需要使用alias，例子如下：
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="n">server</span> <span class="err">{</span>
-        <span class="k">listen</span>       <span class="mi">80</span> <span class="n">default_server</span><span class="p">;</span>
-        <span class="k">listen</span>       <span class="p">[::]:</span><span class="mi">80</span> <span class="n">default_server</span><span class="p">;</span>
-        <span class="k">server_name</span>  <span class="n">_</span><span class="p">;</span>
-        <span class="o">#</span><span class="n">root</span>         <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="k">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span><span class="p">;</span>
+      <pre><span></span><code><span class="nv">server</span> {
+        <span class="nv">listen</span>       <span class="mi">80</span> <span class="nv">default_server</span><span class="c1">;</span>
+        <span class="nv">listen</span>       [::]:<span class="mi">80</span> <span class="nv">default_server</span><span class="c1">;</span>
+        <span class="nv">server_name</span>  <span class="nv">_</span><span class="c1">;</span>
+        #<span class="nv">root</span>         <span class="o">/</span><span class="nv">usr</span><span class="o">/</span><span class="nv">share</span><span class="o">/</span><span class="nv">nginx</span><span class="o">/</span><span class="nv">html</span><span class="c1">;</span>
 
-        <span class="o">#</span><span class="n">websocket</span>
-        <span class="k">map</span> <span class="err">$</span><span class="n">http_upgrade</span> <span class="err">$</span><span class="n">connection_upgrade</span> <span class="err">{</span>
-            <span class="k">default</span> <span class="n">upgrade</span><span class="p">;</span>
-            <span class="s1">''</span> <span class="k">close</span><span class="p">;</span>
-        <span class="err">}</span>
+        #<span class="nv">websocket</span>
+        <span class="nv">map</span> $<span class="nv">http_upgrade</span> <span class="mh">$c</span><span class="nv">onnection_upgrade</span> {
+            <span class="nv">default</span> <span class="nv">upgrade</span><span class="c1">;</span>
+            <span class="s1">''</span> <span class="nv">close</span><span class="c1">;</span>
+        }
 
-        <span class="o">#</span> <span class="k">Load</span> <span class="n">configuration</span> <span class="n">files</span> <span class="k">for</span> <span class="n">the</span> <span class="k">default</span> <span class="n">server</span> <span class="n">block</span><span class="p">.</span>
-        <span class="n">include</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="k">default</span><span class="p">.</span><span class="n">d</span><span class="cm">/*.conf;</span>
+        # <span class="nv">Load</span> <span class="nv">configuration</span> <span class="nv">files</span> <span class="k">for</span> <span class="nv">the</span> <span class="nv">default</span> <span class="nv">server</span> <span class="nv">block</span>.
+        <span class="k">include</span> <span class="o">/</span><span class="nv">etc</span><span class="o">/</span><span class="nv">nginx</span><span class="o">/</span><span class="nv">default</span>.<span class="nv">d</span><span class="cm">/*.conf;</span>
 
 <span class="cm">        root /root/projects/dist;</span>
 <span class="cm">        #index  index.html index.htm index.php;</span>
@@ -115,7 +115,55 @@ yum install -y nginx
 <span class="o">}</span>
 </code></pre>
      </div>
-     <h2 id="_5">
+     <h3 id="_5">
+      配置示例
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="nt">server</span> <span class="p">{</span>
+        <span class="err">listen</span>       <span class="err">80</span> <span class="err">default_server</span><span class="p">;</span>
+        <span class="n">listen</span>       <span class="cp">[</span><span class="p">::</span><span class="cp">]</span><span class="p">:</span><span class="mi">80</span> <span class="n">default_server</span><span class="p">;</span>
+        <span class="err">server_name</span>  <span class="err">_</span><span class="p">;</span>
+        <span class="err">#root</span>         <span class="err">/usr/share/nginx/html</span><span class="p">;</span>
+        <span class="err">root</span>         <span class="err">/home</span><span class="p">;</span>
+
+        <span class="err">#websocket</span>
+        <span class="err">#map</span> <span class="err">$http_upgrade</span> <span class="err">$connection_upgrade</span> <span class="err">{</span>
+        <span class="err">#</span>    <span class="err">default</span> <span class="err">upgrade</span><span class="p">;</span>
+        <span class="err">#</span>    <span class="err">''</span> <span class="err">close</span><span class="p">;</span>
+        <span class="err">#</span><span class="p">}</span>
+
+        <span class="err">#</span> <span class="nt">Load</span> <span class="nt">configuration</span> <span class="nt">files</span> <span class="nt">for</span> <span class="nt">the</span> <span class="nt">default</span> <span class="nt">server</span> <span class="nt">block</span><span class="o">.</span>
+        <span class="nt">include</span> <span class="o">/</span><span class="nt">etc</span><span class="o">/</span><span class="nt">nginx</span><span class="o">/</span><span class="nt">default</span><span class="p">.</span><span class="nc">d</span><span class="o">/*</span><span class="p">.</span><span class="nc">conf</span><span class="o">;</span>
+
+        <span class="err">#</span> <span class="nt">转</span><span class="err">�</span><span class="o">~</span><span class="nt">O</span><span class="o">~</span><span class="nt">Qwebsocket</span><span class="err">�</span><span class="o">~</span><span class="err">\</span><span class="o">~@</span><span class="err">��</span><span class="o">~</span><span class="nt">A</span><span class="err">�</span><span class="o">~</span><span class="nt">Z</span><span class="o">~</span><span class="nt">D设置</span>
+        <span class="nt">proxy_set_header</span> <span class="nt">X-Real_IP</span> <span class="o">$</span><span class="nt">remote_addr</span><span class="o">;</span>
+        <span class="nt">proxy_set_header</span> <span class="nt">Host</span> <span class="o">$</span><span class="nt">host</span><span class="o">;</span>
+        <span class="nt">proxy_set_header</span> <span class="nt">X_Forward_For</span> <span class="o">$</span><span class="nt">proxy_add_x_forwarded_for</span><span class="o">;</span>
+        <span class="nt">proxy_http_version</span> <span class="nt">1</span><span class="p">.</span><span class="nc">1</span><span class="o">;</span>
+        <span class="nt">proxy_set_header</span> <span class="nt">Upgrade</span> <span class="o">$</span><span class="nt">http_upgrade</span><span class="o">;</span>
+        <span class="nt">proxy_set_header</span> <span class="nt">Connection</span> <span class="s1">'upgrade'</span><span class="o">;</span>
+
+        <span class="nt">location</span> <span class="o">/</span> <span class="p">{</span>
+            <span class="err">autoindex</span> <span class="err">on</span><span class="p">;</span>
+            <span class="err">autoindex_exact_size</span> <span class="err">on</span><span class="p">;</span>
+            <span class="err">autoindex_localtime</span> <span class="err">on</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nt">location</span> <span class="o">/</span><span class="nt">xxx</span> <span class="p">{</span>
+            <span class="err">proxy_pass</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="o">:</span><span class="mi">8188</span><span class="o">/</span><span class="n">xxx</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nt">error_page</span> <span class="nt">404</span> <span class="o">/</span><span class="nt">404</span><span class="p">.</span><span class="nc">html</span><span class="o">;</span>
+            <span class="nt">location</span> <span class="o">=</span> <span class="o">/</span><span class="nt">40x</span><span class="p">.</span><span class="nc">html</span> <span class="p">{</span>
+        <span class="p">}</span>
+
+        <span class="nt">error_page</span> <span class="nt">500</span> <span class="nt">502</span> <span class="nt">503</span> <span class="nt">504</span> <span class="o">/</span><span class="nt">50x</span><span class="p">.</span><span class="nc">html</span><span class="o">;</span>
+            <span class="nt">location</span> <span class="o">=</span> <span class="o">/</span><span class="nt">50x</span><span class="p">.</span><span class="nc">html</span> <span class="p">{</span>
+        <span class="p">}</span>
+    <span class="err">}</span>
+</code></pre>
+     </div>
+     <h2 id="_6">
       参考链接
      </h2>
      <ul>

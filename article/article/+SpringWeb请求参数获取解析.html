@@ -1,0 +1,506 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-springweb">
+      Spring源码解析 -- SpringWeb请求参数获取解析
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在文章：
+      <a href="https://juejin.cn/post/6980529362969821192/">
+       Spring Web 请求初探
+      </a>
+      中，我们看到最后方法反射调用的相关代码，本篇文章就探索其中的参数是如何从请求中获取的
+     </p>
+     <h2 id="_2">
+      概览
+     </h2>
+     <p>
+      方法反射调用的关键代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">InvocableHandlerMethod</span> <span class="p">{</span>
+    <span class="kd">protected</span> <span class="n">Object</span> <span class="nf">doInvoke</span><span class="p">(</span><span class="n">Object</span><span class="p">...</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="n">Method</span> <span class="n">method</span> <span class="o">=</span> <span class="n">getBridgedMethod</span><span class="p">();</span>
+        <span class="n">ReflectionUtils</span><span class="p">.</span><span class="na">makeAccessible</span><span class="p">(</span><span class="n">method</span><span class="p">);</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">KotlinDetector</span><span class="p">.</span><span class="na">isSuspendingFunction</span><span class="p">(</span><span class="n">method</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">CoroutinesUtils</span><span class="p">.</span><span class="na">invokeSuspendingFunction</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">getBean</span><span class="p">(),</span> <span class="n">args</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="n">method</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="n">getBean</span><span class="p">(),</span> <span class="n">args</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">catch</span> <span class="p">(</span><span class="n">IllegalArgumentException</span> <span class="n">ex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="p">......</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      现在我们更新我们的代码如下，增加接个参数：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">import</span> <span class="nn">com.example.springexample.vo.User</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.*</span><span class="p">;</span>
+
+<span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span> <span class="p">{</span>
+
+    <span class="nd">@GetMapping</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">helloWorld</span><span class="p">(</span><span class="nd">@RequestParam</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"id"</span><span class="p">)</span> <span class="n">Integer</span> <span class="n">id</span><span class="p">,</span>
+                             <span class="nd">@RequestParam</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"name"</span><span class="p">)</span> <span class="n">String</span> <span class="n">name</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">"Hello world:"</span> <span class="o">+</span> <span class="n">id</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@GetMapping</span><span class="p">(</span><span class="s">"/test1"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">helloWorld1</span><span class="p">(</span><span class="nd">@RequestHeader</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"id"</span><span class="p">)</span> <span class="n">Integer</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">"Hello world:"</span> <span class="o">+</span> <span class="n">id</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@PostMapping</span><span class="p">(</span><span class="s">"/test2"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">helloWorld2</span><span class="p">(</span><span class="nd">@RequestBody</span> <span class="n">User</span> <span class="n">user</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">"Hello world:"</span> <span class="o">+</span> <span class="n">user</span><span class="p">.</span><span class="na">toString</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      发起下面的请求,在上面反射调用的代码中打上断点，跟踪调用栈分析：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>GET http://localhost:8080/?id<span class="o">=</span><span class="m">1</span><span class="p">&amp;</span><span class="nv">id</span><span class="o">=</span><span class="m">2</span>
+
+POST http://localhost:8080/test2
+Content-Type: application/json
+
+<span class="o">{</span><span class="s2">"name"</span>: <span class="s2">"name"</span>, <span class="s2">"password"</span>: <span class="s2">"password"</span><span class="o">}</span>
+</code></pre>
+     </div>
+     <h2 id="_3">
+      源码解析
+     </h2>
+     <p>
+      首先查看调用栈，我们找到了参数最开始获取的相关代码，在下面的代码中获取相关的参数：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">InvocableHandlerMethod</span><span class="p">.</span><span class="na">java</span>
+    <span class="nd">@Nullable</span>
+    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">invokeForRequest</span><span class="p">(</span><span class="n">NativeWebRequest</span> <span class="n">request</span><span class="p">,</span> <span class="nd">@Nullable</span> <span class="n">ModelAndViewContainer</span> <span class="n">mavContainer</span><span class="p">,</span>
+            <span class="n">Object</span><span class="p">...</span> <span class="n">providedArgs</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="c1">// 得到了相关的参数</span>
+        <span class="n">Object</span><span class="o">[]</span> <span class="n">args</span> <span class="o">=</span> <span class="n">getMethodArgumentValues</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">mavContainer</span><span class="p">,</span> <span class="n">providedArgs</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isTraceEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="s">"Arguments: "</span> <span class="o">+</span> <span class="n">Arrays</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">args</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">doInvoke</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      继续跟踪看看函数：getMethodArgumentValues
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">InvocableHandlerMethod</span><span class="p">.</span><span class="na">java</span>
+    <span class="kd">protected</span> <span class="n">Object</span><span class="o">[]</span> <span class="nf">getMethodArgumentValues</span><span class="p">(</span><span class="n">NativeWebRequest</span> <span class="n">request</span><span class="p">,</span> <span class="nd">@Nullable</span> <span class="n">ModelAndViewContainer</span> <span class="n">mavContainer</span><span class="p">,</span>
+            <span class="n">Object</span><span class="p">...</span> <span class="n">providedArgs</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="c1">// 这里获得了参数信息列表，比如类型之类的</span>
+        <span class="n">MethodParameter</span><span class="o">[]</span> <span class="n">parameters</span> <span class="o">=</span> <span class="n">getMethodParameters</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ObjectUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">parameters</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">EMPTY_ARGS</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">Object</span><span class="o">[]</span> <span class="n">args</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[</span><span class="n">parameters</span><span class="p">.</span><span class="na">length</span><span class="o">]</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">parameters</span><span class="p">.</span><span class="na">length</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">MethodParameter</span> <span class="n">parameter</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">[</span><span class="n">i</span><span class="o">]</span><span class="p">;</span>
+            <span class="n">parameter</span><span class="p">.</span><span class="na">initParameterNameDiscovery</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">parameterNameDiscoverer</span><span class="p">);</span>
+            <span class="c1">// 这里进行了一次参数查找，但没有匹配上</span>
+            <span class="n">args</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">findProvidedArgument</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">providedArgs</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="na">resolvers</span><span class="p">.</span><span class="na">supportsParameter</span><span class="p">(</span><span class="n">parameter</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalStateException</span><span class="p">(</span><span class="n">formatArgumentError</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="s">"No suitable resolver"</span><span class="p">));</span>
+            <span class="p">}</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="c1">// 最终在这里匹配上了参数</span>
+                <span class="n">args</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">resolvers</span><span class="p">.</span><span class="na">resolveArgument</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">mavContainer</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">dataBinderFactory</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="p">)</span> <span class="p">{</span>
+                <span class="c1">// Leave stack trace for later, exception may actually be resolved and handled...</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="n">String</span> <span class="n">exMsg</span> <span class="o">=</span> <span class="n">ex</span><span class="p">.</span><span class="na">getMessage</span><span class="p">();</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">exMsg</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">exMsg</span><span class="p">.</span><span class="na">contains</span><span class="p">(</span><span class="n">parameter</span><span class="p">.</span><span class="na">getExecutable</span><span class="p">().</span><span class="na">toGenericString</span><span class="p">()))</span> <span class="p">{</span>
+                        <span class="n">logger</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="n">formatArgumentError</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">exMsg</span><span class="p">));</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="k">throw</span> <span class="n">ex</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">args</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在上面的代码中，我们可以看到大致下面的逻辑：
+     </p>
+     <ul>
+      <li>
+       获取方法调用所需的参数信息
+      </li>
+      <li>
+       尝试获取具体参数值：findProvidedArgument
+      </li>
+      <li>
+       尝试获取具体参数值：this.resolvers.resolveArgument
+      </li>
+      <li>
+       抛出未获取异常
+      </li>
+     </ul>
+     <p>
+      findProvidedArgument 没怎么看懂，日后在看下
+     </p>
+     <p>
+      我们先跟着函数：this.resolvers.resolveArgument
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">HandlerMethodArgumentResolverComposite</span><span class="p">.</span><span class="na">java</span>
+    <span class="nd">@Override</span>
+    <span class="nd">@Nullable</span>
+    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">resolveArgument</span><span class="p">(</span><span class="n">MethodParameter</span> <span class="n">parameter</span><span class="p">,</span> <span class="nd">@Nullable</span> <span class="n">ModelAndViewContainer</span> <span class="n">mavContainer</span><span class="p">,</span>
+            <span class="n">NativeWebRequest</span> <span class="n">webRequest</span><span class="p">,</span> <span class="nd">@Nullable</span> <span class="n">WebDataBinderFactory</span> <span class="n">binderFactory</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="c1">// 获取参数解析器</span>
+        <span class="n">HandlerMethodArgumentResolver</span> <span class="n">resolver</span> <span class="o">=</span> <span class="n">getArgumentResolver</span><span class="p">(</span><span class="n">parameter</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">resolver</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalArgumentException</span><span class="p">(</span><span class="s">"Unsupported parameter type ["</span> <span class="o">+</span>
+                    <span class="n">parameter</span><span class="p">.</span><span class="na">getParameterType</span><span class="p">().</span><span class="na">getName</span><span class="p">()</span> <span class="o">+</span> <span class="s">"]. supportsParameter should be called first."</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// 返回解析结果</span>
+        <span class="k">return</span> <span class="n">resolver</span><span class="p">.</span><span class="na">resolveArgument</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">mavContainer</span><span class="p">,</span> <span class="n">webRequest</span><span class="p">,</span> <span class="n">binderFactory</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Nullable</span>
+    <span class="kd">private</span> <span class="n">HandlerMethodArgumentResolver</span> <span class="nf">getArgumentResolver</span><span class="p">(</span><span class="n">MethodParameter</span> <span class="n">parameter</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 首先查找缓存，如果缓存不存在则遍历查找参数解析器列表</span>
+        <span class="n">HandlerMethodArgumentResolver</span> <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">argumentResolverCache</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">parameter</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">result</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">HandlerMethodArgumentResolver</span> <span class="n">resolver</span> <span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="na">argumentResolvers</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">resolver</span><span class="p">.</span><span class="na">supportsParameter</span><span class="p">(</span><span class="n">parameter</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">resolver</span><span class="p">;</span>
+                    <span class="k">this</span><span class="p">.</span><span class="na">argumentResolverCache</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+                    <span class="k">break</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在上面的函数中，首先取获取对应参数的解析器，关键函数就是： supportsParameter
+     </p>
+     <p>
+      解析器目前调试发现有32个，本地请求：GET http://localhost:8080?id=1&amp;id=2 匹配上的是： RequestParamMethodArgumentResolver.java ，其判断的代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">RequestParamMethodArgumentResolver</span><span class="p">.</span><span class="na">java</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">supportsParameter</span><span class="p">(</span><span class="n">MethodParameter</span> <span class="n">parameter</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">parameter</span><span class="p">.</span><span class="na">hasParameterAnnotation</span><span class="p">(</span><span class="n">RequestParam</span><span class="p">.</span><span class="na">class</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Map</span><span class="p">.</span><span class="na">class</span><span class="p">.</span><span class="na">isAssignableFrom</span><span class="p">(</span><span class="n">parameter</span><span class="p">.</span><span class="na">nestedIfOptional</span><span class="p">().</span><span class="na">getNestedParameterType</span><span class="p">()))</span> <span class="p">{</span>
+                <span class="n">RequestParam</span> <span class="n">requestParam</span> <span class="o">=</span> <span class="n">parameter</span><span class="p">.</span><span class="na">getParameterAnnotation</span><span class="p">(</span><span class="n">RequestParam</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">requestParam</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">hasText</span><span class="p">(</span><span class="n">requestParam</span><span class="p">.</span><span class="na">name</span><span class="p">()));</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">parameter</span><span class="p">.</span><span class="na">hasParameterAnnotation</span><span class="p">(</span><span class="n">RequestPart</span><span class="p">.</span><span class="na">class</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">parameter</span> <span class="o">=</span> <span class="n">parameter</span><span class="p">.</span><span class="na">nestedIfOptional</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">MultipartResolutionDelegate</span><span class="p">.</span><span class="na">isMultipartArgument</span><span class="p">(</span><span class="n">parameter</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">useDefaultResolution</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">BeanUtils</span><span class="p">.</span><span class="na">isSimpleProperty</span><span class="p">(</span><span class="n">parameter</span><span class="p">.</span><span class="na">getNestedParameterType</span><span class="p">());</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      大致就是看看是否有相关的注解、符合要求之类的，这部分就不细看
+     </p>
+     <p>
+      我们继续看看具体参数获取处理：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">AbstractNamedValueMethodArgumentResolver</span><span class="p">.</span><span class="na">java</span>
+    <span class="nd">@Override</span>
+    <span class="nd">@Nullable</span>
+    <span class="kd">public</span> <span class="kd">final</span> <span class="n">Object</span> <span class="nf">resolveArgument</span><span class="p">(</span><span class="n">MethodParameter</span> <span class="n">parameter</span><span class="p">,</span> <span class="nd">@Nullable</span> <span class="n">ModelAndViewContainer</span> <span class="n">mavContainer</span><span class="p">,</span>
+            <span class="n">NativeWebRequest</span> <span class="n">webRequest</span><span class="p">,</span> <span class="nd">@Nullable</span> <span class="n">WebDataBinderFactory</span> <span class="n">binderFactory</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="c1">// 获取参数名称，GET http://localhost:8080?id=1&amp;id=2 就是 id</span>
+        <span class="n">NamedValueInfo</span> <span class="n">namedValueInfo</span> <span class="o">=</span> <span class="n">getNamedValueInfo</span><span class="p">(</span><span class="n">parameter</span><span class="p">);</span>
+        <span class="c1">// 方法调用的信息，如类、参数类型之类的</span>
+        <span class="n">MethodParameter</span> <span class="n">nestedParameter</span> <span class="o">=</span> <span class="n">parameter</span><span class="p">.</span><span class="na">nestedIfOptional</span><span class="p">();</span>
+
+        <span class="c1">// 看着想是参数效验？没完全看懂，先跳过</span>
+        <span class="n">Object</span> <span class="n">resolvedName</span> <span class="o">=</span> <span class="n">resolveEmbeddedValuesAndExpressions</span><span class="p">(</span><span class="n">namedValueInfo</span><span class="p">.</span><span class="na">name</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">resolvedName</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalArgumentException</span><span class="p">(</span>
+                    <span class="s">"Specified name must not resolve to null: ["</span> <span class="o">+</span> <span class="n">namedValueInfo</span><span class="p">.</span><span class="na">name</span> <span class="o">+</span> <span class="s">"]"</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// 获取参数值</span>
+        <span class="n">Object</span> <span class="n">arg</span> <span class="o">=</span> <span class="n">resolveName</span><span class="p">(</span><span class="n">resolvedName</span><span class="p">.</span><span class="na">toString</span><span class="p">(),</span> <span class="n">nestedParameter</span><span class="p">,</span> <span class="n">webRequest</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">arg</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">namedValueInfo</span><span class="p">.</span><span class="na">defaultValue</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="n">resolveEmbeddedValuesAndExpressions</span><span class="p">(</span><span class="n">namedValueInfo</span><span class="p">.</span><span class="na">defaultValue</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">namedValueInfo</span><span class="p">.</span><span class="na">required</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">nestedParameter</span><span class="p">.</span><span class="na">isOptional</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">handleMissingValue</span><span class="p">(</span><span class="n">namedValueInfo</span><span class="p">.</span><span class="na">name</span><span class="p">,</span> <span class="n">nestedParameter</span><span class="p">,</span> <span class="n">webRequest</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="n">handleNullValue</span><span class="p">(</span><span class="n">namedValueInfo</span><span class="p">.</span><span class="na">name</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">nestedParameter</span><span class="p">.</span><span class="na">getNestedParameterType</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="s">""</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">namedValueInfo</span><span class="p">.</span><span class="na">defaultValue</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="n">resolveEmbeddedValuesAndExpressions</span><span class="p">(</span><span class="n">namedValueInfo</span><span class="p">.</span><span class="na">defaultValue</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// 在下面的函数中会进行参数转换</span>
+        <span class="c1">// 比如在请求：GET http://localhost:8080?id=1&amp;id=2</span>
+        <span class="c1">// 得到的结果是一个数组，有两个值，但转换后直接就得到了 1</span>
+        <span class="c1">// 这部分的细节日后回过头再来看</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">binderFactory</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">WebDataBinder</span> <span class="n">binder</span> <span class="o">=</span> <span class="n">binderFactory</span><span class="p">.</span><span class="na">createBinder</span><span class="p">(</span><span class="n">webRequest</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="n">namedValueInfo</span><span class="p">.</span><span class="na">name</span><span class="p">);</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="n">binder</span><span class="p">.</span><span class="na">convertIfNecessary</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">parameter</span><span class="p">.</span><span class="na">getParameterType</span><span class="p">(),</span> <span class="n">parameter</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">catch</span> <span class="p">(</span><span class="n">ConversionNotSupportedException</span> <span class="n">ex</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="n">MethodArgumentConversionNotSupportedException</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">ex</span><span class="p">.</span><span class="na">getRequiredType</span><span class="p">(),</span>
+                        <span class="n">namedValueInfo</span><span class="p">.</span><span class="na">name</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">ex</span><span class="p">.</span><span class="na">getCause</span><span class="p">());</span>
+            <span class="p">}</span>
+            <span class="k">catch</span> <span class="p">(</span><span class="n">TypeMismatchException</span> <span class="n">ex</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="n">MethodArgumentTypeMismatchException</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">ex</span><span class="p">.</span><span class="na">getRequiredType</span><span class="p">(),</span>
+                        <span class="n">namedValueInfo</span><span class="p">.</span><span class="na">name</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">ex</span><span class="p">.</span><span class="na">getCause</span><span class="p">());</span>
+            <span class="p">}</span>
+            <span class="c1">// Check for null value after conversion of incoming argument value</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">arg</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">namedValueInfo</span><span class="p">.</span><span class="na">defaultValue</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span>
+                    <span class="n">namedValueInfo</span><span class="p">.</span><span class="na">required</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">nestedParameter</span><span class="p">.</span><span class="na">isOptional</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">handleMissingValueAfterConversion</span><span class="p">(</span><span class="n">namedValueInfo</span><span class="p">.</span><span class="na">name</span><span class="p">,</span> <span class="n">nestedParameter</span><span class="p">,</span> <span class="n">webRequest</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="n">handleResolvedValue</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">namedValueInfo</span><span class="p">.</span><span class="na">name</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">mavContainer</span><span class="p">,</span> <span class="n">webRequest</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="n">arg</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      上面的函数是一处关键代码：
+     </p>
+     <ul>
+      <li>
+       获取参数名称
+      </li>
+      <li>
+       获取参数信息，如类型之类的
+      </li>
+      <li>
+       进行具体参数值
+      </li>
+      <li>
+       进行参数转换
+      </li>
+     </ul>
+     <p>
+      其中参数转换还比较麻烦，粗略看了下细节还是比较多，本地先跳过，后面再过来看
+     </p>
+     <p>
+      我们继续跟踪获取具体参数值的相关函数： resolveName(resolvedName.toString(), nestedParameter, webRequest);
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">RequestParamMethodArgumentResolver</span><span class="p">.</span><span class="na">java</span>
+    <span class="nd">@Override</span>
+    <span class="nd">@Nullable</span>
+    <span class="kd">protected</span> <span class="n">Object</span> <span class="nf">resolveName</span><span class="p">(</span><span class="n">String</span> <span class="n">name</span><span class="p">,</span> <span class="n">MethodParameter</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">NativeWebRequest</span> <span class="n">request</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="n">HttpServletRequest</span> <span class="n">servletRequest</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getNativeRequest</span><span class="p">(</span><span class="n">HttpServletRequest</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">servletRequest</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">Object</span> <span class="n">mpArg</span> <span class="o">=</span> <span class="n">MultipartResolutionDelegate</span><span class="p">.</span><span class="na">resolveMultipartArgument</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">servletRequest</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">mpArg</span> <span class="o">!=</span> <span class="n">MultipartResolutionDelegate</span><span class="p">.</span><span class="na">UNRESOLVABLE</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">mpArg</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="n">Object</span> <span class="n">arg</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="c1">// 看着像是获取文件？</span>
+        <span class="n">MultipartRequest</span> <span class="n">multipartRequest</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getNativeRequest</span><span class="p">(</span><span class="n">MultipartRequest</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">multipartRequest</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">List</span><span class="o">&lt;</span><span class="n">MultipartFile</span><span class="o">&gt;</span> <span class="n">files</span> <span class="o">=</span> <span class="n">multipartRequest</span><span class="p">.</span><span class="na">getFiles</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">files</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="p">(</span><span class="n">files</span><span class="p">.</span><span class="na">size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">?</span> <span class="n">files</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span> <span class="n">files</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">arg</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// 获取参数名中请求中对应的值</span>
+            <span class="c1">// http://localhost:8080?id=1&amp;id=2 就得到了 [1, 2]</span>
+            <span class="n">String</span><span class="o">[]</span> <span class="n">paramValues</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getParameterValues</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">paramValues</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="p">(</span><span class="n">paramValues</span><span class="p">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">?</span> <span class="n">paramValues</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="p">:</span> <span class="n">paramValues</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">arg</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在上面的代码中，我们可以看到参数值的获取是先去 multipartRequest 中获取，如果为空再到函数： getParameterValues 中获取
+     </p>
+     <p>
+      看得好像是文件优先？是不是同名的话，就优先获取文件了？这个大家也可以试下
+     </p>
+     <p>
+      继续跟踪函数： getParameterValues
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">Parameters</span><span class="p">.</span><span class="na">java</span>
+    <span class="kd">public</span> <span class="n">String</span><span class="o">[]</span> <span class="nf">getParameterValues</span><span class="p">(</span><span class="n">String</span> <span class="n">name</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">handleQueryParameters</span><span class="p">();</span>
+        <span class="c1">// no "facade"</span>
+        <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">values</span> <span class="o">=</span> <span class="n">paramHashValues</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">values</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">values</span><span class="p">.</span><span class="na">toArray</span><span class="p">(</span><span class="k">new</span> <span class="n">String</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      跟踪下去就是Tomcat的函数处理了，感觉很有类似自己写Tcp服务时自定义解析协议的感觉，这部分细节就不细看了
+     </p>
+     <p>
+      到这里就得到最终的结果： [1, 2]
+     </p>
+     <p>
+      经过： arg = binder.convertIfNecessary(arg, parameter.getParameterType(), parameter); 得到了最后的值： 1
+     </p>
+     <h2 id="_4">
+      总结
+     </h2>
+     <p>
+      本篇文章中，我们大致探索了请求参数的获取源码，大致有下面的步骤：
+     </p>
+     <ul>
+      <li>
+       获取所需的参数列表，其中有一些参数的信息，比如类型，进行遍历获取其值
+      </li>
+      <li>
+       findProvidedArgument 匹配获取，这部分功能未探索
+      </li>
+      <li>
+       this.resolvers.resolveArgument :参数解析器获取
+      </li>
+      <li>
+       遍历所有的解析器
+      </li>
+      <li>
+       得到对应的解析器
+      </li>
+      <li>
+       得到对应的值
+      </li>
+      <li>
+       值的转换
+      </li>
+     </ul>
+     <p>
+      期间，我们实验两种请求：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>GET http://localhost:8080/?id<span class="o">=</span><span class="m">1</span><span class="p">&amp;</span><span class="nv">id</span><span class="o">=</span><span class="m">2</span>
+
+POST http://localhost:8080/test2
+Content-Type: application/json
+
+<span class="o">{</span><span class="s2">"name"</span>: <span class="s2">"name"</span>, <span class="s2">"password"</span>: <span class="s2">"password"</span><span class="o">}</span>
+</code></pre>
+     </div>
+     <p>
+      两个请求的参数解析器是不一样的，但也是我们日常开发中常用的，比如第二个，但本篇文章中并没有具体解析，大家感兴趣可以自行根据本篇的思路进行解析
+     </p>
+     <h2 id="_5">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://juejin.cn/post/6983145193117581343">
+        Spring 源码解析系列
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

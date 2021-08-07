@@ -229,7 +229,7 @@ vim ./bin/sasl-kafka-console-consumer.sh
 <span class="c1"># 消费者</span>
 <span class="nv">consumer</span> <span class="o">=</span> KafkaConsumer<span class="o">(</span><span class="nv">bootstrap_servers</span><span class="o">=</span><span class="s1">'172.19.104.18:9092,172.19.104.19:9092,172.19.104.21:9092'</span>, <span class="nv">security_protocol</span><span class="o">=</span><span class="s2">"SASL_PLAINTEXT"</span>, <span class="nv">sasl_mechanism</span><span class="o">=</span><span class="s1">'PLAIN'</span>, <span class="nv">sasl_plain_username</span><span class="o">=</span><span class="s1">'alice'</span>, <span class="nv">sasl_plain_password</span><span class="o">=</span><span class="s1">'alice'</span><span class="o">)</span>
 consumer.subscribe<span class="o">([</span><span class="s2">"test"</span><span class="o">])</span>
-<span class="k">for</span> msg in consumer:
+<span class="k">for</span> msg <span class="k">in</span> consumer:
     print<span class="o">(</span>str<span class="o">(</span>msg<span class="o">[</span><span class="m">6</span><span class="o">]</span>, <span class="nv">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="o">))</span>
 
 <span class="c1"># 生产者</span>

@@ -39,14 +39,14 @@
      </h2>
      <div class="codehilite">
       <pre><span></span><code><span class="n">tzselect</span>
-<span class="n">export</span> <span class="n">TZ</span><span class="o">=</span><span class="s1">'Asia/Shanghai'</span>
-<span class="k">source</span> <span class="o">~/</span><span class="p">.</span><span class="n">bashrc</span>
-<span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="k">localtime</span>
-<span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="k">share</span><span class="o">/</span><span class="n">zoneinfo</span><span class="o">/</span><span class="n">Asia</span><span class="o">/</span><span class="n">Shanghai</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="k">localtime</span>
-<span class="n">timedatectl</span> <span class="k">set</span><span class="o">-</span><span class="n">timezone</span> <span class="s1">'Asia/Shanghai'</span>
+<span class="k">export</span> <span class="n">TZ</span><span class="o">=</span><span class="s1">'Asia/Shanghai'</span>
+<span class="n">source</span> <span class="o">~/.</span><span class="n">bashrc</span>
+<span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">localtime</span>
+<span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">zoneinfo</span><span class="o">/</span><span class="n">Asia</span><span class="o">/</span><span class="n">Shanghai</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">localtime</span>
+<span class="n">timedatectl</span> <span class="n">set</span><span class="o">-</span><span class="n">timezone</span> <span class="s1">'Asia/Shanghai'</span>
 
 <span class="n">yum</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">ntp</span>
-<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">ntpdate</span> <span class="o">-</span><span class="n">u</span> <span class="n">cn</span><span class="p">.</span><span class="n">pool</span><span class="p">.</span><span class="n">ntp</span><span class="p">.</span><span class="n">org</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">ntpdate</span> <span class="o">-</span><span class="n">u</span> <span class="n">cn</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span>
 </code></pre>
      </div>
      <h2 id="_2">

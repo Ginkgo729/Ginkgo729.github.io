@@ -151,7 +151,7 @@ def build_home_page():
     rebuild_other(template_soup)
     build_resume(template_soup)
 
-    blog_path = "F:\Code\Markdown\LOG\profession"
+    blog_path = "D:\Code\Markdown\SE-Notes\profession"
     file_list = get_catalog(blog_path)
     build_catalog(file_list, template_soup)
 

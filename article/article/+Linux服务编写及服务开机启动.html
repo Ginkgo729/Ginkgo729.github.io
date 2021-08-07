@@ -89,7 +89,7 @@ stop<span class="o">()</span> <span class="o">{</span>
     <span class="nb">exit</span> <span class="m">1</span>
 <span class="k">fi</span>
 
-<span class="k">case</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span> in
+<span class="k">case</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span> <span class="k">in</span>
     start<span class="o">)</span>
         start
         <span class="nb">exit</span> <span class="m">0</span>
@@ -117,17 +117,17 @@ stop<span class="o">()</span> <span class="o">{</span>
       先赋予文件执行权限后使用命令将上面写的test添加到服务里面
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="p">.</span><span class="n">d</span><span class="o">/</span><span class="n">test</span>
+      <pre><span></span><code>chmod +x /etc/init.d/test
 
-<span class="o">#</span> <span class="n">Ubuntu</span><span class="p">,</span><span class="n">Kali下的操作</span>
-<span class="o">#</span> <span class="k">update</span><span class="o">-</span><span class="n">rc</span><span class="p">.</span><span class="n">d</span> <span class="err">服务名</span> <span class="k">defaults</span><span class="err">，并且这样设置服务也就开机启动了</span>
-<span class="k">update</span><span class="o">-</span><span class="n">rc</span><span class="p">.</span><span class="n">d</span> <span class="n">test</span> <span class="k">defaults</span>
-<span class="o">#</span> <span class="err">删除</span>
-<span class="o">#</span> <span class="k">update</span><span class="o">-</span><span class="n">rc</span><span class="p">.</span><span class="n">d</span> <span class="o">-</span><span class="n">f</span> <span class="err">服务名</span> <span class="n">remove</span>
+# Ubuntu,Kali下的操作
+# update-rc.d 服务名 defaults，并且这样设置服务也就开机启动了
+update-rc.d test defaults
+# 删除
+# update-rc.d -f 服务名 remove
 
-<span class="o">#</span> <span class="n">CtenOS下的操作</span>
-<span class="n">chkconfig</span> <span class="c1">--add agent_server</span>
-<span class="n">chkconfig</span> <span class="n">agent_server</span> <span class="k">on</span>
+# CtenOS下的操作
+chkconfig --add agent_server
+chkconfig agent_server on
 </code></pre>
      </div>
      <h3 id="_4">
@@ -137,25 +137,25 @@ stop<span class="o">()</span> <span class="o">{</span>
       接下来就可以使用service命令去启动它了
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="o">#</span> <span class="n">service</span> <span class="err">方式</span>
-<span class="o">#</span> <span class="n">service</span> <span class="err">服务名</span> <span class="k">start</span>
-<span class="o">#</span> <span class="n">service</span> <span class="err">服务名</span> <span class="n">stop</span>
-<span class="o">#</span> <span class="n">service</span> <span class="err">服务名</span> <span class="k">start</span>
-<span class="n">service</span> <span class="n">test</span> <span class="k">start</span>
+      <pre><span></span><code># service 方式
+# service 服务名 start
+# service 服务名 stop
+# service 服务名 start
+service test start
 
-<span class="o">#</span> <span class="n">systemctl</span>  <span class="err">方式</span>
-<span class="n">systemctl</span> <span class="k">start</span> <span class="n">service</span>
-<span class="n">systemctl</span> <span class="n">stop</span> <span class="n">service</span>
-<span class="n">systemctl</span> <span class="k">restart</span> <span class="n">service</span>
-<span class="n">systemctl</span> <span class="n">status</span> <span class="n">service</span>
+# systemctl  方式
+systemctl start service
+systemctl stop service
+systemctl restart service
+systemctl status service
 </code></pre>
      </div>
      <h2 id="rclocal">
       编写rc.local文件
      </h2>
      <div class="codehilite">
-      <pre><span></span><code><span class="err">chmod +x /etc/rc.d/rc.local</span>
-<span class="err">vi /etc/rc.d/rc.local</span>
+      <pre><span></span><code>chmod +x /etc/rc.d/rc.local
+vi /etc/rc.d/rc.local
 </code></pre>
      </div>
      <h2 id="_5">

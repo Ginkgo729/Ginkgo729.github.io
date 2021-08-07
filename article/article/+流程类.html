@@ -88,9 +88,9 @@
       首先在没有打任何断点的情况下运行一次程序：把程序跑起来，访问 http://localhost:8080/，成功得到结果。通过查看日志，发现有下面关于路由匹配的语句：
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="err">o.s.c.g.h.p.RoutePredicateFactory        : Pattern "[/image/webp]" does not match against value "/"</span>
-<span class="err">o.s.c.g.h.p.RoutePredicateFactory        : Pattern "/" matches against value "/"</span>
-<span class="err">o.s.c.g.h.RoutePredicateHandlerMapping   : Route matched: 606b3b86-7ef4-4538-bbcb-b512c411c325</span>
+      <pre><span></span><code>o.s.c.g.h.p.RoutePredicateFactory        : Pattern "[/image/webp]" does not match against value "/"
+o.s.c.g.h.p.RoutePredicateFactory        : Pattern "/" matches against value "/"
+o.s.c.g.h.RoutePredicateHandlerMapping   : Route matched: 606b3b86-7ef4-4538-bbcb-b512c411c325
 </code></pre>
      </div>
      <p>
@@ -143,8 +143,8 @@
       一样通过查看debug日志，可以看到下面明显的日志：
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="err">o.s.c.g.handler.FilteringWebHandler      : Sorted gatewayFilterFactories: </span>
-<span class="err">o.s.c.g.filter.RouteToRequestUrlFilter   : RouteToRequestUrlFilter start</span>
+      <pre><span></span><code>o.s.c.g.handler.FilteringWebHandler      : Sorted gatewayFilterFactories: 
+o.s.c.g.filter.RouteToRequestUrlFilter   : RouteToRequestUrlFilter start
 </code></pre>
      </div>
      <p>
@@ -187,18 +187,18 @@
       在程序debug停在此处的时候，我们可以查看 filters 的值是啥，大致的内容如下：
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="err">0 RemoveCachedBodyFilter</span>
-<span class="err">1 AdaptCachedBodyGlobalFilter</span>
-<span class="err">2 NettyWriteResponseFilter</span>
-<span class="err">3 ForwardPathFilter</span>
-<span class="err">4 GatewayMetricsFilter</span>
-<span class="err">5 [[AddRequestParameter test = 'test'], order = 0]</span>
-<span class="err">6 [[AddResponseHeader return = 'return'], order = 0]</span>
-<span class="err">7 RouteToRequestUrlFilter</span>
-<span class="err">8 LoadBalancerClientFilter</span>
-<span class="err">9 WebsocketRoutingFilter</span>
-<span class="err">10 NettyRoutingFilter</span>
-<span class="err">11 ForwardRoutingFilter</span>
+      <pre><span></span><code><span class="mf">0</span> <span class="c1">RemoveCachedBodyFilter</span>
+<span class="mf">1</span> <span class="n">AdaptCachedBodyGlobalFilter</span>
+<span class="mf">2</span> <span class="n">NettyWriteResponseFilter</span>
+<span class="mf">3</span> <span class="kr">For</span><span class="n">wardPathFilter</span>
+<span class="mf">4</span> <span class="n">GatewayMetricsFilter</span>
+<span class="mf">5</span> <span class="err">[[</span><span class="n">AddRequestParameter</span> <span class="n">test</span> <span class="o">=</span> <span class="err">'</span><span class="n">test</span><span class="err">']</span><span class="p">,</span> <span class="ow">or</span><span class="n">der</span> <span class="o">=</span> <span class="mf">0</span><span class="err">]</span>
+<span class="mf">6</span> <span class="err">[[</span><span class="n">AddResponseHeader</span> <span class="kr">return</span> <span class="o">=</span> <span class="err">'</span><span class="kr">return</span><span class="err">']</span><span class="p">,</span> <span class="ow">or</span><span class="n">der</span> <span class="o">=</span> <span class="mf">0</span><span class="err">]</span>
+<span class="mf">7</span> <span class="n">RouteToRequestUrlFilter</span>
+<span class="mf">8</span> <span class="kr">Load</span><span class="n">BalancerClientFilter</span>
+<span class="mf">9</span> <span class="n">WebsocketRoutingFilter</span>
+<span class="mf">10</span> <span class="n">NettyRoutingFilter</span>
+<span class="mf">11</span> <span class="kr">For</span><span class="n">wardRoutingFilter</span>
 </code></pre>
      </div>
      <p>
@@ -426,18 +426,18 @@
       数据流图如下，图中使用序号代替filter处理器
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="err">0 RemoveCachedBodyFilter</span>
-<span class="err">1 AdaptCachedBodyGlobalFilter</span>
-<span class="err">2 NettyWriteResponseFilter</span>
-<span class="err">3 ForwardPathFilter</span>
-<span class="err">4 GatewayMetricsFilter</span>
-<span class="err">5 AddRequestParameterGatewayFilterFactory -- [[AddRequestParameter test = 'test'], order = 0]</span>
-<span class="err">6 AddResponseHeaderGatewayFilterFactory -- [[AddResponseHeader return = 'return'], order = 0]</span>
-<span class="err">7 RouteToRequestUrlFilter</span>
-<span class="err">8 LoadBalancerClientFilter</span>
-<span class="err">9 WebsocketRoutingFilter</span>
-<span class="err">10 NettyRoutingFilter</span>
-<span class="err">11 ForwardRoutingFilter</span>
+      <pre><span></span><code><span class="mf">0</span> <span class="c1">RemoveCachedBodyFilter</span>
+<span class="mf">1</span> <span class="n">AdaptCachedBodyGlobalFilter</span>
+<span class="mf">2</span> <span class="n">NettyWriteResponseFilter</span>
+<span class="mf">3</span> <span class="kr">For</span><span class="n">wardPathFilter</span>
+<span class="mf">4</span> <span class="n">GatewayMetricsFilter</span>
+<span class="mf">5</span> <span class="n">AddRequestParameterGatewayFilterFactory</span> <span class="o">--</span> <span class="err">[[</span><span class="n">AddRequestParameter</span> <span class="n">test</span> <span class="o">=</span> <span class="err">'</span><span class="n">test</span><span class="err">']</span><span class="p">,</span> <span class="ow">or</span><span class="n">der</span> <span class="o">=</span> <span class="mf">0</span><span class="err">]</span>
+<span class="mf">6</span> <span class="n">AddResponseHeaderGatewayFilterFactory</span> <span class="o">--</span> <span class="err">[[</span><span class="n">AddResponseHeader</span> <span class="kr">return</span> <span class="o">=</span> <span class="err">'</span><span class="kr">return</span><span class="err">']</span><span class="p">,</span> <span class="ow">or</span><span class="n">der</span> <span class="o">=</span> <span class="mf">0</span><span class="err">]</span>
+<span class="mf">7</span> <span class="n">RouteToRequestUrlFilter</span>
+<span class="mf">8</span> <span class="kr">Load</span><span class="n">BalancerClientFilter</span>
+<span class="mf">9</span> <span class="n">WebsocketRoutingFilter</span>
+<span class="mf">10</span> <span class="n">NettyRoutingFilter</span>
+<span class="mf">11</span> <span class="kr">For</span><span class="n">wardRoutingFilter</span>
 </code></pre>
      </div>
      <p>

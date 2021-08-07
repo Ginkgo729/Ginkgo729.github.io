@@ -66,13 +66,13 @@
 docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">首先配置运行</span><span class="n">Soul</span><span class="o">-</span><span class="k">Admin</span><span class="err">，设置数据同步方式为</span><span class="n">Websocket</span>
+      <pre><span></span><code>&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;首先配置运行Soul-Admin，设置数据同步方式为Websocket
 
-<span class="o">```</span><span class="n">xml</span>
-<span class="n">soul</span><span class="p">:</span>
-  <span class="n">sync</span><span class="p">:</span>
-    <span class="n">websocket</span><span class="p">:</span>
-      <span class="n">enabled</span><span class="p">:</span> <span class="k">true</span>
+```xml
+soul:
+  sync:
+    websocket:
+      enabled: true
 </code></pre>
      </div>
      <p>

@@ -1,0 +1,430 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-springweb">
+      Spring 源码解析 -- SpringWeb请求映射解析
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      基于上篇请求路径初步探索，了解到了一个请求到具体处理方法的大致路径，本篇就继续探索，看下路径是如何匹配到处理方法的
+     </p>
+     <h2 id="_2">
+      概览
+     </h2>
+     <p>
+      基于上篇：
+      <a href="https://juejin.cn/post/6980529362969821192/">
+       Spring Web 请求初探
+      </a>
+     </p>
+     <p>
+      我们大致定位到了请求路径到处理方法的关键代码在类中：DispatcherServlet.java
+     </p>
+     <p>
+      具体的代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">mv</span> <span class="o">=</span> <span class="n">ha</span><span class="p">.</span><span class="na">handle</span><span class="p">(</span><span class="n">processedRequest</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">mappedHandler</span><span class="p">.</span><span class="na">getHandler</span><span class="p">());</span>
+</code></pre>
+     </div>
+     <p>
+      mappedHandler 的获取就是关键了，下面我们就具体看下如何获取请求的mappedHandler的
+     </p>
+     <h2 id="_3">
+      源码解析
+     </h2>
+     <h3 id="mappedhandler">
+      获取 mappedHandler
+     </h3>
+     <p>
+      在类：DispatcherServlet.java 中，我们定位到 mappedHandler 获取的关键代码
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1">// Determine handler for the current request.</span>
+<span class="n">mappedHandler</span> <span class="o">=</span> <span class="n">getHandler</span><span class="p">(</span><span class="n">processedRequest</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">mappedHandler</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">noHandlerFound</span><span class="p">(</span><span class="n">processedRequest</span><span class="p">,</span> <span class="n">response</span><span class="p">);</span>
+    <span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      通过上面的代码，我们可以看到是通过请求进行获取，我们还注意到了为null的情况，如下代码，大意就是经典的404
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="cm">/**</span>
+<span class="cm">* No handler found -&gt; set appropriate HTTP response status.</span>
+<span class="cm">* @param request current HTTP request</span>
+<span class="cm">* @param response current HTTP response</span>
+<span class="cm">* @throws Exception if preparing the response failed</span>
+<span class="cm">*/</span>
+<span class="kd">protected</span> <span class="kt">void</span> <span class="nf">noHandlerFound</span><span class="p">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">,</span> <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pageNotFoundLogger</span><span class="p">.</span><span class="na">isWarnEnabled</span><span class="p">())</span> <span class="p">{</span>
+        <span class="n">pageNotFoundLogger</span><span class="p">.</span><span class="na">warn</span><span class="p">(</span><span class="s">"No mapping for "</span> <span class="o">+</span> <span class="n">request</span><span class="p">.</span><span class="na">getMethod</span><span class="p">()</span> <span class="o">+</span> <span class="s">" "</span> <span class="o">+</span> <span class="n">getRequestUri</span><span class="p">(</span><span class="n">request</span><span class="p">));</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">throwExceptionIfNoHandlerFound</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="n">NoHandlerFoundException</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getMethod</span><span class="p">(),</span> <span class="n">getRequestUri</span><span class="p">(</span><span class="n">request</span><span class="p">),</span>
+                <span class="k">new</span> <span class="n">ServletServerHttpRequest</span><span class="p">(</span><span class="n">request</span><span class="p">).</span><span class="na">getHeaders</span><span class="p">());</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="n">response</span><span class="p">.</span><span class="na">sendError</span><span class="p">(</span><span class="n">HttpServletResponse</span><span class="p">.</span><span class="na">SC_NOT_FOUND</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      我们进入 getHandler 函数，看看其具体处理逻辑，代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="cm">/**</span>
+<span class="cm">* Return the HandlerExecutionChain for this request.</span>
+<span class="cm">* &lt;p&gt;Tries all handler mappings in order.</span>
+<span class="cm">* @param request current HTTP request</span>
+<span class="cm">* @return the HandlerExecutionChain, or {@code null} if no handler could be found</span>
+<span class="cm">*/</span>
+<span class="nd">@Nullable</span>
+<span class="kd">protected</span> <span class="n">HandlerExecutionChain</span> <span class="nf">getHandler</span><span class="p">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">HandlerMapping</span> <span class="n">mapping</span> <span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">HandlerExecutionChain</span> <span class="n">handler</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">.</span><span class="na">getHandler</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">handler</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">handler</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      从上面代码大意可以看出：循环遍历一个关于请求匹配的Map，如果某个Handler匹配成功则返回
+     </p>
+     <p>
+      这个Map是如何初始化、具体包含哪些内容？
+     </p>
+     <p>
+      HandlerExecutionChain 具体是什么？
+     </p>
+     <p>
+      这部分疑问后面再看，感觉是个大工程，当前并不影响本篇的解析
+     </p>
+     <h3 id="mapper">
+      请求与Mapper匹配
+     </h3>
+     <p>
+      接着跟下去，到类：AbstractHandlerMethodMapping.java
+     </p>
+     <p>
+      我们来到了一个比较关键的处理，我们可以看到这里有相关的匹配逻辑，里面有很多的处理，有些目前都不知道有啥作用，后面查查资料后咱们再回过头来看看
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="nd">@Override</span>
+    <span class="nd">@Nullable</span>
+    <span class="kd">public</span> <span class="kd">final</span> <span class="n">HandlerExecutionChain</span> <span class="nf">getHandler</span><span class="p">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="n">Object</span> <span class="n">handler</span> <span class="o">=</span> <span class="n">getHandlerInternal</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+
+        <span class="c1">// 什么情况下会匹配到默认的Handler？</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">handler</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">getDefaultHandler</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">handler</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 什么情况下获取到的Bean是一个String？</span>
+        <span class="c1">// 需要从 obtainApplicationContext 中获取</span>
+        <span class="c1">// Bean name or resolved handler?</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">handler</span> <span class="k">instanceof</span> <span class="n">String</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">String</span> <span class="n">handlerName</span> <span class="o">=</span> <span class="p">(</span><span class="n">String</span><span class="p">)</span> <span class="n">handler</span><span class="p">;</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">obtainApplicationContext</span><span class="p">().</span><span class="na">getBean</span><span class="p">(</span><span class="n">handlerName</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 什么情况下会用到缓存？</span>
+        <span class="c1">// Ensure presence of cached lookupPath for interceptors and others</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ServletRequestPathUtils</span><span class="p">.</span><span class="na">hasCachedPath</span><span class="p">(</span><span class="n">request</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">initLookupPath</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="n">HandlerExecutionChain</span> <span class="n">executionChain</span> <span class="o">=</span> <span class="n">getHandlerExecutionChain</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">request</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isTraceEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="s">"Mapped to "</span> <span class="o">+</span> <span class="n">handler</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">DispatcherType</span><span class="p">.</span><span class="na">ASYNC</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getDispatcherType</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="n">logger</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="s">"Mapped to "</span> <span class="o">+</span> <span class="n">executionChain</span><span class="p">.</span><span class="na">getHandler</span><span class="p">());</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">hasCorsConfigurationSource</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span> <span class="o">||</span> <span class="n">CorsUtils</span><span class="p">.</span><span class="na">isPreFlightRequest</span><span class="p">(</span><span class="n">request</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">CorsConfiguration</span> <span class="n">config</span> <span class="o">=</span> <span class="n">getCorsConfiguration</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">request</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">getCorsConfigurationSource</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">CorsConfiguration</span> <span class="n">globalConfig</span> <span class="o">=</span> <span class="n">getCorsConfigurationSource</span><span class="p">().</span><span class="na">getCorsConfiguration</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+                <span class="n">config</span> <span class="o">=</span> <span class="p">(</span><span class="n">globalConfig</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">globalConfig</span><span class="p">.</span><span class="na">combine</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="p">:</span> <span class="n">config</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">config</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">config</span><span class="p">.</span><span class="na">validateAllowCredentials</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="n">executionChain</span> <span class="o">=</span> <span class="n">getCorsHandlerExecutionChain</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">executionChain</span><span class="p">,</span> <span class="n">config</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">executionChain</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      其中的 getHandlerExecutionChain 还挺可疑，感觉也是关键代码，给设置了一堆的我们熟悉的 Interceptors,这里做个标记，后面再探索下
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">protected</span> <span class="n">HandlerExecutionChain</span> <span class="nf">getHandlerExecutionChain</span><span class="p">(</span><span class="n">Object</span> <span class="n">handler</span><span class="p">,</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">HandlerExecutionChain</span> <span class="n">chain</span> <span class="o">=</span> <span class="p">(</span><span class="n">handler</span> <span class="k">instanceof</span> <span class="n">HandlerExecutionChain</span> <span class="o">?</span>
+                <span class="p">(</span><span class="n">HandlerExecutionChain</span><span class="p">)</span> <span class="n">handler</span> <span class="p">:</span> <span class="k">new</span> <span class="n">HandlerExecutionChain</span><span class="p">(</span><span class="n">handler</span><span class="p">));</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">HandlerInterceptor</span> <span class="n">interceptor</span> <span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="na">adaptedInterceptors</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">interceptor</span> <span class="k">instanceof</span> <span class="n">MappedInterceptor</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">MappedInterceptor</span> <span class="n">mappedInterceptor</span> <span class="o">=</span> <span class="p">(</span><span class="n">MappedInterceptor</span><span class="p">)</span> <span class="n">interceptor</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">mappedInterceptor</span><span class="p">.</span><span class="na">matches</span><span class="p">(</span><span class="n">request</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="n">chain</span><span class="p">.</span><span class="na">addInterceptor</span><span class="p">(</span><span class="n">mappedInterceptor</span><span class="p">.</span><span class="na">getInterceptor</span><span class="p">());</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="p">{</span>
+                <span class="n">chain</span><span class="p">.</span><span class="na">addInterceptor</span><span class="p">(</span><span class="n">interceptor</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="handler">
+      Handler匹配
+     </h3>
+     <p>
+      下面就跟着断点来到了：AbstractHandlerMapping.java
+     </p>
+     <p>
+      看到下面的关键代码：在查找匹配的时候上了一个锁，进入具体的查找逻辑
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Override</span>
+<span class="nd">@Nullable</span>
+<span class="kd">protected</span> <span class="n">HandlerMethod</span> <span class="nf">getHandlerInternal</span><span class="p">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+    <span class="c1">// 这里一些处理得到我们的请求路径：”/"</span>
+    <span class="n">String</span> <span class="n">lookupPath</span> <span class="o">=</span> <span class="n">initLookupPath</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="na">mappingRegistry</span><span class="p">.</span><span class="na">acquireReadLock</span><span class="p">();</span>
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="n">HandlerMethod</span> <span class="n">handlerMethod</span> <span class="o">=</span> <span class="n">lookupHandlerMethod</span><span class="p">(</span><span class="n">lookupPath</span><span class="p">,</span> <span class="n">request</span><span class="p">);</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">handlerMethod</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">handlerMethod</span><span class="p">.</span><span class="na">createWithResolvedBean</span><span class="p">()</span> <span class="p">:</span> <span class="kc">null</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">finally</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">mappingRegistry</span><span class="p">.</span><span class="na">releaseReadLock</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      我们进入类：AbstractHandlerMethodMapping.java 中，查看具体的处理逻辑
+     </p>
+     <p>
+      我们可以看到这里进行了一系列的匹配，如果为空还能取默认值，这个默认值是个啥？
+     </p>
+     <p>
+      并且还有多个匹配上的还不会报错的情况，瞬间感觉Web这块还是有很多门道啊，但这些细节后面我们再看看，继续看下匹配的逻辑
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="nd">@Nullable</span>
+    <span class="kd">protected</span> <span class="n">HandlerMethod</span> <span class="nf">lookupHandlerMethod</span><span class="p">(</span><span class="n">String</span> <span class="n">lookupPath</span><span class="p">,</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">Match</span><span class="o">&gt;</span> <span class="n">matches</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+        <span class="c1">// 在这里获取到了相关的Handler，就是一个简单的Map取值（如后面的代码），那个Map如何初始化的得后面看看了</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">directPathMatches</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">mappingRegistry</span><span class="p">.</span><span class="na">getMappingsByDirectPath</span><span class="p">(</span><span class="n">lookupPath</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">directPathMatches</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">addMatchingMappings</span><span class="p">(</span><span class="n">directPathMatches</span><span class="p">,</span> <span class="n">matches</span><span class="p">,</span> <span class="n">request</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 如果没有匹配上，这个默认值又是如何处理的呢？</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">matches</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">addMatchingMappings</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">mappingRegistry</span><span class="p">.</span><span class="na">getRegistrations</span><span class="p">().</span><span class="na">keySet</span><span class="p">(),</span> <span class="n">matches</span><span class="p">,</span> <span class="n">request</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 这里看到一些非常有趣的处理</span>
+        <span class="c1">// 如果同时匹配上了两个，好像不是一定报错？</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">matches</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">Match</span> <span class="n">bestMatch</span> <span class="o">=</span> <span class="n">matches</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">matches</span><span class="p">.</span><span class="na">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">Comparator</span><span class="o">&lt;</span><span class="n">Match</span><span class="o">&gt;</span> <span class="n">comparator</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MatchComparator</span><span class="p">(</span><span class="n">getMappingComparator</span><span class="p">(</span><span class="n">request</span><span class="p">));</span>
+                <span class="n">matches</span><span class="p">.</span><span class="na">sort</span><span class="p">(</span><span class="n">comparator</span><span class="p">);</span>
+                <span class="n">bestMatch</span> <span class="o">=</span> <span class="n">matches</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isTraceEnabled</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="n">matches</span><span class="p">.</span><span class="na">size</span><span class="p">()</span> <span class="o">+</span> <span class="s">" matching mappings: "</span> <span class="o">+</span> <span class="n">matches</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="c1">// 这个的返回是什么意思？</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">CorsUtils</span><span class="p">.</span><span class="na">isPreFlightRequest</span><span class="p">(</span><span class="n">request</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="n">Match</span> <span class="n">match</span> <span class="p">:</span> <span class="n">matches</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">match</span><span class="p">.</span><span class="na">hasCorsConfig</span><span class="p">())</span> <span class="p">{</span>
+                            <span class="k">return</span> <span class="n">PREFLIGHT_AMBIGUOUS_MATCH</span><span class="p">;</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="k">else</span> <span class="p">{</span>
+                    <span class="n">Match</span> <span class="n">secondBestMatch</span> <span class="o">=</span> <span class="n">matches</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">comparator</span><span class="p">.</span><span class="na">compare</span><span class="p">(</span><span class="n">bestMatch</span><span class="p">,</span> <span class="n">secondBestMatch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="n">Method</span> <span class="n">m1</span> <span class="o">=</span> <span class="n">bestMatch</span><span class="p">.</span><span class="na">getHandlerMethod</span><span class="p">().</span><span class="na">getMethod</span><span class="p">();</span>
+                        <span class="n">Method</span> <span class="n">m2</span> <span class="o">=</span> <span class="n">secondBestMatch</span><span class="p">.</span><span class="na">getHandlerMethod</span><span class="p">().</span><span class="na">getMethod</span><span class="p">();</span>
+                        <span class="n">String</span> <span class="n">uri</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">getRequestURI</span><span class="p">();</span>
+                        <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalStateException</span><span class="p">(</span>
+                                <span class="s">"Ambiguous handler methods mapped for '"</span> <span class="o">+</span> <span class="n">uri</span> <span class="o">+</span> <span class="s">"': {"</span> <span class="o">+</span> <span class="n">m1</span> <span class="o">+</span> <span class="s">", "</span> <span class="o">+</span> <span class="n">m2</span> <span class="o">+</span> <span class="s">"}"</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="n">request</span><span class="p">.</span><span class="na">setAttribute</span><span class="p">(</span><span class="n">BEST_MATCHING_HANDLER_ATTRIBUTE</span><span class="p">,</span> <span class="n">bestMatch</span><span class="p">.</span><span class="na">getHandlerMethod</span><span class="p">());</span>
+            <span class="n">handleMatch</span><span class="p">(</span><span class="n">bestMatch</span><span class="p">.</span><span class="na">mapping</span><span class="p">,</span> <span class="n">lookupPath</span><span class="p">,</span> <span class="n">request</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">bestMatch</span><span class="p">.</span><span class="na">getHandlerMethod</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">handleNoMatch</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">mappingRegistry</span><span class="p">.</span><span class="na">getRegistrations</span><span class="p">().</span><span class="na">keySet</span><span class="p">(),</span> <span class="n">lookupPath</span><span class="p">,</span> <span class="n">request</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      一个简单的Map取值（如后面的代码），那个Map如何初始化的得后面看看了
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">class</span> <span class="nc">MappingRegistry</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">MultiValueMap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">pathLookup</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedMultiValueMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+    <span class="nd">@Nullable</span>
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">getMappingsByDirectPath</span><span class="p">(</span><span class="n">String</span> <span class="n">urlPath</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">pathLookup</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">urlPath</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      到这里就匹配成功并返回了，但通过调试看到不是我们熟悉的类和方法
+     </p>
+     <p>
+      继续看看这行的具体处理逻辑：return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
+     </p>
+     <p>
+      看看类 HandlerMethod 的一些方法和构造函数：
+     </p>
+     <p>
+      下面函数我们看到了属性的获取Bean
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">HandlerMethod</span> <span class="nf">createWithResolvedBean</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">Object</span> <span class="n">handler</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">bean</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">bean</span> <span class="k">instanceof</span> <span class="n">String</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">Assert</span><span class="p">.</span><span class="na">state</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">beanFactory</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">,</span> <span class="s">"Cannot resolve bean name without BeanFactory"</span><span class="p">);</span>
+            <span class="n">String</span> <span class="n">beanName</span> <span class="o">=</span> <span class="p">(</span><span class="n">String</span><span class="p">)</span> <span class="k">this</span><span class="p">.</span><span class="na">bean</span><span class="p">;</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">beanFactory</span><span class="p">.</span><span class="na">getBean</span><span class="p">(</span><span class="n">beanName</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">HandlerMethod</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">handler</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在其构造函数中，直接将Bean和Method进行了初始化，这个如何初始化的我们后面再看
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="nf">HandlerMethod</span><span class="p">(</span><span class="n">Object</span> <span class="n">bean</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Assert</span><span class="p">.</span><span class="na">notNull</span><span class="p">(</span><span class="n">bean</span><span class="p">,</span> <span class="s">"Bean is required"</span><span class="p">);</span>
+        <span class="n">Assert</span><span class="p">.</span><span class="na">notNull</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="s">"Method is required"</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">bean</span> <span class="o">=</span> <span class="n">bean</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">beanFactory</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">beanType</span> <span class="o">=</span> <span class="n">ClassUtils</span><span class="p">.</span><span class="na">getUserClass</span><span class="p">(</span><span class="n">bean</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">method</span> <span class="o">=</span> <span class="n">method</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">bridgedMethod</span> <span class="o">=</span> <span class="n">BridgeMethodResolver</span><span class="p">.</span><span class="na">findBridgedMethod</span><span class="p">(</span><span class="n">method</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">parameters</span> <span class="o">=</span> <span class="n">initMethodParameters</span><span class="p">();</span>
+        <span class="n">evaluateResponseStatus</span><span class="p">();</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">description</span> <span class="o">=</span> <span class="n">initDescription</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">beanType</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_4">
+      总结
+     </h2>
+     <p>
+      本篇文章探索了下具体的请求如何匹配到处理方法的相关处理函数,了解到了核心逻辑就是遍历一个： handlerMappings
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Nullable</span>
+<span class="kd">protected</span> <span class="n">HandlerExecutionChain</span> <span class="nf">getHandler</span><span class="p">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">HandlerMapping</span> <span class="n">mapping</span> <span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">HandlerExecutionChain</span> <span class="n">handler</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">.</span><span class="na">getHandler</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">handler</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">handler</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      后面的具体匹配逻辑也有很多值得探索的细节，但接下来更重要的是弄清楚这个: handlerMappings ,是如何初始化和加载的
+     </p>
+     <p>
+      下面的文章我们会继续探索
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

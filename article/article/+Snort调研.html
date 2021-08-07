@@ -82,13 +82,13 @@ _softirq
       利用一个发包的软件在15秒左右发送了120万个数据包，这些包都能引起snort的警报处理，得到的结果如下：
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="err">Packet I/O Totals:</span>
-<span class="err">   Received:      1859825</span>
-<span class="err">   Analyzed:       746655 ( 40.147%)</span>
-<span class="err">    Dropped:      1113163 ( 37.443%)</span>
-<span class="err">   Filtered:            0 (  0.000%)</span>
-<span class="c">Outstanding:      1113170 ( 59.853%)</span>
-<span class="c">   Injected:            0</span>
+      <pre><span></span><code>Packet I/O Totals:
+   Received:      1859825
+   Analyzed:       746655 ( 40.147%)
+    Dropped:      1113163 ( 37.443%)
+   Filtered:            0 (  0.000%)
+Outstanding:      1113170 ( 59.853%)
+   Injected:            0
 </code></pre>
      </div>
      <p>
@@ -98,13 +98,13 @@ _softirq
       从上面的结果应该可以看出数据包捕获效率和数据包分析效率好像都有影响了，对了，下面是10秒内12万个数据的处理结果：
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="err">Packet I/O Totals:</span>
-<span class="err">   Received:       222642</span>
-<span class="err">   Analyzed:       222641 (100.000%)</span>
-<span class="err">    Dropped:            0 (  0.000%)</span>
-<span class="err">   Filtered:            0 (  0.000%)</span>
-<span class="c">Outstanding:            1 (  0.000%)</span>
-<span class="c">   Injected:            0</span>
+      <pre><span></span><code>Packet I/O Totals:
+   Received:       222642
+   Analyzed:       222641 (100.000%)
+    Dropped:            0 (  0.000%)
+   Filtered:            0 (  0.000%)
+Outstanding:            1 (  0.000%)
+   Injected:            0
 </code></pre>
      </div>
      <p>
@@ -152,32 +152,32 @@ _softirq
       </bpf>
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="o">#</span> <span class="err">只使用</span><span class="n">Windows实验环境中发包程序</span><span class="err">，</span><span class="mi">90</span><span class="err">线程最大速度</span>
-<span class="o">#</span> <span class="err">只要</span><span class="n">TCP包</span><span class="err">，其他的过滤掉，好像发包程序发的不是</span><span class="n">tcp</span><span class="err">，是啥</span><span class="n">ARP</span>
-<span class="n">CPU使用情况</span><span class="err">：</span><span class="mi">0</span><span class="p">.</span><span class="mi">3</span><span class="o">%</span>
-<span class="err">处理包的数据量：</span><span class="mi">10</span><span class="err">秒内处理了</span><span class="mi">6</span><span class="err">个</span>
+      <pre><span></span><code># 只使用Windows实验环境中发包程序，90线程最大速度
+# 只要TCP包，其他的过滤掉，好像发包程序发的不是tcp，是啥ARP
+CPU使用情况：0.3%
+处理包的数据量：10秒内处理了6个
 
-<span class="o">#</span> <span class="err">不进行包过滤</span>
-<span class="n">CPU使用情况</span><span class="err">：</span><span class="mi">29</span><span class="p">.</span><span class="mi">2</span><span class="o">%</span>
-<span class="err">处理包的数据量：</span><span class="mi">11</span><span class="err">秒内处理了</span><span class="mi">190851</span><span class="err">个</span>
+# 不进行包过滤
+CPU使用情况：29.2%
+处理包的数据量：11秒内处理了190851个
 
-<span class="o">#</span> <span class="err">使用第三方发送</span><span class="n">UDP包和TCP包</span><span class="err">，总共速率</span><span class="mi">31</span><span class="n">M</span>
-<span class="o">#</span> <span class="err">只要</span><span class="n">TCP包</span><span class="err">，其他的过滤掉</span>
-<span class="n">CPU使用情况</span><span class="err">：</span><span class="mi">31</span><span class="o">%</span>
-<span class="err">处理包的数据量：</span><span class="mi">287954</span> <span class="mi">11</span><span class="err">秒</span>
+# 使用第三方发送UDP包和TCP包，总共速率31M
+# 只要TCP包，其他的过滤掉
+CPU使用情况：31%
+处理包的数据量：287954 11秒
 
-<span class="o">#</span> <span class="err">不进行包过滤</span>
-<span class="n">CPU使用情况</span><span class="err">：</span><span class="mi">42</span><span class="p">.</span><span class="mi">3</span><span class="o">%</span>
-<span class="err">处理包的数据量：</span><span class="mi">649593</span> <span class="mi">12</span><span class="err">秒</span>
+# 不进行包过滤
+CPU使用情况：42.3%
+处理包的数据量：649593 12秒
 
-<span class="o">#</span> <span class="err">使用使用</span><span class="n">Windows实验环境中发包程序90线程最大速度</span><span class="err">，第三方发送</span><span class="n">TCP包</span><span class="err">，速率</span><span class="mi">31</span><span class="n">M</span>
-<span class="o">#</span> <span class="err">不进行包过滤</span>
-<span class="n">CPU使用情况</span><span class="err">：</span><span class="mi">39</span><span class="p">.</span><span class="mi">3</span><span class="o">%</span>
-<span class="err">处理包的数据量：</span><span class="mi">5845501</span> <span class="mi">25</span><span class="err">秒</span>
+# 使用使用Windows实验环境中发包程序90线程最大速度，第三方发送TCP包，速率31M
+# 不进行包过滤
+CPU使用情况：39.3%
+处理包的数据量：5845501 25秒
 
-<span class="o">#</span> <span class="err">只要</span><span class="n">TCP包</span><span class="err">，其他的过滤掉</span>
-<span class="n">CPU使用情况</span><span class="err">：</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="o">%</span>
-<span class="err">处理包的数据量：</span><span class="mi">27690</span> <span class="mi">24</span><span class="err">秒（刚好是第三方发送数据包数量）</span>
+# 只要TCP包，其他的过滤掉
+CPU使用情况：0.1%
+处理包的数据量：27690 24秒（刚好是第三方发送数据包数量）
 </code></pre>
      </div>
      <p>
@@ -201,43 +201,43 @@ docker run -tid --net=host --name snort snort /usr/local/bin/snort -A console -u
       15秒左右发送了120万个数据包
      </h3>
      <div class="codehilite">
-      <pre><span></span><code><span class="n">Packet</span> <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">Totals</span><span class="p">:</span>
-   <span class="n">Received</span><span class="p">:</span>       <span class="mi">497600</span>
-   <span class="n">Analyzed</span><span class="p">:</span>       <span class="mi">497600</span> <span class="p">(</span><span class="mi">100</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-    <span class="n">Dropped</span><span class="p">:</span>       <span class="mi">570717</span> <span class="p">(</span> <span class="mi">53</span><span class="p">.</span><span class="mi">422</span><span class="o">%</span><span class="p">)</span>
-   <span class="n">Filtered</span><span class="p">:</span>            <span class="mi">0</span> <span class="p">(</span>  <span class="mi">0</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-<span class="n">Outstanding</span><span class="p">:</span>            <span class="mi">0</span> <span class="p">(</span>  <span class="mi">0</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-   <span class="n">Injected</span><span class="p">:</span>            <span class="mi">0</span>
+      <pre><span></span><code>Packet I/O Totals:
+   Received:       497600
+   Analyzed:       497600 (100.000%)
+    Dropped:       570717 ( 53.422%)
+   Filtered:            0 (  0.000%)
+Outstanding:            0 (  0.000%)
+   Injected:            0
 
-<span class="n">Packet</span> <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">Totals</span><span class="p">:</span>
-   <span class="n">Received</span><span class="p">:</span>       <span class="mi">540223</span>
-   <span class="n">Analyzed</span><span class="p">:</span>       <span class="mi">540223</span> <span class="p">(</span><span class="mi">100</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-    <span class="n">Dropped</span><span class="p">:</span>       <span class="mi">735552</span> <span class="p">(</span> <span class="mi">57</span><span class="p">.</span><span class="mi">655</span><span class="o">%</span><span class="p">)</span>
-   <span class="n">Filtered</span><span class="p">:</span>            <span class="mi">0</span> <span class="p">(</span>  <span class="mi">0</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-<span class="n">Outstanding</span><span class="p">:</span>            <span class="mi">0</span> <span class="p">(</span>  <span class="mi">0</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-   <span class="n">Injected</span><span class="p">:</span>            <span class="mi">0</span>
+Packet I/O Totals:
+   Received:       540223
+   Analyzed:       540223 (100.000%)
+    Dropped:       735552 ( 57.655%)
+   Filtered:            0 (  0.000%)
+Outstanding:            0 (  0.000%)
+   Injected:            0
 
-<span class="n">Packet</span> <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">Totals</span><span class="p">:</span>
-   <span class="n">Received</span><span class="p">:</span>       <span class="mi">591759</span>
-   <span class="n">Analyzed</span><span class="p">:</span>       <span class="mi">591759</span> <span class="p">(</span><span class="mi">100</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-    <span class="n">Dropped</span><span class="p">:</span>       <span class="mi">893606</span> <span class="p">(</span> <span class="mi">60</span><span class="p">.</span><span class="mi">161</span><span class="o">%</span><span class="p">)</span>
-   <span class="n">Filtered</span><span class="p">:</span>            <span class="mi">0</span> <span class="p">(</span>  <span class="mi">0</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-<span class="n">Outstanding</span><span class="p">:</span>            <span class="mi">0</span> <span class="p">(</span>  <span class="mi">0</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-   <span class="n">Injected</span><span class="p">:</span>            <span class="mi">0</span>
+Packet I/O Totals:
+   Received:       591759
+   Analyzed:       591759 (100.000%)
+    Dropped:       893606 ( 60.161%)
+   Filtered:            0 (  0.000%)
+Outstanding:            0 (  0.000%)
+   Injected:            0
 
-<span class="n">Packet</span> <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">Totals</span><span class="p">:</span>
-   <span class="n">Received</span><span class="p">:</span>       <span class="mi">675657</span>
-   <span class="n">Analyzed</span><span class="p">:</span>       <span class="mi">675657</span> <span class="p">(</span><span class="mi">100</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-    <span class="n">Dropped</span><span class="p">:</span>      <span class="mi">1012010</span> <span class="p">(</span> <span class="mi">59</span><span class="p">.</span><span class="mi">965</span><span class="o">%</span><span class="p">)</span>
-   <span class="n">Filtered</span><span class="p">:</span>            <span class="mi">0</span> <span class="p">(</span>  <span class="mi">0</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-<span class="n">Outstanding</span><span class="p">:</span>            <span class="mi">0</span> <span class="p">(</span>  <span class="mi">0</span><span class="p">.</span><span class="mi">000</span><span class="o">%</span><span class="p">)</span>
-   <span class="n">Injected</span><span class="p">:</span>            <span class="mi">0</span>
+Packet I/O Totals:
+   Received:       675657
+   Analyzed:       675657 (100.000%)
+    Dropped:      1012010 ( 59.965%)
+   Filtered:            0 (  0.000%)
+Outstanding:            0 (  0.000%)
+   Injected:            0
 </code></pre>
      </div>
      <div class="codehilite">
-      <pre><span></span><code><span class="err">Total packets processed:              176719</span>
-<span class="err">Total packets processed:              174065</span>
-<span class="err">1192681</span>
+      <pre><span></span><code>Total packets processed:              176719
+Total packets processed:              174065
+1192681
 </code></pre>
      </div>
      <h2 id="other_1">

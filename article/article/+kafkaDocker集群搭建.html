@@ -68,29 +68,29 @@
       docker logs -f zk
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="o">###</span> <span class="err">运行</span> <span class="n">Kafka</span>
-<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">启动的命令如下，注意将下面的</span> <span class="mi">192</span><span class="p">.</span><span class="mi">168</span><span class="p">.</span><span class="mi">101</span><span class="p">.</span><span class="mi">104</span> <span class="err">换成自己的宿主机</span><span class="n">IP</span><span class="err">，运行后查看日志正常即可</span>
+      <pre><span></span><code>### 运行 Kafka
+&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;启动的命令如下，注意将下面的 192.168.101.104 换成自己的宿主机IP，运行后查看日志正常即可
 
-<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
-<span class="o">#</span> <span class="err">第一次启动</span>
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="c1">--name kafka0 -p 9092:9092 -e KAFKA_BROKER_ID=0 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9092 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 -t wurstmeister/kafka</span>
+```shell script
+# 第一次启动
+docker run -dit --name kafka0 -p 9092:9092 -e KAFKA_BROKER_ID=0 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9092 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 -t wurstmeister/kafka
 
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="c1">--name kafka1 -p 9093:9093 -e KAFKA_BROKER_ID=1 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9093 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9093 -t wurstmeister/kafka</span>
+docker run -dit --name kafka1 -p 9093:9093 -e KAFKA_BROKER_ID=1 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9093 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9093 -t wurstmeister/kafka
 
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="c1">--name kafka2 -p 9094:9094 -e KAFKA_BROKER_ID=2 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9094 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9094 -t wurstmeister/kafka</span>
+docker run -dit --name kafka2 -p 9094:9094 -e KAFKA_BROKER_ID=2 -e KAFKA_ZOOKEEPER_CONNECT=192.168.101.104:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.104:9094 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9094 -t wurstmeister/kafka
 
-<span class="o">#</span> <span class="err">重启</span>
-<span class="n">docker</span> <span class="k">restart</span> <span class="n">kafka0</span>
-<span class="n">docker</span> <span class="k">restart</span> <span class="n">kafka1</span>
-<span class="n">docker</span> <span class="k">restart</span> <span class="n">kafka2</span>
+# 重启
+docker restart kafka0
+docker restart kafka1
+docker restart kafka2
 
-<span class="o">#</span> <span class="err">查看日志</span>
-<span class="n">docker</span> <span class="n">logs</span> <span class="o">-</span><span class="n">f</span> <span class="n">kafka0</span>
+# 查看日志
+docker logs -f kafka0
 
-<span class="o">#</span> <span class="err">删除</span><span class="n">kafka</span>
-<span class="n">docker</span> <span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="n">kafka0</span>
-<span class="n">docker</span> <span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="n">kafka1</span>
-<span class="n">docker</span> <span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="n">kafka2</span>
+# 删除kafka
+docker rm -f kafka0
+docker rm -f kafka1
+docker rm -f kafka2
 </code></pre>
      </div>
      <h3 id="_5">
@@ -132,13 +132,13 @@ docker exec -ti kafka0 kafka-console-producer.sh --broker-list 192.168.101.104:9
 docker exec -ti kafka0 kafka-consumer-perf-test.sh --bootstrap-server 192.168.101.104:9092 --topic TestTopic --fetch-size 1048576 --messages 100000 --threads 1
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="o">###</span> <span class="n">kafka</span> <span class="n">manage</span>
-<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">使用</span><span class="n">docker启动后</span><span class="err">，访问</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">9000</span><span class="o">/</span> <span class="p">,</span> <span class="err">点击添加</span><span class="k">cluster</span><span class="err">，输入前两个（名称和</span><span class="n">zk地址</span><span class="err">），保存即可</span>
+      <pre><span></span><code>### kafka manage
+&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;使用docker启动后，访问: http://localhost:9000/ , 点击添加cluster，输入前两个（名称和zk地址），保存即可
 
-<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9000</span><span class="p">:</span><span class="mi">9000</span> <span class="o">-</span><span class="n">e</span> <span class="n">ZK_HOSTS</span><span class="o">=</span><span class="ss">"192.168.101.104:2181"</span> <span class="n">hlebalbau</span><span class="o">/</span><span class="n">kafka</span><span class="o">-</span><span class="n">manager</span><span class="p">:</span><span class="k">stable</span>
+```shell script
+docker run -dit -p 9000:9000 -e ZK_HOSTS="192.168.101.104:2181" hlebalbau/kafka-manager:stable
 
-<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">9000</span><span class="o">/</span>
+http://localhost:9000/
 </code></pre>
      </div>
      <h2 id="_8">

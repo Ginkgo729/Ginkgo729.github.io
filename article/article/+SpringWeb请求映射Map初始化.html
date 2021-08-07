@@ -1,0 +1,532 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-springwebmap">
+      Spring源码解析 -- SpringWeb请求映射Map初始化
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在上篇文章中，大致解析了Spring如何将请求路径与处理方法进行映射，但映射相关的初始化对于我们来说还是一团迷雾
+     </p>
+     <p>
+      本篇文章就来探索下，请求路径和处理方法的映射，是如何进行初始化的
+     </p>
+     <h2 id="_2">
+      概览
+     </h2>
+     <p>
+      基于上篇文章：
+      <a href="https://juejin.cn/post/6980874051669458952">
+       Spring 源码解析 -- SpringWeb请求映射解析
+      </a>
+     </p>
+     <p>
+      本篇文章本来想早点写完，但一直卡着，没有找到想要的切入点，还好在周四左右定位到了相关的关键代码，初步探索到相关初始化的代码过程
+     </p>
+     <p>
+      接下来就展示这段时间的定位和解析过程，下面是自己这段时间探索历程：
+     </p>
+     <ul>
+      <li>
+       想定位 handlerMappings 的初始化，但没有定位请求URL和处理方法相关初始化的东西
+      </li>
+      <li>
+       回过来头来看 handlerMappings ，看其有哪些东西,发现这个Map中并没有自定义的HelloWorld
+      </li>
+      <li>
+       意识到关键的 RequestMappingHandlerMapping，跟踪发送只有在这个类型才成功匹配
+      </li>
+      <li>
+       回顾上篇的请求映射解析，在 RequestMappingHandlerMapping 细致初始化相关的代码
+      </li>
+      <li>
+       成功找到相关的路径和处理方法初始化的关键代码
+      </li>
+     </ul>
+     <p>
+      接下来详细看下：
+     </p>
+     <h2 id="_3">
+      源码解析
+     </h2>
+     <h3 id="_4">
+      初步探索初始化：误入歧途
+     </h3>
+     <p>
+      在类： DispatcherServlet.java 中，我们定位到 mappedHandler 获取的关键代码
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Nullable</span>
+<span class="kd">protected</span> <span class="n">HandlerExecutionChain</span> <span class="nf">getHandler</span><span class="p">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">HandlerMapping</span> <span class="n">mapping</span> <span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="na">handlerMappings</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">HandlerExecutionChain</span> <span class="n">handler</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">.</span><span class="na">getHandler</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">handler</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">handler</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      它就是遍历了： handlerMappings ,于是去跟踪了 handlerMappings 初始化过程
+     </p>
+     <p>
+      结果失败而归，没有找到自己想要的东西，并没有发现自定义类： HelloWorld 的相关东西
+     </p>
+     <p>
+      这块有很多的代码，里面也有很多的东西，但在这里就不展示出来了，感兴趣的老哥可自行探索
+     </p>
+     <h3 id="_5">
+      回顾请求映射查找匹配：幡然醒悟
+     </h3>
+     <p>
+      探索 handlerMappings 无果，于是回到上面那段遍历处理
+     </p>
+     <p>
+      经过调试 handlerMappings 基本是固定的，包含下面的类：
+     </p>
+     <ul>
+      <li>
+       this.handlerMappings
+       <ul>
+        <li>
+         RequestMappingHandlerMapping
+        </li>
+        <li>
+         BeanNameUrlHandlerMapping
+        </li>
+        <li>
+         RouterFunctionMapping
+        </li>
+        <li>
+         SimpleUrlHandlerMapping
+        </li>
+        <li>
+         WelcomePageHandlerMapping
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <p>
+      而匹配的成功的是： RequestMappingHandlerMapping ，其返回了我们想要的处理方法 HelloWorld
+     </p>
+     <p>
+      调试中很疑惑为啥初期要初始化这几个了，并且再套了一层请求匹配，目前掌握的知识还不足于破解，只能后面再探索了
+     </p>
+     <p>
+      于是开始梳理 RequestMappingHandlerMapping 的请求匹配，在下面的一段关键代码匹配成功了：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">AbstractHandlerMethodMapping</span><span class="p">.</span><span class="na">java</span>
+    <span class="nd">@Nullable</span>
+    <span class="kd">protected</span> <span class="n">HandlerMethod</span> <span class="nf">lookupHandlerMethod</span><span class="p">(</span><span class="n">String</span> <span class="n">lookupPath</span><span class="p">,</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">Match</span><span class="o">&gt;</span> <span class="n">matches</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+        <span class="c1">// 在这里拿到了匹配结果</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">directPathMatches</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">mappingRegistry</span><span class="p">.</span><span class="na">getMappingsByDirectPath</span><span class="p">(</span><span class="n">lookupPath</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">directPathMatches</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">addMatchingMappings</span><span class="p">(</span><span class="n">directPathMatches</span><span class="p">,</span> <span class="n">matches</span><span class="p">,</span> <span class="n">request</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">matches</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">addMatchingMappings</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">mappingRegistry</span><span class="p">.</span><span class="na">getRegistrations</span><span class="p">().</span><span class="na">keySet</span><span class="p">(),</span> <span class="n">matches</span><span class="p">,</span> <span class="n">request</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="p">.......</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在上面的代码中就匹配成功了，其中匹配的方法很简单粗暴：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">AbstractHandlerMethodMapping</span><span class="p">.</span><span class="na">java</span> <span class="o">--</span> <span class="n">MappingRegistry</span>
+    <span class="nd">@Nullable</span>
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">getMappingsByDirectPath</span><span class="p">(</span><span class="n">String</span> <span class="n">urlPath</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">pathLookup</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">urlPath</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      于是关键点到了 this.mappingRegistry 的初始化，找到初始化的代码，打上断点
+     </p>
+     <p>
+      期间以为是在类：AbstractHandlerMethodMapping 中进行的初始的，在下面的函数打上了断点：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">AbstractHandlerMethodMapping</span><span class="p">.</span><span class="na">java</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setPatternParser</span><span class="p">(</span><span class="n">PathPatternParser</span> <span class="n">patternParser</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Assert</span><span class="p">.</span><span class="na">state</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">mappingRegistry</span><span class="p">.</span><span class="na">getRegistrations</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">(),</span>
+                <span class="s">"PathPatternParser must be set before the initialization of "</span> <span class="o">+</span>
+                        <span class="s">"request mappings through InitializingBean#afterPropertiesSet."</span><span class="p">);</span>
+        <span class="kd">super</span><span class="p">.</span><span class="na">setPatternParser</span><span class="p">(</span><span class="n">patternParser</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">registerMapping</span><span class="p">(</span><span class="n">T</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">Object</span> <span class="n">handler</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isTraceEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="s">"Register \""</span> <span class="o">+</span> <span class="n">mapping</span> <span class="o">+</span> <span class="s">"\" to "</span> <span class="o">+</span> <span class="n">method</span><span class="p">.</span><span class="na">toGenericString</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">mappingRegistry</span><span class="p">.</span><span class="na">register</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">handler</span><span class="p">,</span> <span class="n">method</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      但一直进不去，于是直接在其定义的内部类中： MappingRegistry 中进行寻找，并成功定位到想要的关键代码
+     </p>
+     <h3 id="_6">
+      请求映射关键代码定位：柳暗花明
+     </h3>
+     <p>
+      阅读类： MappingRegistry 的相关代码，发现下面的方法和可以，我们直接打上断点，重启程序：
+     </p>
+     <p>
+      发现了前面的: this.pathLookup 的相关添加操作
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">register</span><span class="p">(</span><span class="n">T</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">Object</span> <span class="n">handler</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">readWriteLock</span><span class="p">.</span><span class="na">writeLock</span><span class="p">().</span><span class="na">lock</span><span class="p">();</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">HandlerMethod</span> <span class="n">handlerMethod</span> <span class="o">=</span> <span class="n">createHandlerMethod</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">method</span><span class="p">);</span>
+            <span class="n">validateMethodMapping</span><span class="p">(</span><span class="n">handlerMethod</span><span class="p">,</span> <span class="n">mapping</span><span class="p">);</span>
+
+            <span class="n">Set</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">directPaths</span> <span class="o">=</span> <span class="n">AbstractHandlerMethodMapping</span><span class="p">.</span><span class="na">this</span><span class="p">.</span><span class="na">getDirectPaths</span><span class="p">(</span><span class="n">mapping</span><span class="p">);</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">path</span> <span class="p">:</span> <span class="n">directPaths</span><span class="p">)</span> <span class="p">{</span>
+                <span class="c1">// 这段代码是关键</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">pathLookup</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mapping</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">getNamingStrategy</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">getNamingStrategy</span><span class="p">().</span><span class="na">getName</span><span class="p">(</span><span class="n">handlerMethod</span><span class="p">,</span> <span class="n">mapping</span><span class="p">);</span>
+                <span class="n">addMappingName</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">handlerMethod</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="n">CorsConfiguration</span> <span class="n">corsConfig</span> <span class="o">=</span> <span class="n">initCorsConfiguration</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">mapping</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">corsConfig</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">corsConfig</span><span class="p">.</span><span class="na">validateAllowCredentials</span><span class="p">();</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">corsLookup</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">handlerMethod</span><span class="p">,</span> <span class="n">corsConfig</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="k">this</span><span class="p">.</span><span class="na">registry</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span>
+                <span class="k">new</span> <span class="n">MappingRegistration</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">handlerMethod</span><span class="p">,</span> <span class="n">directPaths</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">corsConfig</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">));</span>
+            <span class="p">}</span>
+        <span class="k">finally</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">readWriteLock</span><span class="p">.</span><span class="na">writeLock</span><span class="p">().</span><span class="na">unlock</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      应用重启后，果然顺利来到我们打上的断点处，通过分析调用栈，我们确实找到了请求映射的关键代码
+     </p>
+     <p>
+      我们将调用栈从下网上分析查看：
+     </p>
+     <h4 id="_7">
+      应用启动相关
+     </h4>
+     <p>
+      开始就是熟悉Spring启动相关，这些代码相信大家尝试阅读源码的时候读过很多遍了
+     </p>
+     <p>
+      跟踪发现在： DefaultListableBeanFactory.class 的 preInstantiateSingletons 方法中个，一大段嵌套循环，心想这段代码目前能优化吗？
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">ConfigurableApplicationContext</span> <span class="nf">run</span><span class="p">(</span><span class="n">Class</span><span class="o">&lt;?&gt;[]</span> <span class="n">primarySources</span><span class="p">,</span> <span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span><span class="k">new</span> <span class="n">SpringApplication</span><span class="p">(</span><span class="n">primarySources</span><span class="p">)).</span><span class="na">run</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="n">run</span><span class="p">(</span><span class="k">new</span> <span class="n">Class</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="n">ConfigurableApplicationContext</span> <span class="nf">run</span><span class="p">(</span><span class="n">String</span><span class="p">...</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+        <span class="p">......</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="p">......</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">prepareContext</span><span class="p">(</span><span class="n">bootstrapContext</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">environment</span><span class="p">,</span> <span class="n">listeners</span><span class="p">,</span> <span class="n">applicationArguments</span><span class="p">,</span> <span class="n">printedBanner</span><span class="p">);</span>
+            <span class="c1">// 从下面这个进入</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">refreshContext</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">afterRefresh</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">applicationArguments</span><span class="p">);</span>
+            <span class="p">......</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var10</span><span class="p">)</span> <span class="p">{</span>
+            <span class="p">......</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">handleRunFailure</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">var10</span><span class="p">,</span> <span class="n">listeners</span><span class="p">);</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalStateException</span><span class="p">(</span><span class="n">var10</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="p">......</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">refresh</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">BeansException</span><span class="p">,</span> <span class="n">IllegalStateException</span> <span class="p">{</span>
+        <span class="kd">synchronized</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">startupShutdownMonitor</span><span class="p">)</span> <span class="p">{</span>
+            <span class="p">.......</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">postProcessBeanFactory</span><span class="p">(</span><span class="n">beanFactory</span><span class="p">);</span>
+                <span class="n">StartupStep</span> <span class="n">beanPostProcess</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">applicationStartup</span><span class="p">.</span><span class="na">start</span><span class="p">(</span><span class="s">"spring.context.beans.post-process"</span><span class="p">);</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">invokeBeanFactoryPostProcessors</span><span class="p">(</span><span class="n">beanFactory</span><span class="p">);</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">registerBeanPostProcessors</span><span class="p">(</span><span class="n">beanFactory</span><span class="p">);</span>
+                <span class="n">beanPostProcess</span><span class="p">.</span><span class="na">end</span><span class="p">();</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">initMessageSource</span><span class="p">();</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">initApplicationEventMulticaster</span><span class="p">();</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">onRefresh</span><span class="p">();</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">registerListeners</span><span class="p">();</span>
+                <span class="c1">// 从这里进入</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">finishBeanFactoryInitialization</span><span class="p">(</span><span class="n">beanFactory</span><span class="p">);</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">finishRefresh</span><span class="p">();</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">BeansException</span> <span class="n">var10</span><span class="p">)</span> <span class="p">{</span>
+            <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+                <span class="p">......</span>
+            <span class="p">}</span>
+            <span class="p">......</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <h4 id="requestmappinghandlermapping">
+      RequestMappingHandlerMapping 相关初始化
+     </h4>
+     <p>
+      继续跟踪下面的，看到了属性的CreateBean和afterPropertiesSet
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">AbstractAutowireCapableBeanFactory</span><span class="p">.</span><span class="na">class</span>
+    <span class="kd">protected</span> <span class="n">Object</span> <span class="nf">createBean</span><span class="p">(</span><span class="n">String</span> <span class="n">beanName</span><span class="p">,</span> <span class="n">RootBeanDefinition</span> <span class="n">mbd</span><span class="p">,</span> <span class="nd">@Nullable</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">BeanCreationException</span> <span class="p">{</span>
+        <span class="p">......</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="c1">// 这里初始化了 RequestMappingHandlerMapping</span>
+            <span class="n">beanInstance</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">doCreateBean</span><span class="p">(</span><span class="n">beanName</span><span class="p">,</span> <span class="n">mbdToUse</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">logger</span><span class="p">.</span><span class="na">isTraceEnabled</span><span class="p">())</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="s">"Finished creating instance of bean '"</span> <span class="o">+</span> <span class="n">beanName</span> <span class="o">+</span> <span class="s">"'"</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span> <span class="n">beanInstance</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">ImplicitlyAppearedSingletonException</span> <span class="o">|</span> <span class="n">BeanCreationException</span> <span class="n">var7</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="n">var7</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var8</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">BeanCreationException</span><span class="p">(</span><span class="n">mbdToUse</span><span class="p">.</span><span class="na">getResourceDescription</span><span class="p">(),</span> <span class="n">beanName</span><span class="p">,</span> <span class="s">"Unexpected exception during bean creation"</span><span class="p">,</span> <span class="n">var8</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="err">#</span> <span class="n">AbstractAutowireCapableBeanFactory</span><span class="p">.</span><span class="na">class</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">invokeInitMethods</span><span class="p">(</span><span class="n">String</span> <span class="n">beanName</span><span class="p">,</span> <span class="n">Object</span> <span class="n">bean</span><span class="p">,</span> <span class="nd">@Nullable</span> <span class="n">RootBeanDefinition</span> <span class="n">mbd</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Throwable</span> <span class="p">{</span>
+        <span class="kt">boolean</span> <span class="n">isInitializingBean</span> <span class="o">=</span> <span class="n">bean</span> <span class="k">instanceof</span> <span class="n">InitializingBean</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">isInitializingBean</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">mbd</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="o">!</span><span class="n">mbd</span><span class="p">.</span><span class="na">isExternallyManagedInitMethod</span><span class="p">(</span><span class="s">"afterPropertiesSet"</span><span class="p">)))</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">logger</span><span class="p">.</span><span class="na">isTraceEnabled</span><span class="p">())</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="s">"Invoking afterPropertiesSet() on bean with name '"</span> <span class="o">+</span> <span class="n">beanName</span> <span class="o">+</span> <span class="s">"'"</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">getSecurityManager</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">try</span> <span class="p">{</span>
+                    <span class="n">AccessController</span><span class="p">.</span><span class="na">doPrivileged</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                        <span class="p">((</span><span class="n">InitializingBean</span><span class="p">)</span><span class="n">bean</span><span class="p">).</span><span class="na">afterPropertiesSet</span><span class="p">();</span>
+                        <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+                    <span class="p">},</span> <span class="k">this</span><span class="p">.</span><span class="na">getAccessControlContext</span><span class="p">());</span>
+                <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">PrivilegedActionException</span> <span class="n">var6</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">throw</span> <span class="n">var6</span><span class="p">.</span><span class="na">getException</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="c1">// 这里进入请求映射的相关操作</span>
+                <span class="p">((</span><span class="n">InitializingBean</span><span class="p">)</span><span class="n">bean</span><span class="p">).</span><span class="na">afterPropertiesSet</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="p">......</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <h4 id="_8">
+      请求映射初始化
+     </h4>
+     <p>
+      继续跟踪下去，看看了循环遍历Controllers相关的代码（还有很多细节没搞清，后面再继续了，先梳理主线）
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">AbstractHandlerMethodMapping</span><span class="p">.</span><span class="na">java</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">afterPropertiesSet</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// 初始化请求映射</span>
+        <span class="n">initHandlerMethods</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">initHandlerMethods</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// 遍历所有的自定义的Controllers，后面自己又定义了一个Controllers</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">beanName</span> <span class="p">:</span> <span class="n">getCandidateBeanNames</span><span class="p">())</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">beanName</span><span class="p">.</span><span class="na">startsWith</span><span class="p">(</span><span class="n">SCOPED_TARGET_NAME_PREFIX</span><span class="p">))</span> <span class="p">{</span>
+                <span class="c1">// 在这里看到了我们定义的HelloWorld</span>
+                <span class="n">processCandidateBean</span><span class="p">(</span><span class="n">beanName</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="n">handlerMethodsInitialized</span><span class="p">(</span><span class="n">getHandlerMethods</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="kd">protected</span> <span class="n">String</span><span class="o">[]</span> <span class="nf">getCandidateBeanNames</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">detectHandlerMethodsInAncestorContexts</span> <span class="o">?</span>
+                <span class="n">BeanFactoryUtils</span><span class="p">.</span><span class="na">beanNamesForTypeIncludingAncestors</span><span class="p">(</span><span class="n">obtainApplicationContext</span><span class="p">(),</span> <span class="n">Object</span><span class="p">.</span><span class="na">class</span><span class="p">)</span> <span class="p">:</span>
+                <span class="n">obtainApplicationContext</span><span class="p">().</span><span class="na">getBeanNamesForType</span><span class="p">(</span><span class="n">Object</span><span class="p">.</span><span class="na">class</span><span class="p">));</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      继续跟踪下去，看到了下面的获取类中具体请求路径相关的代码，并且到了具体的初始化请求映射的代码
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="err">#</span> <span class="n">AbstractHandlerMethodMapping</span><span class="p">.</span><span class="na">java</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">processCandidateBean</span><span class="p">(</span><span class="n">String</span> <span class="n">beanName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">beanType</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">beanType</span> <span class="o">=</span> <span class="n">obtainApplicationContext</span><span class="p">().</span><span class="na">getType</span><span class="p">(</span><span class="n">beanName</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">ex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// An unresolvable bean type, probably from a lazy bean - let's ignore it.</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isTraceEnabled</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="s">"Could not resolve type for bean '"</span> <span class="o">+</span> <span class="n">beanName</span> <span class="o">+</span> <span class="s">"'"</span><span class="p">,</span> <span class="n">ex</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">beanType</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">isHandler</span><span class="p">(</span><span class="n">beanType</span><span class="p">))</span> <span class="p">{</span>
+            <span class="c1">// 得到Controller Bean后的入口</span>
+            <span class="n">detectHandlerMethods</span><span class="p">(</span><span class="n">beanName</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">detectHandlerMethods</span><span class="p">(</span><span class="n">Object</span> <span class="n">handler</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">handlerType</span> <span class="o">=</span> <span class="p">(</span><span class="n">handler</span> <span class="k">instanceof</span> <span class="n">String</span> <span class="o">?</span>
+                <span class="n">obtainApplicationContext</span><span class="p">().</span><span class="na">getType</span><span class="p">((</span><span class="n">String</span><span class="p">)</span> <span class="n">handler</span><span class="p">)</span> <span class="p">:</span> <span class="n">handler</span><span class="p">.</span><span class="na">getClass</span><span class="p">());</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">handlerType</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// 处理得到所有的Controllers method</span>
+            <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">userType</span> <span class="o">=</span> <span class="n">ClassUtils</span><span class="p">.</span><span class="na">getUserClass</span><span class="p">(</span><span class="n">handlerType</span><span class="p">);</span>
+            <span class="n">Map</span><span class="o">&lt;</span><span class="n">Method</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">methods</span> <span class="o">=</span> <span class="n">MethodIntrospector</span><span class="p">.</span><span class="na">selectMethods</span><span class="p">(</span><span class="n">userType</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">MethodIntrospector</span><span class="p">.</span><span class="na">MetadataLookup</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">)</span> <span class="n">method</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                        <span class="k">try</span> <span class="p">{</span>
+                            <span class="k">return</span> <span class="n">getMappingForMethod</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">userType</span><span class="p">);</span>
+                        <span class="p">}</span>
+                        <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">ex</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalStateException</span><span class="p">(</span><span class="s">"Invalid mapping on handler class ["</span> <span class="o">+</span>
+                                    <span class="n">userType</span><span class="p">.</span><span class="na">getName</span><span class="p">()</span> <span class="o">+</span> <span class="s">"]: "</span> <span class="o">+</span> <span class="n">method</span><span class="p">,</span> <span class="n">ex</span><span class="p">);</span>
+                        <span class="p">}</span>
+                    <span class="p">});</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">logger</span><span class="p">.</span><span class="na">isTraceEnabled</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">logger</span><span class="p">.</span><span class="na">trace</span><span class="p">(</span><span class="n">formatMappings</span><span class="p">(</span><span class="n">userType</span><span class="p">,</span> <span class="n">methods</span><span class="p">));</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">mappingsLogger</span><span class="p">.</span><span class="na">isDebugEnabled</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">mappingsLogger</span><span class="p">.</span><span class="na">debug</span><span class="p">(</span><span class="n">formatMappings</span><span class="p">(</span><span class="n">userType</span><span class="p">,</span> <span class="n">methods</span><span class="p">));</span>
+            <span class="p">}</span>
+            <span class="n">methods</span><span class="p">.</span><span class="na">forEach</span><span class="p">((</span><span class="n">method</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">Method</span> <span class="n">invocableMethod</span> <span class="o">=</span> <span class="n">AopUtils</span><span class="p">.</span><span class="na">selectInvocableMethod</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">userType</span><span class="p">);</span>
+                <span class="c1">// 注册</span>
+                <span class="n">registerHandlerMethod</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">invocableMethod</span><span class="p">,</span> <span class="n">mapping</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">register</span><span class="p">(</span><span class="n">T</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">Object</span> <span class="n">handler</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">readWriteLock</span><span class="p">.</span><span class="na">writeLock</span><span class="p">().</span><span class="na">lock</span><span class="p">();</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">HandlerMethod</span> <span class="n">handlerMethod</span> <span class="o">=</span> <span class="n">createHandlerMethod</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">method</span><span class="p">);</span>
+            <span class="n">validateMethodMapping</span><span class="p">(</span><span class="n">handlerMethod</span><span class="p">,</span> <span class="n">mapping</span><span class="p">);</span>
+
+            <span class="n">Set</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">directPaths</span> <span class="o">=</span> <span class="n">AbstractHandlerMethodMapping</span><span class="p">.</span><span class="na">this</span><span class="p">.</span><span class="na">getDirectPaths</span><span class="p">(</span><span class="n">mapping</span><span class="p">);</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">path</span> <span class="p">:</span> <span class="n">directPaths</span><span class="p">)</span> <span class="p">{</span>
+                <span class="c1">// 映射添加</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">pathLookup</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mapping</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">finally</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">readWriteLock</span><span class="p">.</span><span class="na">writeLock</span><span class="p">().</span><span class="na">unlock</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_9">
+      总结
+     </h2>
+     <p>
+      经过一段时间的探索的整理，我们终于得到了大致的请求路径映射初始化的代码
+     </p>
+     <ul>
+      <li>
+       1.应用启动时，初始化：RequestMappingHandlerMapping
+      </li>
+      <li>
+       2.RequestMappingHandlerMapping 中请求路径初始化
+      </li>
+     </ul>
+     <p>
+      经过调试，我们还发现虽然 RequestMappingHandlerMapping 是一开始就初始化了，但加载到 handlerMappings 是第一次请求的时候才加载进去的
+     </p>
+     <p>
+      本篇虽然得到了大致的请求路径初始化的代码，但其中有很多细节是值得探索的，比如Bean中Method的处理
+     </p>
+     <p>
+      之前自己写过一些DI和Web相关的Demo，停在了Servlet，卡在了请求映射初始化和匹配，这个给了我一些思路，后面详细看看这块代码，完善下之前的Demo
+     </p>
+     <h2 id="_10">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://juejin.cn/post/6983145193117581343">
+        Spring 源码解析系列
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
