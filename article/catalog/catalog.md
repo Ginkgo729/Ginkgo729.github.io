@@ -103,6 +103,8 @@
 - 前端
     - [vue打包直接访问.md](./article/article/+vue打包直接访问.html)
 - 开源
+    - minetest
+        - [minetestWindows编译运行.md](./article/article/+minetestWindows编译运行.html)
     - soul
         - [ShenYu网关源码解析28-注册中心原理解析.md](./article/article/+ShenYu网关源码解析28-注册中心原理解析.html)
         - [soul源码解析1-概览.md](./article/article/+soul源码解析1-概览.html)
@@ -136,6 +138,7 @@
         - [Soul网关源码解析27-Zookeeper注册中心.md](./article/article/+Soul网关源码解析27-Zookeeper注册中心.html)
     - Spring
         - [SpringWeb.md](./article/article/+SpringWeb.html)
+        - [SpringWeb小结.md](./article/article/+SpringWeb小结.html)
         - [SpringWeb请求初探.md](./article/article/+SpringWeb请求初探.html)
         - [SpringWeb请求参数获取解析.md](./article/article/+SpringWeb请求参数获取解析.html)
         - [SpringWeb请求映射Map初始化.md](./article/article/+SpringWeb请求映射Map初始化.html)

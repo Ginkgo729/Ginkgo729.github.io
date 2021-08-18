@@ -1,0 +1,152 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring-springweb">
+      Spring源码解析 -- SpringWeb小结
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在前几篇的文章中，我们探索了一个请求的大致处理路径，在其中注重对Filter进行分析，虽然还有其他一些细节待探索，但这篇文章在这里做一个小结，留下一条主线，方便后面继续回头来探索更大的细节
+     </p>
+     <h2 id="_2">
+      小结
+     </h2>
+     <p>
+      在前面几篇文章中，我们得到的东西打字如下的思维导图所示：
+     </p>
+     <p>
+      <img alt="Spring源码阅读.png" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/749c750d00cb4dcda198c75af7645d7d~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <h3 id="_3">
+      请求的大致处理过程
+     </h3>
+     <p>
+      如上图所示：
+     </p>
+     <ul>
+      <li>
+       请求接收与前期处理：如之前tomcat中的netty监听接收通信消息等
+      </li>
+      <li>
+       Filter处理：经过处理后变来到了Filter处理
+      </li>
+      <li>
+       在前面的几篇文章中，我们探索的Filter的初始化，在程序启动便初始化好相关的Filter
+      </li>
+      <li>
+       在请求到来的时候，根据路径匹配得到响应的Filter处理链
+      </li>
+      <li>
+       Interceptor拦截器：这部分没有写处理，因为比Filter简单很多，就是对Controller的AOP
+      </li>
+      <li>
+       解析获取请求参数：通过文章的分析和断点获取参数是在Filter和拦截器后面
+      </li>
+      <li>
+       Controller处理
+      </li>
+     </ul>
+     <p>
+      上面便是我们最近的源码解析所得
+     </p>
+     <p>
+      但也留下了很多值得探索的问题：
+     </p>
+     <ul>
+      <li>
+       Filter、拦截器、解析获取请求参数，这些类是如何串起来的，其中起承接作用的类是哪些
+      </li>
+      <li>
+       Filter的责任链具体是如何的设计的，有哪些类？
+      </li>
+     </ul>
+     <h3 id="_4">
+      后序计划
+     </h3>
+     <p>
+      有时候工作上事多，认真写一篇文章还是挺花时间的，但还是要坚持学习输出，后序有下面的计划：
+     </p>
+     <ul>
+      <li>
+       缓存相关的源码探索：最近在工作中使用有点心虚，下来分析下，让自己对自己写的代码更心中有数
+      </li>
+     </ul>
+     <p>
+      最近还有在研究minetest（C++克隆的我的世界源码），这个有点难搞，还没怎么整明白，后序有点成功了，也输出一些文章
+     </p>
+     <h2 id="_5">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://juejin.cn/post/6983145193117581343">
+        Spring源码解析系列
+       </a>
+      </li>
+      <li>
+       <a href="https://segmentfault.com/a/1190000039996829">
+        彻底理解Spring Interceptor和Servlet Filter
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

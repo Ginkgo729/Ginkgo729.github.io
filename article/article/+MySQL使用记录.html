@@ -146,7 +146,15 @@ flush privileges<span class="p">;</span>
 <span class="k">CALL</span> <span class="n">goods_initData</span><span class="p">();</span>
 </code></pre>
      </div>
-     <h2 id="_6">
+     <h3 id="_6">
+      开启/关闭 安全模式
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">#</span> <span class="err">因为</span><span class="n">MySql运行在safe</span><span class="o">-</span><span class="n">updates模式下</span><span class="err">，该模式会导致非主键条件下无法执行</span><span class="n">update或者delete命令</span><span class="err">，执行命令如下命令关闭安全模式</span><span class="p">.</span>
+<span class="k">SET</span> <span class="n">SQL_SAFE_UPDATES</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</code></pre>
+     </div>
+     <h2 id="_7">
       参考链接
      </h2>
      <ul>

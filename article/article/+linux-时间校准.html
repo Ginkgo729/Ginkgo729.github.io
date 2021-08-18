@@ -37,6 +37,9 @@
      <h2 id="_1">
       命令
      </h2>
+     <h3 id="_2">
+      方式一
+     </h3>
      <div class="codehilite">
       <pre><span></span><code><span class="n">tzselect</span>
 <span class="k">export</span> <span class="n">TZ</span><span class="o">=</span><span class="s1">'Asia/Shanghai'</span>
@@ -49,7 +52,23 @@
 <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">ntpdate</span> <span class="o">-</span><span class="n">u</span> <span class="n">cn</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">ntp</span><span class="o">.</span><span class="n">org</span>
 </code></pre>
      </div>
-     <h2 id="_2">
+     <h3 id="_3">
+      方式二
+     </h3>
+     <p>
+      ```shell script
+date
+     </p>
+     <p>
+      yum install -y ntpdate
+rm -rf /etc/localtime
+cp /usr/share/zoneinfo/Asia/Shanghai/ /etc/localtime
+ntpdate -u ntp.api.bz
+date
+hwclock -w
+```
+     </p>
+     <h2 id="_4">
       参考链接
      </h2>
      <ul>
