@@ -1,0 +1,433 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shardingsphere-jdbc">
+      ShardingSphere JDBC 语句执行初探
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在前几篇文中，我们基于源码就ShardingSphere的核心功能给运行了一遍，本篇文章开始，我们开始探索源码，看看ShardingSphere是如何进行工作的
+     </p>
+     <h2 id="_2">
+      概览
+     </h2>
+     <p>
+      开始之前，我们先思考这次探索的疑点：
+     </p>
+     <ul>
+      <li>
+       1.ShardingSphere是如何加载我们配置的多个数据库源的？
+      </li>
+      <li>
+       2.ShardingSphere是如何将语句写到不同的数据源的？
+      </li>
+     </ul>
+     <p>
+      带着问题去探索，虽然可能得不到答案，但起码有个方向
+     </p>
+     <p>
+      基于我们JDBC探索的文章，打上相关的断点，开始我们的探索之旅
+     </p>
+     <ul>
+      <li>
+       <a href="https://juejin.cn/post/6999625443930439693/">
+        ShardingSphere JDBC 分库分表 读写分离 数据加密
+       </a>
+      </li>
+     </ul>
+     <h2 id="_3">
+      源码探索
+     </h2>
+     <h3 id="1shardingsphere-jdbc">
+      1.寻找ShardingSphere JDBC 的入口
+     </h3>
+     <p>
+      在下面代码中的init和process打上断点，看看能不能通过程序调用栈找到蛛丝马迹
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">ExampleExecuteTemplate</span> <span class="p">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">run</span><span class="p">(</span><span class="kd">final</span> <span class="n">ExampleService</span> <span class="n">exampleService</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">exampleService</span><span class="p">.</span><span class="na">initEnvironment</span><span class="p">();</span>
+            <span class="n">exampleService</span><span class="p">.</span><span class="na">processSuccess</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+            <span class="n">exampleService</span><span class="p">.</span><span class="na">cleanEnvironment</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      exampleService.initEnvironment() 进来以后，调用栈空空如也，啥也没有，看来我们第一个探索如果加载多个配置的数据源的目的告吹了
+     </p>
+     <p>
+      但还是继续Debug下去，竟然全是Ibatis相关的东西，没有Debug到ShardingSphere相关的代码，安慰自己，正常现象
+     </p>
+     <p>
+      继续探索：exampleService.processSuccess()，来到下面的相关语句的插入、查询等相关的操作，在insertData()打上断点
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">OrderServiceImpl</span> <span class="kd">implements</span> <span class="n">ExampleService</span> <span class="p">{</span>
+    <span class="nd">@Override</span>
+    <span class="nd">@Transactional</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">processSuccess</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"-------------- Process Success Begin ---------------"</span><span class="p">);</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">Long</span><span class="o">&gt;</span> <span class="n">orderIds</span> <span class="o">=</span> <span class="n">insertData</span><span class="p">();</span>
+        <span class="n">printData</span><span class="p">();</span>
+        <span class="n">deleteData</span><span class="p">(</span><span class="n">orderIds</span><span class="p">);</span>
+        <span class="n">printData</span><span class="p">();</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"-------------- Process Success Finish --------------"</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      基于之前尝试没有收获，这次不得不小心翼翼，跟着函数调用不断的深入下去
+     </p>
+     <p>
+      MapperProxy.class，执行下面的方法，进行跟下去：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">invoke</span><span class="p">(</span><span class="n">Object</span> <span class="n">proxy</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">,</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Throwable</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">Object</span><span class="p">.</span><span class="na">class</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">method</span><span class="p">.</span><span class="na">getDeclaringClass</span><span class="p">()))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">method</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">isDefaultMethod</span><span class="p">(</span><span class="n">method</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">invokeDefaultMethod</span><span class="p">(</span><span class="n">proxy</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var5</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="n">ExceptionUtil</span><span class="p">.</span><span class="na">unwrapThrowable</span><span class="p">(</span><span class="n">var5</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="n">MapperMethod</span> <span class="n">mapperMethod</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">cachedMapperMethod</span><span class="p">(</span><span class="n">method</span><span class="p">);</span>
+    <span class="c1">// 从这里进入</span>
+        <span class="k">return</span> <span class="n">mapperMethod</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">sqlSession</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      来到下面的函数
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">execute</span><span class="p">(</span><span class="n">SqlSession</span> <span class="n">sqlSession</span><span class="p">,</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Object</span> <span class="n">result</span><span class="p">;</span>
+        <span class="n">Object</span> <span class="n">param</span><span class="p">;</span>
+        <span class="k">switch</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">command</span><span class="p">.</span><span class="na">getType</span><span class="p">())</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">INSERT</span><span class="p">:</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">convertArgsToSqlCommandParam</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+        <span class="c1">// 从这里进入，跟踪insert方法</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">rowCountResult</span><span class="p">(</span><span class="n">sqlSession</span><span class="p">.</span><span class="na">insert</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">command</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">param</span><span class="p">));</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="n">UPDATE</span><span class="p">:</span>
+    <span class="p">......</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      其中我们看到了熟悉的数据库相关的参数：SqlSession sqlSession，我们调用堆栈，查看其内容，如下图：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/939246803c2642c2a679b6bfe16ff81f~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      数据库名称竟然是 logic_db，想到秦老师讲课时说ShardingSphere UI中也能用JDBC，只是它的名称是 logic_db
+     </p>
+     <p>
+      此时有了一些猜测，但得继续跟踪下去，证实下
+     </p>
+     <p>
+      来到了：SqlSessionTemplate.class，其中重新获取了一次 sqlSession，但其实还是logic_db，继续跟
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">private</span> <span class="kd">class</span> <span class="nc">SqlSessionInterceptor</span> <span class="kd">implements</span> <span class="n">InvocationHandler</span> <span class="p">{</span>
+        <span class="kd">public</span> <span class="n">Object</span> <span class="nf">invoke</span><span class="p">(</span><span class="n">Object</span> <span class="n">proxy</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">,</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Throwable</span> <span class="p">{</span>
+            <span class="n">SqlSession</span> <span class="n">sqlSession</span> <span class="o">=</span> <span class="n">SqlSessionUtils</span><span class="p">.</span><span class="na">getSqlSession</span><span class="p">(</span><span class="n">SqlSessionTemplate</span><span class="p">.</span><span class="na">this</span><span class="p">.</span><span class="na">sqlSessionFactory</span><span class="p">,</span> <span class="n">SqlSessionTemplate</span><span class="p">.</span><span class="na">this</span><span class="p">.</span><span class="na">executorType</span><span class="p">,</span> <span class="n">SqlSessionTemplate</span><span class="p">.</span><span class="na">this</span><span class="p">.</span><span class="na">exceptionTranslator</span><span class="p">);</span>
+
+            <span class="n">Object</span> <span class="n">unwrapped</span><span class="p">;</span>
+            <span class="k">try</span> <span class="p">{</span>
+        <span class="c1">// 这里继续跟下去</span>
+                <span class="n">Object</span> <span class="n">result</span> <span class="o">=</span> <span class="n">method</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="n">sqlSession</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">SqlSessionUtils</span><span class="p">.</span><span class="na">isSqlSessionTransactional</span><span class="p">(</span><span class="n">sqlSession</span><span class="p">,</span> <span class="n">SqlSessionTemplate</span><span class="p">.</span><span class="na">this</span><span class="p">.</span><span class="na">sqlSessionFactory</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="n">sqlSession</span><span class="p">.</span><span class="na">commit</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+                <span class="p">}</span>
+
+                <span class="n">unwrapped</span> <span class="o">=</span> <span class="n">result</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var11</span><span class="p">)</span> <span class="p">{</span>
+               <span class="p">......</span>
+            <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+               <span class="p">......</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="n">unwrapped</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      一路上遇到很多的 update 操作，我们进入跟下去即可，最后我们来到：PreparedStatementHandler.class
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PreparedStatementHandler</span> <span class="kd">extends</span> <span class="n">BaseStatementHandler</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">update</span><span class="p">(</span><span class="n">Statement</span> <span class="n">statement</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">PreparedStatement</span> <span class="n">ps</span> <span class="o">=</span> <span class="p">(</span><span class="n">PreparedStatement</span><span class="p">)</span><span class="n">statement</span><span class="p">;</span>
+    <span class="c1">// 执行这里很关键了</span>
+        <span class="n">ps</span><span class="p">.</span><span class="na">execute</span><span class="p">();</span>
+        <span class="kt">int</span> <span class="n">rows</span> <span class="o">=</span> <span class="n">ps</span><span class="p">.</span><span class="na">getUpdateCount</span><span class="p">();</span>
+        <span class="n">Object</span> <span class="n">parameterObject</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">boundSql</span><span class="p">.</span><span class="na">getParameterObject</span><span class="p">();</span>
+        <span class="n">KeyGenerator</span> <span class="n">keyGenerator</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">mappedStatement</span><span class="p">.</span><span class="na">getKeyGenerator</span><span class="p">();</span>
+        <span class="n">keyGenerator</span><span class="p">.</span><span class="na">processAfter</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">executor</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">mappedStatement</span><span class="p">,</span> <span class="n">ps</span><span class="p">,</span> <span class="n">parameterObject</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">rows</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在上面的：ps.execute(),我们跟下去的时候，惊喜就来了，砰的一下，就来到了ShardingSphere自己写的类中：ShardingSpherePreparedStatement.java
+     </p>
+     <p>
+      到这里，对于ShardingSphere JDBC有了一些想法：
+     </p>
+     <p>
+      ShardingSphere JDBC 感觉其实本质上还有一个中间件，内嵌式的，同样是介于程序与数据库之间，在本地探索中，它就以一个 logic_db ，最为 Mybatis的下游，将所有的数据库进行获取截断处理
+     </p>
+     <p>
+      初步有这么个体会，后面随着研究的深入可能会有更多的发现，到这我们就找到了ShardingSphere的入口了
+     </p>
+     <h3 id="2shardingsphere-jdbc">
+      2.初步探索ShardingSphere JDBC 处理路径
+     </h3>
+     <p>
+      在上面我们来到了这次找到的入口：ShardingSpherePreparedStatement.java
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">execute</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">clearPrevious</span><span class="p">();</span>
+        <span class="c1">// 这里有了真实的数据库源和语句</span>
+            <span class="n">executionContext</span> <span class="o">=</span> <span class="n">createExecutionContext</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">metaDataContexts</span><span class="p">.</span><span class="na">getMetaData</span><span class="p">(</span><span class="n">connection</span><span class="p">.</span><span class="na">getSchemaName</span><span class="p">()).</span><span class="na">getRuleMetaData</span><span class="p">().</span><span class="na">getRules</span><span class="p">().</span><span class="na">stream</span><span class="p">().</span><span class="na">anyMatch</span><span class="p">(</span><span class="n">each</span> <span class="o">-&gt;</span> <span class="n">each</span> <span class="k">instanceof</span> <span class="n">RawExecutionRule</span><span class="p">))</span> <span class="p">{</span>
+                <span class="c1">// TODO process getStatement</span>
+                <span class="n">Collection</span><span class="o">&lt;</span><span class="n">ExecuteResult</span><span class="o">&gt;</span> <span class="n">executeResults</span> <span class="o">=</span> <span class="n">rawExecutor</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">createRawExecutionGroupContext</span><span class="p">(),</span> <span class="n">executionContext</span><span class="p">.</span><span class="na">getLogicSQL</span><span class="p">(),</span> <span class="k">new</span> <span class="n">RawSQLExecutorCallback</span><span class="p">());</span>
+                <span class="k">return</span> <span class="n">executeResults</span><span class="p">.</span><span class="na">iterator</span><span class="p">().</span><span class="na">next</span><span class="p">()</span> <span class="k">instanceof</span> <span class="n">QueryResult</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">executionContext</span><span class="p">.</span><span class="na">getRouteContext</span><span class="p">().</span><span class="na">isFederated</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">List</span><span class="o">&lt;</span><span class="n">QueryResult</span><span class="o">&gt;</span> <span class="n">queryResults</span> <span class="o">=</span> <span class="n">executeFederatedQuery</span><span class="p">();</span>
+                <span class="k">return</span> <span class="o">!</span><span class="n">queryResults</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="c1">// 继续跟踪</span>
+            <span class="n">ExecutionGroupContext</span><span class="o">&lt;</span><span class="n">JDBCExecutionUnit</span><span class="o">&gt;</span> <span class="n">executionGroupContext</span> <span class="o">=</span> <span class="n">createExecutionGroupContext</span><span class="p">();</span>
+            <span class="n">cacheStatements</span><span class="p">(</span><span class="n">executionGroupContext</span><span class="p">.</span><span class="na">getInputGroups</span><span class="p">());</span>
+            <span class="k">return</span> <span class="n">driverJDBCExecutor</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">executionGroupContext</span><span class="p">,</span>
+                    <span class="n">executionContext</span><span class="p">.</span><span class="na">getLogicSQL</span><span class="p">(),</span> <span class="n">executionContext</span><span class="p">.</span><span class="na">getRouteContext</span><span class="p">().</span><span class="na">getRouteUnits</span><span class="p">(),</span> <span class="n">createExecuteCallback</span><span class="p">());</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+            <span class="n">clearBatch</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      executionContext = createExecutionContext() 有原始的语句，还是我们定时真实的数据源和SQL语句，如下图，我们继续跟下去：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5e774d6347044d8bba23e9d59002b3e1~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      来到：AbstractExecutionPrepareEngine.java,前面其实已经能得到展示的执行语句，目前还不太清楚这步的目的是啥
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="kd">final</span> <span class="n">ExecutionGroupContext</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">prepare</span><span class="p">(</span><span class="kd">final</span> <span class="n">RouteContext</span> <span class="n">routeContext</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">ExecutionUnit</span><span class="o">&gt;</span> <span class="n">executionUnits</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">Collection</span><span class="o">&lt;</span><span class="n">ExecutionGroup</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">SQLUnit</span><span class="o">&gt;&gt;</span> <span class="n">entry</span> <span class="p">:</span> <span class="n">aggregateSQLUnitGroups</span><span class="p">(</span><span class="n">executionUnits</span><span class="p">).</span><span class="na">entrySet</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">String</span> <span class="n">dataSourceName</span> <span class="o">=</span> <span class="n">entry</span><span class="p">.</span><span class="na">getKey</span><span class="p">();</span>
+            <span class="n">List</span><span class="o">&lt;</span><span class="n">SQLUnit</span><span class="o">&gt;</span> <span class="n">sqlUnits</span> <span class="o">=</span> <span class="n">entry</span><span class="p">.</span><span class="na">getValue</span><span class="p">();</span>
+            <span class="n">List</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">SQLUnit</span><span class="o">&gt;&gt;</span> <span class="n">sqlUnitGroups</span> <span class="o">=</span> <span class="n">group</span><span class="p">(</span><span class="n">sqlUnits</span><span class="p">);</span>
+            <span class="n">ConnectionMode</span> <span class="n">connectionMode</span> <span class="o">=</span> <span class="n">maxConnectionsSizePerQuery</span> <span class="o">&lt;</span> <span class="n">sqlUnits</span><span class="p">.</span><span class="na">size</span><span class="p">()</span> <span class="o">?</span> <span class="n">ConnectionMode</span><span class="p">.</span><span class="na">CONNECTION_STRICTLY</span> <span class="p">:</span> <span class="n">ConnectionMode</span><span class="p">.</span><span class="na">MEMORY_STRICTLY</span><span class="p">;</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">addAll</span><span class="p">(</span><span class="n">group</span><span class="p">(</span><span class="n">dataSourceName</span><span class="p">,</span> <span class="n">sqlUnitGroups</span><span class="p">,</span> <span class="n">connectionMode</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">decorate</span><span class="p">(</span><span class="n">routeContext</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      回到 ShardingSpherePreparedStatement.java，跟踪 driverJDBCExecutor.execute，来到：DriverJDBCExecutor.java
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>   <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ExecutionGroupContext</span><span class="o">&lt;</span><span class="n">JDBCExecutionUnit</span><span class="o">&gt;</span> <span class="n">executionGroupContext</span><span class="p">,</span> <span class="kd">final</span> <span class="n">LogicSQL</span> <span class="n">logicSQL</span><span class="p">,</span>
+                           <span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">RouteUnit</span><span class="o">&gt;</span> <span class="n">routeUnits</span><span class="p">,</span> <span class="kd">final</span> <span class="n">JDBCExecutorCallback</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span> <span class="n">callback</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">ExecuteProcessEngine</span><span class="p">.</span><span class="na">initialize</span><span class="p">(</span><span class="n">logicSQL</span><span class="p">,</span> <span class="n">executionGroupContext</span><span class="p">,</span> <span class="n">metaDataContexts</span><span class="p">.</span><span class="na">getProps</span><span class="p">());</span>
+            <span class="n">List</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span> <span class="n">results</span> <span class="o">=</span> <span class="n">jdbcLockEngine</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">executionGroupContext</span><span class="p">,</span> <span class="n">logicSQL</span><span class="p">.</span><span class="na">getSqlStatementContext</span><span class="p">(),</span> <span class="n">routeUnits</span><span class="p">,</span> <span class="n">callback</span><span class="p">);</span>
+            <span class="kt">boolean</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span> <span class="o">!=</span> <span class="n">results</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">results</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="kc">null</span> <span class="o">!=</span> <span class="n">results</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">results</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+            <span class="n">ExecuteProcessEngine</span><span class="p">.</span><span class="na">finish</span><span class="p">(</span><span class="n">executionGroupContext</span><span class="p">.</span><span class="na">getExecutionID</span><span class="p">());</span>
+            <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+            <span class="n">ExecuteProcessEngine</span><span class="p">.</span><span class="na">clean</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      有趣的是 jdbcLockEngine 还是 logic_db，继续跟踪execute函数，一路跟下去来到： ExecutorEngine.java
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">I</span><span class="p">,</span> <span class="n">O</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">O</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">ExecutionGroupContext</span><span class="o">&lt;</span><span class="n">I</span><span class="o">&gt;</span> <span class="n">executionGroupContext</span><span class="p">,</span>
+                                  <span class="kd">final</span> <span class="n">ExecutorCallback</span><span class="o">&lt;</span><span class="n">I</span><span class="p">,</span> <span class="n">O</span><span class="o">&gt;</span> <span class="n">firstCallback</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ExecutorCallback</span><span class="o">&lt;</span><span class="n">I</span><span class="p">,</span> <span class="n">O</span><span class="o">&gt;</span> <span class="n">callback</span><span class="p">,</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">serial</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">executionGroupContext</span><span class="p">.</span><span class="na">getInputGroups</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">())</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Collections</span><span class="p">.</span><span class="na">emptyList</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">serial</span> <span class="o">?</span> <span class="n">serialExecute</span><span class="p">(</span><span class="n">executionGroupContext</span><span class="p">.</span><span class="na">getInputGroups</span><span class="p">().</span><span class="na">iterator</span><span class="p">(),</span> <span class="n">firstCallback</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+                <span class="p">:</span> <span class="n">parallelExecute</span><span class="p">(</span><span class="n">executionGroupContext</span><span class="p">.</span><span class="na">getInputGroups</span><span class="p">().</span><span class="na">iterator</span><span class="p">(),</span> <span class="n">firstCallback</span><span class="p">,</span> <span class="n">callback</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="o">&lt;</span><span class="n">I</span><span class="p">,</span> <span class="n">O</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">O</span><span class="o">&gt;</span> <span class="nf">serialExecute</span><span class="p">(</span><span class="kd">final</span> <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">ExecutionGroup</span><span class="o">&lt;</span><span class="n">I</span><span class="o">&gt;&gt;</span> <span class="n">executionGroups</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ExecutorCallback</span><span class="o">&lt;</span><span class="n">I</span><span class="p">,</span> <span class="n">O</span><span class="o">&gt;</span> <span class="n">firstCallback</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ExecutorCallback</span><span class="o">&lt;</span><span class="n">I</span><span class="p">,</span> <span class="n">O</span><span class="o">&gt;</span> <span class="n">callback</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">ExecutionGroup</span><span class="o">&lt;</span><span class="n">I</span><span class="o">&gt;</span> <span class="n">firstInputs</span> <span class="o">=</span> <span class="n">executionGroups</span><span class="p">.</span><span class="na">next</span><span class="p">();</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">O</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedList</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">syncExecute</span><span class="p">(</span><span class="n">firstInputs</span><span class="p">,</span> <span class="kc">null</span> <span class="o">==</span> <span class="n">firstCallback</span> <span class="o">?</span> <span class="n">callback</span> <span class="p">:</span> <span class="n">firstCallback</span><span class="p">));</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">executionGroups</span><span class="p">.</span><span class="na">hasNext</span><span class="p">())</span> <span class="p">{</span>
+        <span class="c1">// 继续跟踪</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">addAll</span><span class="p">(</span><span class="n">syncExecute</span><span class="p">(</span><span class="n">executionGroups</span><span class="p">.</span><span class="na">next</span><span class="p">(),</span> <span class="n">callback</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      一路跟踪下去，来到： JDBCExecutorCallback.java
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">JDBCExecutionUnit</span><span class="o">&gt;</span> <span class="n">executionUnits</span><span class="p">,</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">isTrunkThread</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">dataMap</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="c1">// TODO It is better to judge whether need sane result before execute, can avoid exception thrown</span>
+        <span class="n">Collection</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">JDBCExecutionUnit</span> <span class="n">each</span> <span class="p">:</span> <span class="n">executionUnits</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">T</span> <span class="n">executeResult</span> <span class="o">=</span> <span class="n">execute</span><span class="p">(</span><span class="n">each</span><span class="p">,</span> <span class="n">isTrunkThread</span><span class="p">,</span> <span class="n">dataMap</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="kc">null</span> <span class="o">!=</span> <span class="n">executeResult</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">result</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">executeResult</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">T</span> <span class="nf">execute</span><span class="p">(</span><span class="kd">final</span> <span class="n">JDBCExecutionUnit</span> <span class="n">jdbcExecutionUnit</span><span class="p">,</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">isTrunkThread</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">dataMap</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">SQLExecutorExceptionHandler</span><span class="p">.</span><span class="na">setExceptionThrown</span><span class="p">(</span><span class="n">isExceptionThrown</span><span class="p">);</span>
+    <span class="c1">// 在这里得到了我们真实的数据库源</span>
+        <span class="n">DataSourceMetaData</span> <span class="n">dataSourceMetaData</span> <span class="o">=</span> <span class="n">getDataSourceMetaData</span><span class="p">(</span><span class="n">jdbcExecutionUnit</span><span class="p">.</span><span class="na">getStorageResource</span><span class="p">().</span><span class="na">getConnection</span><span class="p">().</span><span class="na">getMetaData</span><span class="p">());</span>
+        <span class="n">SQLExecutionHook</span> <span class="n">sqlExecutionHook</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SPISQLExecutionHook</span><span class="p">();</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">SQLUnit</span> <span class="n">sqlUnit</span> <span class="o">=</span> <span class="n">jdbcExecutionUnit</span><span class="p">.</span><span class="na">getExecutionUnit</span><span class="p">().</span><span class="na">getSqlUnit</span><span class="p">();</span>
+            <span class="n">sqlExecutionHook</span><span class="p">.</span><span class="na">start</span><span class="p">(</span><span class="n">jdbcExecutionUnit</span><span class="p">.</span><span class="na">getExecutionUnit</span><span class="p">().</span><span class="na">getDataSourceName</span><span class="p">(),</span> <span class="n">sqlUnit</span><span class="p">.</span><span class="na">getSql</span><span class="p">(),</span> <span class="n">sqlUnit</span><span class="p">.</span><span class="na">getParameters</span><span class="p">(),</span> <span class="n">dataSourceMetaData</span><span class="p">,</span> <span class="n">isTrunkThread</span><span class="p">,</span> <span class="n">dataMap</span><span class="p">);</span>
+        <span class="c1">// 继续跟踪执行语句</span>
+            <span class="n">T</span> <span class="n">result</span> <span class="o">=</span> <span class="n">executeSQL</span><span class="p">(</span><span class="n">sqlUnit</span><span class="p">.</span><span class="na">getSql</span><span class="p">(),</span> <span class="n">jdbcExecutionUnit</span><span class="p">.</span><span class="na">getStorageResource</span><span class="p">(),</span> <span class="n">jdbcExecutionUnit</span><span class="p">.</span><span class="na">getConnectionMode</span><span class="p">());</span>
+            <span class="n">sqlExecutionHook</span><span class="p">.</span><span class="na">finishSuccess</span><span class="p">();</span>
+            <span class="n">finishReport</span><span class="p">(</span><span class="n">dataMap</span><span class="p">,</span> <span class="n">jdbcExecutionUnit</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="kd">final</span> <span class="n">SQLException</span> <span class="n">ex</span><span class="p">)</span> <span class="p">{</span>
+        <span class="p">......</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在上面的代码中，找到直接获取真实数据库源相关的代码
+     </p>
+     <p>
+      <img alt="image.png" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/692bd86a53e24508b34b9e3d73f1c7d4~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      我们继续跟踪执行的相关代码： ShardingSpherePreparedStatement.java ， 来到
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>   <span class="kd">private</span> <span class="n">JDBCExecutorCallback</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span> <span class="nf">createExecuteCallback</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kt">boolean</span> <span class="n">isExceptionThrown</span> <span class="o">=</span> <span class="n">SQLExecutorExceptionHandler</span><span class="p">.</span><span class="na">isExceptionThrown</span><span class="p">();</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">JDBCExecutorCallback</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span><span class="p">(</span><span class="n">metaDataContexts</span><span class="p">.</span><span class="na">getMetaData</span><span class="p">(</span><span class="n">connection</span><span class="p">.</span><span class="na">getSchemaName</span><span class="p">()).</span><span class="na">getResource</span><span class="p">().</span><span class="na">getDatabaseType</span><span class="p">(),</span> <span class="n">sqlStatement</span><span class="p">,</span> <span class="n">isExceptionThrown</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="nd">@Override</span>
+            <span class="kd">protected</span> <span class="n">Boolean</span> <span class="nf">executeSQL</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">sql</span><span class="p">,</span> <span class="kd">final</span> <span class="n">Statement</span> <span class="n">statement</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ConnectionMode</span> <span class="n">connectionMode</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="p">((</span><span class="n">PreparedStatement</span><span class="p">)</span> <span class="n">statement</span><span class="p">).</span><span class="na">execute</span><span class="p">();</span>
+            <span class="p">}</span>
+
+            <span class="nd">@Override</span>
+            <span class="kd">protected</span> <span class="n">Optional</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span> <span class="nf">getSaneResult</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLStatement</span> <span class="n">sqlStatement</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">Optional</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      其中的: Statement statement ,如果用原生的 JDBC 自己写过操作数据库，那应该比较数据，那语句执行到这里就基本告一个段落了
+     </p>
+     <h2 id="_4">
+      总结
+     </h2>
+     <p>
+      这次感觉收获还是挺大，虽然相关的数据库源的解析和语句如何打到对应的数据库的部分没有探索，但我们已经定位到了其大致的位置，可以后面继续研究
+     </p>
+     <p>
+      ShardingSphere JDBC 在本次探索中，感觉就是一个内嵌的 Proxy ，其数据库库名固定为 logic_db，截断了 Mybatis与真实数据库的链接，当前了中间商，大致如下图：
+     </p>
+     <p>
+      <img alt="ShardingSphereJDBC语句执行初探.png" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/a9cffed1bfde43099d0555f0b6857851~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

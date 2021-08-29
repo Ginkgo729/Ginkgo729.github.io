@@ -1,0 +1,345 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shardingsphere-ui">
+      ShardingSphere UI 初步体验
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在上两篇文章中，尝试了ShardingSphere JDBC和Proxy的相关功能，本篇进行探索ShardingSphere的UI组件部分
+     </p>
+     <h2 id="_2">
+      示例运行
+     </h2>
+     <p>
+      这个应该是一个管理配置之类的东西，国际惯例，先瞅一瞅文档：
+     </p>
+     <ul>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/current/cn/user-manual/shardingsphere-ui/">
+        ShardingSphere-UI
+       </a>
+      </li>
+     </ul>
+     <p>
+      上面的官方文档中对其做了一个大致的介绍，下面我尝试运行下：
+     </p>
+     <h3 id="1">
+      1.代码拉取
+     </h3>
+     <p>
+      运行下面的命令进行相关代码的拉取：
+     </p>
+     <p>
+      ```shell script
+git clone https://github.com.cnpmjs.org/apache/shardingsphere-ui.git
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1">### 2.编译</span>
+<span class="err">直接运行命令，好像一直报错，那只能手动去安装了</span>
+
+<span class="err">下面</span><span class="n">Nodejs</span><span class="err">：</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">nodejs</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">en</span><span class="o">/</span><span class="n">download</span><span class="o">/</span> <span class="err">，并进行相应的安装</span>
+
+<span class="err">配置一下源</span><span class="p">(</span><span class="err">安装完成后，重新打开命令行终端，命令是生效的），然后进行相关依赖的安装：</span>
+
+<span class="err">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="n">npm</span> <span class="n">config</span> <span class="n">set</span> <span class="n">registry</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">registry</span><span class="o">.</span><span class="n">npm</span><span class="o">.</span><span class="n">taobao</span><span class="o">.</span><span class="n">org</span>
+<span class="n">npm</span> <span class="n">install</span>
+<span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>
+<span class="c1"># 运行过程中可能会报错，运行下面的命令，再次运行即可</span>
+<span class="n">npm</span> <span class="n">rebuild</span> <span class="n">node</span><span class="o">-</span><span class="n">sass</span>
+<span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>
+</code></pre>
+     </div>
+     <h3 id="3">
+      3.后端代码
+     </h3>
+     <p>
+      使用IDEA打开，配置好Java8和Maven
+     </p>
+     <p>
+      实现修改下跟目录下的配置：pom.xml
+     </p>
+     <p>
+      修改下ShardingSphere相关依赖版本为：
+      <shardingsphere.version>
+       5.0.0-alpha
+      </shardingsphere.version>
+     </p>
+     <p>
+      然后运行后台代码：shardingsphere-ui-backend/src/main/java/org/apache/shardingsphere/ui/Bootstrap.java
+     </p>
+     <p>
+      成功跑了起来
+     </p>
+     <h3 id="4">
+      4.页面登录访问
+     </h3>
+     <p>
+      在第二步中前端已经跑起来了，访问显示的地址：http://localhost:8080/
+     </p>
+     <p>
+      进去默认就填好了用户名和密码，点击登录即可，登录后如下图：
+     </p>
+     <h3 id="5proxy">
+      5.Proxy连接
+     </h3>
+     <h4 id="zookeeper">
+      启动Zookeeper
+     </h4>
+     <p>
+      使用Docker启动一个zk：
+     </p>
+     <p>
+      ```shell script
+docker run -dit --name zk -p 2181:2181 zookeeper
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>#### 将源码版本切换到5.0.0-alpha
+5.0.0-beta的Proxy注册会有问题，数据匹配不上，我们这里使用5.0.0-alpha版本的，使用命令行，将代码重置到相关版本即可，命令如下：
+
+```shell script
+git checkout 5dc690c2227571e83beada277dbb2dfb43c29427
+</code></pre>
+     </div>
+     <p>
+      打了相关标签的，成功的话，会显示下面的一行：
+     </p>
+     <blockquote>
+      <p>
+       HEAD is now at 5dc690c222 [maven-release-plugin] prepare release 5.0.0-alpha
+      </p>
+     </blockquote>
+     <h4 id="proxy">
+      修改配置，启动Proxy
+     </h4>
+     <p>
+      接下来我们就开始修改配置启动Proxy
+     </p>
+     <p>
+      首先修改server.yaml：shardingsphere-proxy\shardingsphere-proxy-bootstrap\src\main\resources\conf\server.yaml
+     </p>
+     <p>
+      放开下面的配置，记住我们的名字：governance_ds
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nt">governance</span><span class="p">:</span>
+  <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">governance_ds</span>
+  <span class="nt">registryCenter</span><span class="p">:</span>
+    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ZooKeeper</span>
+    <span class="nt">serverLists</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">localhost:2181</span>
+    <span class="nt">props</span><span class="p">:</span>
+      <span class="nt">retryIntervalMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5000</span>
+      <span class="nt">timeToLiveSeconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">60</span>
+      <span class="nt">maxRetries</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3</span>
+      <span class="nt">operationTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5000</span>
+  <span class="nt">overwrite</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">authentication</span><span class="p">:</span>
+  <span class="nt">users</span><span class="p">:</span>
+    <span class="nt">root</span><span class="p">:</span>
+      <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">sharding</span><span class="p">:</span>
+      <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sharding</span>
+      <span class="nt">authorizedSchemas</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sharding_db</span>
+
+<span class="nt">props</span><span class="p">:</span>
+  <span class="nt">max-connections-size-per-query</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="nt">acceptor-size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">16</span>  <span class="c1"># The default value is available processors count * 2.</span>
+  <span class="nt">executor-size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">16</span>  <span class="c1"># Infinite by default.</span>
+  <span class="nt">proxy-frontend-flush-threshold</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>  <span class="c1"># The default value is 128.</span>
+    <span class="c1"># LOCAL: Proxy will run with LOCAL transaction.</span>
+    <span class="c1"># XA: Proxy will run with XA transaction.</span>
+    <span class="c1"># BASE: Proxy will run with B.A.S.E transaction.</span>
+  <span class="nt">proxy-transaction-type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">LOCAL</span>
+  <span class="nt">proxy-opentracing-enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">proxy-hint-enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">query-with-cipher-column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">sql-show</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">check-table-metadata-enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+</code></pre>
+     </div>
+     <p>
+      再讲数据加密配置放开：shardingsphere-proxy\shardingsphere-proxy-bootstrap\src\main\resources\conf\config-encrypt.yaml
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nt">schemaName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">encrypt_db</span>
+
+<span class="nt">dataSource</span><span class="p">:</span>
+  <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://127.0.0.1:3306/demo_ds?serverTimezone=UTC&amp;useSSL=false</span>
+  <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+  <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+  <span class="nt">connectionTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30000</span>
+  <span class="nt">idleTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">60000</span>
+  <span class="nt">maxLifetimeMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1800000</span>
+  <span class="nt">maxPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+
+<span class="nt">rules</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="kt">!ENCRYPT</span>
+  <span class="nt">encryptors</span><span class="p">:</span>
+    <span class="nt">aes_encryptor</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">AES</span>
+      <span class="nt">props</span><span class="p">:</span>
+        <span class="nt">aes-key-value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">123456abc</span>
+    <span class="nt">md5_encryptor</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MD5</span>
+  <span class="nt">tables</span><span class="p">:</span>
+    <span class="nt">t_encrypt</span><span class="p">:</span>
+      <span class="nt">columns</span><span class="p">:</span>
+        <span class="nt">user_id</span><span class="p">:</span>
+          <span class="nt">plainColumn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">user_plain</span>
+          <span class="nt">cipherColumn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">user_cipher</span>
+          <span class="nt">encryptorName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">aes_encryptor</span>
+        <span class="nt">order_id</span><span class="p">:</span>
+          <span class="nt">cipherColumn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">order_cipher</span>
+          <span class="nt">encryptorName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">md5_encryptor</span>
+</code></pre>
+     </div>
+     <p>
+      在启动的时候，还是遇到了问题，明明没有放开数据分片的配置，但Proxy还是默认加载了数据分片的配置，对数据分片配置进行修改了也不行，由于默认是无密码连接的，导致一直连接不上
+     </p>
+     <p>
+      于是只能跟踪代码，将默认的数据库连接密码都改为root，让Proxy暂时能跑起来：
+     </p>
+     <p>
+      修改的文件是：shardingsphere-proxy\shardingsphere-proxy-backend\src\main\java\org\apache\shardingsphere\proxy\backend\communication\jdbc\datasource\factory\JDBCRawBackendDataSourceFactory.java
+     </p>
+     <p>
+      将密码暂时都设置为root：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">JDBCRawBackendDataSourceFactory</span> <span class="kd">implements</span> <span class="n">JDBCBackendDataSourceFactory</span> <span class="p">{</span>
+
+    <span class="nd">@SuppressWarnings</span><span class="p">({</span><span class="s">"unchecked"</span><span class="p">,</span> <span class="s">"rawtypes"</span><span class="p">})</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">DataSource</span> <span class="nf">build</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">dataSourceName</span><span class="p">,</span> <span class="kd">final</span> <span class="n">DataSourceParameter</span> <span class="n">dataSourceParameter</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">HikariConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HikariConfig</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">driverClassName</span> <span class="o">=</span> <span class="n">JDBCDriverURLRecognizerEngine</span><span class="p">.</span><span class="na">getJDBCDriverURLRecognizer</span><span class="p">(</span><span class="n">dataSourceParameter</span><span class="p">.</span><span class="na">getUrl</span><span class="p">()).</span><span class="na">getDriverClassName</span><span class="p">();</span>
+        <span class="n">validateDriverClassName</span><span class="p">(</span><span class="n">driverClassName</span><span class="p">);</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setDriverClassName</span><span class="p">(</span><span class="n">driverClassName</span><span class="p">);</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setJdbcUrl</span><span class="p">(</span><span class="n">dataSourceParameter</span><span class="p">.</span><span class="na">getUrl</span><span class="p">());</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setUsername</span><span class="p">(</span><span class="n">dataSourceParameter</span><span class="p">.</span><span class="na">getUsername</span><span class="p">());</span>
+<span class="c1">//        config.setPassword(dataSourceParameter.getPassword());</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setPassword</span><span class="p">(</span><span class="s">"root"</span><span class="p">);</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setConnectionTimeout</span><span class="p">(</span><span class="n">dataSourceParameter</span><span class="p">.</span><span class="na">getConnectionTimeoutMilliseconds</span><span class="p">());</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setIdleTimeout</span><span class="p">(</span><span class="n">dataSourceParameter</span><span class="p">.</span><span class="na">getIdleTimeoutMilliseconds</span><span class="p">());</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setMaxLifetime</span><span class="p">(</span><span class="n">dataSourceParameter</span><span class="p">.</span><span class="na">getMaxLifetimeMilliseconds</span><span class="p">());</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setMaximumPoolSize</span><span class="p">(</span><span class="n">dataSourceParameter</span><span class="p">.</span><span class="na">getMaxPoolSize</span><span class="p">());</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setMinimumIdle</span><span class="p">(</span><span class="n">dataSourceParameter</span><span class="p">.</span><span class="na">getMinPoolSize</span><span class="p">());</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setReadOnly</span><span class="p">(</span><span class="n">dataSourceParameter</span><span class="p">.</span><span class="na">isReadOnly</span><span class="p">());</span>
+        <span class="n">DataSource</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HikariDataSource</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+        <span class="n">Optional</span><span class="o">&lt;</span><span class="n">JDBCParameterDecorator</span><span class="o">&gt;</span> <span class="n">decorator</span> <span class="o">=</span> <span class="n">findJDBCParameterDecorator</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">decorator</span><span class="p">.</span><span class="na">isPresent</span><span class="p">()</span> <span class="o">?</span> <span class="n">decorator</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">decorate</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="p">:</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      但是为啥默认一直有数据分片的配置，时间不够，后面再跟踪研究下
+     </p>
+     <p>
+      这样，我们就可以启动Proxy了，在ZK中查看，我们生成了节点：governance_ds
+     </p>
+     <p>
+      <img alt="image.png" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8642f0c0ef984c28a131153e8129056d~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <h4 id="_3">
+      注册中心设置
+     </h4>
+     <p>
+      在页面上添加一个注册中心，操作大致如下，填入Proxy中我们配置的名称：governance_ds，注意一定要对应上，这个涉及到ZK的读取路径
+     </p>
+     <p>
+      <img alt="image.png" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d36cbd73645046a0846a0d38a7a76818~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      添加完成后，点击激活，后面就会显示已经连接了注册中心，如下图：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/20121ff1076f4471b528d3ae9427338b~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      在配置管理中，我们能看到相关的配置：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/78ccbce112e94f849ea3d471aad3c121~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      运行状态中也看到了我们的Proxy节点：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1e281e451e7140eb8101e82793d924ad~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <h2 id="_4">
+      总结
+     </h2>
+     <p>
+      本篇中体验了下ShardingSphere UI的基本功能，使用Proxy连接了上去
+     </p>
+     <p>
+      后面的动态数据同步，由于时间问题，还没来得及去尝试，但问题不大，感兴趣的老哥可以自定尝试
+     </p>
+     <p>
+      核心的组件基本上体验完了，并且都是源码上直接启动的，后面准备开始源码上的阅读了
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

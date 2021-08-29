@@ -186,72 +186,9 @@ DATA_DIR="etcd-data"
 docker run -dit --name zk -p 2181:2181 zookeeper
 </code></pre>
      </div>
-     <h2 id="_3">
-      消息队列
-     </h2>
-     <h3 id="docker-activemq">
-      docker-activemq
+     <h3 id="consul">
+      Consul
      </h3>
-     <p>
-      ```shell script
-docker run -dit --name activemq -p 11616:61616 -p 8161:8161 -p 1883:1883 rmohr/activemq
-     </p>
-     <div class="codehilite">
-      <pre><span></span><code>初始账号：
-admin admin
-user user
-
-### docker rabbitmq
-```shell script
-docker run -dit --name rabbitmq -p 5672:5672 rabbitmq
-
-docker run -d -p 5672:5672 -p 15672:15672 --name rabbitmq rabbitmq:management
-
-http://127.0.0.1:15672
-
-用户和密码：
-guest
-guest
-</code></pre>
-     </div>
-     <h2 id="_4">
-      其他
-     </h2>
-     <h3 id="nginx">
-      Nginx
-     </h3>
-     <p>
-      ```shell script
-docker run -dit --name nginx --restart=always -p 80:80 -v D:/Docker/images/nginx/:/etc/nginx/ -v D:/Docker/images/nginx/download:/home/download/ nginx
-     </p>
-     <p>
-      docker run -dit --name nginx -p 80:80 -v D:/Docker/images/nginx/config/:/etc/nginx/ -v D:/Docker/images/nginx/download:/home/download/ nginx
-     </p>
-     <div class="codehilite">
-      <pre><span></span><code>### 前后端接口管理：Yapi
-```shell script
-git clone https://gitee.com/fjc0k/docker-YApi.git
-docker-compose up -d
-
-然后，通过 http://localhost:40001 即可访问 YApi。
-用户密码在docker-compose.yml中，YAPI_ADMIN_ACCOUNT 为你的管理员邮箱，YAPI_ADMIN_PASSWORD 为你的管理员密码
-</code></pre>
-     </div>
-     <h3 id="kong">
-      Kong
-     </h3>
-     <ul>
-      <li>
-       <a href="https://docs.konghq.com/gateway-oss/2.2.x/">
-        Documentation for Kong Gateway (OSS)
-       </a>
-      </li>
-      <li>
-       <a href="https://docs.konghq.com/install/docker/?_ga=2.15676593.643431049.1616122322-97521002.1616122322">
-        Docker Installation
-       </a>
-      </li>
-     </ul>
      <p>
       ```shell script
      </p>
@@ -259,162 +196,234 @@ docker-compose up -d
       linux
      </h1>
      <p>
-      docker run -d --name kong \
-     --network=kong-net \
-     -v "kong-vol:/usr/local/kong/declarative" \
-     -e "KONG_DATABASE=off" \
-     -e "KONG_DECLARATIVE_CONFIG=/usr/local/kong/declarative/kong.yml" \
-     -e "KONG_PROXY_ACCESS_LOG=/dev/stdout" \
-     -e "KONG_ADMIN_ACCESS_LOG=/dev/stdout" \
-     -e "KONG_PROXY_ERROR_LOG=/dev/stderr" \
-     -e "KONG_ADMIN_ERROR_LOG=/dev/stderr" \
-     -e "KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl" \
-     -p 8000:8000 \
-     -p 8443:8443 \
-     -p 127.0.0.1:8001:8001 \
-     -p 127.0.0.1:8444:8444 \
-     kong:latest
+      docker run \
+    -d \
+    -p 8500:8500 \
+    -p 8600:8600/udp \
+    --name=consul_badger \
+    consul agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
      </p>
      <h1 id="windows">
       windows
      </h1>
      <p>
-      docker network create kong-net
+      docker run
+      <code>
+       -d
+      </code>
+      -p 8500:8500
+      <code>
+       -p 8600:8600/udp
+      </code>
+      --name=consul_badger
+      <code>
+       -v D:\Docker\compose\consul:/consul/config
+      </code>
+      consul agent -server -ui
+      <code>
+       -node
+      </code>
+      =server-1
+      <code>
+       -bootstrap-expect
+      </code>
+      =1
+      <code>
+       -client
+      </code>
+      =0.0.0.0
+     </p>
+     <h1 id="acl-config-in-consulconfig">
+      ACL config in /consul/config
+     </h1>
+     <p>
+      {
+    "datacenter": "dc1",
+    "bootstrap_expect": 1,
+    "log_level": "INFO",
+    "node_name": "consul_server_1",
+    "client_addr": "0.0.0.0",
+    "server": true,
+    "ui": true,
+    "enable_script_checks": true,
+    "addresses": {
+        "https": "0.0.0.0",
+        "dns": "0.0.0.0"
+    }
+}
      </p>
      <p>
-      docker run -d --name kong-database
-      <code>
-       --network=kong-net
-      </code>
-      -p 5432:5432
-      <code>
-       -e "POSTGRES_USER=kong"
-      </code>
-      -e "POSTGRES_DB=kong"
-      <code>
-       -e "POSTGRES_PASSWORD=kong"
-      </code>
-      postgres:9.6
-     </p>
-     <p>
-      docker run --rm
-      <code>
-       --network=kong-net
-      </code>
-      -e "KONG_DATABASE=postgres"
-      <code>
-       -e "KONG_PG_HOST=kong-database"
-      </code>
-      -e "KONG_PG_PASSWORD=kong"
-      <code>
-       -e "KONG_CASSANDRA_CONTACT_POINTS=kong-database"
-      </code>
-      kong:latest kong migrations bootstrap
-     </p>
-     <p>
-      docker run -d --name kong
-      <code>
-       --network=kong-net
-      </code>
-      -e "KONG_DATABASE=postgres"
-      <code>
-       -e "KONG_PG_HOST=kong-database"
-      </code>
-      -e "KONG_PG_PASSWORD=kong"
-      <code>
-       -e "KONG_CASSANDRA_CONTACT_POINTS=kong-database"
-      </code>
-      -e "KONG_PROXY_ACCESS_LOG=/dev/stdout"
-      <code>
-       -e "KONG_ADMIN_ACCESS_LOG=/dev/stdout"
-      </code>
-      -e "KONG_PROXY_ERROR_LOG=/dev/stderr"
-      <code>
-       -e "KONG_ADMIN_ERROR_LOG=/dev/stderr"
-      </code>
-      -e "KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl"
-      <code>
-       -p 8000:8000
-      </code>
-      -p 8443:8443
-      <code>
-       -p 8001:8001
-      </code>
-      -p 8444:8444 `
-     kong:latest
-     </p>
-     <p>
-      curl -i http://localhost:8001/
-     </p>
-     <p>
-      docker run --rm pantsel/konga:latest -c prepare -a postgres -u postgresql://kong:kong@192.168.110.242:5432/konga
-     </p>
-     <p>
-      docker run -p 1337:1337
-      <code>
-       --network kong-net
-      </code>
-      --name konga
-      <code>
-       -e "NODE_ENV=production"
-      </code>
-      -e "DB_ADAPTER=postgres"
-      <code>
-       -e "DB_URI=postgresql://kong:kong@192.168.110.242:5432/konga"
-      </code>
-      pantsel/konga
+      primary_datacenter = "dc1"
+acl {
+  enabled = true
+  default_policy = "deny"
+  enable_token_persistence = true
+  tokens { 
+    master = "474dcea7-ee4d-3f11-1af1-a38eb37d3f5d"
+  }
+}
      </p>
      <div class="codehilite">
-      <pre><span></span><code>### Portainer - Docker的可视化管理工具使用详解
+      <pre><span></span><code>## 消息队列
+### docker-activemq
+```shell script
+docker run -dit --name activemq -p 11616:61616 -p 8161:8161 -p 1883:1883 rmohr/activemq
 </code></pre>
      </div>
-     <h1 id="linux_1">
-      linux
-     </h1>
      <p>
-      docker run -d -p 9000:9000 --name portainer --restart always -v D:/temp/docker/portainer/docker.sock:/var/run/docker.sock -v D:/temp/docker/portainer/data:/data portainer/portainer
+      初始账号：
+admin admin
+user user
      </p>
-     <h1 id="windows_1">
-      windows
-     </h1>
+     <h3 id="docker-rabbitmq">
+      docker rabbitmq
+     </h3>
      <p>
-      docker run -d -p 9000:9000 --name portainer --restart always -v -v D:/temp/docker/portainer/docker_engine:/var/run/pipe/docker_engine -v D:/temp/docker/portainer/data:/data portainer/portainer
+      ```shell script
+docker run -dit --name rabbitmq -p 5672:5672 rabbitmq
+     </p>
+     <p>
+      docker run -d -p 5672:5672 -p 15672:15672 --name rabbitmq rabbitmq:management
+     </p>
+     <p>
+      http://127.0.0.1:15672
      </p>
      <p>
       用户和密码：
-admin password
+guest
+guest
      </p>
      <div class="codehilite">
-      <pre><span></span><code>### Centos
+      <pre><span></span><code><span class="c1">## 其他</span>
+<span class="c1">### Nginx</span>
+<span class="err">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="o">--</span><span class="n">name</span> <span class="n">nginx</span> <span class="o">--</span><span class="n">restart</span><span class="o">=</span><span class="n">always</span> <span class="o">-</span><span class="n">p</span> <span class="mi">80</span><span class="p">:</span><span class="mi">80</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">Docker</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">Docker</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">download</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">download</span><span class="o">/</span> <span class="n">nginx</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="o">--</span><span class="n">name</span> <span class="n">nginx</span> <span class="o">-</span><span class="n">p</span> <span class="mi">80</span><span class="p">:</span><span class="mi">80</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">Docker</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">config</span><span class="o">/</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">Docker</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">download</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">download</span><span class="o">/</span> <span class="n">nginx</span>
 </code></pre>
      </div>
+     <h3 id="yapi">
+      前后端接口管理：Yapi
+     </h3>
      <p>
-      docker run -tid --name centos8 -p 82:80 -v D:/temp/centos/:/root/ centos
+      ```shell script
+git clone https://gitee.com/fjc0k/docker-YApi.git
+docker-compose up -d
+     </p>
+     <p>
+      然后，通过 http://localhost:40001 即可访问 YApi。
+用户密码在docker-compose.yml中，YAPI_ADMIN_ACCOUNT 为你的管理员邮箱，YAPI_ADMIN_PASSWORD 为你的管理员密码
      </p>
      <div class="codehilite">
-      <pre><span></span><code>### 本地镜像仓库
+      <pre><span></span><code><span class="cp">### Kong</span>
+<span class="o">-</span> <span class="p">[</span><span class="n">Documentation</span> <span class="k">for</span> <span class="n">Kong</span> <span class="n">Gateway</span> <span class="p">(</span><span class="n">OSS</span><span class="p">)](</span><span class="nl">https</span><span class="p">:</span><span class="c1">//docs.konghq.com/gateway-oss/2.2.x/)</span>
+<span class="o">-</span> <span class="p">[</span><span class="n">Docker</span> <span class="n">Installation</span><span class="p">](</span><span class="nl">https</span><span class="p">:</span><span class="c1">//docs.konghq.com/install/docker/?_ga=2.15676593.643431049.1616122322-97521002.1616122322)</span>
+
+<span class="err">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="cp"># linux</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">name</span> <span class="n">kong</span> \
+     <span class="o">--</span><span class="n">network</span><span class="o">=</span><span class="n">kong</span><span class="o">-</span><span class="n">net</span> \
+     <span class="o">-</span><span class="n">v</span> <span class="s">"kong-vol:/usr/local/kong/declarative"</span> \
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_DATABASE=off"</span> \
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_DECLARATIVE_CONFIG=/usr/local/kong/declarative/kong.yml"</span> \
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_PROXY_ACCESS_LOG=/dev/stdout"</span> \
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_ADMIN_ACCESS_LOG=/dev/stdout"</span> \
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_PROXY_ERROR_LOG=/dev/stderr"</span> \
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_ADMIN_ERROR_LOG=/dev/stderr"</span> \
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl"</span> \
+     <span class="o">-</span><span class="n">p</span> <span class="mi">8000</span><span class="o">:</span><span class="mi">8000</span> \
+     <span class="o">-</span><span class="n">p</span> <span class="mi">8443</span><span class="o">:</span><span class="mi">8443</span> \
+     <span class="o">-</span><span class="n">p</span> <span class="mf">127.0.0.1</span><span class="o">:</span><span class="mi">8001</span><span class="o">:</span><span class="mi">8001</span> \
+     <span class="o">-</span><span class="n">p</span> <span class="mf">127.0.0.1</span><span class="o">:</span><span class="mi">8444</span><span class="o">:</span><span class="mi">8444</span> \
+     <span class="nl">kong</span><span class="p">:</span><span class="n">latest</span>
+
+
+<span class="cp"># windows</span>
+<span class="n">docker</span> <span class="n">network</span> <span class="n">create</span> <span class="n">kong</span><span class="o">-</span><span class="n">net</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">name</span> <span class="n">kong</span><span class="o">-</span><span class="n">database</span> <span class="err">`</span>
+               <span class="o">--</span><span class="n">network</span><span class="o">=</span><span class="n">kong</span><span class="o">-</span><span class="n">net</span> <span class="err">`</span>
+               <span class="o">-</span><span class="n">p</span> <span class="mi">5432</span><span class="o">:</span><span class="mi">5432</span> <span class="err">`</span>
+               <span class="o">-</span><span class="n">e</span> <span class="s">"POSTGRES_USER=kong"</span> <span class="err">`</span>
+               <span class="o">-</span><span class="n">e</span> <span class="s">"POSTGRES_DB=kong"</span> <span class="err">`</span>
+               <span class="o">-</span><span class="n">e</span> <span class="s">"POSTGRES_PASSWORD=kong"</span> <span class="err">`</span>
+               <span class="nl">postgres</span><span class="p">:</span><span class="mf">9.6</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">rm</span> <span class="err">`</span>
+     <span class="o">--</span><span class="n">network</span><span class="o">=</span><span class="n">kong</span><span class="o">-</span><span class="n">net</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_DATABASE=postgres"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_PG_HOST=kong-database"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_PG_PASSWORD=kong"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_CASSANDRA_CONTACT_POINTS=kong-database"</span> <span class="err">`</span>
+     <span class="nl">kong</span><span class="p">:</span><span class="n">latest</span> <span class="n">kong</span> <span class="n">migrations</span> <span class="n">bootstrap</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">name</span> <span class="n">kong</span> <span class="err">`</span>
+     <span class="o">--</span><span class="n">network</span><span class="o">=</span><span class="n">kong</span><span class="o">-</span><span class="n">net</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_DATABASE=postgres"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_PG_HOST=kong-database"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_PG_PASSWORD=kong"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_CASSANDRA_CONTACT_POINTS=kong-database"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_PROXY_ACCESS_LOG=/dev/stdout"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_ADMIN_ACCESS_LOG=/dev/stdout"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_PROXY_ERROR_LOG=/dev/stderr"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_ADMIN_ERROR_LOG=/dev/stderr"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">e</span> <span class="s">"KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl"</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">p</span> <span class="mi">8000</span><span class="o">:</span><span class="mi">8000</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">p</span> <span class="mi">8443</span><span class="o">:</span><span class="mi">8443</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">p</span> <span class="mi">8001</span><span class="o">:</span><span class="mi">8001</span> <span class="err">`</span>
+     <span class="o">-</span><span class="n">p</span> <span class="mi">8444</span><span class="o">:</span><span class="mi">8444</span> <span class="err">`</span>
+     <span class="nl">kong</span><span class="p">:</span><span class="n">latest</span>
+
+<span class="n">curl</span> <span class="o">-</span><span class="n">i</span> <span class="nl">http</span><span class="p">:</span><span class="c1">//localhost:8001/</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">rm</span> <span class="n">pantsel</span><span class="o">/</span><span class="nl">konga</span><span class="p">:</span><span class="n">latest</span> <span class="o">-</span><span class="n">c</span> <span class="n">prepare</span> <span class="o">-</span><span class="n">a</span> <span class="n">postgres</span> <span class="o">-</span><span class="n">u</span> <span class="nl">postgresql</span><span class="p">:</span><span class="c1">//kong:kong@192.168.110.242:5432/konga</span>
+
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">p</span> <span class="mi">1337</span><span class="o">:</span><span class="mi">1337</span> <span class="err">`</span>
+        <span class="o">--</span><span class="n">network</span> <span class="n">kong</span><span class="o">-</span><span class="n">net</span> <span class="err">`</span>
+        <span class="o">--</span><span class="n">name</span> <span class="n">konga</span> <span class="err">`</span>
+        <span class="o">-</span><span class="n">e</span> <span class="s">"NODE_ENV=production"</span>  <span class="err">`</span>
+        <span class="o">-</span><span class="n">e</span> <span class="s">"DB_ADAPTER=postgres"</span> <span class="err">`</span>
+        <span class="o">-</span><span class="n">e</span> <span class="s">"DB_URI=postgresql://kong:kong@192.168.110.242:5432/konga"</span> <span class="err">`</span>
+        <span class="n">pantsel</span><span class="o">/</span><span class="n">konga</span>
 </code></pre>
      </div>
-     <p>
-      docker run -d -p 5000:5000 --name registry --restart=always -v D:/Docker/registry:/var/lib/registry registry:latest
-     </p>
-     <h1 id="docker-deamon-1270015000">
-      在docker deamon 中加入 127.0.0.1:5000
-     </h1>
-     <h1 id="_5">
-      上传
-     </h1>
-     <p>
-      docker tag xxxx:test 192.168.110.196:5000/xxxx:test
-docker push 192.168.110.196:5000/xxxx:test
-     </p>
-     <h1 id="_6">
-      下载
-     </h1>
-     <p>
-      docker pull 192.168.110.196:5000/xxxx:test
-```
-     </p>
+     <h3 id="portainer-docker">
+      Portainer - Docker的可视化管理工具使用详解
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1"># linux</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9000</span><span class="p">:</span><span class="mi">9000</span> <span class="o">--</span><span class="n">name</span> <span class="n">portainer</span> <span class="o">--</span><span class="n">restart</span> <span class="n">always</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">temp</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">temp</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="n">data</span> <span class="n">portainer</span><span class="o">/</span><span class="n">portainer</span>
+
+<span class="c1"># windows</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9000</span><span class="p">:</span><span class="mi">9000</span> <span class="o">--</span><span class="n">name</span> <span class="n">portainer</span> <span class="o">--</span><span class="n">restart</span> <span class="n">always</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">temp</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">docker_engine</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">pipe</span><span class="o">/</span><span class="n">docker_engine</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">temp</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="n">data</span> <span class="n">portainer</span><span class="o">/</span><span class="n">portainer</span>
+
+<span class="err">用户和密码：</span>
+<span class="n">admin</span> <span class="n">password</span>
+</code></pre>
+     </div>
+     <h3 id="centos">
+      Centos
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>docker run -tid --name centos8 -p 82:80 -v D:/temp/centos/:/root/ centos
+</code></pre>
+     </div>
+     <h3 id="_3">
+      本地镜像仓库
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">5000</span><span class="p">:</span><span class="mi">5000</span> <span class="o">--</span><span class="n">name</span> <span class="n">registry</span> <span class="o">--</span><span class="n">restart</span><span class="o">=</span><span class="n">always</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">Docker</span><span class="o">/</span><span class="n">registry</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">registry</span> <span class="n">registry</span><span class="p">:</span><span class="n">latest</span>
+
+<span class="c1"># 在docker deamon 中加入 127.0.0.1:5000</span>
+
+<span class="c1"># 上传</span>
+<span class="n">docker</span> <span class="n">tag</span> <span class="n">xxxx</span><span class="p">:</span><span class="n">test</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">110.196</span><span class="p">:</span><span class="mi">5000</span><span class="o">/</span><span class="n">xxxx</span><span class="p">:</span><span class="n">test</span>
+<span class="n">docker</span> <span class="n">push</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">110.196</span><span class="p">:</span><span class="mi">5000</span><span class="o">/</span><span class="n">xxxx</span><span class="p">:</span><span class="n">test</span>
+
+<span class="c1"># 下载</span>
+<span class="n">docker</span> <span class="n">pull</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">110.196</span><span class="p">:</span><span class="mi">5000</span><span class="o">/</span><span class="n">xxxx</span><span class="p">:</span><span class="n">test</span>
+</code></pre>
+     </div>
      <ul>
       <li>
        <a href="https://blog.csdn.net/qq_2300688967/article/details/83545647">

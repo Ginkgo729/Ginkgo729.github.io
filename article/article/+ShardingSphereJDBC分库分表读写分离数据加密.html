@@ -1,0 +1,340 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shardingsphere-jdbc">
+      ShardingSphere JDBC 分库分表 读写分离 数据加密
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在上篇文章中，在本地搭建了运行环境，本地来体验下ShardingSphere JDBC的三个功能：分库分表、读写分离、数据加密
+     </p>
+     <h2 id="_2">
+      示例运行
+     </h2>
+     <p>
+      首先把概念先捋一捋，参考下面的文档：
+     </p>
+     <ul>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/current/cn/features/sharding/">
+        数据分片
+       </a>
+      </li>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/current/cn/features/readwrite-splitting/">
+        读写分离
+       </a>
+      </li>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/current/cn/features/encrypt/">
+        数据加密
+       </a>
+      </li>
+     </ul>
+     <p>
+      配置的参考说明也是要看一看的，参考下面的文档：
+     </p>
+     <ul>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/current/cn/user-manual/shardingsphere-jdbc/configuration/yaml/sharding/">
+        数据分片配置
+       </a>
+      </li>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/current/cn/user-manual/shardingsphere-jdbc/configuration/yaml/readwrite-splitting-/">
+        读写分离配置
+       </a>
+      </li>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/current/cn/user-manual/shardingsphere-jdbc/configuration/yaml/encrypt/">
+        数据加密配置
+       </a>
+      </li>
+     </ul>
+     <p>
+      接下来就是运行示例了，简单点就运行官方源码中的示例：examples/shardingsphere-jdbc-example/sharding-example/sharding-spring-boot-mybatis-example
+     </p>
+     <h3 id="_3">
+      分库分表与读写分离
+     </h3>
+     <h4 id="1">
+      1.数据库初始化
+     </h4>
+     <p>
+      首先把相关的数据分片和读写分离所需要的表在数据库中建好
+     </p>
+     <p>
+      数据库简单使用docker起一个，用户名和密码都是root：
+     </p>
+     <p>
+      ```shell script
+docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>运行下面的<span class="nv">SQL</span>语句建立相关的数据库：
+
+```<span class="nv">sql</span>
+<span class="nv">CREATE</span> <span class="nv">SCHEMA</span> <span class="k">IF</span> <span class="nv">NOT</span> <span class="nv">EXISTS</span> <span class="nv">demo_write_ds_0</span><span class="c1">;</span>
+<span class="nv">CREATE</span> <span class="nv">SCHEMA</span> <span class="k">IF</span> <span class="nv">NOT</span> <span class="nv">EXISTS</span> <span class="nv">demo_write_ds_0_read_0</span><span class="c1">;</span>
+<span class="nv">CREATE</span> <span class="nv">SCHEMA</span> <span class="k">IF</span> <span class="nv">NOT</span> <span class="nv">EXISTS</span> <span class="nv">demo_write_ds_0_read_1</span><span class="c1">;</span>
+<span class="nv">CREATE</span> <span class="nv">SCHEMA</span> <span class="k">IF</span> <span class="nv">NOT</span> <span class="nv">EXISTS</span> <span class="nv">demo_write_ds_1</span><span class="c1">;</span>
+<span class="nv">CREATE</span> <span class="nv">SCHEMA</span> <span class="k">IF</span> <span class="nv">NOT</span> <span class="nv">EXISTS</span> <span class="nv">demo_write_ds_1_read_0</span><span class="c1">;</span>
+<span class="nv">CREATE</span> <span class="nv">SCHEMA</span> <span class="k">IF</span> <span class="nv">NOT</span> <span class="nv">EXISTS</span> <span class="nv">demo_write_ds_1_read_1</span><span class="c1">;</span>
+</code></pre>
+     </div>
+     <h4 id="2">
+      2.配置修改
+     </h4>
+     <p>
+      先修改：examples/shardingsphere-jdbc-example/sharding-example/sharding-spring-boot-mybatis-example/src/main/resources/application.properties
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">mybatis.config-location=classpath:META-INF/mybatis-config.xml</span>
+
+<span class="l l-Scalar l-Scalar-Plain">#spring.profiles.active=sharding-databases</span>
+<span class="l l-Scalar l-Scalar-Plain">#spring.profiles.active=sharding-tables</span>
+<span class="l l-Scalar l-Scalar-Plain">#spring.profiles.active=sharding-databases-tables</span>
+<span class="l l-Scalar l-Scalar-Plain">#spring.profiles.active=readwrite-splitting</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.profiles.active=sharding-readwrite-splittin</span>
+</code></pre>
+     </div>
+     <p>
+      将其配置文件修改为执行读写分离加分片
+     </p>
+     <p>
+      再修改：examples/shardingsphere-jdbc-example/sharding-example/sharding-spring-boot-mybatis-example/src/main/resources/application-sharding-readwrite-splitting.properties
+     </p>
+     <p>
+      简单的修改下对应的数据库密码，然后在最后添加下面一个配置，用于打印SQL语句：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">spring.shardingsphere.props.sql-show=true</span>
+</code></pre>
+     </div>
+     <h4 id="3">
+      3.运行
+     </h4>
+     <p>
+      跑起来后大致如下图所示：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e8952a99ea594c2a9546eeb98c25de67~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      其中打印了插入语句和查询语句，示例如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nt">----------------------------</span> <span class="nt">Insert</span> <span class="nt">Data</span> <span class="nt">----------------------------</span>
+<span class="nt">Logic</span> <span class="nt">SQL</span><span class="o">:</span> <span class="nt">INSERT</span> <span class="nt">INTO</span> <span class="nt">t_order</span> <span class="o">(</span><span class="nt">user_id</span><span class="o">,</span> <span class="nt">address_id</span><span class="o">,</span> <span class="nt">status</span><span class="o">)</span> <span class="nt">VALUES</span> <span class="o">(?,</span> <span class="o">?,</span> <span class="o">?);</span> 
+<span class="nt">SQLStatement</span><span class="o">:</span> <span class="nt">MySQLInsertStatement</span><span class="o">(</span><span class="nt">setAssignment</span><span class="o">=</span><span class="nt">Optional</span><span class="p">.</span><span class="nc">empty</span><span class="o">,</span> <span class="nt">onDuplicateKeyColumns</span><span class="o">=</span><span class="nt">Optional</span><span class="p">.</span><span class="nc">empty</span><span class="o">)</span> 
+<span class="nt">Actual</span> <span class="nt">SQL</span><span class="o">:</span> <span class="nt">write-ds-1</span> <span class="o">:::</span> <span class="nt">INSERT</span> <span class="nt">INTO</span> <span class="nt">t_order_0</span> <span class="o">(</span><span class="nt">user_id</span><span class="o">,</span> <span class="nt">address_id</span><span class="o">,</span> <span class="nt">status</span><span class="o">,</span> <span class="nt">order_id</span><span class="o">)</span> <span class="nt">VALUES</span> <span class="o">(?,</span> <span class="o">?,</span> <span class="o">?,</span> <span class="o">?);</span> <span class="o">:::</span> <span class="cp">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">INSERT_TEST</span><span class="p">,</span> <span class="mi">636678694781825024</span><span class="cp">]</span> 
+<span class="nt">Logic</span> <span class="nt">SQL</span><span class="o">:</span> <span class="nt">INSERT</span> <span class="nt">INTO</span> <span class="nt">t_order_item</span> <span class="o">(</span><span class="nt">order_id</span><span class="o">,</span> <span class="nt">user_id</span><span class="o">,</span> <span class="nt">status</span><span class="o">)</span> <span class="nt">VALUES</span> <span class="o">(?,</span> <span class="o">?,</span> <span class="o">?);</span> 
+<span class="nt">SQLStatement</span><span class="o">:</span> <span class="nt">MySQLInsertStatement</span><span class="o">(</span><span class="nt">setAssignment</span><span class="o">=</span><span class="nt">Optional</span><span class="p">.</span><span class="nc">empty</span><span class="o">,</span> <span class="nt">onDuplicateKeyColumns</span><span class="o">=</span><span class="nt">Optional</span><span class="p">.</span><span class="nc">empty</span><span class="o">)</span> 
+<span class="nt">Actual</span> <span class="nt">SQL</span><span class="o">:</span> <span class="nt">write-ds-1</span> <span class="o">:::</span> <span class="nt">INSERT</span> <span class="nt">INTO</span> <span class="nt">t_order_item_0</span> <span class="o">(</span><span class="nt">order_id</span><span class="o">,</span> <span class="nt">user_id</span><span class="o">,</span> <span class="nt">status</span><span class="o">,</span> <span class="nt">order_item_id</span><span class="o">)</span> <span class="nt">VALUES</span> <span class="o">(?,</span> <span class="o">?,</span> <span class="o">?,</span> <span class="o">?);</span> <span class="o">:::</span> <span class="cp">[</span><span class="mi">636678694781825024</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">INSERT_TEST</span><span class="p">,</span> <span class="mi">636678695339667457</span><span class="cp">]</span> 
+<span class="nt">SQLStatement</span><span class="o">:</span> <span class="nt">MySQLInsertStatement</span><span class="o">(</span><span class="nt">setAssignment</span><span class="o">=</span><span class="nt">Optional</span><span class="p">.</span><span class="nc">empty</span><span class="o">,</span> <span class="nt">onDuplicateKeyColumns</span><span class="o">=</span><span class="nt">Optional</span><span class="p">.</span><span class="nc">empty</span><span class="o">)</span> 
+<span class="nt">Actual</span> <span class="nt">SQL</span><span class="o">:</span> <span class="nt">write-ds-0</span> <span class="o">:::</span> <span class="nt">INSERT</span> <span class="nt">INTO</span> <span class="nt">t_order_0</span> <span class="o">(</span><span class="nt">user_id</span><span class="o">,</span> <span class="nt">address_id</span><span class="o">,</span> <span class="nt">status</span><span class="o">,</span> <span class="nt">order_id</span><span class="o">)</span> <span class="nt">VALUES</span> <span class="o">(?,</span> <span class="o">?,</span> <span class="o">?,</span> <span class="o">?);</span> <span class="o">:::</span> <span class="cp">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">INSERT_TEST</span><span class="p">,</span> <span class="mi">636678695436136448</span><span class="cp">]</span> 
+<span class="nt">Logic</span> <span class="nt">SQL</span><span class="o">:</span> <span class="nt">INSERT</span> <span class="nt">INTO</span> <span class="nt">t_order_item</span> <span class="o">(</span><span class="nt">order_id</span><span class="o">,</span> <span class="nt">user_id</span><span class="o">,</span> <span class="nt">status</span><span class="o">)</span> <span class="nt">VALUES</span> <span class="o">(?,</span> <span class="o">?,</span> <span class="o">?);</span> 
+</code></pre>
+     </div>
+     <p>
+      插入的语句大致就如上面的，可以从Actual SQL看出，数据的生成插入确实是分片了的
+     </p>
+     <p>
+      但读写分离，就不太确定了：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nt">----------------------------</span> <span class="nt">Print</span> <span class="nt">Order</span> <span class="nt">Data</span> <span class="nt">-----------------------</span>
+<span class="cp">[</span><span class="nx">INFO</span> <span class="cp">]</span> <span class="nt">2021-08-23</span> <span class="nt">21</span><span class="p">:</span><span class="nd">33</span><span class="p">:</span><span class="nd">50</span><span class="o">,</span><span class="nt">057</span> <span class="nt">--main--</span> <span class="cp">[</span><span class="nx">ShardingSphere</span><span class="na">-SQL</span><span class="cp">]</span> <span class="nt">Logic</span> <span class="nt">SQL</span><span class="o">:</span> <span class="nt">SELECT</span> <span class="o">*</span> <span class="nt">FROM</span> <span class="nt">t_order</span><span class="o">;</span> 
+<span class="cp">[</span><span class="nx">INFO</span> <span class="cp">]</span> <span class="nt">2021-08-23</span> <span class="nt">21</span><span class="p">:</span><span class="nd">33</span><span class="p">:</span><span class="nd">50</span><span class="o">,</span><span class="nt">057</span> <span class="nt">--main--</span> <span class="cp">[</span><span class="nx">ShardingSphere</span><span class="na">-SQL</span><span class="cp">]</span> <span class="nt">SQLStatement</span><span class="o">:</span> <span class="nt">MySQLSelectStatement</span><span class="o">(</span><span class="nt">limit</span><span class="o">=</span><span class="nt">Optional</span><span class="p">.</span><span class="nc">empty</span><span class="o">,</span> <span class="nt">lock</span><span class="o">=</span><span class="nt">Optional</span><span class="p">.</span><span class="nc">empty</span><span class="o">,</span> <span class="nt">window</span><span class="o">=</span><span class="nt">Optional</span><span class="p">.</span><span class="nc">empty</span><span class="o">)</span> 
+<span class="cp">[</span><span class="nx">INFO</span> <span class="cp">]</span> <span class="nt">2021-08-23</span> <span class="nt">21</span><span class="p">:</span><span class="nd">33</span><span class="p">:</span><span class="nd">50</span><span class="o">,</span><span class="nt">057</span> <span class="nt">--main--</span> <span class="cp">[</span><span class="nx">ShardingSphere</span><span class="na">-SQL</span><span class="cp">]</span> <span class="nt">Actual</span> <span class="nt">SQL</span><span class="o">:</span> <span class="nt">write-ds-0</span> <span class="o">:::</span> <span class="nt">SELECT</span> <span class="o">*</span> <span class="nt">FROM</span> <span class="nt">t_order_0</span> <span class="nt">ORDER</span> <span class="nt">BY</span> <span class="nt">order_id</span> <span class="nt">ASC</span> <span class="o">;</span> 
+<span class="cp">[</span><span class="nx">INFO</span> <span class="cp">]</span> <span class="nt">2021-08-23</span> <span class="nt">21</span><span class="p">:</span><span class="nd">33</span><span class="p">:</span><span class="nd">50</span><span class="o">,</span><span class="nt">057</span> <span class="nt">--main--</span> <span class="cp">[</span><span class="nx">ShardingSphere</span><span class="na">-SQL</span><span class="cp">]</span> <span class="nt">Actual</span> <span class="nt">SQL</span><span class="o">:</span> <span class="nt">write-ds-0</span> <span class="o">:::</span> <span class="nt">SELECT</span> <span class="o">*</span> <span class="nt">FROM</span> <span class="nt">t_order_1</span> <span class="nt">ORDER</span> <span class="nt">BY</span> <span class="nt">order_id</span> <span class="nt">ASC</span> <span class="o">;</span> 
+<span class="cp">[</span><span class="nx">INFO</span> <span class="cp">]</span> <span class="nt">2021-08-23</span> <span class="nt">21</span><span class="p">:</span><span class="nd">33</span><span class="p">:</span><span class="nd">50</span><span class="o">,</span><span class="nt">057</span> <span class="nt">--main--</span> <span class="cp">[</span><span class="nx">ShardingSphere</span><span class="na">-SQL</span><span class="cp">]</span> <span class="nt">Actual</span> <span class="nt">SQL</span><span class="o">:</span> <span class="nt">write-ds-1</span> <span class="o">:::</span> <span class="nt">SELECT</span> <span class="o">*</span> <span class="nt">FROM</span> <span class="nt">t_order_0</span> <span class="nt">ORDER</span> <span class="nt">BY</span> <span class="nt">order_id</span> <span class="nt">ASC</span> <span class="o">;</span> 
+<span class="cp">[</span><span class="nx">INFO</span> <span class="cp">]</span> <span class="nt">2021-08-23</span> <span class="nt">21</span><span class="p">:</span><span class="nd">33</span><span class="p">:</span><span class="nd">50</span><span class="o">,</span><span class="nt">057</span> <span class="nt">--main--</span> <span class="cp">[</span><span class="nx">ShardingSphere</span><span class="na">-SQL</span><span class="cp">]</span> <span class="nt">Actual</span> <span class="nt">SQL</span><span class="o">:</span> <span class="nt">write-ds-1</span> <span class="o">:::</span> <span class="nt">SELECT</span> <span class="o">*</span> <span class="nt">FROM</span> <span class="nt">t_order_1</span> <span class="nt">ORDER</span> <span class="nt">BY</span> <span class="nt">order_id</span> <span class="nt">ASC</span> <span class="o">;</span> 
+</code></pre>
+     </div>
+     <p>
+      读的话，从语句上来看，还是读的write，不是预想中的：write-ds-0-read-0,write-ds-0-read-1,write-ds-1-read-0,write-ds-1-read-1，其中一个，这个有点疑惑
+     </p>
+     <p>
+      后面自己又运行了一次单独的读写分离的示例配置，但语句还是和上面的一样，从语句上没有看出明显的读从库
+     </p>
+     <p>
+      感觉可能有下面的几种情况：
+     </p>
+     <ul>
+      <li>
+       1.已经走的读库，只是打印的语句设置如此
+      </li>
+      <li>
+       2.数据库需要额外的配置
+      </li>
+     </ul>
+     <p>
+      这个后面再研究下.....
+     </p>
+     <h3 id="_4">
+      数据加密
+     </h3>
+     <p>
+      我们就简单使用这个示例工程进行尝试：examples/shardingsphere-jdbc-example/governance-example/governance-spring-boot-mybatis-example
+     </p>
+     <h4 id="1_1">
+      1.数据库建立
+     </h4>
+     <div class="codehilite">
+      <pre><span></span><code><span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="k">IF</span> <span class="k">NOT</span> <span class="k">EXISTS</span> <span class="n">demo_ds</span><span class="p">;</span>
+</code></pre>
+     </div>
+     <h4 id="2_1">
+      2.配置修改
+     </h4>
+     <p>
+      修改配置：examples/shardingsphere-jdbc-example/governance-example/governance-spring-boot-mybatis-example/src/main/resources/application.properties
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">spring.profiles.active=local-zookeeper-encryp</span>
+</code></pre>
+     </div>
+     <p>
+      修改配置：examples/shardingsphere-jdbc-example/governance-example/governance-spring-boot-mybatis-example/src/main/resources/application-local-zookeeper-encrypt.properties
+     </p>
+     <p>
+      修改数据库密码即可
+     </p>
+     <h4 id="3_1">
+      3.运行
+     </h4>
+     <p>
+      示例运行过后都会清理数据，先在代码中把相关的数据库清理给关掉：
+     </p>
+     <p>
+      examples/example-core/example-api/src/main/java/org/apache/shardingsphere/example/core/api/ExampleExecuteTemplate.java
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">ExampleExecuteTemplate</span> <span class="p">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">run</span><span class="p">(</span><span class="kd">final</span> <span class="n">ExampleService</span> <span class="n">exampleService</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">exampleService</span><span class="p">.</span><span class="na">initEnvironment</span><span class="p">();</span>
+            <span class="n">exampleService</span><span class="p">.</span><span class="na">processSuccess</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+        <span class="c1">// 注释掉</span>
+<span class="c1">//            exampleService.cleanEnvironment();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">runFailure</span><span class="p">(</span><span class="kd">final</span> <span class="n">ExampleService</span> <span class="n">exampleService</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">exampleService</span><span class="p">.</span><span class="na">initEnvironment</span><span class="p">();</span>
+            <span class="n">exampleService</span><span class="p">.</span><span class="na">processFailure</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+            <span class="n">exampleService</span><span class="p">.</span><span class="na">cleanEnvironment</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      examples/example-core/example-spring-mybatis/src/main/java/org/apache/shardingsphere/example/core/mybatis/service/OrderServiceImpl.java
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Service</span>
+<span class="nd">@Primary</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">OrderServiceImpl</span> <span class="kd">implements</span> <span class="n">ExampleService</span> <span class="p">{</span>
+    <span class="p">......</span>
+
+    <span class="nd">@Override</span>
+    <span class="nd">@Transactional</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">processSuccess</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"-------------- Process Success Begin ---------------"</span><span class="p">);</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">Long</span><span class="o">&gt;</span> <span class="n">orderIds</span> <span class="o">=</span> <span class="n">insertData</span><span class="p">();</span>
+        <span class="n">printData</span><span class="p">();</span>
+    <span class="c1">// 注释掉</span>
+<span class="c1">//        deleteData(orderIds);</span>
+        <span class="n">printData</span><span class="p">();</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"-------------- Process Success Finish --------------"</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="p">......</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      跑来了，就看到了大量的日志，由上面提到的SQL之类的
+     </p>
+     <p>
+      上面我们关闭了order相关的数据清理代码，我们看看数据库里面的字段张啥样的，大致如下，最后一个字段看的出来是加密了的
+     </p>
+     <p>
+      <img alt="image.png" src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/769f914ed46e4a82b3f421d124582640~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <h2 id="_5">
+      总结
+     </h2>
+     <p>
+      本篇文件运行了源码示例中的数据分片（分库分表）、读写分离、数据加密相关的
+     </p>
+     <p>
+      其中数据库分片和数据加密符合我们的初步预期，但读写分离有点怪，有点不太预期，这个后面要研究下
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

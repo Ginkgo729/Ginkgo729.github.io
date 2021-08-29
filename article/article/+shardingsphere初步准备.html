@@ -1,0 +1,341 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shardingsphere">
+      ShardingSphere源码解析 初步准备
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      源码阅读解析前，肯定是要对其有一个初步的了解，其用于解决问题，用于哪些场景。并上手本地跑一跑官方示例之类，开始阅读解析的第一步，为后面做准备。
+     </p>
+     <h2 id="_2">
+      阅读解析准备
+     </h2>
+     <p>
+      GitHub和项目官网是了解的好途径：
+     </p>
+     <ul>
+      <li>
+       <a href="https://github.com/apache/shardingsphere">
+        Github address
+       </a>
+      </li>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/current/cn/overview/">
+        官网
+       </a>
+      </li>
+     </ul>
+     <p>
+      初步看GitHub的介绍，Apache ShardingSphere是一个由一组分布式数据库解决方案组成的开源生态系统，下面是介绍：
+     </p>
+     <blockquote>
+      <p>
+       Apache ShardingSphere is an open-source ecosystem consisting of a set of distributed database solutions, including 3 independent products, JDBC, Proxy &amp; Sidecar (Planning). They all provide functions of data scale-out, distributed transaction and distributed governance, applicable in a variety of situations such as Java isomorphism, heterogeneous language and cloud-native.
+来源GitHub官网：https://github.com/apache/shardingsphere
+      </p>
+     </blockquote>
+     <p>
+      更多相关的介绍就自行查看了，刚开始文档肯定是要自己扫一遍，虽然看不太懂，但起码心中有些印象，知道项目大体是做啥的，有哪些模块之类的
+     </p>
+     <p>
+      下面是本地环境准备阶段：
+     </p>
+     <ul>
+      <li>
+       克隆代码到本地
+      </li>
+      <li>
+       运行体验代码示例
+      </li>
+     </ul>
+     <h3 id="_3">
+      克隆代码到本地
+     </h3>
+     <p>
+      一般来说直接 git clone 就基本解决了，但国内的特殊环境，ShardingSphere又太大了，没有点其他东西，还拉不下来
+     </p>
+     <p>
+      注：ShardingSphere有些文件名太长了，需要运行下面的命令进行设置，不然拉不下来：
+     </p>
+     <p>
+      ```shell script
+     </p>
+     <h1 id="git-clone">
+      git clone 文件名太长
+     </h1>
+     <p>
+      git config --global core.longpaths true
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>目前解决克隆速度慢有下面几种方法：
+
+#### 1.只克隆最新的一层：使用--depth=1，只拉取代码最新的一层，这样不会拉取代码历史，之前尝试过此方法可行，多试几次基本都能拉下来
+
+```shell script
+git clone --depth=1 https://github.com/apache/shardingsphere
+</code></pre>
+     </div>
+     <h4 id="2chrome-github">
+      2.使用Chrome Github 下载插件，使用其提供的地址进行克隆，很快很快，也是博主一直以来使用的方法
+     </h4>
+     <p>
+      此方法嗖嗖的，快滴很，如果在线访问安装不了的话，使用博主提供的网盘链接或者去其他地方下载后，本地安装也可以，本地安装的教程链接也放到下面了，可能还需要自己进行一些处理
+     </p>
+     <ul>
+      <li>
+       <a href="https://github.com/fhefh2015/Fast-GitHub">
+        Github 地址
+       </a>
+      </li>
+      <li>
+       <a href="https://chrome.google.com/webstore/detail/github%E5%8A%A0%E9%80%9F/mfnkflidjnladnkldfonnaicljppahpg?hl=zh-CN&amp;authuser=1">
+        Github 加速插件地址
+       </a>
+      </li>
+      <li>
+       百度网盘链接: https://pan.baidu.com/s/1Fcm2immxryeDJfgilxITug 提取码: 7pxk
+      </li>
+      <li>
+       <a href="https://zhuanlan.zhihu.com/p/80305764">
+        国内离线安装 Chrome 扩展程序的方法总结
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/bb51dc91b93a">
+        Chrome 手动安装.crx插件
+       </a>
+      </li>
+     </ul>
+     <p>
+      安装完成后，进入GitHub网页，获取加速地址，克隆即可
+     </p>
+     <p>
+      ```shell script
+git clone https://github.com.cnpmjs.org/apache/shardingsphere.git
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>注：如果是fork的项目，后面需要提pr的，需要将地址修改回非加速地址
+
+#### 3.从Gitee上clone
+简单学习之类的，从别人同步到Gitee的项目克隆，因为是国内，也是嗖嗖的
+
+#### 4.下载源码包
+也可以直接在GitHub上下载源码包，虽然本地解压后好像没有git历史了，但也够学习之用了，当然，速度也是慢吞吞的......
+
+
+### 示例代码运行
+使用IDEA打开后，先本地使用Maven工具，clean、install操作下，注意跳过测试
+
+这个如果不使用国内镜像的话，也是比较耗时的
+
+博主看着过去两三分钟还没好，就趁着这段时间下楼跑个步，冲个澡后回来继续
+
+在根目录下有个example目录，右键选择作为Maven工程加载，然后再clean、install一下
+
+#### 数据库准备
+这里就使用docker启动一个吧，方便，用户和密码都是root
+
+```shell script
+docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
+</code></pre>
+     </div>
+     <h4 id="_4">
+      数据库初始化
+     </h4>
+     <p>
+      使用官方提供的数据库初始化脚本：examples/src/resources/manual_schema.sql
+     </p>
+     <p>
+      表之类的，ShardingSphere好像自己在代码里面操作，后面探索下这个
+     </p>
+     <h4 id="mysql">
+      修改MySQL驱动依赖
+     </h4>
+     <p>
+      提供的示例稍有点问题，在MySQL版本是8+时，会报下面的错误：
+     </p>
+     <blockquote>
+      <p>
+       Unable to load authentication plugin ‘caching_sha2_password‘
+      </p>
+     </blockquote>
+     <p>
+      修改MySQL的驱动版本，Maven配置文件是：examples/pom.xml
+     </p>
+     <p>
+      修改内容如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">&lt;mysql-connector-java.version&gt;8.0.22&lt;/mysql-connector-java.version&gt;</span>
+</code></pre>
+     </div>
+     <h4 id="_5">
+      修改配置
+     </h4>
+     <p>
+      修改配置文件，这里修改密码即可，大致如下：examples/shardingsphere-jdbc-example/sharding-example/sharding-raw-jdbc-example/src/main/resources/META-INF/sharding-databases-range.yaml
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nt">dataSources</span><span class="p">:</span>
+  <span class="nt">ds_0</span><span class="p">:</span>
+    <span class="nt">dataSourceClassName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">com.zaxxer.hikari.HikariDataSource</span>
+    <span class="nt">driverClassName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">com.mysql.jdbc.Driver</span>
+    <span class="nt">jdbcUrl</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://localhost:3306/demo_ds_0?serverTimezone=UTC&amp;useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8</span>
+    <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+  <span class="nt">ds_1</span><span class="p">:</span>
+    <span class="nt">dataSourceClassName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">com.zaxxer.hikari.HikariDataSource</span>
+    <span class="nt">driverClassName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">com.mysql.jdbc.Driver</span>
+    <span class="nt">jdbcUrl</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://localhost:3306/demo_ds_1?serverTimezone=UTC&amp;useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8</span>
+    <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">roo</span>
+</code></pre>
+     </div>
+     <h4 id="_6">
+      运行示例
+     </h4>
+     <p>
+      这里选择启动类：examples/shardingsphere-jdbc-example/sharding-example/sharding-raw-jdbc-example/src/main/java/org/apache/shardingsphere/example/sharding/raw/jdbc/YamlRangeConfigurationExampleMain.java
+     </p>
+     <p>
+      通过看代码能准确知道这个启动类的相关配置文件，就直接选它了
+     </p>
+     <p>
+      运行起来输出大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>[<span class="nv">INFO</span> ] <span class="mi">2021</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">22</span> <span class="mi">07</span>:<span class="mi">38</span>:<span class="mi">28</span>,<span class="mi">331</span> <span class="o">--</span><span class="nv">main</span><span class="o">--</span> [<span class="nv">com</span>.<span class="nv">zaxxer</span>.<span class="nv">hikari</span>.<span class="nv">HikariDataSource</span>] <span class="nv">HikariPool</span><span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="nv">Starting</span>... 
+[<span class="nv">WARN</span> ] <span class="mi">2021</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">22</span> <span class="mi">07</span>:<span class="mi">38</span>:<span class="mi">28</span>,<span class="mi">370</span> <span class="o">--</span><span class="nv">main</span><span class="o">--</span> [<span class="nv">com</span>.<span class="nv">zaxxer</span>.<span class="nv">hikari</span>.<span class="nv">util</span>.<span class="nv">DriverDataSource</span>] <span class="nv">Registered</span> <span class="nv">driver</span> <span class="nv">with</span> <span class="nv">driverClassName</span><span class="o">=</span><span class="nv">com</span>.<span class="nv">mysql</span>.<span class="nv">jdbc</span>.<span class="nv">Driver</span> <span class="nv">was</span> <span class="nv">not</span> <span class="nv">found</span>, <span class="nv">trying</span> <span class="nv">direct</span> <span class="nv">instantiation</span>. 
+[<span class="nv">INFO</span> ] <span class="mi">2021</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">22</span> <span class="mi">07</span>:<span class="mi">38</span>:<span class="mi">28</span>,<span class="mi">871</span> <span class="o">--</span><span class="nv">main</span><span class="o">--</span> [<span class="nv">com</span>.<span class="nv">zaxxer</span>.<span class="nv">hikari</span>.<span class="nv">HikariDataSource</span>] <span class="nv">HikariPool</span><span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="nv">Start</span> <span class="nv">completed</span>. 
+[<span class="nv">INFO</span> ] <span class="mi">2021</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">22</span> <span class="mi">07</span>:<span class="mi">38</span>:<span class="mi">28</span>,<span class="mi">893</span> <span class="o">--</span><span class="nv">main</span><span class="o">--</span> [<span class="nv">com</span>.<span class="nv">zaxxer</span>.<span class="nv">hikari</span>.<span class="nv">HikariDataSource</span>] <span class="nv">HikariPool</span><span class="o">-</span><span class="mi">2</span> <span class="o">-</span> <span class="nv">Starting</span>... 
+[<span class="nv">WARN</span> ] <span class="mi">2021</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">22</span> <span class="mi">07</span>:<span class="mi">38</span>:<span class="mi">28</span>,<span class="mi">893</span> <span class="o">--</span><span class="nv">main</span><span class="o">--</span> [<span class="nv">com</span>.<span class="nv">zaxxer</span>.<span class="nv">hikari</span>.<span class="nv">util</span>.<span class="nv">DriverDataSource</span>] <span class="nv">Registered</span> <span class="nv">driver</span> <span class="nv">with</span> <span class="nv">driverClassName</span><span class="o">=</span><span class="nv">com</span>.<span class="nv">mysql</span>.<span class="nv">jdbc</span>.<span class="nv">Driver</span> <span class="nv">was</span> <span class="nv">not</span> <span class="nv">found</span>, <span class="nv">trying</span> <span class="nv">direct</span> <span class="nv">instantiation</span>. 
+[<span class="nv">INFO</span> ] <span class="mi">2021</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">22</span> <span class="mi">07</span>:<span class="mi">38</span>:<span class="mi">28</span>,<span class="mi">908</span> <span class="o">--</span><span class="nv">main</span><span class="o">--</span> [<span class="nv">com</span>.<span class="nv">zaxxer</span>.<span class="nv">hikari</span>.<span class="nv">HikariDataSource</span>] <span class="nv">HikariPool</span><span class="o">-</span><span class="mi">2</span> <span class="o">-</span> <span class="nv">Start</span> <span class="nv">completed</span>. 
+<span class="o">--------------</span> <span class="nv">Process</span> <span class="nv">Success</span> <span class="nv">Begin</span> <span class="o">---------------</span>
+<span class="o">----------------------------</span> <span class="nv">Insert</span> <span class="nv">Data</span> <span class="o">----------------------------</span>
+<span class="o">----------------------------</span> <span class="nv">Print</span> <span class="nv">Order</span> <span class="nv">Data</span> <span class="o">-----------------------</span>
+<span class="nv">order_id</span>: <span class="mi">636106123225051136</span>, <span class="nv">user_id</span>: <span class="mi">1</span>, <span class="nv">address_id</span>: <span class="mi">1</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_id</span>: <span class="mi">636106123476709376</span>, <span class="nv">user_id</span>: <span class="mi">2</span>, <span class="nv">address_id</span>: <span class="mi">2</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_id</span>: <span class="mi">636106123636092928</span>, <span class="nv">user_id</span>: <span class="mi">3</span>, <span class="nv">address_id</span>: <span class="mi">3</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_id</span>: <span class="mi">636106123833225216</span>, <span class="nv">user_id</span>: <span class="mi">4</span>, <span class="nv">address_id</span>: <span class="mi">4</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_id</span>: <span class="mi">636106124013580288</span>, <span class="nv">user_id</span>: <span class="mi">5</span>, <span class="nv">address_id</span>: <span class="mi">5</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_id</span>: <span class="mi">636106124164575232</span>, <span class="nv">user_id</span>: <span class="mi">6</span>, <span class="nv">address_id</span>: <span class="mi">6</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_id</span>: <span class="mi">636106124336541696</span>, <span class="nv">user_id</span>: <span class="mi">7</span>, <span class="nv">address_id</span>: <span class="mi">7</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_id</span>: <span class="mi">636106124508508160</span>, <span class="nv">user_id</span>: <span class="mi">8</span>, <span class="nv">address_id</span>: <span class="mi">8</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_id</span>: <span class="mi">636106124672086016</span>, <span class="nv">user_id</span>: <span class="mi">9</span>, <span class="nv">address_id</span>: <span class="mi">9</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_id</span>: <span class="mi">636106124839858176</span>, <span class="nv">user_id</span>: <span class="mi">10</span>, <span class="nv">address_id</span>: <span class="mi">10</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="o">----------------------------</span> <span class="nv">Print</span> <span class="nv">OrderItem</span> <span class="nv">Data</span> <span class="o">-------------------</span>
+<span class="nv">order_item_id</span>:<span class="mi">636106123409600513</span>, <span class="nv">order_id</span>: <span class="mi">636106123225051136</span>, <span class="nv">user_id</span>: <span class="mi">1</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_item_id</span>:<span class="mi">636106123543818241</span>, <span class="nv">order_id</span>: <span class="mi">636106123476709376</span>, <span class="nv">user_id</span>: <span class="mi">2</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_item_id</span>:<span class="mi">636106123749339137</span>, <span class="nv">order_id</span>: <span class="mi">636106123636092928</span>, <span class="nv">user_id</span>: <span class="mi">3</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_item_id</span>:<span class="mi">636106123929694209</span>, <span class="nv">order_id</span>: <span class="mi">636106123833225216</span>, <span class="nv">user_id</span>: <span class="mi">4</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_item_id</span>:<span class="mi">636106124093272065</span>, <span class="nv">order_id</span>: <span class="mi">636106124013580288</span>, <span class="nv">user_id</span>: <span class="mi">5</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_item_id</span>:<span class="mi">636106124248461313</span>, <span class="nv">order_id</span>: <span class="mi">636106124164575232</span>, <span class="nv">user_id</span>: <span class="mi">6</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_item_id</span>:<span class="mi">636106124433010689</span>, <span class="nv">order_id</span>: <span class="mi">636106124336541696</span>, <span class="nv">user_id</span>: <span class="mi">7</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_item_id</span>:<span class="mi">636106124584005633</span>, <span class="nv">order_id</span>: <span class="mi">636106124508508160</span>, <span class="nv">user_id</span>: <span class="mi">8</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_item_id</span>:<span class="mi">636106124747583489</span>, <span class="nv">order_id</span>: <span class="mi">636106124672086016</span>, <span class="nv">user_id</span>: <span class="mi">9</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="nv">order_item_id</span>:<span class="mi">636106124919549953</span>, <span class="nv">order_id</span>: <span class="mi">636106124839858176</span>, <span class="nv">user_id</span>: <span class="mi">10</span>, <span class="nv">status</span>: <span class="nv">INSERT_TEST</span>
+<span class="o">----------------------------</span> <span class="nv">Delete</span> <span class="nv">Data</span> <span class="o">----------------------------</span>
+<span class="o">----------------------------</span> <span class="nv">Print</span> <span class="nv">Order</span> <span class="nv">Data</span> <span class="o">-----------------------</span>
+<span class="o">----------------------------</span> <span class="nv">Print</span> <span class="nv">OrderItem</span> <span class="nv">Data</span> <span class="o">-------------------</span>
+<span class="o">--------------</span> <span class="nv">Process</span> <span class="nv">Success</span> <span class="nv">Finish</span> <span class="o">--------------</span>
+<span class="nv">Disconnected</span> <span class="nv">from</span> <span class="nv">the</span> <span class="nv">target</span> <span class="nv">VM</span>, <span class="nv">address</span>: <span class="s1">'</span><span class="s">127.0.0.1:53730</span><span class="s1">'</span>, <span class="nv">transport</span>: <span class="s1">'</span><span class="s">socket</span><span class="s1">'</span>
+
+<span class="nv">Process</span> <span class="nv">finished</span> <span class="nv">with</span> <span class="k">exit</span> <span class="nv">code</span> 
+</code></pre>
+     </div>
+     <h2 id="_7">
+      总结
+     </h2>
+     <p>
+      本篇做了下源码阅读前的准备，大致扫了下官方文档，虽然还是比较懵，但起码有个大体印象
+     </p>
+     <p>
+      然后拉取官方的代码，在本地成功运行了，为后面的分析和调试打下基础
+     </p>
+     <h2 id="_8">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/current/cn/overview/">
+        ShardingSphere
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/weixin_37669199/article/details/111180241">
+        ShardingSphere-JDBC小伙伴之Mybatis-plus
+       </a>
+      </li>
+      <li>
+       <a href="https://dev.mysql.com/doc/refman/8.0/en/caching-sha2-pluggable-authentication.html">
+        6.4.1.2 Caching SHA-2 Pluggable Authentication
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/ad03952344e7">
+        Chrome导出扩展程序（插件）
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

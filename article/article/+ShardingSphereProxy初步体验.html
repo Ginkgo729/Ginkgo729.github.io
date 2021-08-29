@@ -1,0 +1,541 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shardingsphere-proxy">
+      ShardingSphere Proxy 初步体验
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在上篇文章中，体验了ShardingSphere JDBC的数据分片、读写分离、数据加密，本篇文章就来探索下ShardingSphere Proxy相关的功能
+     </p>
+     <h2 id="_2">
+      示例运行
+     </h2>
+     <p>
+      ShardingSphere Proxy相对来说还是比较陌上的，首先肯定是官方文档了解一波：
+     </p>
+     <ul>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/current/cn/overview/">
+        ShardingSphere概览
+       </a>
+      </li>
+     </ul>
+     <p>
+      数据分片、读写分离、数据加密的说明和配置和ShardingSphere JDBC一样，参考上篇文章即可
+     </p>
+     <p>
+      ShardingSphere JDBC如果要接入的话，从上篇文章中可以看出，其是需要改变现有业务代码的，是侵入式的
+     </p>
+     <p>
+      ShardingSphere Proxy感觉更像一个代码，只需要改变数据库的连接配置，是非侵入式的。但也增加了整个系统的复杂度，各有利弊吧
+     </p>
+     <h3 id="shardingsphere-proxy_1">
+      ShardingSphere Proxy启动相关
+     </h3>
+     <p>
+      首先找到启动的地方：shardingsphere-proxy/shardingsphere-proxy-bootstrap/src/main/java/org/apache/shardingsphere/proxy/Bootstrap.java
+     </p>
+     <p>
+      上面就是启动类，但还不能进行启动，需要先将server.yaml进行开启：shardingsphere-proxy/shardingsphere-proxy-bootstrap/src/main/resources/conf/server.yaml
+     </p>
+     <p>
+      下面的注释全部放开：
+     </p>
+     <p>
+      其中配置了ShardingSphere连接是用户名和密码，下面的配置文件中就配置了两个：root和sharding
+     </p>
+     <p>
+      sql-show改为true，看日志利于排查问题（一个示例跑起来问题真不少啊）
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nt">rules</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="kt">!AUTHORITY</span>
+    <span class="nt">users</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">root@%:root</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">sharding@:sharding</span>
+    <span class="nt">provider</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NATIVE</span>
+
+<span class="nt">props</span><span class="p">:</span>
+  <span class="nt">max-connections-size-per-query</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="nt">executor-size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">16</span>  <span class="c1"># Infinite by default.</span>
+  <span class="nt">proxy-frontend-flush-threshold</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">128</span>  <span class="c1"># The default value is 128.</span>
+    <span class="c1"># LOCAL: Proxy will run with LOCAL transaction.</span>
+    <span class="c1"># XA: Proxy will run with XA transaction.</span>
+    <span class="c1"># BASE: Proxy will run with B.A.S.E transaction.</span>
+  <span class="nt">proxy-transaction-type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">LOCAL</span>
+  <span class="nt">xa-transaction-manager-type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Atomikos</span>
+  <span class="nt">proxy-opentracing-enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">proxy-hint-enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">sql-show</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">check-table-metadata-enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">lock-wait-timeout-milliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50000</span> <span class="c1"># The maximum time to wait for a lock</span>
+  <span class="nt">show-process-list-enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+    <span class="l l-Scalar l-Scalar-Plain"># Proxy backend query fetch size. A larger value may increase the memory usage of ShardingSphere Proxy.</span>
+    <span class="l l-Scalar l-Scalar-Plain"># The default value is -1, which means set the minimum value for different JDBC drivers.</span>
+  <span class="nt">proxy-backend-query-fetch-size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">-1</span>
+  <span class="nt">check-duplicate-table-enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">fals</span>
+</code></pre>
+     </div>
+     <p>
+      相关的配置文件位于：shardingsphere-proxy/shardingsphere-proxy-bootstrap/src/main/resources/conf
+     </p>
+     <p>
+      下面有各个示例开启的配置文件，先不进行开启，跟着下面的步骤进行操作即可
+     </p>
+     <p>
+      使用docker启动一个数据库：
+     </p>
+     <p>
+      ```shell script
+docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>注：本地采用单个测试，所以在测试一个特性的时候，其他特性的配置文件是注释掉的
+
+注：连接<span class="nv">ShardingSphere</span> <span class="nv">Proxy</span>时，数据库名称是<span class="nv">Proxy</span>的逻辑名称：<span class="nv">schemaName</span>，注意进行相应的修改
+
+### 数据分片
+#### <span class="mi">1</span>.数据库初始化
+用下面的语句建立相关的数据库
+
+```<span class="nv">sql</span>
+<span class="nv">CREATE</span> <span class="nv">SCHEMA</span> <span class="k">IF</span> <span class="nv">NOT</span> <span class="nv">EXISTS</span> <span class="nv">demo_ds_0</span><span class="c1">;</span>
+<span class="nv">CREATE</span> <span class="nv">SCHEMA</span> <span class="k">IF</span> <span class="nv">NOT</span> <span class="nv">EXISTS</span> <span class="nv">demo_ds_1</span><span class="c1">;</span>
+</code></pre>
+     </div>
+     <h4 id="2shardingsphere-proxy">
+      2.ShardingSphere Proxy配置
+     </h4>
+     <p>
+      放开配置：shardingsphere-proxy/shardingsphere-proxy-bootstrap/src/main/resources/conf/config-sharding.yaml
+     </p>
+     <p>
+      就是简单修改密码，大致配置如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nt">schemaName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sharding_db</span>
+
+<span class="nt">dataSources</span><span class="p">:</span>
+  <span class="nt">ds_0</span><span class="p">:</span>
+    <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://127.0.0.1:3306/demo_ds_0?serverTimezone=UTC&amp;useSSL=false</span>
+    <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">connectionTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30000</span>
+    <span class="nt">idleTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">60000</span>
+    <span class="nt">maxLifetimeMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1800000</span>
+    <span class="nt">maxPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+    <span class="nt">minPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="nt">ds_1</span><span class="p">:</span>
+    <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://127.0.0.1:3306/demo_ds_1?serverTimezone=UTC&amp;useSSL=false</span>
+    <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">connectionTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30000</span>
+    <span class="nt">idleTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">60000</span>
+    <span class="nt">maxLifetimeMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1800000</span>
+    <span class="nt">maxPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+    <span class="nt">minPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+
+<span class="nt">rules</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="kt">!SHARDING</span>
+  <span class="nt">tables</span><span class="p">:</span>
+    <span class="nt">t_order</span><span class="p">:</span>
+      <span class="nt">actualDataNodes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ds_${0..1}.t_order_${0..1}</span>
+      <span class="nt">tableStrategy</span><span class="p">:</span>
+        <span class="nt">standard</span><span class="p">:</span>
+          <span class="nt">shardingColumn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">order_id</span>
+          <span class="nt">shardingAlgorithmName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">t_order_inline</span>
+      <span class="nt">keyGenerateStrategy</span><span class="p">:</span>
+        <span class="nt">column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">order_id</span>
+        <span class="nt">keyGeneratorName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">snowflake</span>
+    <span class="nt">t_order_item</span><span class="p">:</span>
+      <span class="nt">actualDataNodes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ds_${0..1}.t_order_item_${0..1}</span>
+      <span class="nt">tableStrategy</span><span class="p">:</span>
+        <span class="nt">standard</span><span class="p">:</span>
+          <span class="nt">shardingColumn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">order_id</span>
+          <span class="nt">shardingAlgorithmName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">t_order_item_inline</span>
+      <span class="nt">keyGenerateStrategy</span><span class="p">:</span>
+        <span class="nt">column</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">order_item_id</span>
+        <span class="nt">keyGeneratorName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">snowflake</span>
+  <span class="nt">bindingTables</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">t_order,t_order_item</span>
+  <span class="nt">defaultDatabaseStrategy</span><span class="p">:</span>
+    <span class="nt">standard</span><span class="p">:</span>
+      <span class="nt">shardingColumn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">user_id</span>
+      <span class="nt">shardingAlgorithmName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">database_inline</span>
+  <span class="nt">defaultTableStrategy</span><span class="p">:</span>
+    <span class="nt">none</span><span class="p">:</span>
+
+  <span class="nt">shardingAlgorithms</span><span class="p">:</span>
+    <span class="nt">database_inline</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">INLINE</span>
+      <span class="nt">props</span><span class="p">:</span>
+        <span class="nt">algorithm-expression</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ds_${user_id % 2}</span>
+    <span class="nt">t_order_inline</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">INLINE</span>
+      <span class="nt">props</span><span class="p">:</span>
+        <span class="nt">algorithm-expression</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">t_order_${order_id % 2}</span>
+    <span class="nt">t_order_item_inline</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">INLINE</span>
+      <span class="nt">props</span><span class="p">:</span>
+        <span class="nt">algorithm-expression</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">t_order_item_${order_id % 2}</span>
+
+  <span class="nt">keyGenerators</span><span class="p">:</span>
+    <span class="nt">snowflake</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SNOWFLAKE</span>
+      <span class="nt">props</span><span class="p">:</span>
+        <span class="nt">worker-id</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">123</span>
+</code></pre>
+     </div>
+     <p>
+      配置完成后，重启
+     </p>
+     <h4 id="3">
+      3.示例运行
+     </h4>
+     <p>
+      修改配置：examples/shardingsphere-proxy-example/shardingsphere-proxy-boot-mybatis-example/src/main/resources/application.properties
+     </p>
+     <p>
+      让访问的数据库名和密码对上，配置大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">mybatis.config-location=classpath:META-INF/mybatis-config.xml</span>
+
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.type=com.zaxxer.hikari.HikariDataSource</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.driver-class-name=com.mysql.jdbc.Driver</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.url=jdbc:mysql://localhost:3307/sharding_db?useServerPrepStmts=true&amp;cachePrepStmts=true</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.username=root</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.password=root</span>
+</code></pre>
+     </div>
+     <p>
+      启动后，我们就看到相关的ShardingSphere Proxy的日志：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">Logic</span><span class="w"> </span><span class="k">SQL</span><span class="err">:</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="nb">@@session</span><span class="p">.</span><span class="n">transaction_read_only</span><span class="w"></span>
+<span class="nl">SQLStatement</span><span class="p">:</span><span class="w"> </span><span class="n">MySQLSelectStatement</span><span class="p">(</span><span class="k">limit</span><span class="o">=</span><span class="n">Optional</span><span class="p">.</span><span class="n">empty</span><span class="p">,</span><span class="w"> </span><span class="n">lock</span><span class="o">=</span><span class="n">Optional</span><span class="p">.</span><span class="n">empty</span><span class="p">,</span><span class="w"> </span><span class="k">window</span><span class="o">=</span><span class="n">Optional</span><span class="p">.</span><span class="n">empty</span><span class="p">)</span><span class="w"></span>
+<span class="n">Actual</span><span class="w"> </span><span class="k">SQL</span><span class="err">:</span><span class="w"> </span><span class="n">ds_0</span><span class="w"> </span><span class="o">::</span><span class="err">:</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="nb">@@session</span><span class="p">.</span><span class="n">transaction_read_only</span><span class="w"></span>
+<span class="n">Logic</span><span class="w"> </span><span class="k">SQL</span><span class="err">:</span><span class="w"> </span><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">t_order_item</span><span class="w"> </span><span class="p">(</span><span class="n">order_id</span><span class="p">,</span><span class="w"> </span><span class="nf">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="vm">?</span><span class="p">,</span><span class="w"> </span><span class="vm">?</span><span class="p">,</span><span class="w"> </span><span class="vm">?</span><span class="p">);</span><span class="w"></span>
+<span class="nl">SQLStatement</span><span class="p">:</span><span class="w"> </span><span class="n">MySQLInsertStatement</span><span class="p">(</span><span class="n">setAssignment</span><span class="o">=</span><span class="n">Optional</span><span class="p">.</span><span class="n">empty</span><span class="p">,</span><span class="w"> </span><span class="n">onDuplicateKeyColumns</span><span class="o">=</span><span class="n">Optional</span><span class="p">.</span><span class="n">empty</span><span class="p">)</span><span class="w"></span>
+<span class="n">Actual</span><span class="w"> </span><span class="k">SQL</span><span class="err">:</span><span class="w"> </span><span class="n">ds_0</span><span class="w"> </span><span class="o">::</span><span class="err">:</span><span class="w"> </span><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">t_order_item_0</span><span class="w"> </span><span class="p">(</span><span class="n">order_id</span><span class="p">,</span><span class="w"> </span><span class="nf">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">order_item_id</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="vm">?</span><span class="p">,</span><span class="w"> </span><span class="vm">?</span><span class="p">,</span><span class="w"> </span><span class="vm">?</span><span class="p">,</span><span class="w"> </span><span class="vm">?</span><span class="p">);</span><span class="w"> </span><span class="o">::</span><span class="err">:</span><span class="w"> </span><span class="o">[</span><span class="n">637039855574429696, 10, INSERT_TEST, 637039855616372737</span><span class="o">]</span><span class="w"></span>
+<span class="n">Logic</span><span class="w"> </span><span class="k">SQL</span><span class="err">:</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="nb">@@session</span><span class="p">.</span><span class="n">transaction_read_only</span><span class="w"></span>
+<span class="nl">SQLStatement</span><span class="p">:</span><span class="w"> </span><span class="n">MySQLSelectStatement</span><span class="p">(</span><span class="k">limit</span><span class="o">=</span><span class="n">Optional</span><span class="p">.</span><span class="n">empty</span><span class="p">,</span><span class="w"> </span><span class="n">lock</span><span class="o">=</span><span class="n">Optional</span><span class="p">.</span><span class="n">empty</span><span class="p">,</span><span class="w"> </span><span class="k">window</span><span class="o">=</span><span class="n">Optional</span><span class="p">.</span><span class="n">empty</span><span class="p">)</span><span class="w"></span>
+<span class="n">Actual</span><span class="w"> </span><span class="k">SQL</span><span class="err">:</span><span class="w"> </span><span class="n">ds_0</span><span class="w"> </span><span class="o">::</span><span class="err">:</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="nb">@@session</span><span class="p">.</span><span class="n">transaction_read_only</span><span class="w"></span>
+<span class="n">Logic</span><span class="w"> </span><span class="k">SQL</span><span class="err">:</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t_order</span><span class="p">;</span><span class="w"></span>
+<span class="nl">SQLStatement</span><span class="p">:</span><span class="w"> </span><span class="n">MySQLSelectStatement</span><span class="p">(</span><span class="k">limit</span><span class="o">=</span><span class="n">Optional</span><span class="p">.</span><span class="n">empty</span><span class="p">,</span><span class="w"> </span><span class="n">lock</span><span class="o">=</span><span class="n">Optional</span><span class="p">.</span><span class="n">empty</span><span class="p">,</span><span class="w"> </span><span class="k">window</span><span class="o">=</span><span class="n">Optional</span><span class="p">.</span><span class="n">empty</span><span class="p">)</span><span class="w"></span>
+<span class="n">Actual</span><span class="w"> </span><span class="k">SQL</span><span class="err">:</span><span class="w"> </span><span class="n">ds_0</span><span class="w"> </span><span class="o">::</span><span class="err">:</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t_order_0</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">order_id</span><span class="w"> </span><span class="k">ASC</span><span class="w"> </span><span class="p">;</span><span class="w"></span>
+<span class="n">Actual</span><span class="w"> </span><span class="k">SQL</span><span class="err">:</span><span class="w"> </span><span class="n">ds_0</span><span class="w"> </span><span class="o">::</span><span class="err">:</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t_order_1</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">order_id</span><span class="w"> </span><span class="k">ASC</span><span class="w"> </span><span class="p">;</span><span class="w"></span>
+<span class="n">Actual</span><span class="w"> </span><span class="k">SQL</span><span class="err">:</span><span class="w"> </span><span class="n">ds_1</span><span class="w"> </span><span class="o">::</span><span class="err">:</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t_order_0</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">order_id</span><span class="w"> </span><span class="k">ASC</span><span class="w"> </span><span class="p">;</span><span class="w"></span>
+<span class="n">Actual</span><span class="w"> </span><span class="k">SQL</span><span class="err">:</span><span class="w"> </span><span class="n">ds_1</span><span class="w"> </span><span class="o">::</span><span class="err">:</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t_order_1</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">order_id</span><span class="w"> </span><span class="k">ASC</span><span class="w"> </span><span class="p">;</span><span class="w"></span>
+</code></pre>
+     </div>
+     <p>
+      从上面能大致看的处理，分片策略是起效的
+     </p>
+     <p>
+      接着运行下面的示例，记得环境ShardingSphere Proxy的配置
+     </p>
+     <h3 id="_3">
+      读写分离
+     </h3>
+     <h4 id="1">
+      1.数据库初始化
+     </h4>
+     <p>
+      用下面的语句建立相关的数据库
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="k">IF</span> <span class="k">NOT</span> <span class="k">EXISTS</span> <span class="n">demo_write_ds</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="k">IF</span> <span class="k">NOT</span> <span class="k">EXISTS</span> <span class="n">demo_read_ds_0</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="k">IF</span> <span class="k">NOT</span> <span class="k">EXISTS</span> <span class="n">demo_read_ds_1</span><span class="p">;</span>
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="k">IF</span> <span class="k">NOT</span> <span class="k">EXISTS</span> <span class="n">demo_read_ds_0</span><span class="p">.</span><span class="n">t_order</span> <span class="p">(</span><span class="n">order_id</span> <span class="nb">BIGINT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span> <span class="n">user_id</span> <span class="nb">INT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span> <span class="n">status</span> <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span> <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="n">order_id</span><span class="p">));</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="k">IF</span> <span class="k">NOT</span> <span class="k">EXISTS</span> <span class="n">demo_read_ds_1</span><span class="p">.</span><span class="n">t_order</span> <span class="p">(</span><span class="n">order_id</span> <span class="nb">BIGINT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span> <span class="n">user_id</span> <span class="nb">INT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span> <span class="n">status</span> <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span> <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="n">order_id</span><span class="p">));</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="k">IF</span> <span class="k">NOT</span> <span class="k">EXISTS</span> <span class="n">demo_read_ds_0</span><span class="p">.</span><span class="n">t_order_item</span> <span class="p">(</span><span class="n">order_item_id</span> <span class="nb">BIGINT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span> <span class="n">order_id</span> <span class="nb">BIGINT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span> <span class="n">user_id</span> <span class="nb">INT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span> <span class="n">status</span> <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span> <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="n">order_item_id</span><span class="p">));</span>
+<span class="k">CREATE</span> <span class="k">TABLE</span> <span class="k">IF</span> <span class="k">NOT</span> <span class="k">EXISTS</span> <span class="n">demo_read_ds_1</span><span class="p">.</span><span class="n">t_order_item</span> <span class="p">(</span><span class="n">order_item_id</span> <span class="nb">BIGINT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span> <span class="n">order_id</span> <span class="nb">BIGINT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span> <span class="n">user_id</span> <span class="nb">INT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span> <span class="n">status</span> <span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span> <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="p">(</span><span class="n">order_item_id</span><span class="p">));</span>
+</code></pre>
+     </div>
+     <h4 id="2shardingsphere-proxy_1">
+      2.ShardingSphere Proxy配置
+     </h4>
+     <p>
+      我们放开配置：shardingsphere-proxy/shardingsphere-proxy-bootstrap/src/main/resources/conf/config-readwrite-splitting.yaml
+     </p>
+     <p>
+      放开其配置即可,然后改改密码，大致如下：
+     </p>
+     <p>
+      记住我们的数据库是： readwrite_splitting_db
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nt">schemaName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">readwrite_splitting_db</span>
+
+<span class="nt">dataSources</span><span class="p">:</span>
+  <span class="nt">write_ds</span><span class="p">:</span>
+    <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://127.0.0.1:3306/demo_write_ds?serverTimezone=UTC&amp;useSSL=false</span>
+    <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">connectionTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30000</span>
+    <span class="nt">idleTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">60000</span>
+    <span class="nt">maxLifetimeMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1800000</span>
+    <span class="nt">maxPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+    <span class="nt">minPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="nt">read_ds_0</span><span class="p">:</span>
+    <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://127.0.0.1:3306/demo_read_ds_0?serverTimezone=UTC&amp;useSSL=false</span>
+    <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">connectionTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30000</span>
+    <span class="nt">idleTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">60000</span>
+    <span class="nt">maxLifetimeMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1800000</span>
+    <span class="nt">maxPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+    <span class="nt">minPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="nt">read_ds_1</span><span class="p">:</span>
+    <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://127.0.0.1:3306/demo_read_ds_1?serverTimezone=UTC&amp;useSSL=false</span>
+    <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">connectionTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30000</span>
+    <span class="nt">idleTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">60000</span>
+    <span class="nt">maxLifetimeMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1800000</span>
+    <span class="nt">maxPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+    <span class="nt">minPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+
+<span class="nt">rules</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="kt">!READWRITE_SPLITTING</span>
+  <span class="nt">dataSources</span><span class="p">:</span>
+    <span class="nt">pr_ds</span><span class="p">:</span>
+      <span class="nt">writeDataSourceName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">write_ds</span>
+      <span class="nt">readDataSourceNames</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">read_ds_0</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">read_ds_1</span>
+</code></pre>
+     </div>
+     <p>
+      配置完成后，重启
+     </p>
+     <h4 id="3_1">
+      3.示例运行
+     </h4>
+     <p>
+      使用官方示例：examples/shardingsphere-proxy-example/shardingsphere-proxy-boot-mybatis-example/src/main/java/org/apache/shardingsphere/example/proxy/spring/boot/mybatis/ProxySpringBootStarterExample.java
+     </p>
+     <p>
+      要修改下配置：examples/shardingsphere-proxy-example/shardingsphere-proxy-boot-mybatis-example/src/main/resources/application.properties
+     </p>
+     <p>
+      将数据库名改成 readwrite_splitting_db，大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">mybatis.config-location=classpath:META-INF/mybatis-config.xml</span>
+
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.type=com.zaxxer.hikari.HikariDataSource</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.driver-class-name=com.mysql.jdbc.Driver</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.url=jdbc:mysql://localhost:3307/readwrite_splitting_db?useServerPrepStmts=true&amp;cachePrepStmts=true</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.username=root</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.password=root</span>
+</code></pre>
+     </div>
+     <p>
+      然后启动，我们就看到日志，日志是ShardingSphere Proxy的：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">SQLStatement</span><span class="o">:</span> <span class="n">MySQLInsertStatement</span><span class="o">(</span><span class="n">setAssignment</span><span class="o">=</span><span class="n">Optional</span><span class="o">.</span><span class="na">empty</span><span class="o">,</span> <span class="n">onDuplicateKeyColumns</span><span class="o">=</span><span class="n">Optional</span><span class="o">.</span><span class="na">empty</span><span class="o">)</span>
+<span class="n">Actual</span> <span class="n">SQL</span><span class="o">:</span> <span class="n">write_ds</span> <span class="o">:::</span> <span class="n">INSERT</span> <span class="n">INTO</span> <span class="n">t_order_item</span> <span class="o">(</span><span class="n">order_id</span><span class="o">,</span> <span class="n">user_id</span><span class="o">,</span> <span class="n">status</span><span class="o">)</span> <span class="n">VALUES</span> <span class="o">(?,</span> <span class="o">?,</span> <span class="o">?);</span> <span class="o">:::</span> <span class="o">[</span><span class="mi">20</span><span class="o">,</span> <span class="mi">10</span><span class="o">,</span> <span class="n">INSERT_TEST</span><span class="o">]</span>
+<span class="n">Logic</span> <span class="n">SQL</span><span class="o">:</span> <span class="n">select</span> <span class="err">@@</span><span class="n">session</span><span class="o">.</span><span class="na">transaction_read_only</span>
+<span class="n">SQLStatement</span><span class="o">:</span> <span class="n">MySQLSelectStatement</span><span class="o">(</span><span class="n">limit</span><span class="o">=</span><span class="n">Optional</span><span class="o">.</span><span class="na">empty</span><span class="o">,</span> <span class="n">lock</span><span class="o">=</span><span class="n">Optional</span><span class="o">.</span><span class="na">empty</span><span class="o">,</span> <span class="n">window</span><span class="o">=</span><span class="n">Optional</span><span class="o">.</span><span class="na">empty</span><span class="o">)</span>
+<span class="n">Actual</span> <span class="n">SQL</span><span class="o">:</span> <span class="n">read_ds_0</span> <span class="o">:::</span> <span class="n">select</span> <span class="err">@@</span><span class="n">session</span><span class="o">.</span><span class="na">transaction_read_only</span>
+<span class="n">Logic</span> <span class="n">SQL</span><span class="o">:</span> <span class="n">SELECT</span> <span class="o">*</span> <span class="n">FROM</span> <span class="n">t_order</span><span class="o">;</span>
+<span class="n">SQLStatement</span><span class="o">:</span> <span class="n">MySQLSelectStatement</span><span class="o">(</span><span class="n">limit</span><span class="o">=</span><span class="n">Optional</span><span class="o">.</span><span class="na">empty</span><span class="o">,</span> <span class="n">lock</span><span class="o">=</span><span class="n">Optional</span><span class="o">.</span><span class="na">empty</span><span class="o">,</span> <span class="n">window</span><span class="o">=</span><span class="n">Optional</span><span class="o">.</span><span class="na">empty</span><span class="o">)</span>
+<span class="n">Actual</span> <span class="n">SQL</span><span class="o">:</span> <span class="n">read_ds_1</span> <span class="o">:::</span> <span class="n">SELECT</span> <span class="o">*</span> <span class="n">FROM</span> <span class="n">t_order</span>
+</code></pre>
+     </div>
+     <p>
+      从上面的日志可以看出，写入是成功了的，查询的时候也走了从库，说明我们的读写分离是有效的
+     </p>
+     <p>
+      但也证明我们昨天的读写分离失败了，这个后面得研究下
+     </p>
+     <p>
+      在启动也报了个错：Column index out of range.
+     </p>
+     <p>
+      感觉是示例问题，暂时不管（其实尝试搞了下，没搞定，哎）
+     </p>
+     <p>
+      这不测试完了，尝试下一个的时候，记得将配置还原
+     </p>
+     <h3 id="_4">
+      数据加密
+     </h3>
+     <h4 id="1_1">
+      1.数据库初始化
+     </h4>
+     <p>
+      执行下面的语句对数据库进行初始化：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="k">IF</span> <span class="k">NOT</span> <span class="k">EXISTS</span> <span class="n">demo_ds_0</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">SCHEMA</span> <span class="k">IF</span> <span class="k">NOT</span> <span class="k">EXISTS</span> <span class="n">demo_ds_1</span><span class="p">;</span>
+</code></pre>
+     </div>
+     <h4 id="2shardingsphere-proxy_2">
+      2.ShardingSphere Proxy配置
+     </h4>
+     <p>
+      放开加密配置：shardingsphere-proxy/shardingsphere-proxy-bootstrap/src/main/resources/conf/config-encrypt.yaml
+     </p>
+     <p>
+      声明了数据库名称：encrypt_db
+     </p>
+     <p>
+      对下面两个字段进行加密：user_id/order_id
+     </p>
+     <p>
+      配置大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nt">schemaName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">encrypt_db</span>
+
+<span class="nt">dataSources</span><span class="p">:</span>
+  <span class="nt">ds_0</span><span class="p">:</span>
+    <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://127.0.0.1:3306/demo_ds_0?serverTimezone=UTC&amp;useSSL=false</span>
+    <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">connectionTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30000</span>
+    <span class="nt">idleTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">60000</span>
+    <span class="nt">maxLifetimeMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1800000</span>
+    <span class="nt">maxPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+    <span class="nt">minPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="nt">ds_1</span><span class="p">:</span>
+    <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://127.0.0.1:3306/demo_ds_1?serverTimezone=UTC&amp;useSSL=false</span>
+    <span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">password</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">connectionTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30000</span>
+    <span class="nt">idleTimeoutMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">60000</span>
+    <span class="nt">maxLifetimeMilliseconds</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1800000</span>
+    <span class="nt">maxPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
+    <span class="nt">minPoolSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+
+<span class="nt">rules</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="kt">!ENCRYPT</span>
+  <span class="nt">encryptors</span><span class="p">:</span>
+    <span class="nt">aes_encryptor</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">AES</span>
+      <span class="nt">props</span><span class="p">:</span>
+        <span class="nt">aes-key-value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">123456abc</span>
+    <span class="nt">md5_encryptor</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">MD5</span>
+  <span class="nt">tables</span><span class="p">:</span>
+    <span class="nt">t_encrypt</span><span class="p">:</span>
+      <span class="nt">columns</span><span class="p">:</span>
+        <span class="nt">user_id</span><span class="p">:</span>
+          <span class="nt">plainColumn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">user_plain</span>
+          <span class="nt">cipherColumn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">user_cipher</span>
+          <span class="nt">encryptorName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">aes_encryptor</span>
+        <span class="nt">order_id</span><span class="p">:</span>
+          <span class="nt">cipherColumn</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">order_cipher</span>
+          <span class="nt">encryptorName</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">md5_encrypto</span>
+</code></pre>
+     </div>
+     <p>
+      配置修改后，进行重启（记得其他配置文件的配置要注释掉）
+     </p>
+     <h4 id="3_2">
+      3.示例运行
+     </h4>
+     <p>
+      修改配置：examples/shardingsphere-proxy-example/shardingsphere-proxy-boot-mybatis-example/src/main/resources/application.properties
+     </p>
+     <p>
+      修改数据库密码和数据库名为：encrypt_db
+     </p>
+     <p>
+      大致配置为：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">mybatis.config-location=classpath:META-INF/mybatis-config.xml</span>
+
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.type=com.zaxxer.hikari.HikariDataSource</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.driver-class-name=com.mysql.jdbc.Driver</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.url=jdbc:mysql://localhost:3307/encrypt_db?useServerPrepStmts=true&amp;cachePrepStmts=true</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.username=root</span>
+<span class="l l-Scalar l-Scalar-Plain">spring.datasource.password=root</span>
+</code></pre>
+     </div>
+     <p>
+      运行启动，从日志看到我们确实跑起来，日志看起来也是正常
+     </p>
+     <h2 id="_5">
+      总结
+     </h2>
+     <p>
+      本篇文件使用ShardingSphere Proxy，单独运行尝试了数据分片、数据加密、读写分离
+     </p>
+     <p>
+      在示例中，好像三者是分离的，不同的配置文件，不同的逻辑数据库名称
+     </p>
+     <p>
+      那三者能结合或者两两组合吗，从文档上来看，应该是可以，后面探索下
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

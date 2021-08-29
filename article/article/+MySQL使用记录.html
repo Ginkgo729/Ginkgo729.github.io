@@ -147,6 +147,13 @@ flush privileges<span class="p">;</span>
 </code></pre>
      </div>
      <h3 id="_6">
+      统计相关
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="k">select</span> <span class="n">timestampdiff</span><span class="p">(</span><span class="n">week</span><span class="p">,</span><span class="s1">'2011-09-30'</span><span class="p">,</span><span class="s1">'2015-05-04'</span><span class="p">);</span>
+</code></pre>
+     </div>
+     <h3 id="_7">
       开启/关闭 安全模式
      </h3>
      <div class="codehilite">
@@ -154,7 +161,7 @@ flush privileges<span class="p">;</span>
 <span class="k">SET</span> <span class="n">SQL_SAFE_UPDATES</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 </code></pre>
      </div>
-     <h2 id="_7">
+     <h2 id="_8">
       参考链接
      </h2>
      <ul>
@@ -184,8 +191,8 @@ flush privileges<span class="p">;</span>
        </a>
       </li>
       <li>
-       <a href="https://blog.csdn.net/justdb/article/details/8246782">
-        MySQL修改字段允许为空
+       <a href="https://blog.csdn.net/guo_qiangqiang/article/details/90480945">
+        mysql sum() 求和函数和TIMESTAMPDIFF时间差函数相结合的用法
        </a>
       </li>
      </ul>

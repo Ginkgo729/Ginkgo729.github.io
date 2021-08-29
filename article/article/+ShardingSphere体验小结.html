@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shardingsphere">
+      ShardingSphere 体验小结
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在前几篇文章中，我们尝试了ShardingSphere JDBC、Proxy、UI，都是源码上直接运行的，跑了起来，看到相应的效果，为后面的源码分析做好准备，今天就简单做一个小结
+     </p>
+     <h2 id="_2">
+      总结
+     </h2>
+     <p>
+      这几天对于ShardingSphere的相关了解如下：
+     </p>
+     <p>
+      <img alt="ShardingSphere源码阅读.png" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f9ed6777b5d54edf9a7e7321bf0ae462~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      目前体验了三大部分：
+     </p>
+     <ul>
+      <li>
+       ShardingSphere JDBC
+      </li>
+      <li>
+       ShardingSphere Proxy
+      </li>
+      <li>
+       ShardingSphere UI
+      </li>
+     </ul>
+     <p>
+      JDBC和Proxy的功能基本是相同的，都有数据分片、读写分离、数据加密都功能
+     </p>
+     <p>
+      不同的是JDBC对于业务代码来说，应该是侵入式的，而Proxy是非侵入式的
+     </p>
+     <p>
+      但使用Proxy就相当于引入新的部署单元，增加维护成本
+     </p>
+     <p>
+      UI是体验了Proxy集成部分，能查看Proxy的服务状态和其上的数据分片等的配置信息，还能动态更新配置到Proxy上
+     </p>
+     <p>
+      示例部分就基本到这了，接下来就是源码分析部分了
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
