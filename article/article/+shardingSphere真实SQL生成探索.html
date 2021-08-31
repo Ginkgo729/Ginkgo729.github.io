@@ -1,0 +1,330 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="sharingsphere-sql">
+      SharingSphere 源码解析 -- 真实SQL生成探索
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在上一篇文章中，我们探索了ShardingSphere JDBC Mybatis示例执行的一个大致的过程，找到了SQL处理的关键节点，看看一个逻辑的SQL变成真实SQL有哪些关键点
+     </p>
+     <h2 id="_2">
+      源码解析
+     </h2>
+     <p>
+      注：一番探索下来，逻辑SQL达到真实数据库的处理有点复杂了，需要花不少时间debug，放在一篇也太长了，所以进行拆分，这样简单点
+     </p>
+     <h3 id="sql">
+      SQL解析生成入口
+     </h3>
+     <p>
+      继续使用上篇文章中示例：
+      <a href="https://juejin.cn/post/7001268789371207688">
+       ShardingSphere JDBC 语句执行初探
+      </a>
+     </p>
+     <p>
+      在上文中： executionContext ，是一个非常关键的变量，可以说贯穿全文，经过我们调试发现，其已经具备真实的需要执行的语句，如下图：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5fecf638281f4b5991afd52774128a94~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      那真实SQL生成的关键代码就如下,也就是上文中与Mybatis承接的部分
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">#</span> <span class="n">ShardingSpherePreparedStatement</span><span class="p">.</span><span class="na">java</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">execute</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">clearPrevious</span><span class="p">();</span>
+        <span class="c1">// 在这就已经生成了真实的SQL等语句</span>
+            <span class="n">executionContext</span> <span class="o">=</span> <span class="n">createExecutionContext</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">metaDataContexts</span><span class="p">.</span><span class="na">getMetaData</span><span class="p">(</span><span class="n">connection</span><span class="p">.</span><span class="na">getSchemaName</span><span class="p">()).</span><span class="na">getRuleMetaData</span><span class="p">().</span><span class="na">getRules</span><span class="p">().</span><span class="na">stream</span><span class="p">().</span><span class="na">anyMatch</span><span class="p">(</span><span class="n">each</span> <span class="o">-&gt;</span> <span class="n">each</span> <span class="k">instanceof</span> <span class="n">RawExecutionRule</span><span class="p">))</span> <span class="p">{</span>
+                <span class="c1">// TODO process getStatement</span>
+                <span class="n">Collection</span><span class="o">&lt;</span><span class="n">ExecuteResult</span><span class="o">&gt;</span> <span class="n">executeResults</span> <span class="o">=</span> <span class="n">rawExecutor</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">createRawExecutionGroupContext</span><span class="p">(),</span> <span class="n">executionContext</span><span class="p">.</span><span class="na">getLogicSQL</span><span class="p">(),</span> <span class="k">new</span> <span class="n">RawSQLExecutorCallback</span><span class="p">());</span>
+                <span class="k">return</span> <span class="n">executeResults</span><span class="p">.</span><span class="na">iterator</span><span class="p">().</span><span class="na">next</span><span class="p">()</span> <span class="k">instanceof</span> <span class="n">QueryResult</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">executionContext</span><span class="p">.</span><span class="na">getRouteContext</span><span class="p">().</span><span class="na">isFederated</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">List</span><span class="o">&lt;</span><span class="n">QueryResult</span><span class="o">&gt;</span> <span class="n">queryResults</span> <span class="o">=</span> <span class="n">executeFederatedQuery</span><span class="p">();</span>
+                <span class="k">return</span> <span class="o">!</span><span class="n">queryResults</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="n">ExecutionGroupContext</span><span class="o">&lt;</span><span class="n">JDBCExecutionUnit</span><span class="o">&gt;</span> <span class="n">executionGroupContext</span> <span class="o">=</span> <span class="n">createExecutionGroupContext</span><span class="p">();</span>
+            <span class="n">cacheStatements</span><span class="p">(</span><span class="n">executionGroupContext</span><span class="p">.</span><span class="na">getInputGroups</span><span class="p">());</span>
+            <span class="k">return</span> <span class="n">driverJDBCExecutor</span><span class="p">.</span><span class="na">execute</span><span class="p">(</span><span class="n">executionGroupContext</span><span class="p">,</span>
+                    <span class="n">executionContext</span><span class="p">.</span><span class="na">getLogicSQL</span><span class="p">(),</span> <span class="n">executionContext</span><span class="p">.</span><span class="na">getRouteContext</span><span class="p">().</span><span class="na">getRouteUnits</span><span class="p">(),</span> <span class="n">createExecuteCallback</span><span class="p">());</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+            <span class="n">clearBatch</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="sql_1">
+      SQL的解析生成路径
+     </h3>
+     <p>
+      如上，下面我们就开始跟踪生成语句： executionContext = createExecutionContext();
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">private</span> <span class="n">ExecutionContext</span> <span class="nf">createExecutionContext</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">LogicSQL</span> <span class="n">logicSQL</span> <span class="o">=</span> <span class="n">createLogicSQL</span><span class="p">();</span>
+        <span class="n">SQLCheckEngine</span><span class="p">.</span><span class="na">check</span><span class="p">(</span><span class="n">logicSQL</span><span class="p">.</span><span class="na">getSqlStatementContext</span><span class="p">().</span><span class="na">getSqlStatement</span><span class="p">(),</span> <span class="n">logicSQL</span><span class="p">.</span><span class="na">getParameters</span><span class="p">(),</span> 
+                <span class="n">metaDataContexts</span><span class="p">.</span><span class="na">getMetaData</span><span class="p">(</span><span class="n">connection</span><span class="p">.</span><span class="na">getSchemaName</span><span class="p">()).</span><span class="na">getRuleMetaData</span><span class="p">().</span><span class="na">getRules</span><span class="p">(),</span> <span class="n">connection</span><span class="p">.</span><span class="na">getSchemaName</span><span class="p">(),</span> <span class="n">metaDataContexts</span><span class="p">.</span><span class="na">getMetaDataMap</span><span class="p">(),</span> <span class="kc">null</span><span class="p">);</span>
+    <span class="c1">// 这生成真实的SQL</span>
+        <span class="n">ExecutionContext</span> <span class="n">result</span> <span class="o">=</span> <span class="n">kernelProcessor</span><span class="p">.</span><span class="na">generateExecutionContext</span><span class="p">(</span><span class="n">logicSQL</span><span class="p">,</span> <span class="n">metaDataContexts</span><span class="p">.</span><span class="na">getMetaData</span><span class="p">(</span><span class="n">connection</span><span class="p">.</span><span class="na">getSchemaName</span><span class="p">()),</span> <span class="n">metaDataContexts</span><span class="p">.</span><span class="na">getProps</span><span class="p">());</span>
+        <span class="n">findGeneratedKey</span><span class="p">(</span><span class="n">result</span><span class="p">).</span><span class="na">ifPresent</span><span class="p">(</span><span class="n">generatedKey</span> <span class="o">-&gt;</span> <span class="n">generatedValues</span><span class="p">.</span><span class="na">addAll</span><span class="p">(</span><span class="n">generatedKey</span><span class="p">.</span><span class="na">getGeneratedValues</span><span class="p">()));</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      跟踪来到下面的关键类，通过注释，我们看到其持有原始的SQL，相关的配置信息，生成了我们想要的 execution context
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">KernelProcessor</span> <span class="p">{</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * Generate execution context.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param logicSQL logic SQL</span>
+<span class="cm">     * @param metaData ShardingSphere meta data</span>
+<span class="cm">     * @param props configuration properties</span>
+<span class="cm">     * @return execution context</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="n">ExecutionContext</span> <span class="nf">generateExecutionContext</span><span class="p">(</span><span class="kd">final</span> <span class="n">LogicSQL</span> <span class="n">logicSQL</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ShardingSphereMetaData</span> <span class="n">metaData</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ConfigurationProperties</span> <span class="n">props</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">RouteContext</span> <span class="n">routeContext</span> <span class="o">=</span> <span class="n">route</span><span class="p">(</span><span class="n">logicSQL</span><span class="p">,</span> <span class="n">metaData</span><span class="p">,</span> <span class="n">props</span><span class="p">);</span>
+        <span class="n">SQLRewriteResult</span> <span class="n">rewriteResult</span> <span class="o">=</span> <span class="n">rewrite</span><span class="p">(</span><span class="n">logicSQL</span><span class="p">,</span> <span class="n">metaData</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">routeContext</span><span class="p">);</span>
+        <span class="n">ExecutionContext</span> <span class="n">result</span> <span class="o">=</span> <span class="n">createExecutionContext</span><span class="p">(</span><span class="n">logicSQL</span><span class="p">,</span> <span class="n">metaData</span><span class="p">,</span> <span class="n">routeContext</span><span class="p">,</span> <span class="n">rewriteResult</span><span class="p">);</span>
+        <span class="n">logSQL</span><span class="p">(</span><span class="n">logicSQL</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      上面这个函数非常非常的核心，下面看看其三个关键的变量： routeContext, rewriteResult, result
+     </p>
+     <p>
+      routeContext 从名字可以看出，其应该是保存了逻辑SQL到真实SQL相关路由信息，通过debug我们也可以看出，如下图：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/55c598066acb4ebab2d512e6e8e56d16~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      从上面标红的东西可以看到，其已经有了数据库和表的相关的路由的信息，很关键
+     </p>
+     <p>
+      rewriteResult 经过重写的SQL，得到了真实的SQL语句，如下图：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1460be482f16465ba43f2f8fa8afc21d~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      result 拼装 routeContext, rewriteResult 得到了一直贯穿整个ShardingSphere语句执行的东西，这个前面的文章和本文的开篇都有涉及，这里就不再赘述了
+     </p>
+     <p>
+      在： SQLRewriteResult rewriteResult = rewrite(logicSQL, metaData, props, routeContext) 继续跟下去：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">SQLRewriteEntry</span> <span class="p">{</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * Rewrite.</span>
+<span class="cm">     * </span>
+<span class="cm">     * @param sql SQL</span>
+<span class="cm">     * @param parameters SQL parameters</span>
+<span class="cm">     * @param sqlStatementContext SQL statement context</span>
+<span class="cm">     * @param routeContext route context</span>
+<span class="cm">     * @return route unit and SQL rewrite result map</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="n">SQLRewriteResult</span> <span class="nf">rewrite</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">sql</span><span class="p">,</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">parameters</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SQLStatementContext</span><span class="o">&lt;?&gt;</span> <span class="n">sqlStatementContext</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RouteContext</span> <span class="n">routeContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">SQLRewriteContext</span> <span class="n">sqlRewriteContext</span> <span class="o">=</span> <span class="n">createSQLRewriteContext</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">sqlStatementContext</span><span class="p">,</span> <span class="n">routeContext</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">routeContext</span><span class="p">.</span><span class="na">getRouteUnits</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">()</span>
+                <span class="o">?</span> <span class="k">new</span> <span class="n">GenericSQLRewriteEngine</span><span class="p">().</span><span class="na">rewrite</span><span class="p">(</span><span class="n">sqlRewriteContext</span><span class="p">)</span> <span class="p">:</span> <span class="k">new</span> <span class="n">RouteSQLRewriteEngine</span><span class="p">().</span><span class="na">rewrite</span><span class="p">(</span><span class="n">sqlRewriteContext</span><span class="p">,</span> <span class="n">routeContext</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">SQLRewriteContext</span> <span class="nf">createSQLRewriteContext</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">sql</span><span class="p">,</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">parameters</span><span class="p">,</span> <span class="kd">final</span> <span class="n">SQLStatementContext</span><span class="o">&lt;?&gt;</span> <span class="n">sqlStatementContext</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RouteContext</span> <span class="n">routeContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">SQLRewriteContext</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SQLRewriteContext</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">sqlStatementContext</span><span class="p">,</span> <span class="n">sql</span><span class="p">,</span> <span class="n">parameters</span><span class="p">);</span>
+        <span class="n">decorate</span><span class="p">(</span><span class="n">decorators</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">routeContext</span><span class="p">);</span>
+        <span class="n">result</span><span class="p">.</span><span class="na">generateSQLTokens</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在上面的: createSQLRewriteContext 函数中，其实还没有生成真实的SQL，但其生成非常关键的用于后面真实SQL的关键元信息，这部分这里不细说，后面再研究
+     </p>
+     <p>
+      我们本次走入处理分支： new RouteSQLRewriteEngine().rewrite(sqlRewriteContext, routeContext)
+     </p>
+     <p>
+      目前我们是有 route，但如果我们没有route，走： new GenericSQLRewriteEngine().rewrite(sqlRewriteContext) 是什么样的场景呢？这里标记一个，我们先继续跟着主线看：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">RouteSQLRewriteEngine</span> <span class="p">{</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * Rewrite SQL and parameters.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param sqlRewriteContext SQL rewrite context</span>
+<span class="cm">     * @param routeContext route context</span>
+<span class="cm">     * @return SQL rewrite result</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="n">RouteSQLRewriteResult</span> <span class="nf">rewrite</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLRewriteContext</span> <span class="n">sqlRewriteContext</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RouteContext</span> <span class="n">routeContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Map</span><span class="o">&lt;</span><span class="n">RouteUnit</span><span class="p">,</span> <span class="n">SQLRewriteUnit</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedHashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">routeContext</span><span class="p">.</span><span class="na">getRouteUnits</span><span class="p">().</span><span class="na">size</span><span class="p">(),</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">RouteUnit</span> <span class="n">each</span> <span class="p">:</span> <span class="n">routeContext</span><span class="p">.</span><span class="na">getRouteUnits</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">each</span><span class="p">,</span> <span class="k">new</span> <span class="n">SQLRewriteUnit</span><span class="p">(</span><span class="k">new</span> <span class="n">RouteSQLBuilder</span><span class="p">(</span><span class="n">sqlRewriteContext</span><span class="p">,</span> <span class="n">each</span><span class="p">).</span><span class="na">toSQL</span><span class="p">(),</span> <span class="n">getParameters</span><span class="p">(</span><span class="n">sqlRewriteContext</span><span class="p">.</span><span class="na">getParameterBuilder</span><span class="p">(),</span> <span class="n">routeContext</span><span class="p">,</span> <span class="n">each</span><span class="p">)));</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">RouteSQLRewriteResult</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      上面的代码中，类：SQLRewriteUnit，直接由一个关键的变量：sql，这个是我们想要的真实的SQL，而其就是由本次最终的核心代码生成的：new SQLRewriteUnit(new RouteSQLBuilder(sqlRewriteContext, each).toSQL(),其toSQL函数就是真实SQL生成的位置：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">AbstractSQLBuilder</span> <span class="kd">implements</span> <span class="n">SQLBuilder</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">SQLRewriteContext</span> <span class="n">context</span><span class="p">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kd">final</span> <span class="n">String</span> <span class="nf">toSQL</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="na">getSqlTokens</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">())</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">context</span><span class="p">.</span><span class="na">getSql</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="n">Collections</span><span class="p">.</span><span class="na">sort</span><span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="na">getSqlTokens</span><span class="p">());</span>
+        <span class="n">StringBuilder</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringBuilder</span><span class="p">();</span>
+        <span class="n">result</span><span class="p">.</span><span class="na">append</span><span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="na">getSql</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">context</span><span class="p">.</span><span class="na">getSqlTokens</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="na">getStartIndex</span><span class="p">());</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">SQLToken</span> <span class="n">each</span> <span class="p">:</span> <span class="n">context</span><span class="p">.</span><span class="na">getSqlTokens</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">append</span><span class="p">(</span><span class="n">each</span> <span class="k">instanceof</span> <span class="n">ComposableSQLToken</span> <span class="o">?</span> <span class="n">getComposableSQLTokenText</span><span class="p">((</span><span class="n">ComposableSQLToken</span><span class="p">)</span> <span class="n">each</span><span class="p">)</span> <span class="p">:</span> <span class="n">getSQLTokenText</span><span class="p">(</span><span class="n">each</span><span class="p">));</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">append</span><span class="p">(</span><span class="n">getConjunctionText</span><span class="p">(</span><span class="n">each</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">.</span><span class="na">toString</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">protected</span> <span class="kd">abstract</span> <span class="n">String</span> <span class="nf">getSQLTokenText</span><span class="p">(</span><span class="n">SQLToken</span> <span class="n">sqlToken</span><span class="p">);</span>
+
+    <span class="kd">private</span> <span class="n">String</span> <span class="nf">getComposableSQLTokenText</span><span class="p">(</span><span class="kd">final</span> <span class="n">ComposableSQLToken</span> <span class="n">composableSQLToken</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">StringBuilder</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringBuilder</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">SQLToken</span> <span class="n">each</span> <span class="p">:</span> <span class="n">composableSQLToken</span><span class="p">.</span><span class="na">getSqlTokens</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">append</span><span class="p">(</span><span class="n">getSQLTokenText</span><span class="p">(</span><span class="n">each</span><span class="p">));</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">append</span><span class="p">(</span><span class="n">getConjunctionText</span><span class="p">(</span><span class="n">each</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">.</span><span class="na">toString</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">String</span> <span class="nf">getConjunctionText</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLToken</span> <span class="n">sqlToken</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">context</span><span class="p">.</span><span class="na">getSql</span><span class="p">().</span><span class="na">substring</span><span class="p">(</span><span class="n">getStartIndex</span><span class="p">(</span><span class="n">sqlToken</span><span class="p">),</span> <span class="n">getStopIndex</span><span class="p">(</span><span class="n">sqlToken</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      通过debug，我们慢慢的看到变量：result，逐渐的变成我们想要的真实的SQL，到这里我们基本找到了路径了
+     </p>
+     <p>
+      这里逻辑还是有点多，还没分析完，就留到下篇分解了
+     </p>
+     <h2 id="_3">
+      总结
+     </h2>
+     <p>
+      总结下我们这边探索的真实SQL经历的关键节点
+     </p>
+     <ul>
+      <li>
+       ShardingSpherePreparedStatement.java： executionContext = createExecutionContext();
+      </li>
+      <li>
+       ShardingSpherePreparedStatement.java： ExecutionContext result = kernelProcessor.generateExecutionContext(logicSQL, metaDataContexts.getMetaData(connection.getSchemaName()), metaDataContexts.getProps());
+      </li>
+      <li>
+       KernelProcessor.java: generateExecutionContext
+      </li>
+      <li>
+       RouteContext routeContext = route(logicSQL, metaData, props);
+      </li>
+      <li>
+       SQLRewriteResult rewriteResult = rewrite(logicSQL, metaData, props, routeContext);
+       <ul>
+        <li>
+         SQLRewriteEntry：rewrite
+        </li>
+        <li>
+         new GenericSQLRewriteEngine().rewrite(sqlRewriteContext)
+        </li>
+        <li>
+         new RouteSQLRewriteEngine().rewrite(sqlRewriteContext, routeContext)
+        </li>
+       </ul>
+      </li>
+      <li>
+       ExecutionContext result = createExecutionContext(logicSQL, metaData, routeContext, rewriteResult)
+      </li>
+     </ul>
+     <p>
+      本次其实就定位了具体的真实SQL的关键代码，逻辑梳理还是比较花时间的，所以就留到下一篇讲解了
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

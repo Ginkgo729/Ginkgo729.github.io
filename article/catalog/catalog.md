@@ -113,6 +113,7 @@
         - [ShardingSphere体验小结.md](./article/article/+ShardingSphere体验小结.html)
         - [shardingsphere初步准备.md](./article/article/+shardingsphere初步准备.html)
         - [shardingsphere源码解析系列.md](./article/article/+shardingsphere源码解析系列.html)
+        - [shardingSphere真实SQL生成探索.md](./article/article/+shardingSphere真实SQL生成探索.html)
     - soul
         - [ShenYu网关源码解析28-注册中心原理解析.md](./article/article/+ShenYu网关源码解析28-注册中心原理解析.html)
         - [soul源码解析1-概览.md](./article/article/+soul源码解析1-概览.html)
