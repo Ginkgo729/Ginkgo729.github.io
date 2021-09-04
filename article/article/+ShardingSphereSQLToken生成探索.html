@@ -1,0 +1,487 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shardingsphere-sqltoken">
+      ShardingSphere SQLToken 生成探索
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在上篇文章中，我们探索了ShardingSphere中逻辑SQL变成真实SQL的解析过程，其中SQLToken在其中有着关键的作用，这篇文章中就探索下SQLToken的生成
+     </p>
+     <h2 id="_2">
+      源码分析
+     </h2>
+     <p>
+      基于上文：
+     </p>
+     <ul>
+      <li>
+       <a href="https://juejin.cn/post/7003073129643769869">
+        ShardingSphere 语句解析生成初探
+       </a>
+      </li>
+     </ul>
+     <p>
+      我们继续看看SQLToken的生成
+     </p>
+     <p>
+      首先定位到SQLToken生成的关键代码部分：
+     </p>
+     <p>
+      再跟着下去，来到核心的部分：
+     </p>
+     <p>
+      INSERT INTO t_order (user_id, address_id, status) VALUES (?, ?, ?)
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">SQLTokenGenerators</span> <span class="p">{</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * Generate SQL tokens.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param sqlStatementContext SQL statement context</span>
+<span class="cm">     * @param parameters SQL parameters</span>
+<span class="cm">     * @param schema sShardingSphere schema</span>
+<span class="cm">     * @return SQL tokens</span>
+<span class="cm">     */</span>
+    <span class="nd">@SuppressWarnings</span><span class="p">(</span><span class="s">"unchecked"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">SQLToken</span><span class="o">&gt;</span> <span class="nf">generateSQLTokens</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLStatementContext</span> <span class="n">sqlStatementContext</span><span class="p">,</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">parameters</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ShardingSphereSchema</span> <span class="n">schema</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">SQLToken</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+    <span class="c1">// 遍历所有的sqlTokenGenerators</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">SQLTokenGenerator</span> <span class="n">each</span> <span class="p">:</span> <span class="n">sqlTokenGenerators</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">setUpSQLTokenGenerator</span><span class="p">(</span><span class="n">each</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+        <span class="c1">// 这个应该类似判断是否符合条件</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">each</span><span class="p">.</span><span class="na">isGenerateSQLToken</span><span class="p">(</span><span class="n">sqlStatementContext</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="c1">// 下面就是生成Token</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">each</span> <span class="k">instanceof</span> <span class="n">OptionalSQLTokenGenerator</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">SQLToken</span> <span class="n">sqlToken</span> <span class="o">=</span> <span class="p">((</span><span class="n">OptionalSQLTokenGenerator</span><span class="p">)</span> <span class="n">each</span><span class="p">).</span><span class="na">generateSQLToken</span><span class="p">(</span><span class="n">sqlStatementContext</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">.</span><span class="na">contains</span><span class="p">(</span><span class="n">sqlToken</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="n">result</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">sqlToken</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">each</span> <span class="k">instanceof</span> <span class="n">CollectionSQLTokenGenerator</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">result</span><span class="p">.</span><span class="na">addAll</span><span class="p">(((</span><span class="n">CollectionSQLTokenGenerator</span><span class="p">)</span> <span class="n">each</span><span class="p">).</span><span class="na">generateSQLTokens</span><span class="p">(</span><span class="n">sqlStatementContext</span><span class="p">));</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      所有的sqlTokenGenerators如下图：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2a276f756b8644b9a5d0ab004fa580b2~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      我们跟着看一下：setUpSQLTokenGenerator(each, parameters, schema, result);
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">SQLTokenGenerators</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setUpSQLTokenGenerator</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLTokenGenerator</span> <span class="n">sqlTokenGenerator</span><span class="p">,</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">parameters</span><span class="p">,</span> <span class="kd">final</span> <span class="n">ShardingSphereSchema</span> <span class="n">schema</span><span class="p">,</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">SQLToken</span><span class="o">&gt;</span> <span class="n">previousSQLTokens</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sqlTokenGenerator</span> <span class="k">instanceof</span> <span class="n">ParametersAware</span><span class="p">)</span> <span class="p">{</span>
+            <span class="p">((</span><span class="n">ParametersAware</span><span class="p">)</span> <span class="n">sqlTokenGenerator</span><span class="p">).</span><span class="na">setParameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sqlTokenGenerator</span> <span class="k">instanceof</span> <span class="n">SchemaMetaDataAware</span><span class="p">)</span> <span class="p">{</span>
+            <span class="p">((</span><span class="n">SchemaMetaDataAware</span><span class="p">)</span> <span class="n">sqlTokenGenerator</span><span class="p">).</span><span class="na">setSchema</span><span class="p">(</span><span class="n">schema</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sqlTokenGenerator</span> <span class="k">instanceof</span> <span class="n">PreviousSQLTokensAware</span><span class="p">)</span> <span class="p">{</span>
+            <span class="p">((</span><span class="n">PreviousSQLTokensAware</span><span class="p">)</span> <span class="n">sqlTokenGenerator</span><span class="p">).</span><span class="na">setPreviousSQLTokens</span><span class="p">(</span><span class="n">previousSQLTokens</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      看到目前有三种Aware，自己目前不太清楚其大致作用是啥。但没有提前返回，会不会存在同时匹配多个的情况？暂时先不管，继续跟下去
+     </p>
+     <h4 id="removetokengenerator">
+      RemoveTokenGenerator
+     </h4>
+     <p>
+      通过debug sqlStatementContext 的内容，我们大致可以知道，remove的相关东西都是直接写到 sqlStatementContext 中的，但具体作用还是不太了解，后面去补一补应用场景
+     </p>
+     <p>
+      一顿操作下来，返回的false
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">RemoveTokenGenerator</span> <span class="kd">implements</span> <span class="n">CollectionSQLTokenGenerator</span><span class="o">&lt;</span><span class="n">SQLStatementContext</span><span class="o">&lt;?&gt;&gt;</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isGenerateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLStatementContext</span> <span class="n">sqlStatementContext</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 下面两个都是直接去取sqlStatementContext对应的字段有没有</span>
+        <span class="kt">boolean</span> <span class="n">containsRemoveSegment</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sqlStatementContext</span> <span class="k">instanceof</span> <span class="n">RemoveAvailable</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">containsRemoveSegment</span> <span class="o">=</span> <span class="o">!</span><span class="p">((</span><span class="n">RemoveAvailable</span><span class="p">)</span> <span class="n">sqlStatementContext</span><span class="p">).</span><span class="na">getRemoveSegments</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="kt">boolean</span> <span class="n">containsSchemaName</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sqlStatementContext</span> <span class="k">instanceof</span> <span class="n">TableAvailable</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">containsSchemaName</span> <span class="o">=</span> <span class="p">((</span><span class="n">TableAvailable</span><span class="p">)</span> <span class="n">sqlStatementContext</span><span class="p">).</span><span class="na">getTablesContext</span><span class="p">().</span><span class="na">getSchemaName</span><span class="p">().</span><span class="na">isPresent</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">containsRemoveSegment</span> <span class="o">||</span> <span class="n">containsSchemaName</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h4 id="tabletokengenerator">
+      TableTokenGenerator
+     </h4>
+     <p>
+      这个默认就返回true了，并且走的是CollectionSQLTokenGenerator分支，那我们就接口看其token的生成：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Setter</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">TableTokenGenerator</span> <span class="kd">implements</span> <span class="n">CollectionSQLTokenGenerator</span><span class="p">,</span> <span class="n">ShardingRuleAware</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="n">ShardingRule</span> <span class="n">shardingRule</span><span class="p">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isGenerateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLStatementContext</span> <span class="n">sqlStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 生成前还需要判断一下</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">TableToken</span><span class="o">&gt;</span> <span class="nf">generateSQLTokens</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLStatementContext</span> <span class="n">sqlStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">sqlStatementContext</span> <span class="k">instanceof</span> <span class="n">TableAvailable</span> <span class="o">?</span> <span class="n">generateSQLTokens</span><span class="p">((</span><span class="n">TableAvailable</span><span class="p">)</span> <span class="n">sqlStatementContext</span><span class="p">)</span> <span class="p">:</span> <span class="n">Collections</span><span class="p">.</span><span class="na">emptyList</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">TableToken</span><span class="o">&gt;</span> <span class="nf">generateSQLTokens</span><span class="p">(</span><span class="kd">final</span> <span class="n">TableAvailable</span> <span class="n">sqlStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Collection</span><span class="o">&lt;</span><span class="n">TableToken</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+    <span class="c1">// 获取获取的table相关的东西，这个类型是InsertStatementContext，所以就获取了getOriginalTables</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">SimpleTableSegment</span> <span class="n">each</span> <span class="p">:</span> <span class="n">sqlStatementContext</span><span class="p">.</span><span class="na">getAllTables</span><span class="p">())</span> <span class="p">{</span>
+        <span class="c1">// 判断是否有规则匹配上</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">shardingRule</span><span class="p">.</span><span class="na">findTableRule</span><span class="p">(</span><span class="n">each</span><span class="p">.</span><span class="na">getTableName</span><span class="p">().</span><span class="na">getIdentifier</span><span class="p">().</span><span class="na">getValue</span><span class="p">()).</span><span class="na">isPresent</span><span class="p">())</span> <span class="p">{</span>
+        <span class="c1">// 匹配上则添加token</span>
+                <span class="n">result</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">new</span> <span class="n">TableToken</span><span class="p">(</span><span class="n">each</span><span class="p">.</span><span class="na">getTableName</span><span class="p">().</span><span class="na">getStartIndex</span><span class="p">(),</span> <span class="n">each</span><span class="p">.</span><span class="na">getTableName</span><span class="p">().</span><span class="na">getStopIndex</span><span class="p">(),</span> <span class="n">each</span><span class="p">,</span> <span class="p">(</span><span class="n">SQLStatementContext</span><span class="p">)</span> <span class="n">sqlStatementContext</span><span class="p">,</span> <span class="n">shardingRule</span><span class="p">));</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      从上面的代码中，我们看到了一个TableToken的生成，此时的关键变量如下图：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/632643c4e0364d24b91dcbaa786160b7~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      其中遍历只遍历了 OriginalTables，tables和shardingRule这些都是生成好的，符合条件后，直接添加生成token
+     </p>
+     <h3 id="indextokengenerator">
+      IndexTokenGenerator
+     </h3>
+     <p>
+      这个就直接没有匹配上了
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">IndexTokenGenerator</span> <span class="kd">implements</span> <span class="n">CollectionSQLTokenGenerator</span><span class="p">,</span> <span class="n">ShardingRuleAware</span><span class="p">,</span> <span class="n">SchemaMetaDataAware</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isGenerateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLStatementContext</span> <span class="n">sqlStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">sqlStatementContext</span> <span class="k">instanceof</span> <span class="n">IndexAvailable</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">((</span><span class="n">IndexAvailable</span><span class="p">)</span> <span class="n">sqlStatementContext</span><span class="p">).</span><span class="na">getIndexes</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="constrainttokengenerator">
+      ConstraintTokenGenerator
+     </h3>
+     <p>
+      这个也没有匹配上
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">ConstraintTokenGenerator</span> <span class="kd">implements</span> <span class="n">CollectionSQLTokenGenerator</span><span class="p">,</span> <span class="n">ShardingRuleAware</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isGenerateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLStatementContext</span> <span class="n">sqlStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">sqlStatementContext</span> <span class="k">instanceof</span> <span class="n">ConstraintAvailable</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">((</span><span class="n">ConstraintAvailable</span><span class="p">)</span> <span class="n">sqlStatementContext</span><span class="p">).</span><span class="na">getConstraints</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="generatedkeyinsertcolumntokengenerator-basegeneratedkeytokengenerator">
+      GeneratedKeyInsertColumnTokenGenerator -- BaseGeneratedKeyTokenGenerator
+     </h3>
+     <p>
+      先来到抽象类，进行一波判断，成功匹配
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">BaseGeneratedKeyTokenGenerator</span> <span class="kd">implements</span> <span class="n">OptionalSQLTokenGenerator</span><span class="o">&lt;</span><span class="n">InsertStatementContext</span><span class="o">&gt;</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="nf">isGenerateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLStatementContext</span> <span class="n">sqlStatementContext</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 连环三重判断</span>
+        <span class="k">return</span> <span class="n">sqlStatementContext</span> <span class="k">instanceof</span> <span class="n">InsertStatementContext</span> <span class="o">&amp;&amp;</span> <span class="p">((</span><span class="n">InsertStatementContext</span><span class="p">)</span> <span class="n">sqlStatementContext</span><span class="p">).</span><span class="na">getGeneratedKeyContext</span><span class="p">().</span><span class="na">isPresent</span><span class="p">()</span>
+                <span class="o">&amp;&amp;</span> <span class="p">((</span><span class="n">InsertStatementContext</span><span class="p">)</span> <span class="n">sqlStatementContext</span><span class="p">).</span><span class="na">getGeneratedKeyContext</span><span class="p">().</span><span class="na">get</span><span class="p">().</span><span class="na">isGenerated</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">isGenerateSQLToken</span><span class="p">((</span><span class="n">InsertStatementContext</span><span class="p">)</span> <span class="n">sqlStatementContext</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">protected</span> <span class="kd">abstract</span> <span class="kt">boolean</span> <span class="nf">isGenerateSQLToken</span><span class="p">(</span><span class="n">InsertStatementContext</span> <span class="n">insertStatementContext</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      然后来到子类，其也进行一波判断，并且成功匹配
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">GeneratedKeyInsertColumnTokenGenerator</span> <span class="kd">extends</span> <span class="n">BaseGeneratedKeyTokenGenerator</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">boolean</span> <span class="nf">isGenerateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">InsertStatementContext</span> <span class="n">insertStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Optional</span><span class="o">&lt;</span><span class="n">InsertColumnsSegment</span><span class="o">&gt;</span> <span class="n">sqlSegment</span> <span class="o">=</span> <span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getSqlStatement</span><span class="p">().</span><span class="na">getInsertColumns</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">sqlSegment</span><span class="p">.</span><span class="na">isPresent</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sqlSegment</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">getColumns</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">()</span>
+                <span class="o">&amp;&amp;</span> <span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getGeneratedKeyContext</span><span class="p">().</span><span class="na">isPresent</span><span class="p">()</span>
+                <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getGeneratedKeyContext</span><span class="p">().</span><span class="na">get</span><span class="p">().</span><span class="na">getGeneratedValues</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      其insertStatementContext的内容如下图：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/781aff23fbfd408aa9c6d4f66be45e02~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      成功匹配后，走的 OptionalSQLTokenGenerator 分支：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">GeneratedKeyInsertColumnTokenGenerator</span> <span class="kd">extends</span> <span class="n">BaseGeneratedKeyTokenGenerator</span> <span class="p">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">GeneratedKeyInsertColumnToken</span> <span class="nf">generateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">InsertStatementContext</span> <span class="n">insertStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Optional</span><span class="o">&lt;</span><span class="n">GeneratedKeyContext</span><span class="o">&gt;</span> <span class="n">generatedKey</span> <span class="o">=</span> <span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getGeneratedKeyContext</span><span class="p">();</span>
+        <span class="n">Preconditions</span><span class="p">.</span><span class="na">checkState</span><span class="p">(</span><span class="n">generatedKey</span><span class="p">.</span><span class="na">isPresent</span><span class="p">());</span>
+        <span class="n">Optional</span><span class="o">&lt;</span><span class="n">InsertColumnsSegment</span><span class="o">&gt;</span> <span class="n">sqlSegment</span> <span class="o">=</span> <span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getSqlStatement</span><span class="p">().</span><span class="na">getInsertColumns</span><span class="p">();</span>
+        <span class="n">Preconditions</span><span class="p">.</span><span class="na">checkState</span><span class="p">(</span><span class="n">sqlSegment</span><span class="p">.</span><span class="na">isPresent</span><span class="p">());</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">GeneratedKeyInsertColumnToken</span><span class="p">(</span><span class="n">sqlSegment</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">getStopIndex</span><span class="p">(),</span> <span class="n">generatedKey</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">getColumnName</span><span class="p">());</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      上面也是取相关的内容各种判断，其中的Preconditions.checkState挺有意思，看其内容如果为false，会抛出IllegalStateException异常，比if判断简洁啊，感觉又学到了一手
+     </p>
+     <p>
+      最后生成了Token，里面只用到了开始和结束的index
+     </p>
+     <h3 id="generatedkeyforusedefaultinsertcolumnstokengenerator-basegeneratedkeytokengenerator">
+      GeneratedKeyForUseDefaultInsertColumnsTokenGenerator -- BaseGeneratedKeyTokenGenerator
+     </h3>
+     <p>
+      匹配失败了
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">GeneratedKeyForUseDefaultInsertColumnsTokenGenerator</span> <span class="kd">extends</span> <span class="n">BaseGeneratedKeyTokenGenerator</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">boolean</span> <span class="nf">isGenerateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">InsertStatementContext</span> <span class="n">insertStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">insertStatementContext</span><span class="p">.</span><span class="na">useDefaultColumns</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="shardinginsertvaluestokengenerator">
+      ShardingInsertValuesTokenGenerator
+     </h3>
+     <p>
+      这个匹配通过，并且走入分支： OptionalSQLTokenGenerator
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">ShardingInsertValuesTokenGenerator</span> <span class="kd">implements</span> <span class="n">OptionalSQLTokenGenerator</span><span class="o">&lt;</span><span class="n">InsertStatementContext</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">RouteContextAware</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="n">RouteContext</span> <span class="n">routeContext</span><span class="p">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isGenerateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">SQLStatementContext</span> <span class="n">sqlStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">sqlStatementContext</span> <span class="k">instanceof</span> <span class="n">InsertStatementContext</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(((</span><span class="n">InsertStatementContext</span><span class="p">)</span> <span class="n">sqlStatementContext</span><span class="p">).</span><span class="na">getSqlStatement</span><span class="p">()).</span><span class="na">getValues</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">InsertValuesToken</span> <span class="nf">generateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">InsertStatementContext</span> <span class="n">insertStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Collection</span><span class="o">&lt;</span><span class="n">InsertValuesSegment</span><span class="o">&gt;</span> <span class="n">insertValuesSegments</span> <span class="o">=</span> <span class="p">(</span><span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getSqlStatement</span><span class="p">()).</span><span class="na">getValues</span><span class="p">();</span>
+    <span class="c1">// 直接取相关的最大最小index</span>
+        <span class="n">InsertValuesToken</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ShardingInsertValuesToken</span><span class="p">(</span><span class="n">getStartIndex</span><span class="p">(</span><span class="n">insertValuesSegments</span><span class="p">),</span> <span class="n">getStopIndex</span><span class="p">(</span><span class="n">insertValuesSegments</span><span class="p">));</span>
+        <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">Collection</span><span class="o">&lt;</span><span class="n">DataNode</span><span class="o">&gt;&gt;</span> <span class="n">originalDataNodesIterator</span> <span class="o">=</span> <span class="kc">null</span> <span class="o">==</span> <span class="n">routeContext</span> <span class="o">||</span> <span class="n">routeContext</span><span class="p">.</span><span class="na">getOriginalDataNodes</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">()</span>
+                <span class="o">?</span> <span class="kc">null</span> <span class="p">:</span> <span class="n">routeContext</span><span class="p">.</span><span class="na">getOriginalDataNodes</span><span class="p">().</span><span class="na">iterator</span><span class="p">();</span>
+    <span class="c1">// 感觉这个类似添加values之类的，如果是多值插入，那应该会有多个</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">InsertValueContext</span> <span class="n">each</span> <span class="p">:</span> <span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getInsertValueContexts</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">List</span><span class="o">&lt;</span><span class="n">ExpressionSegment</span><span class="o">&gt;</span> <span class="n">expressionSegments</span> <span class="o">=</span> <span class="n">each</span><span class="p">.</span><span class="na">getValueExpressions</span><span class="p">();</span>
+            <span class="n">Collection</span><span class="o">&lt;</span><span class="n">DataNode</span><span class="o">&gt;</span> <span class="n">dataNodes</span> <span class="o">=</span> <span class="kc">null</span> <span class="o">==</span> <span class="n">originalDataNodesIterator</span> <span class="o">?</span> <span class="n">Collections</span><span class="p">.</span><span class="na">emptyList</span><span class="p">()</span> <span class="p">:</span> <span class="n">originalDataNodesIterator</span><span class="p">.</span><span class="na">next</span><span class="p">();</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">getInsertValues</span><span class="p">().</span><span class="na">add</span><span class="p">(</span><span class="k">new</span> <span class="n">ShardingInsertValue</span><span class="p">(</span><span class="n">expressionSegments</span><span class="p">,</span> <span class="n">dataNodes</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 取最小值</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="nf">getStartIndex</span><span class="p">(</span><span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">InsertValuesSegment</span><span class="o">&gt;</span> <span class="n">segments</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="n">segments</span><span class="p">.</span><span class="na">iterator</span><span class="p">().</span><span class="na">next</span><span class="p">().</span><span class="na">getStartIndex</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">InsertValuesSegment</span> <span class="n">each</span> <span class="p">:</span> <span class="n">segments</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">Math</span><span class="p">.</span><span class="na">min</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">each</span><span class="p">.</span><span class="na">getStartIndex</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 取最大值</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="nf">getStopIndex</span><span class="p">(</span><span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">InsertValuesSegment</span><span class="o">&gt;</span> <span class="n">segments</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="n">segments</span><span class="p">.</span><span class="na">iterator</span><span class="p">().</span><span class="na">next</span><span class="p">().</span><span class="na">getStopIndex</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">InsertValuesSegment</span> <span class="n">each</span> <span class="p">:</span> <span class="n">segments</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">Math</span><span class="p">.</span><span class="na">max</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">each</span><span class="p">.</span><span class="na">getStopIndex</span><span class="p">());</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      上面的代码大概就是生成SQL中value相关的token，关键的变量值如下：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0afb8f33cad440a4be1b32aed6f1a1fe~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <h3 id="generatedkeyinsertvaluestokengenerator">
+      GeneratedKeyInsertValuesTokenGenerator
+     </h3>
+     <p>
+      好像与ShardingInsertValuesTokenGenerator有关联，目前看不太懂
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">GeneratedKeyInsertValuesTokenGenerator</span> <span class="kd">extends</span> <span class="n">BaseGeneratedKeyTokenGenerator</span> <span class="kd">implements</span> <span class="n">PreviousSQLTokensAware</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">SQLToken</span><span class="o">&gt;</span> <span class="n">previousSQLTokens</span><span class="p">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">boolean</span> <span class="nf">isGenerateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">InsertStatementContext</span> <span class="n">insertStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">!</span><span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getSqlStatement</span><span class="p">().</span><span class="na">getValues</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getGeneratedKeyContext</span><span class="p">().</span><span class="na">isPresent</span><span class="p">()</span>
+                <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getGeneratedKeyContext</span><span class="p">().</span><span class="na">get</span><span class="p">().</span><span class="na">getGeneratedValues</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">SQLToken</span> <span class="nf">generateSQLToken</span><span class="p">(</span><span class="kd">final</span> <span class="n">InsertStatementContext</span> <span class="n">insertStatementContext</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Optional</span><span class="o">&lt;</span><span class="n">InsertValuesToken</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">findPreviousSQLToken</span><span class="p">();</span>
+        <span class="n">Preconditions</span><span class="p">.</span><span class="na">checkState</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">isPresent</span><span class="p">());</span>
+        <span class="n">Optional</span><span class="o">&lt;</span><span class="n">GeneratedKeyContext</span><span class="o">&gt;</span> <span class="n">generatedKey</span> <span class="o">=</span> <span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getGeneratedKeyContext</span><span class="p">();</span>
+        <span class="n">Preconditions</span><span class="p">.</span><span class="na">checkState</span><span class="p">(</span><span class="n">generatedKey</span><span class="p">.</span><span class="na">isPresent</span><span class="p">());</span>
+        <span class="n">Iterator</span><span class="o">&lt;</span><span class="n">Comparable</span><span class="o">&lt;?&gt;&gt;</span> <span class="n">generatedValues</span> <span class="o">=</span> <span class="n">generatedKey</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">getGeneratedValues</span><span class="p">().</span><span class="na">iterator</span><span class="p">();</span>
+        <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;&gt;</span> <span class="n">parameters</span> <span class="o">=</span> <span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getGroupedParameters</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">InsertValueContext</span> <span class="n">each</span> <span class="p">:</span> <span class="n">insertStatementContext</span><span class="p">.</span><span class="na">getInsertValueContexts</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">InsertValue</span> <span class="n">insertValueToken</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">getInsertValues</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="n">count</span><span class="p">);</span>
+            <span class="n">DerivedSimpleExpressionSegment</span> <span class="n">expressionSegment</span> <span class="o">=</span> <span class="n">isToAddDerivedLiteralExpression</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+                    <span class="o">?</span> <span class="k">new</span> <span class="n">DerivedLiteralExpressionSegment</span><span class="p">(</span><span class="n">generatedValues</span><span class="p">.</span><span class="na">next</span><span class="p">())</span> <span class="p">:</span> <span class="k">new</span> <span class="n">DerivedParameterMarkerExpressionSegment</span><span class="p">(</span><span class="n">each</span><span class="p">.</span><span class="na">getParameterCount</span><span class="p">());</span>
+            <span class="n">insertValueToken</span><span class="p">.</span><span class="na">getValues</span><span class="p">().</span><span class="na">add</span><span class="p">(</span><span class="n">expressionSegment</span><span class="p">);</span>
+            <span class="n">count</span><span class="o">++</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">.</span><span class="na">get</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">Optional</span><span class="o">&lt;</span><span class="n">InsertValuesToken</span><span class="o">&gt;</span> <span class="nf">findPreviousSQLToken</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">SQLToken</span> <span class="n">each</span> <span class="p">:</span> <span class="n">previousSQLTokens</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">each</span> <span class="k">instanceof</span> <span class="n">InsertValuesToken</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">Optional</span><span class="p">.</span><span class="na">of</span><span class="p">((</span><span class="n">InsertValuesToken</span><span class="p">)</span> <span class="n">each</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">Optional</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">isToAddDerivedLiteralExpression</span><span class="p">(</span><span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;&gt;</span> <span class="n">parameters</span><span class="p">,</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">insertValueCount</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">parameters</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">insertValueCount</span><span class="p">).</span><span class="na">isEmpty</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      上面的Token生成后，进入没有添加到Token中，最终生成的Token比上个多一个东西，如下图：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/37d1a7da3db54c08839c13583ea139fd~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <h3 id="token">
+      Token上传结束
+     </h3>
+     <p>
+      上面就是最后一个了，最终的结果如下图：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/911a67845e984d99ae22327a9f253431~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <h2 id="_3">
+      总结
+     </h2>
+     <p>
+      目前探索了下SQLToken，会经过SQLTokenGenerate的处理，和上篇文章中一样，其中的Index是关键，但在这部分分析中，index其实是已经带下来了，如下图：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1de86c1974f3427abbe5c4c8eb8d0255~tplv-k3u1fbpfcp-watermark.image"/>
+     </p>
+     <p>
+      Token的生成目前感觉就是靠判断类型，然后对应的取到对应的数据
+     </p>
+     <p>
+      后面跟着了一下，index这些重要的原始信息，是从LogicSQL中带下来的，后面我们会跟踪这部分代码，然后看看能不能将这三部分总结串起来
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>

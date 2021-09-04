@@ -161,7 +161,44 @@ flush privileges<span class="p">;</span>
 <span class="k">SET</span> <span class="n">SQL_SAFE_UPDATES</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 </code></pre>
      </div>
-     <h2 id="_8">
+     <h3 id="_8">
+      大于小于之类的写法
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="err">第一种写法（</span><span class="mi">1</span><span class="err">）：</span>
+
+<span class="err">原符号</span>       <span class="o">&lt;</span>        <span class="o">&lt;=</span>      <span class="o">&gt;</span>       <span class="o">&gt;=</span>       <span class="o">&amp;</span>        <span class="err">'</span>        <span class="err">"</span>
+<span class="err">替换符号</span>    <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span>    <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">=</span>   <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>    <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">=</span>   <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span>   <span class="o">&amp;</span><span class="n">apos</span><span class="p">;</span>  <span class="o">&amp;</span><span class="n">quot</span><span class="p">;</span>
+<span class="err">例如：</span><span class="n">sql如下</span><span class="err">：</span>
+<span class="n">create_date_time</span> <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">=</span> <span class="o">#</span><span class="err">{</span><span class="n">startTime</span><span class="err">}</span> <span class="k">and</span>  <span class="n">create_date_time</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">=</span> <span class="o">#</span><span class="err">{</span><span class="n">endTime</span><span class="err">}</span>
+
+<span class="err">第二种写法（</span><span class="mi">2</span><span class="err">）：</span>
+<span class="err">大于等于</span>
+<span class="o">&lt;!</span><span class="p">[</span><span class="n">CDATA</span><span class="p">[</span> <span class="o">&gt;=</span> <span class="p">]]</span><span class="o">&gt;</span>
+<span class="err">小于等于</span>
+<span class="o">&lt;!</span><span class="p">[</span><span class="n">CDATA</span><span class="p">[</span> <span class="o">&lt;=</span> <span class="p">]]</span><span class="o">&gt;</span>
+<span class="err">例如：</span><span class="n">sql如下</span><span class="err">：</span>
+<span class="n">create_date_time</span> <span class="o">&lt;!</span><span class="p">[</span><span class="n">CDATA</span><span class="p">[</span> <span class="o">&gt;=</span> <span class="p">]]</span><span class="o">&gt;</span> <span class="o">#</span><span class="err">{</span><span class="n">startTime</span><span class="err">}</span> <span class="k">and</span>  <span class="n">create_date_time</span> <span class="o">&lt;!</span><span class="p">[</span><span class="n">CDATA</span><span class="p">[</span> <span class="o">&lt;=</span> <span class="p">]]</span><span class="o">&gt;</span> <span class="o">#</span><span class="err">{</span><span class="n">endTime</span><span class="err">}</span>
+</code></pre>
+     </div>
+     <h3 id="_9">
+      修改字段默认值
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="k">alter</span> <span class="k">table</span> <span class="err">表名</span> <span class="k">alter</span> <span class="k">column</span> <span class="err">字段名</span> <span class="k">drop</span> <span class="k">default</span><span class="p">;</span> <span class="p">(</span><span class="err">若本身存在默认值，则先删除</span><span class="p">)</span>
+
+<span class="k">alter</span> <span class="k">table</span> <span class="err">表名</span> <span class="k">alter</span> <span class="k">column</span> <span class="err">字段名</span> <span class="k">set</span> <span class="k">default</span> <span class="err">默认值</span><span class="p">;(</span><span class="err">若本身不存在则可以直接设定</span><span class="p">)</span>
+</code></pre>
+     </div>
+     <h3 id="_10">
+      查询空字段
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="o">#</span> <span class="err">使用</span> <span class="k">is</span> <span class="k">null</span> <span class="err">，而不是</span><span class="o">==</span><span class="k">null</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">test</span> <span class="k">where</span> <span class="n">t_birth</span> <span class="k">is</span> <span class="k">null</span><span class="p">;</span>
+</code></pre>
+     </div>
+     <h2 id="_11">
       参考链接
      </h2>
      <ul>
@@ -193,6 +230,16 @@ flush privileges<span class="p">;</span>
       <li>
        <a href="https://blog.csdn.net/guo_qiangqiang/article/details/90480945">
         mysql sum() 求和函数和TIMESTAMPDIFF时间差函数相结合的用法
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/xuanzhangran/article/details/60329357">
+        mybatis中大于等于小于等于的写法
+       </a>
+      </li>
+      <li>
+       <a href="https://www.cnblogs.com/hellojesson/p/6025548.html">
+        Mysql 修改字段默认值
        </a>
       </li>
      </ul>
