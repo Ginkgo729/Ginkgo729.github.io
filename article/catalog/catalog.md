@@ -108,6 +108,7 @@
     - shardingsphere
         - [ShardingSphereJDBC分库分表读写分离数据加密.md](./article/article/+ShardingSphereJDBC分库分表读写分离数据加密.html)
         - [ShardingSphereJDBC语句执行初探.md](./article/article/+ShardingSphereJDBC语句执行初探.html)
+        - [ShardingSphereLogicSQL的生成.md](./article/article/+ShardingSphereLogicSQL的生成.html)
         - [ShardingSphereProxy初步体验.md](./article/article/+ShardingSphereProxy初步体验.html)
         - [ShardingSphereSQLToken生成探索.md](./article/article/+ShardingSphereSQLToken生成探索.html)
         - [ShardingSphereUI初步体验.md](./article/article/+ShardingSphereUI初步体验.html)
