@@ -1,0 +1,368 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="spring">
+      Spring
+     </h1>
+     <hr/>
+     <ul>
+      <li>
+      </li>
+      <li>
+       0 ProxyingHandlerMethodArgumentResolver
+      </li>
+      <li>
+       1 RequestParamMethodArgumentResolver :
+       <a href="https://blog.csdn.net/qq924862077/article/details/54292082">
+        springMVC源码分析--RequestParamMethodArgumentResolver参数解析器（三）
+       </a>
+      </li>
+      <li>
+       2 RequestParamMapMethodArgumentResolver :
+       <a href="http://blog.sina.com.cn/s/blog_e660c25b01030ib8.html">
+        springmvc的RequestParamMapMethodArgumentResolver分析
+       </a>
+      </li>
+      <li>
+       3 PathVariableMethodArgumentResolver :
+       <a href="https://blog.csdn.net/securitit/article/details/110207357">
+        Spring 注解面面通 之 @PathVariable参数绑定源码解析
+       </a>
+      </li>
+      <li>
+       4 PathVariableMapMethodArgumentResolver  :
+       <a href="https://blog.csdn.net/securitit/article/details/110207357">
+        Spring 注解面面通 之 @PathVariable参数绑定源码解析
+       </a>
+      </li>
+      <li>
+       5 MatrixVariableMethodArgumentResolver
+      </li>
+      <li>
+       6 MatrixVariableMapMethodArgumentResolver
+      </li>
+      <li>
+       7 ServletModelAttributeMethodProcessor
+      </li>
+      <li>
+       8 RequestResponseBodyMethodProcessor
+      </li>
+      <li>
+       9 RequestPartMethodArgumentResolver
+      </li>
+      <li>
+       10 RequestHeaderMethodArgumentResolver
+      </li>
+      <li>
+       11 RequestHeaderMapMethodArgumentResolver
+      </li>
+      <li>
+       12 ServletCookieValueMethodArgumentResolver
+      </li>
+      <li>
+       13 ExpressionValueMethodArgumentResolver
+      </li>
+      <li>
+       14 SessionAttributeMethodArgumentResolver
+      </li>
+      <li>
+       15 RequestAttributeMethodArgumentResolver
+      </li>
+      <li>
+       16 ServletRequestMethodArgumentResolver
+      </li>
+      <li>
+       17 ServletResponseMethodArgumentResolver
+      </li>
+      <li>
+       18 HttpEntityMethodProcessor
+      </li>
+      <li>
+       19 RedirectAttributesMethodArgumentResolver
+      </li>
+      <li>
+       20 ModelMethodProcessor
+      </li>
+      <li>
+       21 MapMethodProcessor
+      </li>
+      <li>
+       22 ErrorsMethodArgumentResolver
+      </li>
+      <li>
+       23 SessionStatusMethodArgumentResolver
+      </li>
+      <li>
+       24 UriComponentsBuilderMethodArgumentResolver
+      </li>
+      <li>
+       25 AuthenticationPrincipalArgumentResolver
+      </li>
+      <li>
+       26 AuthenticationPrincipalArgumentResolver
+      </li>
+      <li>
+       27 CurrentSecurityContextArgumentResolver
+      </li>
+      <li>
+       28 CsrfTokenArgumentResolver
+      </li>
+      <li>
+       29 SortHandlerMethodArgumentResolver
+      </li>
+      <li>
+       30 PageableHandlerMethodArgumentResolver
+      </li>
+      <li>
+       31 ProxyingHandlerMethodArgumentResolver
+      </li>
+      <li>
+       32 RequestParamMethodArgumentResolver
+      </li>
+      <li>
+       33 ServletModelAttributeMethodProcessor
+      </li>
+     </ul>
+     <h3 id="_1">
+      基于注解的参数解析
+     </h3>
+     <p>
+      基于注解的参数解析 &lt;-- 解析的数据来源主要是 HttpServletRequest | ModelAndViewContainer
+     </p>
+     <p>
+      Annotation-based argument resolution
+     </p>
+     <ul>
+      <li>
+       RequestParamMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @RequestParam, @RequestPart 修饰的参数, 数据的获取通过 HttpServletRequest.getParameterValues
+      </li>
+      <li>
+       RequestParamMapMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @RequestParam 修饰, 且类型是 Map 的参数, 数据的获取通过 HttpServletRequest.getParameterMap
+      </li>
+      <li>
+       PathVariableMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @PathVariable 修饰, 数据的获取通过 uriTemplateVars, 而 uriTemplateVars 却是通过 RequestMappingInfoHandlerMapping.handleMatch 生成, 其实就是 uri 中映射出的 key &lt;-&gt; value
+      </li>
+      <li>
+       PathVariableMapMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @PathVariable 修饰 且数据类型是 Map, 数据的获取通过 uriTemplateVars, 而 uriTemplateVars 却是通过 RequestMappingInfoHandlerMapping.handleMatch 生成, 其实就是 uri 中映射出的 key &lt;-&gt; value
+      </li>
+      <li>
+       MatrixVariableMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @MatrixVariable 修饰, 数据的获取通过 URI提取了;后存储的 uri template 变量值
+      </li>
+      <li>
+       MatrixVariableMapMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @MatrixVariable 修饰 且数据类型是 Map, 数据的获取通过 URI提取了;后存储的 uri template 变量值
+      </li>
+      <li>
+       ServletModelAttributeMethodProcessor
+      </li>
+      <li>
+       解析被注解 @ModelAttribute 修饰, 且类型是 Map 的参数, 数据的获取通过 ModelAndViewContainer 获取, 通过 DataBinder 进行绑定
+      </li>
+      <li>
+       RequestResponseBodyMethodProcessor
+      </li>
+      <li>
+       解析被注解 @RequestBody 修饰的参数, 以及被@ResponseBody修饰的返回值, 数据的获取通过 HttpServletRequest 获取, 根据 MediaType通过HttpMessageConverter转换成对应的格式, 在处理返回值时 也是通过 MediaType 选择合适HttpMessageConverter, 进行转换格式, 并输出
+      </li>
+      <li>
+       RequestPartMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @RequestPart 修饰, 数据的获取通过 HttpServletRequest.getParts()
+      </li>
+      <li>
+       RequestHeaderMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @RequestHeader 修饰, 数据的获取通过 HttpServletRequest.getHeaderValues()
+      </li>
+      <li>
+       RequestHeaderMapMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @RequestHeader 修饰且参数类型是 Map, 数据的获取通过 HttpServletRequest.getHeaderValues()
+      </li>
+      <li>
+       ServletCookieValueMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @CookieValue 修饰, 数据的获取通过 HttpServletRequest.getCookies()
+      </li>
+      <li>
+       ExpressionValueMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @Value 修饰, 数据在这里没有解析
+      </li>
+      <li>
+       SessionAttributeMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @SessionAttribute 修饰, 数据的获取通过 HttpServletRequest.getAttribute(name, RequestAttributes.SCOPE_SESSION)
+      </li>
+      <li>
+       RequestAttributeMethodArgumentResolver
+      </li>
+      <li>
+       解析被注解 @RequestAttribute 修饰, 数据的获取通过 HttpServletRequest.getAttribute(name, RequestAttributes.SCOPE_REQUEST)
+      </li>
+     </ul>
+     <h3 id="type-based-argument-resolution">
+      基于类型的参数解析（Type-based argument resolution）
+     </h3>
+     <ul>
+      <li>
+       ServletRequestMethodArgumentResolver
+      </li>
+      <li>
+       解析固定类型参数(比如: ServletRequest, HttpSession, InputStream 等), 参数的数据获取还是通过 HttpServletRequest
+      </li>
+      <li>
+       ServletResponseMethodArgumentResolver
+      </li>
+      <li>
+       解析固定类型参数(比如: ServletResponse, OutputStream等), 参数的数据获取还是通过 HttpServletResponse
+      </li>
+      <li>
+       HttpEntityMethodProcessor
+      </li>
+      <li>
+       解析固定类型参数(比如: HttpEntity, RequestEntity 等), 参数的数据获取还是通过 HttpServletRequest
+      </li>
+      <li>
+       RedirectAttributesMethodArgumentResolver
+      </li>
+      <li>
+       解析固定类型参数(比如: RedirectAttributes), 参数的数据获取还是通过 HttpServletResponse
+      </li>
+      <li>
+       ModelMethodProcessor
+      </li>
+      <li>
+       解析固定类型参数(比如: Model等), 参数的数据获取通过 ModelAndViewContainer
+      </li>
+      <li>
+       ErrorsMethodArgumentResolver
+      </li>
+      <li>
+       解析固定类型参数(比如: Errors), 参数的数据获取通过 ModelAndViewContainer
+      </li>
+      <li>
+       SessionStatusMethodArgumentResolver
+      </li>
+      <li>
+       解析固定类型参数(比如: SessionStatus), 参数的数据获取通过 ModelAndViewContainer
+      </li>
+      <li>
+       UriComponentsBuilderMethodArgumentResolver
+      </li>
+      <li>
+       解析固定类型参数(比如: UriComponentsBuilder), 参数的数据获取通过 HttpServletRequest
+      </li>
+     </ul>
+     <h3 id="custom-arguments">
+      自定义参数解析器（Custom arguments）
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1">// 3.自定义参数解析器</span>
+<span class="c1">// Custom arguments</span>
+<span class="k">if</span> <span class="p">(</span><span class="nx">getCustomArgumentResolvers</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">resolvers</span><span class="p">.</span><span class="nx">addAll</span><span class="p">(</span><span class="nx">getCustomArgumentResolvers</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="_2">
+      特殊的两个解析器
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1">// Catch-all</span>
+<span class="c1">//这两个解析器可以解析所有类型的参数</span>
+<span class="n">resolvers</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">new</span> <span class="n">RequestParamMethodArgumentResolver</span><span class="p">(</span><span class="n">getBeanFactory</span><span class="p">(),</span> <span class="kc">true</span><span class="p">));</span>
+<span class="n">resolvers</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">new</span> <span class="n">ServletModelAttributeMethodProcessor</span><span class="p">(</span><span class="kc">true</span><span class="p">));</span>
+</code></pre>
+     </div>
+     <h2 id="_3">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://cloud.tencent.com/developer/article/1490089">
+        Spring参数的自解析--还在自己转换？你out了!
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
