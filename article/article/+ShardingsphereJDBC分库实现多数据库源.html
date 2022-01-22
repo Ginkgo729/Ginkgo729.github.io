@@ -1,0 +1,443 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="shardingsphere-jdbc">
+      ShardingSphere JDBC 分库实现多数据库源
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第2天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      基于Shardingsphere JDBC 5.0.0版本，利用Sharding分库实现日常开始中的数据库多数据源使用需求，结合Spring Boot 和 Mybatis Plus
+     </p>
+     <h2 id="_2">
+      数据源需求说明
+     </h2>
+     <p>
+      数据库初始语句如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="k">create</span> <span class="k">database</span> <span class="n">demo1</span><span class="p">;</span>
+<span class="k">create</span> <span class="k">database</span> <span class="n">demo2</span><span class="p">;</span>
+
+<span class="k">create</span> <span class="k">table</span> <span class="n n-Quoted">`demo1`</span><span class="p">.</span><span class="n">table1</span> <span class="p">(</span>
+    <span class="n">id</span> <span class="kt">int</span>
+<span class="p">);</span>
+
+<span class="k">create</span> <span class="k">table</span> <span class="n n-Quoted">`demo2`</span><span class="p">.</span><span class="n">table2</span> <span class="p">(</span>
+    <span class="n">id</span> <span class="kt">int</span>
+<span class="p">);</span>
+
+<span class="k">create</span> <span class="k">table</span> <span class="n n-Quoted">`demo1`</span><span class="p">.</span><span class="n">sharding_table</span> <span class="p">(</span>
+    <span class="n">id</span> <span class="kt">int</span>
+<span class="p">);</span>
+
+<span class="k">create</span> <span class="k">table</span> <span class="n n-Quoted">`demo2`</span><span class="p">.</span><span class="n">sharding_table</span> <span class="p">(</span>
+    <span class="n">id</span> <span class="kt">int</span>
+<span class="p">);</span>
+
+<span class="k">insert</span> <span class="k">into</span> <span class="n n-Quoted">`demo1`</span><span class="p">.</span><span class="n">sharding_table</span> <span class="p">(</span><span class="n">id</span><span class="p">)</span> <span class="k">values</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="k">insert</span> <span class="k">into</span> <span class="n n-Quoted">`demo2`</span><span class="p">.</span><span class="n">sharding_table</span> <span class="p">(</span><span class="n">id</span><span class="p">)</span> <span class="k">values</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</code></pre>
+     </div>
+     <p>
+      两个数据库，数据库1有表：table1、sharding_table
+     </p>
+     <p>
+      数据库2有表：table2、sharding_table
+     </p>
+     <p>
+      要求如下：
+     </p>
+     <ul>
+      <li>
+       当访问表 table1 时，访问数据库 demo1
+      </li>
+      <li>
+       当访问表 table2 时，访问数据库 demo2
+      </li>
+      <li>
+       当访问表 sharding_table 时，根据自定义的传入参数，访问对应的数据，本篇文章，将要访问的数据源存入ThreadLocal中，获取后访问对应的数据源
+      </li>
+     </ul>
+     <h2 id="_3">
+      关键代码示例
+     </h2>
+     <p>
+      完整代码GitHub地址：https://github.com/lw1243925457/JAVA-000/tree/main/code/shardingsphere/shardingdb
+     </p>
+     <h3 id="_4">
+      定义数据源
+     </h3>
+     <p>
+      配置ShardingSphere JDBC数据源，关键代码如下：
+     </p>
+     <p>
+      配置如下,定义了连个数据源，最后的rules是标识表table1到数据源db0访问，表table2到数据源db1访问
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code># shardingSphere 分库设置
+shardingsphere:
+  # 配置真实数据源
+  datasources:
+    # 数据库1
+    db0:
+      jdbcurl: <span class="cp">${</span><span class="n">DB1_URL</span><span class="p">:</span><span class="n">jdbc</span><span class="p">:</span><span class="n">mysql</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">3306</span><span class="o">/</span><span class="n">demo1</span><span class="err">?</span><span class="n">useUnicode</span><span class="o">=</span><span class="n">true</span><span class="o">&amp;</span><span class="n">serverTimezone</span><span class="o">=</span><span class="n">UTC</span><span class="cp">}</span>
+      username: <span class="cp">${</span><span class="n">DB1_USER</span><span class="p">:</span><span class="n">root</span><span class="cp">}</span>
+      password: <span class="cp">${</span><span class="n">DB1_PASS</span><span class="p">:</span><span class="n">root</span><span class="cp">}</span>
+    # 数据库2
+    db1:
+      jdbcurl: <span class="cp">${</span><span class="n">DB2_URL</span><span class="p">:</span><span class="n">jdbc</span><span class="p">:</span><span class="n">mysql</span><span class="p">:</span><span class="o">//</span><span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span><span class="p">:</span><span class="mi">3306</span><span class="o">/</span><span class="n">demo2</span><span class="err">?</span><span class="n">useUnicode</span><span class="o">=</span><span class="n">true</span><span class="o">&amp;</span><span class="n">serverTimezone</span><span class="o">=</span><span class="n">UTC</span><span class="cp">}</span>
+      username: <span class="cp">${</span><span class="n">DB2_USER</span><span class="p">:</span><span class="n">root</span><span class="cp">}</span>
+      password: <span class="cp">${</span><span class="n">DB2_PASS</span><span class="p">:</span><span class="n">root</span><span class="cp">}</span>
+  rules:
+    table1: db0
+    table2: db1
+</code></pre>
+     </div>
+     <p>
+      如果使用ShardingSphere的yaml文件配置，暂时还没有找到如何使用环境变量的方式，不方便修改，所有使用Java代码直接进行配置
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Slf4j</span>
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ShardingDataSourceMybatisPlusConfig</span> <span class="kd">extends</span> <span class="n">MybatisPlusAutoConfiguration</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">MultipleDbConfig</span> <span class="n">multipleDbConfig</span><span class="p">;</span>
+
+    <span class="nd">@Primary</span>
+    <span class="nd">@Bean</span><span class="p">(</span><span class="s">"dataSource"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">DataSource</span> <span class="nf">getDataSource</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="c1">// 配置真实数据源</span>
+        <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">MultipleDbConfig</span><span class="p">.</span><span class="na">DbSource</span><span class="o">&gt;</span> <span class="n">dbs</span> <span class="o">=</span> <span class="n">multipleDbConfig</span><span class="p">.</span><span class="na">getDatasources</span><span class="p">();</span>
+        <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">DataSource</span><span class="o">&gt;</span> <span class="n">dataSourceMap</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">dbs</span><span class="p">.</span><span class="na">size</span><span class="p">());</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">dbName</span><span class="p">:</span> <span class="n">dbs</span><span class="p">.</span><span class="na">keySet</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">MultipleDbConfig</span><span class="p">.</span><span class="na">DbSource</span> <span class="n">dbConfig</span> <span class="o">=</span> <span class="n">dbs</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">dbName</span><span class="p">);</span>
+            <span class="n">HikariDataSource</span> <span class="n">dataSource</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HikariDataSource</span><span class="p">();</span>
+            <span class="n">dataSource</span><span class="p">.</span><span class="na">setDriverClassName</span><span class="p">(</span><span class="s">"com.mysql.jdbc.Driver"</span><span class="p">);</span>
+            <span class="n">dataSource</span><span class="p">.</span><span class="na">setJdbcUrl</span><span class="p">(</span><span class="n">dbConfig</span><span class="p">.</span><span class="na">getJdbcUrl</span><span class="p">());</span>
+            <span class="n">dataSource</span><span class="p">.</span><span class="na">setUsername</span><span class="p">(</span><span class="n">dbConfig</span><span class="p">.</span><span class="na">getUsername</span><span class="p">());</span>
+            <span class="n">dataSource</span><span class="p">.</span><span class="na">setPassword</span><span class="p">(</span><span class="n">dbConfig</span><span class="p">.</span><span class="na">getPassword</span><span class="p">());</span>
+            <span class="n">dataSourceMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">dataSource</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 配置分片规则</span>
+        <span class="n">ShardingRuleConfiguration</span> <span class="n">shardingRuleConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ShardingRuleConfiguration</span><span class="p">();</span>
+
+        <span class="c1">// 遍历表的固定映射：表table1到数据源db0访问，表table2到数据源db1访问</span>
+        <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">rules</span> <span class="o">=</span> <span class="n">multipleDbConfig</span><span class="p">.</span><span class="na">getRules</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">table</span><span class="p">:</span> <span class="n">rules</span><span class="p">.</span><span class="na">keySet</span><span class="p">())</span> <span class="p">{</span>
+            <span class="c1">// 配置添加 t_order 表规则</span>
+            <span class="kd">final</span> <span class="n">String</span> <span class="n">actualDataNodes</span> <span class="o">=</span> <span class="n">String</span><span class="p">.</span><span class="na">join</span><span class="p">(</span><span class="s">"."</span><span class="p">,</span> <span class="n">rules</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">table</span><span class="p">),</span> <span class="n">table</span><span class="p">);</span>
+            <span class="n">shardingRuleConfig</span><span class="p">.</span><span class="na">getTables</span><span class="p">().</span><span class="na">add</span><span class="p">(</span><span class="k">new</span> <span class="n">ShardingTableRuleConfiguration</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">actualDataNodes</span><span class="p">));</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 配置 sharding_table 表的访问，需要自定义实现分库和分表算法</span>
+        <span class="n">ShardingTableRuleConfiguration</span> <span class="n">ShardingTableRuleConfiguration</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ShardingTableRuleConfiguration</span><span class="p">(</span><span class="s">"sharding_table"</span><span class="p">,</span> <span class="s">"db${0..1}.sharding_table"</span><span class="p">);</span>
+        <span class="n">shardingRuleConfig</span><span class="p">.</span><span class="na">setDefaultDatabaseShardingStrategy</span><span class="p">(</span><span class="k">new</span> <span class="n">StandardShardingStrategyConfiguration</span><span class="p">(</span><span class="s">"id"</span><span class="p">,</span> <span class="s">"customDbSharding"</span><span class="p">));</span>
+        <span class="n">shardingRuleConfig</span><span class="p">.</span><span class="na">setDefaultTableShardingStrategy</span><span class="p">(</span><span class="k">new</span> <span class="n">StandardShardingStrategyConfiguration</span><span class="p">(</span><span class="s">"id"</span><span class="p">,</span> <span class="s">"customTableSharding"</span><span class="p">));</span>
+        <span class="n">shardingRuleConfig</span><span class="p">.</span><span class="na">getTables</span><span class="p">().</span><span class="na">add</span><span class="p">(</span><span class="n">ShardingTableRuleConfiguration</span><span class="p">);</span>
+
+        <span class="c1">// 配置分库算法</span>
+        <span class="n">Properties</span> <span class="n">dbShardingAlgorithmProps</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="p">();</span>
+        <span class="n">dbShardingAlgorithmProps</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">"strategy"</span><span class="p">,</span> <span class="s">"standard"</span><span class="p">);</span>
+        <span class="n">dbShardingAlgorithmProps</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">"algorithmClassName"</span><span class="p">,</span> <span class="s">"com.shardingsphere.shardingdb.config.CustomDbSharding"</span><span class="p">);</span>
+        <span class="n">shardingRuleConfig</span><span class="p">.</span><span class="na">getShardingAlgorithms</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="s">"customDbSharding"</span><span class="p">,</span> <span class="k">new</span> <span class="n">ShardingSphereAlgorithmConfiguration</span><span class="p">(</span><span class="s">"CLASS_BASED"</span><span class="p">,</span> <span class="n">dbShardingAlgorithmProps</span><span class="p">));</span>
+
+        <span class="c1">// 配置分表算法</span>
+        <span class="n">Properties</span> <span class="n">tableShardingAlgorithmProps</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="p">();</span>
+        <span class="n">tableShardingAlgorithmProps</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">"strategy"</span><span class="p">,</span> <span class="s">"standard"</span><span class="p">);</span>
+        <span class="n">tableShardingAlgorithmProps</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">"algorithmClassName"</span><span class="p">,</span> <span class="s">"com.shardingsphere.shardingdb.config.CustomTableSharding"</span><span class="p">);</span>
+        <span class="n">shardingRuleConfig</span><span class="p">.</span><span class="na">getShardingAlgorithms</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="s">"customTableSharding"</span><span class="p">,</span> <span class="k">new</span> <span class="n">ShardingSphereAlgorithmConfiguration</span><span class="p">(</span><span class="s">"CLASS_BASED"</span><span class="p">,</span> <span class="n">tableShardingAlgorithmProps</span><span class="p">));</span>
+
+        <span class="c1">// 开启Sql日志</span>
+        <span class="kd">final</span> <span class="n">Properties</span> <span class="n">properties</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="p">();</span>
+        <span class="n">properties</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">"sql-show"</span><span class="p">,</span> <span class="s">"true"</span><span class="p">);</span>
+
+        <span class="c1">// 创建 ShardingSphereDataSource</span>
+        <span class="k">return</span> <span class="n">ShardingSphereDataSourceFactory</span><span class="p">.</span><span class="na">createDataSource</span><span class="p">(</span><span class="n">dataSourceMap</span><span class="p">,</span> <span class="n">Collections</span><span class="p">.</span><span class="na">singleton</span><span class="p">(</span><span class="n">shardingRuleConfig</span><span class="p">),</span> <span class="n">properties</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="nd">@Bean</span><span class="p">(</span><span class="s">"sqlSessionFactory"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">SqlSessionFactory</span> <span class="nf">sqlSessionFactory</span><span class="p">(</span><span class="nd">@Qualifier</span><span class="p">(</span><span class="s">"dataSource"</span><span class="p">)</span><span class="n">DataSource</span> <span class="n">dataSource</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kd">super</span><span class="p">.</span><span class="na">sqlSessionFactory</span><span class="p">(</span><span class="n">getDataSource</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="nd">@Bean</span><span class="p">(</span><span class="s">"sqlSessionTemplate"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">SqlSessionTemplate</span> <span class="nf">sqlSessionTemplate</span><span class="p">(</span><span class="nd">@Qualifier</span><span class="p">(</span><span class="s">"sqlSessionFactory"</span><span class="p">)</span><span class="n">SqlSessionFactory</span> <span class="n">sqlSessionFactory</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kd">super</span><span class="p">.</span><span class="na">sqlSessionTemplate</span><span class="p">(</span><span class="n">sqlSessionFactory</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      从代码上可以看出，大部分还是便于后面直接修复配置文件进行扩展的
+     </p>
+     <p>
+      自定义分库代码如下：主要是获取ThreadLocal中的数据源名称信息，然后返回给Shardingsphere，这样就能访问对应的数据源
+     </p>
+     <p>
+      示例中只是为了简单而使用这种直接的方式，也可以放入其他信息，自行根据需求转成对应的数据源
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">CustomDbSharding</span> <span class="kd">implements</span> <span class="n">StandardShardingAlgorithm</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">doSharding</span><span class="p">(</span><span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">availableTargetNames</span><span class="p">,</span> <span class="kd">final</span> <span class="n">PreciseShardingValue</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">shardingValue</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">dbName</span> <span class="o">=</span> <span class="n">ThreadLocalCache</span><span class="p">.</span><span class="na">threadLocal</span><span class="p">.</span><span class="na">get</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">each</span> <span class="p">:</span> <span class="n">availableTargetNames</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">each</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">dbName</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">each</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="nf">doSharding</span><span class="p">(</span><span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">availableTargetNames</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RangeShardingValue</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">shardingValue</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">availableTargetNames</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getType</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      自定义分表，之类其实应该没有，但为了展示一个完整的，所以也弄了一个自定义分表，这里是直接返回即可
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">CustomTableSharding</span> <span class="kd">implements</span> <span class="n">StandardShardingAlgorithm</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">doSharding</span><span class="p">(</span><span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">availableTargetNames</span><span class="p">,</span> <span class="kd">final</span> <span class="n">PreciseShardingValue</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">shardingValue</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">each</span> <span class="p">:</span> <span class="n">availableTargetNames</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">each</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="nf">doSharding</span><span class="p">(</span><span class="kd">final</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">availableTargetNames</span><span class="p">,</span> <span class="kd">final</span> <span class="n">RangeShardingValue</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">shardingValue</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">availableTargetNames</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getType</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="entitymapper">
+      Entity、Mapper定义
+     </h3>
+     <p>
+      简单的写写即可：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Data</span>
+<span class="nd">@TableName</span><span class="p">(</span><span class="s">"sharding_table"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ShardingTable</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nd">@Data</span>
+<span class="nd">@TableName</span><span class="p">(</span><span class="s">"table1"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Table1</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nd">@Data</span>
+<span class="nd">@TableName</span><span class="p">(</span><span class="s">"table2"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Table2</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nd">@Repository</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ShardingTableMapper</span> <span class="kd">extends</span> <span class="n">BaseMapper</span><span class="o">&lt;</span><span class="n">ShardingTable</span><span class="o">&gt;</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="nd">@Repository</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Table1Mapper</span> <span class="kd">extends</span> <span class="n">BaseMapper</span><span class="o">&lt;</span><span class="n">Table1</span><span class="o">&gt;</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="nd">@Repository</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Table2Mapper</span> <span class="kd">extends</span> <span class="n">BaseMapper</span><span class="o">&lt;</span><span class="n">Table2</span><span class="o">&gt;</span> <span class="p">{</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="_5">
+      测试验证
+     </h3>
+     <p>
+      我们写了测试类，进行测试即可
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">SpringExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="nd">@SpringBootTest</span><span class="p">(</span><span class="n">webEnvironment</span> <span class="o">=</span> <span class="n">SpringBootTest</span><span class="p">.</span><span class="na">WebEnvironment</span><span class="p">.</span><span class="na">RANDOM_PORT</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ShardingDbTest</span> <span class="p">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="n">Table1Mapper</span> <span class="n">table1Mapper</span><span class="p">;</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="n">Table2Mapper</span> <span class="n">table2Mapper</span><span class="p">;</span>
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="n">ShardingTableMapper</span> <span class="n">shardingTableMapper</span><span class="p">;</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Table1</span><span class="o">&gt;</span> <span class="n">l1</span> <span class="o">=</span> <span class="n">table1Mapper</span><span class="p">.</span><span class="na">selectList</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+        <span class="n">l1</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">::</span><span class="n">println</span><span class="p">);</span>
+
+        <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Table2</span><span class="o">&gt;</span> <span class="n">l2</span> <span class="o">=</span> <span class="n">table2Mapper</span><span class="p">.</span><span class="na">selectList</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+        <span class="n">l2</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">::</span><span class="n">println</span><span class="p">);</span>
+
+        <span class="n">ThreadLocalCache</span><span class="p">.</span><span class="na">threadLocal</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="s">"db1"</span><span class="p">);</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">shardingTableMapper</span><span class="p">.</span><span class="na">selectById</span><span class="p">(</span><span class="mi">1L</span><span class="p">));</span>
+
+        <span class="n">ThreadLocalCache</span><span class="p">.</span><span class="na">threadLocal</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="s">"db0"</span><span class="p">);</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">shardingTableMapper</span><span class="p">.</span><span class="na">selectById</span><span class="p">(</span><span class="mi">1L</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      结果如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>Logic SQL: SELECT  id  FROM table1
+SQLStatement: MySQLSelectStatement(limit=Optional.empty, lock=Optional.empty, window=Optional.empty)
+Actual SQL: db0 ::: SELECT  id  FROM table1
+
+Logic SQL: SELECT  id  FROM table2
+SQLStatement: MySQLSelectStatement(limit=Optional.empty, lock=Optional.empty, window=Optional.empty)
+Actual SQL: db1 ::: SELECT  id  FROM table2
+
+Logic SQL: SELECT id FROM sharding_table WHERE id=? 
+SQLStatement: MySQLSelectStatement(limit=Optional.empty, lock=Optional.empty, window=Optional.empty)
+Actual SQL: db1 ::: SELECT id FROM sharding_table WHERE id=?  ::: [1]
+ShardingTable(id=1)
+
+Logic SQL: SELECT id FROM sharding_table WHERE id=? 
+SQLStatement: MySQLSelectStatement(limit=Optional.empty, lock=Optional.empty, window=Optional.empty)
+Actual SQL: db0 ::: SELECT id FROM sharding_table WHERE id=?  ::: [1]
+</code></pre>
+     </div>
+     <p>
+      可以看到访问四次，Actual SQL符合我们的预期
+     </p>
+     <h2 id="_6">
+      总结
+     </h2>
+     <p>
+      展示了如何使用Shardingsphere JDBC实现多数据源访问，Shardingsphere JDBC如何实现自定义的分库和分表算法
+     </p>
+     <h2 id="_7">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/5.0.0/cn/user-manual/shardingsphere-jdbc/usage/sharding/java-api/">
+        shardingsphere 使用 JAVA API
+       </a>
+      </li>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/5.0.0/cn/user-manual/shardingsphere-jdbc/configuration/yaml/sharding/">
+        shardingsphere YAML 配置 数据分片
+       </a>
+      </li>
+      <li>
+       <a href="https://juejin.cn/post/6959333602748268575">
+        ThreadLocal使用与原理
+       </a>
+      </li>
+      <li>
+       <a href="https://shardingsphere.apache.org/document/5.0.0/cn/user-manual/shardingsphere-jdbc/configuration/built-in-algorithm/sharding/">
+        shardingsphere 分片算法
+       </a>
+      </li>
+      <li>
+       <a href="https://github.com/apache/shardingsphere/issues/1976">
+        How to configure a custom sharding strategy?
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
