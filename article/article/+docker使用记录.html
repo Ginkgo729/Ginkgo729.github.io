@@ -92,7 +92,10 @@ systemctl <span class="nb">enable</span> docker
       <pre><span></span><code>yum install -y yum-utils  device-mapper-persistent-data  lvm2
 yum-config-manager  --add-repo   https://download.docker.com/linux/centos/docker-ce.repo
 <span class="c1"># https://download.docker.com/linux/centos/7/x86_64/stable/Packages/,containerd.io-1.2.6-3.3.el7.x86_64.rpm  </span>
+wget https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm
 yum localinstall -y containerd.io-1.2.6-3.3.el7.x86_64.rpm
+<span class="c1"># problem with installed package podman-2.0.5-5.module_el8.3.0+512+b3b58dca.x86_64</span>
+<span class="c1"># yum erase podman buildah</span>
 yum install docker-ce docker-ce-cli
 
 systemctl start docker
@@ -339,6 +342,38 @@ docker rmi -f $(docker images | grep "none" | awk '{print $3}')
       <pre><span></span><code>docker tag repository:tag repository:newTag
 </code></pre>
      </div>
+     <h3 id="2375">
+      开发2375端口给外网
+     </h3>
+     <h4 id="windows_1">
+      Windows
+     </h4>
+     <p>
+      Dockers Engine加上下面的配置：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>"hosts": ["tcp://0.0.0.0:2375"]
+</code></pre>
+     </div>
+     <p>
+      使用命令进行端口代理：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="n">netsh</span> <span class="n">interface</span> <span class="n">portproxy</span> <span class="n">add</span> <span class="n">v4tov4</span> <span class="n">listenport</span><span class="p">=</span><span class="n">2375</span> <span class="n">connectaddress</span><span class="p">=</span><span class="n">127</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">1</span> <span class="n">connectport</span><span class="p">=</span><span class="n">2375</span> <span class="n">listenaddress</span><span class="p">=</span><span class="n">192</span><span class="p">.</span><span class="n">168</span><span class="p">.</span><span class="n">110</span><span class="p">.</span><span class="n">242</span> <span class="n">protocol</span><span class="p">=</span><span class="n">tcp</span>
+</code></pre>
+     </div>
+     <ul>
+      <li>
+       <a href="https://www.jianshu.com/p/c45d47bd5769?spm=a2c6h.13066369.0.0.69459afav3i1E7">
+        Windows开启Docker远程连接
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/qq_16171815/article/details/115701262">
+        windows下，解决docker2375端口连不上，telnet不通
+       </a>
+      </li>
+     </ul>
      <h2 id="_14">
       常用仓库链接
      </h2>
@@ -381,6 +416,11 @@ docker rmi -f $(docker images | grep "none" | awk '{print $3}')
       <li>
        <a href="https://blog.csdn.net/gx947791229/article/details/76512660">
         docker for windows 设置aliyun加速以及改变pull镜像位置
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/qq_40133908/article/details/106388175">
+        docker容器中没有ifconfig或ping命令
        </a>
       </li>
      </ul>
