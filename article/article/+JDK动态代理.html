@@ -1,0 +1,326 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="jdk">
+      JDK 动态代理
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第1天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      本篇文章将以两个JDK常见问题为引，探索介绍JDK动态代理的基础知识点
+     </p>
+     <h2 id="_2">
+      问题
+     </h2>
+     <p>
+      在面试中有下面两个常见的问题，看看你是否能信心十足的回答上来，如果可以，这篇文章那不必花费时间去看
+     </p>
+     <ul>
+      <li>
+       1.JDK动态代理为啥不能对类进行代理?
+      </li>
+      <li>
+       2.抽象类可不可以进行JDK动态代理？
+      </li>
+     </ul>
+     <p>
+      本人也是看文章的时候遇到这两个问题，但没有信心十足回答上来，所以有了这篇文章
+     </p>
+     <h2 id="jdk_1">
+      JDK动态代理的使用示例
+     </h2>
+     <p>
+      我们先写一个简单的JDK动态代理示例代码，看看生成的代理类源码
+     </p>
+     <p>
+      源码工程GitHub地址：https://github.com/lw1243925457/JAVA-000/tree/main/homework/mybatis/jdkProxy
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1">// 接口类，定义了两个，主要是想看看两个接口的代理类情况</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">IExample</span> <span class="p">{</span>
+
+    <span class="n">String</span> <span class="nf">hello</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">IExtend</span> <span class="p">{</span>
+
+    <span class="n">String</span> <span class="nf">hi</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">// 实现类</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ExampleImpl</span> <span class="kd">implements</span> <span class="n">IExample</span><span class="p">,</span> <span class="n">IExtend</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">hello</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">"ExampleImpl hello"</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">hi</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">"hi"</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 代理类</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ProxyInvocationHandler</span> <span class="kd">implements</span> <span class="n">InvocationHandler</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="n">Object</span> <span class="n">target</span><span class="p">;</span>
+
+    <span class="kd">public</span> <span class="nf">ProxyInvocationHandler</span><span class="p">(</span><span class="kd">final</span> <span class="n">Object</span> <span class="n">target</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">target</span> <span class="o">=</span> <span class="n">target</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">invoke</span><span class="p">(</span><span class="n">Object</span> <span class="n">proxy</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">,</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Throwable</span> <span class="p">{</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"enter proxy handler"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">method</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      最后写一个测试类，测试输出，并保存代理类的源码，方便后面进行查看
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ProxyTest</span> <span class="p">{</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">IExample</span> <span class="n">example</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ExampleImpl</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">IExample</span> <span class="n">exampleProxy</span> <span class="o">=</span> <span class="p">(</span><span class="n">IExample</span><span class="p">)</span> <span class="n">Proxy</span><span class="p">.</span>
+                <span class="nf">newProxyInstance</span><span class="p">(</span><span class="n">example</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getClassLoader</span><span class="p">(),</span>
+                        <span class="n">example</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getInterfaces</span><span class="p">(),</span>
+                        <span class="k">new</span> <span class="n">ProxyInvocationHandler</span><span class="p">(</span><span class="n">example</span><span class="p">));</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">exampleProxy</span><span class="p">.</span><span class="na">hello</span><span class="p">());</span>
+
+        <span class="kt">byte</span><span class="o">[]</span> <span class="n">bts</span> <span class="o">=</span> <span class="n">ProxyGenerator</span><span class="p">.</span><span class="na">generateProxyClass</span><span class="p">(</span><span class="s">"$ExampleProxy"</span><span class="p">,</span> <span class="n">example</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getInterfaces</span><span class="p">());</span>
+        <span class="n">FileOutputStream</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FileOutputStream</span><span class="p">(</span><span class="k">new</span> <span class="n">File</span><span class="p">(</span><span class="s">"D:\\Code\\Java\\self\\JAVA-000\\homework\\mybatis\\jdkProxy\\src\\main\\resources\\$GameProxy.class"</span><span class="p">));</span>
+        <span class="n">f</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="n">bts</span><span class="p">);</span>
+        <span class="n">f</span><span class="p">.</span><span class="na">flush</span><span class="p">();</span>
+        <span class="n">f</span><span class="p">.</span><span class="na">close</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      上面的运行结果也很简单：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>enter proxy handler
+ExampleImpl hello
+</code></pre>
+     </div>
+     <h2 id="jdk_2">
+      JDK代理类源码
+     </h2>
+     <p>
+      下面我们来看看测试中，保存下来的代理类源码，如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">$ExampleProxy</span> <span class="kd">extends</span> <span class="n">Proxy</span> <span class="kd">implements</span> <span class="n">IExample</span><span class="p">,</span> <span class="n">IExtend</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Method</span> <span class="n">m1</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Method</span> <span class="n">m4</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Method</span> <span class="n">m3</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Method</span> <span class="n">m2</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Method</span> <span class="n">m0</span><span class="p">;</span>
+
+    <span class="kd">public</span> <span class="nf">$ExampleProxy</span><span class="p">(</span><span class="n">InvocationHandler</span> <span class="n">var1</span><span class="p">)</span> <span class="kd">throws</span>  <span class="p">{</span>
+        <span class="kd">super</span><span class="p">(</span><span class="n">var1</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="nf">equals</span><span class="p">(</span><span class="n">Object</span> <span class="n">var1</span><span class="p">)</span> <span class="kd">throws</span>  <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">Boolean</span><span class="p">)</span><span class="kd">super</span><span class="p">.</span><span class="na">h</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span><span class="p">{</span><span class="n">var1</span><span class="p">});</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">RuntimeException</span> <span class="o">|</span> <span class="n">Error</span> <span class="n">var3</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="n">var3</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var4</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">UndeclaredThrowableException</span><span class="p">(</span><span class="n">var4</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">final</span> <span class="n">String</span> <span class="nf">hi</span><span class="p">()</span> <span class="kd">throws</span>  <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">String</span><span class="p">)</span><span class="kd">super</span><span class="p">.</span><span class="na">h</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">m4</span><span class="p">,</span> <span class="p">(</span><span class="n">Object</span><span class="o">[]</span><span class="p">)</span><span class="kc">null</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">RuntimeException</span> <span class="o">|</span> <span class="n">Error</span> <span class="n">var2</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="n">var2</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var3</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">UndeclaredThrowableException</span><span class="p">(</span><span class="n">var3</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">final</span> <span class="n">String</span> <span class="nf">hello</span><span class="p">()</span> <span class="kd">throws</span>  <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">String</span><span class="p">)</span><span class="kd">super</span><span class="p">.</span><span class="na">h</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">m3</span><span class="p">,</span> <span class="p">(</span><span class="n">Object</span><span class="o">[]</span><span class="p">)</span><span class="kc">null</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">RuntimeException</span> <span class="o">|</span> <span class="n">Error</span> <span class="n">var2</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="n">var2</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var3</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">UndeclaredThrowableException</span><span class="p">(</span><span class="n">var3</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">final</span> <span class="n">String</span> <span class="nf">toString</span><span class="p">()</span> <span class="kd">throws</span>  <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">String</span><span class="p">)</span><span class="kd">super</span><span class="p">.</span><span class="na">h</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">m2</span><span class="p">,</span> <span class="p">(</span><span class="n">Object</span><span class="o">[]</span><span class="p">)</span><span class="kc">null</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">RuntimeException</span> <span class="o">|</span> <span class="n">Error</span> <span class="n">var2</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="n">var2</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var3</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">UndeclaredThrowableException</span><span class="p">(</span><span class="n">var3</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">final</span> <span class="kt">int</span> <span class="nf">hashCode</span><span class="p">()</span> <span class="kd">throws</span>  <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">Integer</span><span class="p">)</span><span class="kd">super</span><span class="p">.</span><span class="na">h</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">m0</span><span class="p">,</span> <span class="p">(</span><span class="n">Object</span><span class="o">[]</span><span class="p">)</span><span class="kc">null</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">RuntimeException</span> <span class="o">|</span> <span class="n">Error</span> <span class="n">var2</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="n">var2</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var3</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">UndeclaredThrowableException</span><span class="p">(</span><span class="n">var3</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">static</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">m1</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"java.lang.Object"</span><span class="p">).</span><span class="na">getMethod</span><span class="p">(</span><span class="s">"equals"</span><span class="p">,</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"java.lang.Object"</span><span class="p">));</span>
+            <span class="n">m4</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"IExtend"</span><span class="p">).</span><span class="na">getMethod</span><span class="p">(</span><span class="s">"hi"</span><span class="p">);</span>
+            <span class="n">m3</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"IExample"</span><span class="p">).</span><span class="na">getMethod</span><span class="p">(</span><span class="s">"hello"</span><span class="p">);</span>
+            <span class="n">m2</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"java.lang.Object"</span><span class="p">).</span><span class="na">getMethod</span><span class="p">(</span><span class="s">"toString"</span><span class="p">);</span>
+            <span class="n">m0</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"java.lang.Object"</span><span class="p">).</span><span class="na">getMethod</span><span class="p">(</span><span class="s">"hashCode"</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">NoSuchMethodException</span> <span class="n">var2</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">NoSuchMethodError</span><span class="p">(</span><span class="n">var2</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">ClassNotFoundException</span> <span class="n">var3</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">NoClassDefFoundError</span><span class="p">(</span><span class="n">var3</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      可以看到，在代理类的内部其中保留被代理对象的很多引用，而在我们定义的代理类InvocationHandler中，保留了对原对象的引用
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">static</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">m1</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"java.lang.Object"</span><span class="p">).</span><span class="na">getMethod</span><span class="p">(</span><span class="s">"equals"</span><span class="p">,</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"java.lang.Object"</span><span class="p">));</span>
+            <span class="n">m4</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"IExtend"</span><span class="p">).</span><span class="na">getMethod</span><span class="p">(</span><span class="s">"hi"</span><span class="p">);</span>
+            <span class="n">m3</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"IExample"</span><span class="p">).</span><span class="na">getMethod</span><span class="p">(</span><span class="s">"hello"</span><span class="p">);</span>
+            <span class="n">m2</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"java.lang.Object"</span><span class="p">).</span><span class="na">getMethod</span><span class="p">(</span><span class="s">"toString"</span><span class="p">);</span>
+            <span class="n">m0</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"java.lang.Object"</span><span class="p">).</span><span class="na">getMethod</span><span class="p">(</span><span class="s">"hashCode"</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">NoSuchMethodException</span> <span class="n">var2</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">NoSuchMethodError</span><span class="p">(</span><span class="n">var2</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">ClassNotFoundException</span> <span class="n">var3</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">NoClassDefFoundError</span><span class="p">(</span><span class="n">var3</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      对于文章开头的两个问题，答案就在类定义上面了，不知道你们看出来了没有
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">$ExampleProxy</span> <span class="kd">extends</span> <span class="n">Proxy</span> <span class="kd">implements</span> <span class="n">IExample</span><span class="p">,</span> <span class="n">IExtend</span>
+</code></pre>
+     </div>
+     <p>
+      可以看到生成的代理类，默认继承了类：Proxy，实现了我们定义的两个接口：IExample, IExtend
+     </p>
+     <p>
+      在Java中，是单继承，也就是代理类已经没有办法再继承其他的类，这就是上面两个问题的答案
+     </p>
+     <h2 id="_3">
+      总结
+     </h2>
+     <p>
+      通过实现代理类，查看代理类的源码，我们得到了开头的两个问题的答案：
+     </p>
+     <ul>
+      <li>
+       1.JDK动态代理为啥不能对类进行代理?
+      </li>
+      <li>
+       2.抽象类可不可以进行JDK动态代理？
+      </li>
+     </ul>
+     <p>
+      代理对应是自动生成的，其中已固定继承了Proxy类，无法再对其他的类和抽象类进行继承
+     </p>
+     <h2 id="_4">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://mp.weixin.qq.com/s/L2rYzOCl7pdEce1ztN0zDg">
+        MyBatis 动态代理详解
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/qq_37858386/article/details/79024000">
+        Android：JAVA语言extends和implements用法的学习
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
