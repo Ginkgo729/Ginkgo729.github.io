@@ -72,6 +72,26 @@ docker run -d --name redis -p <span class="m">6379</span>:6379 redis --requirepa
 ./redis-cli -h <span class="m">127</span>.0.0.1 -p <span class="m">6379</span> -a myPassword
 
 docker run -dit --name mongo -p <span class="m">27017</span>:27017 mongo
+<span class="c1"># windows</span>
+docker run  -d <span class="sb">`</span>
+  -e <span class="nv">MONGO_INITDB_ROOT_USERNAME</span><span class="o">=</span>mongoadmin<span class="sb">`</span>
+  -e <span class="nv">MONGO_INITDB_ROOT_PASSWORD</span><span class="o">=</span>secret <span class="sb">`</span>
+  -v /ect/localtime:/etc/localtime<span class="sb">`</span>
+  -p <span class="m">3389</span>:27017 <span class="sb">`</span>
+  --name mongodb<span class="sb">`</span>
+  --restart always mongo:latest
+
+docker run  -d -e <span class="nv">MONGO_INITDB_ROOT_USERNAME</span><span class="o">=</span>mongoadmin -e <span class="nv">MONGO_INITDB_ROOT_PASSWORD</span><span class="o">=</span>secret -v /etc/localtime:/etc/localtime:ro -p <span class="m">3389</span>:27017  --name mongodb --restart always mongo:latest
+<span class="c1"># linux</span>
+docker run  -d <span class="se">\</span>
+  -e <span class="nv">MONGO_INITDB_ROOT_USERNAME</span><span class="o">=</span>mongoadmin <span class="se">\</span>
+  -e <span class="nv">MONGO_INITDB_ROOT_PASSWORD</span><span class="o">=</span>secret <span class="se">\</span>
+  -v /root/docker/mongodb/data:/data/  <span class="se">\</span>
+  -p <span class="m">27017</span>:27017 <span class="se">\</span>
+  --network mongo-network <span class="se">\</span>
+  --name mongo <span class="se">\</span>
+  --restart always <span class="se">\</span>
+  mongo:latest
 </code></pre>
      </div>
      <h3 id="es">
@@ -392,7 +412,7 @@ docker-compose up -d
      </h3>
      <div class="codehilite">
       <pre><span></span><code><span class="c1"># linux</span>
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9000</span><span class="p">:</span><span class="mi">9000</span> <span class="o">--</span><span class="n">name</span> <span class="n">portainer</span> <span class="o">--</span><span class="n">restart</span> <span class="n">always</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">temp</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">temp</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="n">data</span> <span class="n">portainer</span><span class="o">/</span><span class="n">portainer</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9000</span><span class="p">:</span><span class="mi">9000</span> <span class="o">--</span><span class="n">name</span> <span class="n">portainer</span> <span class="o">--</span><span class="n">restart</span> <span class="n">always</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="n">data</span> <span class="n">portainer</span><span class="o">/</span><span class="n">portainer</span>
 
 <span class="c1"># windows</span>
 <span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9000</span><span class="p">:</span><span class="mi">9000</span> <span class="o">--</span><span class="n">name</span> <span class="n">portainer</span> <span class="o">--</span><span class="n">restart</span> <span class="n">always</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">temp</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">docker_engine</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">pipe</span><span class="o">/</span><span class="n">docker_engine</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">temp</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="n">data</span> <span class="n">portainer</span><span class="o">/</span><span class="n">portainer</span>
@@ -406,6 +426,7 @@ docker-compose up -d
      </h3>
      <div class="codehilite">
       <pre><span></span><code>docker run -tid --name centos8 -p 82:80 -v D:/temp/centos/:/root/ centos
+docker run -tid --name centos8 --net=host -v D:/temp/centos/:/root/ centos
 </code></pre>
      </div>
      <h3 id="_3">
