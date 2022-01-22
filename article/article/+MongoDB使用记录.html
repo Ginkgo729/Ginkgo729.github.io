@@ -128,7 +128,7 @@ db.threadIndexTest.find<span class="o">()</span>.forEach<span class="o">(</span>
       数据库复制
      </h3>
      <div class="codehilite">
-      <pre><span></span><code>db.copyDatabase<span class="o">(</span><span class="s2">"cx_tag"</span>,<span class="s2">"cx_tag"</span>,<span class="s2">"127.0.0.1:27017"</span><span class="o">)</span><span class="p">;</span>
+      <pre><span></span><code>db.copyDatabase<span class="o">(</span><span class="s2">"phone_record"</span>,<span class="s2">"self_growth"</span>,<span class="s2">"10.9.72.82:27017"</span><span class="o">)</span><span class="p">;</span>
 </code></pre>
      </div>
      <h3 id="sortsize">
@@ -158,6 +158,12 @@ mongoimport -h <span class="m">172</span>.19.104.18 --port <span class="m">20017
 
 <span class="c1"># 导出数据库</span>
 mongodump -h <span class="m">172</span>.19.104.18 --port <span class="m">20017</span> -u mytest -p <span class="m">12345</span> -d testdb -o /tmp --authenticationDatabase testdb
+docker <span class="nb">exec</span> -ti mongo mongodump -h <span class="m">127</span>.0.0.1 --port <span class="m">27017</span> -d phone_record -o /home/mongodb/
+docker cp mongo:/home/mongodb/ /root/mongo/
+docker cp /root/mongo/ mongodb:/home/mongodb/
+docker <span class="nb">exec</span> -ti mongodb mongorestore -h <span class="m">127</span>.0.0.1 --port <span class="m">27017</span> -u <span class="s2">"mongoadmin"</span> -p <span class="s2">"secret"</span> --authenticationDatabase admin -d phone_record /home/mongodb/
+docker <span class="nb">exec</span> -ti mongodb mongorestore --username <span class="s2">"mongoadmin"</span> --password <span class="s2">"secret"</span> --authenticationDatabase phone_record --db phone_record /home/mongodb/
+
 <span class="c1"># 导出表</span>
 mongoexport -h <span class="m">172</span>.19.104.18 --port <span class="m">20017</span> -u mytest -p <span class="m">12345</span> -d testdb -c testcol -o /tmp/test.json --authenticationDatabase testdb
 </code></pre>
@@ -224,6 +230,16 @@ mongoexport -h <span class="m">172</span>.19.104.18 --port <span class="m">20017
       <li>
        <a href="https://www.cnblogs.com/kevingrace/p/8184087.html">
         MongoDB日常运维操作命令小结
+       </a>
+      </li>
+      <li>
+       <a href="https://segmentfault.com/a/1190000006236494">
+        mongodb 备份、还原、导入、导出简单操作
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.sunriseydy.top/technology/linux/docker-install-mongodb/">
+        使用 Docker 安装 MongoDB
        </a>
       </li>
      </ul>
