@@ -1,0 +1,363 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="java-ip">
+      Java IP相关操作
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      本篇文章，记录Java中与IP相关的一些操作封装：IPV4地址与数字之间的互转、判断某个ip是否在一个网段内、判断A子网是否属于B子网
+     </p>
+     <h2 id="ipv4">
+      IPV4地址与数字的互转
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">package</span> <span class="nn">cn.nssas.eelantech.utils</span><span class="p">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">IPV4Util</span> <span class="p">{</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * @param ipAddress</span>
+<span class="cm">     * @return</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">long</span> <span class="nf">ipToLong</span><span class="p">(</span><span class="n">String</span> <span class="n">ipAddress</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">long</span> <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">String</span><span class="o">[]</span> <span class="n">ipAddressInArray</span> <span class="o">=</span> <span class="n">ipAddress</span><span class="p">.</span><span class="na">split</span><span class="p">(</span><span class="s">"\\."</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kt">long</span> <span class="n">ip</span> <span class="o">=</span> <span class="n">Long</span><span class="p">.</span><span class="na">parseLong</span><span class="p">(</span><span class="n">ipAddressInArray</span><span class="o">[</span><span class="mi">3</span> <span class="o">-</span> <span class="n">i</span><span class="o">]</span><span class="p">);</span>
+            <span class="c1">// left shifting 24,16,8,0 and bitwise OR</span>
+            <span class="c1">// 1. 192 &lt;&lt; 24</span>
+            <span class="c1">// 1. 168 &lt;&lt; 16</span>
+            <span class="c1">// 1. 1 &lt;&lt; 8</span>
+            <span class="c1">// 1. 2 &lt;&lt; 0</span>
+            <span class="n">result</span> <span class="o">|=</span> <span class="n">ip</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">8</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * @param ip</span>
+<span class="cm">     * @return</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="nf">longToIp</span><span class="p">(</span><span class="kt">long</span> <span class="n">ip</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">StringBuilder</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringBuilder</span><span class="p">(</span><span class="mi">15</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">result</span><span class="p">.</span><span class="na">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Long</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ip</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">));</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">result</span><span class="p">.</span><span class="na">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="sc">'.'</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">ip</span> <span class="o">=</span> <span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">.</span><span class="na">toString</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * @param ip</span>
+<span class="cm">     * @return</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="nf">longToIp2</span><span class="p">(</span><span class="kt">long</span> <span class="n">ip</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">)</span> <span class="o">+</span> <span class="s">"."</span> <span class="o">+</span> <span class="p">((</span><span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">)</span> <span class="o">+</span> <span class="s">"."</span>
+                <span class="o">+</span> <span class="p">((</span><span class="n">ip</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">)</span> <span class="o">+</span> <span class="s">"."</span> <span class="o">+</span> <span class="p">(</span><span class="n">ip</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="javaip-ipmask-ip">
+      java判断某个ip是否在一个网段内 ip/mask IP+掩码
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">package</span> <span class="nn">com.ip</span><span class="p">;</span>  
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">IpTest</span> <span class="p">{</span>  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>  
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">isInRange</span><span class="p">(</span><span class="s">"192.168.1.127"</span><span class="p">,</span> <span class="s">"192.168.1.64/26"</span><span class="p">));</span>  
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">isInRange</span><span class="p">(</span><span class="s">"192.168.1.2"</span><span class="p">,</span> <span class="s">"192.168.0.0/23"</span><span class="p">));</span>  
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">isInRange</span><span class="p">(</span><span class="s">"192.168.0.1"</span><span class="p">,</span> <span class="s">"192.168.0.0/24"</span><span class="p">));</span>  
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">isInRange</span><span class="p">(</span><span class="s">"192.168.0.0"</span><span class="p">,</span> <span class="s">"192.168.0.0/32"</span><span class="p">));</span>  
+    <span class="p">}</span>  
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isInRange</span><span class="p">(</span><span class="n">String</span> <span class="n">ip</span><span class="p">,</span> <span class="n">String</span> <span class="n">cidr</span><span class="p">)</span> <span class="p">{</span>  
+        <span class="n">String</span><span class="o">[]</span> <span class="n">ips</span> <span class="o">=</span> <span class="n">ip</span><span class="p">.</span><span class="na">split</span><span class="p">(</span><span class="s">"\\."</span><span class="p">);</span>  
+        <span class="kt">int</span> <span class="n">ipAddr</span> <span class="o">=</span> <span class="p">(</span><span class="n">Integer</span><span class="p">.</span><span class="na">parseInt</span><span class="p">(</span><span class="n">ips</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">24</span><span class="p">)</span>  
+                <span class="o">|</span> <span class="p">(</span><span class="n">Integer</span><span class="p">.</span><span class="na">parseInt</span><span class="p">(</span><span class="n">ips</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>  
+                <span class="o">|</span> <span class="p">(</span><span class="n">Integer</span><span class="p">.</span><span class="na">parseInt</span><span class="p">(</span><span class="n">ips</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="n">Integer</span><span class="p">.</span><span class="na">parseInt</span><span class="p">(</span><span class="n">ips</span><span class="o">[</span><span class="mi">3</span><span class="o">]</span><span class="p">);</span>  
+        <span class="kt">int</span> <span class="n">type</span> <span class="o">=</span> <span class="n">Integer</span><span class="p">.</span><span class="na">parseInt</span><span class="p">(</span><span class="n">cidr</span><span class="p">.</span><span class="na">replaceAll</span><span class="p">(</span><span class="s">".*/"</span><span class="p">,</span> <span class="s">""</span><span class="p">));</span>  
+        <span class="kt">int</span> <span class="n">mask</span> <span class="o">=</span> <span class="mh">0xFFFFFFFF</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">32</span> <span class="o">-</span> <span class="n">type</span><span class="p">);</span>  
+        <span class="n">String</span> <span class="n">cidrIp</span> <span class="o">=</span> <span class="n">cidr</span><span class="p">.</span><span class="na">replaceAll</span><span class="p">(</span><span class="s">"/.*"</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span>  
+        <span class="n">String</span><span class="o">[]</span> <span class="n">cidrIps</span> <span class="o">=</span> <span class="n">cidrIp</span><span class="p">.</span><span class="na">split</span><span class="p">(</span><span class="s">"\\."</span><span class="p">);</span>  
+        <span class="kt">int</span> <span class="n">cidrIpAddr</span> <span class="o">=</span> <span class="p">(</span><span class="n">Integer</span><span class="p">.</span><span class="na">parseInt</span><span class="p">(</span><span class="n">cidrIps</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">24</span><span class="p">)</span>  
+                <span class="o">|</span> <span class="p">(</span><span class="n">Integer</span><span class="p">.</span><span class="na">parseInt</span><span class="p">(</span><span class="n">cidrIps</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>  
+                <span class="o">|</span> <span class="p">(</span><span class="n">Integer</span><span class="p">.</span><span class="na">parseInt</span><span class="p">(</span><span class="n">cidrIps</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span>  
+                <span class="o">|</span> <span class="n">Integer</span><span class="p">.</span><span class="na">parseInt</span><span class="p">(</span><span class="n">cidrIps</span><span class="o">[</span><span class="mi">3</span><span class="o">]</span><span class="p">);</span>  
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">ipAddr</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">cidrIpAddr</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">);</span>  
+    <span class="p">}</span>  
+<span class="p">}</span>  
+</code></pre>
+     </div>
+     <h2 id="ab">
+      判断A子网是否属于B子网
+     </h2>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">IpTest</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isSubnetInSubnet</span><span class="p">(</span><span class="n">String</span> <span class="n">subnet1</span><span class="p">,</span> <span class="n">String</span> <span class="n">subnet2</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span><span class="o">[]</span> <span class="n">split1</span> <span class="o">=</span> <span class="n">subnet1</span><span class="p">.</span><span class="na">split</span><span class="p">(</span><span class="s">"/"</span><span class="p">);</span>
+        <span class="n">String</span> <span class="n">ip1</span> <span class="o">=</span> <span class="n">split1</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">mask1</span> <span class="o">=</span> <span class="n">split1</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">;</span>
+
+        <span class="n">String</span><span class="o">[]</span> <span class="n">split2</span> <span class="o">=</span> <span class="n">subnet2</span><span class="p">.</span><span class="na">split</span><span class="p">(</span><span class="s">"/"</span><span class="p">);</span>
+        <span class="n">String</span> <span class="n">ip2</span> <span class="o">=</span> <span class="n">split2</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">mask2</span> <span class="o">=</span> <span class="n">split2</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">;</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">mask1</span><span class="p">.</span><span class="na">compareTo</span><span class="p">(</span><span class="n">mask2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">String</span> <span class="n">maskBit2</span> <span class="o">=</span> <span class="n">getMaskByMaskBit</span><span class="p">(</span><span class="n">mask2</span><span class="p">);</span>
+        <span class="n">Long</span> <span class="n">ipNumber1</span> <span class="o">=</span> <span class="n">getIpFromString</span><span class="p">(</span><span class="n">ip1</span><span class="p">);</span>
+        <span class="n">Long</span> <span class="n">ipNumber2</span> <span class="o">=</span> <span class="n">getIpFromString</span><span class="p">(</span><span class="n">ip2</span><span class="p">);</span>
+        <span class="n">Long</span> <span class="n">ipNumber3</span> <span class="o">=</span> <span class="n">getIpFromString</span><span class="p">(</span><span class="n">maskBit2</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">((</span><span class="n">ipNumber1</span> <span class="o">&amp;</span> <span class="n">ipNumber3</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">ipNumber2</span> <span class="o">&amp;</span> <span class="n">ipNumber3</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 把xx.xx.xx.xx类型的转为long类型的</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param ip</span>
+<span class="cm">     * @return</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="n">Long</span> <span class="nf">getIpFromString</span><span class="p">(</span><span class="n">String</span> <span class="n">ip</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">Long</span> <span class="n">ipLong</span> <span class="o">=</span> <span class="mi">0</span><span class="n">L</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">ipTemp</span> <span class="o">=</span> <span class="n">ip</span><span class="p">;</span>
+        <span class="n">ipLong</span> <span class="o">=</span> <span class="n">ipLong</span> <span class="o">*</span> <span class="mi">256</span>
+                <span class="o">+</span> <span class="n">Long</span><span class="p">.</span><span class="na">parseLong</span><span class="p">(</span><span class="n">ipTemp</span><span class="p">.</span><span class="na">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ipTemp</span><span class="p">.</span><span class="na">indexOf</span><span class="p">(</span><span class="sc">'.'</span><span class="p">)));</span>
+        <span class="n">ipTemp</span> <span class="o">=</span> <span class="n">ipTemp</span><span class="p">.</span><span class="na">substring</span><span class="p">(</span><span class="n">ipTemp</span><span class="p">.</span><span class="na">indexOf</span><span class="p">(</span><span class="sc">'.'</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ipTemp</span><span class="p">.</span><span class="na">length</span><span class="p">());</span>
+        <span class="n">ipLong</span> <span class="o">=</span> <span class="n">ipLong</span> <span class="o">*</span> <span class="mi">256</span>
+                <span class="o">+</span> <span class="n">Long</span><span class="p">.</span><span class="na">parseLong</span><span class="p">(</span><span class="n">ipTemp</span><span class="p">.</span><span class="na">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ipTemp</span><span class="p">.</span><span class="na">indexOf</span><span class="p">(</span><span class="sc">'.'</span><span class="p">)));</span>
+        <span class="n">ipTemp</span> <span class="o">=</span> <span class="n">ipTemp</span><span class="p">.</span><span class="na">substring</span><span class="p">(</span><span class="n">ipTemp</span><span class="p">.</span><span class="na">indexOf</span><span class="p">(</span><span class="s">"."</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ipTemp</span><span class="p">.</span><span class="na">length</span><span class="p">());</span>
+        <span class="n">ipLong</span> <span class="o">=</span> <span class="n">ipLong</span> <span class="o">*</span> <span class="mi">256</span>
+                <span class="o">+</span> <span class="n">Long</span><span class="p">.</span><span class="na">parseLong</span><span class="p">(</span><span class="n">ipTemp</span><span class="p">.</span><span class="na">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ipTemp</span><span class="p">.</span><span class="na">indexOf</span><span class="p">(</span><span class="sc">'.'</span><span class="p">)));</span>
+        <span class="n">ipTemp</span> <span class="o">=</span> <span class="n">ipTemp</span><span class="p">.</span><span class="na">substring</span><span class="p">(</span><span class="n">ipTemp</span><span class="p">.</span><span class="na">indexOf</span><span class="p">(</span><span class="sc">'.'</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ipTemp</span><span class="p">.</span><span class="na">length</span><span class="p">());</span>
+        <span class="n">ipLong</span> <span class="o">=</span> <span class="n">ipLong</span> <span class="o">*</span> <span class="mi">256</span> <span class="o">+</span> <span class="n">Long</span><span class="p">.</span><span class="na">parseLong</span><span class="p">(</span><span class="n">ipTemp</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">ipLong</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 根据掩码位获取掩码</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param maskBit</span>
+<span class="cm">     *            掩码位数，如"28"、"30"</span>
+<span class="cm">     * @return</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getMaskByMaskBit</span><span class="p">(</span><span class="n">String</span> <span class="n">maskBit</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="s">""</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">)</span> <span class="o">?</span> <span class="s">"error, maskBit is null !"</span> <span class="p">:</span> <span class="n">getMaskMap</span><span class="p">(</span><span class="n">maskBit</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getMaskMap</span><span class="p">(</span><span class="n">String</span> <span class="n">maskBit</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"1"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"128.0.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"2"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"192.0.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"3"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"224.0.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"4"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"240.0.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"5"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"248.0.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"6"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"252.0.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"7"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"254.0.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"8"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.0.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"9"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.128.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"10"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.192.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"11"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.224.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"12"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.240.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"13"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.248.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"14"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.252.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"15"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.254.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"16"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.0.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"17"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.128.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"18"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.192.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"19"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.224.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"20"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.240.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"21"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.248.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"22"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.252.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"23"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.254.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"24"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.255.0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"25"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.255.128"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"26"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.255.192"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"27"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.255.224"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"28"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.255.240"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"29"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.255.248"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"30"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.255.252"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"31"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.255.254"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">"32"</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">maskBit</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">"255.255.255.255"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="s">"-1"</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_2">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="http://www.what21.com/sys/view/java_java-algorithm_1456895959436.html">
+        Java IP地址转换和数字相互转换算法
+       </a>
+      </li>
+      <li>
+       <a href="https://www.jianshu.com/p/70185244e46c">
+        Java IPv4地址和int类型数字的互相转换
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/yinxianluo/article/details/51208323">
+        java判断某个ip是否在一个网段内 ip/mask IP+掩码
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/dqchouyang/article/details/78276956">
+        判断两个IP是否在同一网段
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/whatday/article/details/79168699">
+        java实现 IP/掩码位 转换 ip段范围
+       </a>
+      </li>
+      <li>
+       <a href="https://dev.maxmind.com/geoip/geoip2/geolite2/">
+        GeoLite2 Free Downloadable Databases
+       </a>
+      </li>
+      <li>
+       <a href="https://maxmind.github.io/GeoIP2-java/">
+        GeoIP2 Java API
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
