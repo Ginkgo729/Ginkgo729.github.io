@@ -1,0 +1,320 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="java">
+      Java 性能调优概览
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      简单对Java性能做一个小结：性能指标的参考因素、大体调优策略方向、工具与GC核心命令
+     </p>
+     <h2 id="_2">
+      指标说明
+     </h2>
+     <p>
+      性能方面的度量指标有很多，我觉得有三个指标非常重要，就是：
+     </p>
+     <p>
+      吞吐量、延迟和并发量。吞吐量：指的是单位时间内能处理的请求数量。吞吐量越高，说明性能越好。
+     </p>
+     <p>
+      延迟：指的是从发出请求到收到响应的时间。延迟越小，说明性能越好。
+     </p>
+     <p>
+      并发量：指的是能同时处理的请求数量，一般来说随着并发量的增加、延迟也会增加。所以延迟这个指标，一般都会是基于并发量来说的。例如并发量是 1000 的时候，延迟是 50 毫秒。
+     </p>
+     <h2 id="_3">
+      体现性能的参考因素
+     </h2>
+     <ul>
+      <li>
+       CPU
+      </li>
+      <li>
+       内存
+      </li>
+      <li>
+       磁盘I/O
+      </li>
+      <li>
+       网络
+      </li>
+      <li>
+       异常
+      </li>
+      <li>
+       数据库
+      </li>
+      <li>
+       锁竞争
+      </li>
+      <li>
+       响应时间
+      </li>
+      <li>
+       数据库响应时间
+       <ul>
+        <li>
+         服务端响应时间
+        </li>
+        <li>
+         网络响应时间
+        </li>
+        <li>
+         客户端响应时间
+        </li>
+       </ul>
+      </li>
+      <li>
+       吞吐量
+       <ul>
+        <li>
+         磁盘吞吐量
+        </li>
+        <li>
+         网络吞吐量
+        </li>
+       </ul>
+      </li>
+      <li>
+       计算机资源分配使用率
+       <ul>
+        <li>
+         CPU占用率
+        </li>
+        <li>
+         内存使用率
+        </li>
+        <li>
+         磁盘I/O
+        </li>
+        <li>
+         网络I/O
+        </li>
+       </ul>
+      </li>
+      <li>
+       负载承受能力
+      </li>
+     </ul>
+     <h2 id="_4">
+      性能调优策略
+     </h2>
+     <ul>
+      <li>
+       性能测试
+       <ul>
+        <li>
+         微基准性能测试
+        </li>
+        <li>
+         宏基准性能测试
+        </li>
+       </ul>
+      </li>
+      <li>
+       排查性能问题
+       <ul>
+        <li>
+         应用服务
+        </li>
+        <li>
+         网络
+        </li>
+        <li>
+         JVM
+        </li>
+        <li>
+         容器
+        </li>
+        <li>
+         计算机资源使用率
+        </li>
+       </ul>
+      </li>
+      <li>
+       制订调优
+       <ul>
+        <li>
+         应用调优
+         <ul>
+          <li>
+           优化代码
+          </li>
+          <li>
+           优化设计
+          </li>
+          <li>
+           优化算法
+          </li>
+         </ul>
+        </li>
+        <li>
+         系统调优
+         <ul>
+          <li>
+           操作系统调优
+          </li>
+          <li>
+           JVM调优(24 | 如何优化JVM内存分配？:https://time.geekbang.org/column/article/108139)
+           <ul>
+            <li>
+             <ol>
+              <li>
+               降低 Minor GC 频率
+              </li>
+             </ol>
+            </li>
+            <li>
+             <ol>
+              <li>
+               降低 Full GC 的频率(减少创建大对象/增大堆内存空间/选择合适的 GC 回收器)
+              </li>
+             </ol>
+            </li>
+           </ul>
+          </li>
+          <li>
+           组件调优
+          </li>
+         </ul>
+        </li>
+        <li>
+         调优策略
+         <ul>
+          <li>
+           时间换空间
+          </li>
+          <li>
+           空间换时间
+          </li>
+         </ul>
+        </li>
+       </ul>
+      </li>
+      <li>
+       兜底策略
+       <ul>
+        <li>
+         限流熔断
+        </li>
+        <li>
+         扩容
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <h2 id="_5">
+      性能测试工具
+     </h2>
+     <ul>
+      <li>
+       ab：ab 测试工具是 Apache 提供的一款测试工具，具有简单易上手的特点，在测试 Web 服务时非常实用。
+      </li>
+      <li>
+       JMeter：JMeter 是 Apache 提供的一款功能性比较全的性能测试工具，同样可以在 Windows 和 Linux 环境下安装使用。
+      </li>
+      <li>
+       <a href="https://sourceforge.net/projects/gcviewer/">
+        GCViewer
+       </a>
+       长时间的 GC 日志，我们很难通过文本形式去查看整体的 GC 性能。此时，我们可以通过GCViewer工具打开日志文件，图形化界面查看整体的 GC 性能
+      </li>
+      <li>
+       <a href="https://www.gceasy.io/index.jsp">
+        GCeasy
+       </a>
+       比较好用的 GC 日志分析工具，GCeasy是一款非常直观的 GC 日志分析工具，我们可以将日志文件压缩之后，上传到 GCeasy 官网即可看到非常清楚的 GC 日志分析结果：
+      </li>
+      <li>
+       常用的监控和诊断内存工具:https://time.geekbang.org/column/article/108582
+      </li>
+     </ul>
+     <h2 id="jvm">
+      JVM相关命令
+     </h2>
+     <h3 id="gc">
+      查看 &amp; 分析 GC 日志
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code># 首先，我们需要通过 JVM 参数预先设置 GC 日志，通常有以下几种 JVM 参数设置
+-XX:+PrintGC 输出GC日志
+-XX:+PrintGCDetails 输出GC的详细日志
+-XX:+PrintGCTimeStamps 输出GC的时间戳（以基准时间的形式）
+-XX:+PrintGCDateStamps 输出GC的时间戳（以日期的形式，如 2013-05-04T21:53:59.234+0800）
+-XX:+PrintHeapAtGC 在进行GC的前后打印出堆的信息
+-Xloggc:../logs/gc.log 日志文件的输出路径
+
+# 这里使用如下参数来打印日志：
+-XX:+PrintGCDateStamps -XX:+PrintGCDetails -Xloggc:./gclogs
+</code></pre>
+     </div>
+     <h3 id="jvm_1">
+      查看 JVM 堆内存分配
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>java -XX:+PrintFlagsFinal -version | grep HeapSize 
+jmap -heap 17284
+</code></pre>
+     </div>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
