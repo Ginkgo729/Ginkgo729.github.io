@@ -1,0 +1,274 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="java">
+      Java 单例模式写法大全
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第5天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      本地将介绍下开发中经常使用的单例模式，列举出其所以的饿汉和懒汉写法，还有线程安全和非线程安全的写法
+     </p>
+     <h2 id="_2">
+      什么是单例模式
+     </h2>
+     <p>
+      保证一个类仅创建一个实例，并提供一个全局访问点
+     </p>
+     <p>
+      Java推荐使用静态内部类或者枚举实现
+     </p>
+     <h2 id="_3">
+      创建模式
+     </h2>
+     <h3 id="_4">
+      饿汉模式
+     </h3>
+     <ul>
+      <li>
+       线程安全：static修饰变量，在类初始化过程中能保证唯一执行
+      </li>
+      <li>
+       优点：保证唯一性，没有锁和其他判断，性能高
+      </li>
+      <li>
+       缺点：在类成员比较多或变量比较大时，在没有使用之前或初始化时就会一直暂用堆内存
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1">//饿汉模式</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="n">instance</span><span class="o">=</span><span class="k">new</span> <span class="n">Singleton</span><span class="p">();</span><span class="c1">//自行创建实例</span>
+    <span class="kd">private</span> <span class="nf">Singleton</span><span class="p">(){}</span><span class="c1">//构造函数</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="p">(){</span><span class="c1">//通过该函数向整个系统提供实例</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="c1">//饿汉模式 枚举实现</span>
+<span class="kd">public</span> <span class="kd">enum</span> <span class="n">Singleton</span> <span class="p">{</span>
+    <span class="n">INSTANCE</span><span class="p">;</span><span class="c1">//不实例化</span>
+
+    <span class="kd">private</span> <span class="nf">Singleton</span><span class="p">()</span> <span class="p">{</span><span class="c1">//构造函数</span>
+    <span class="p">}</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="p">(){</span>
+        <span class="k">return</span> <span class="n">INSTANCE</span><span class="p">;</span><span class="c1">//返回已存在的对象</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="_5">
+      懒汉模式
+     </h3>
+     <ul>
+      <li>
+       线程安全：需要使用锁来保障线程安全
+      </li>
+      <li>
+       优点：需要的时候进行加载
+      </li>
+      <li>
+       缺点：初次使用需要加载
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1">// 前三种只是列举出来，不线程安全</span>
+<span class="c1">//懒汉模式</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="n">instance</span><span class="o">=</span> <span class="kc">null</span><span class="p">;</span><span class="c1">//不实例化</span>
+    <span class="kd">private</span> <span class="nf">Singleton</span><span class="p">(){}</span><span class="c1">//构造函数</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="p">(){</span><span class="c1">//通过该函数向整个系统提供实例</span>
+        <span class="k">if</span><span class="p">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">instance</span><span class="p">){</span><span class="c1">//当instance为null时，则实例化对象，否则直接返回对象</span>
+            <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="p">();</span><span class="c1">//实例化对象</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="p">;</span><span class="c1">//返回已存在的对象</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//懒汉模式 + synchronized同步锁</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="n">instance</span><span class="o">=</span> <span class="kc">null</span><span class="p">;</span><span class="c1">//不实例化</span>
+    <span class="kd">private</span> <span class="nf">Singleton</span><span class="p">(){}</span><span class="c1">//构造函数</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">synchronized</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="p">(){</span><span class="c1">//加同步锁，通过该函数向整个系统提供实例</span>
+        <span class="k">if</span><span class="p">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">instance</span><span class="p">){</span><span class="c1">//当instance为null时，则实例化对象，否则直接返回对象</span>
+            <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="p">();</span><span class="c1">//实例化对象</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="p">;</span><span class="c1">//返回已存在的对象</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//懒汉模式 + synchronized同步锁</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="n">instance</span><span class="o">=</span> <span class="kc">null</span><span class="p">;</span><span class="c1">//不实例化</span>
+    <span class="kd">private</span> <span class="nf">Singleton</span><span class="p">(){}</span><span class="c1">//构造函数</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="p">(){</span><span class="c1">//加同步锁，通过该函数向整个系统提供实例</span>
+        <span class="k">if</span><span class="p">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">instance</span><span class="p">){</span><span class="c1">//当instance为null时，则实例化对象，否则直接返回对象</span>
+          <span class="kd">synchronized</span> <span class="p">(</span><span class="n">Singleton</span><span class="p">.</span><span class="na">class</span><span class="p">){</span>
+              <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="p">();</span><span class="c1">//实例化对象</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="p">;</span><span class="c1">//返回已存在的对象</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 线程安全</span>
+<span class="c1">//懒汉模式 + synchronized同步锁 + double-check</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="n">instance</span><span class="o">=</span> <span class="kc">null</span><span class="p">;</span><span class="c1">//不实例化</span>
+    <span class="kd">private</span> <span class="nf">Singleton</span><span class="p">(){}</span><span class="c1">//构造函数</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="p">(){</span><span class="c1">//加同步锁，通过该函数向整个系统提供实例</span>
+        <span class="k">if</span><span class="p">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">instance</span><span class="p">){</span><span class="c1">//第一次判断，当instance为null时，则实例化对象，否则直接返回对象</span>
+          <span class="kd">synchronized</span> <span class="p">(</span><span class="n">Singleton</span><span class="p">.</span><span class="na">class</span><span class="p">){</span><span class="c1">//同步锁</span>
+             <span class="k">if</span><span class="p">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">instance</span><span class="p">){</span><span class="c1">//第二次判断</span>
+                <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="p">();</span><span class="c1">//实例化对象</span>
+             <span class="p">}</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="p">;</span><span class="c1">//返回已存在的对象</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="c1">//懒汉模式 + synchronized同步锁 + double-check</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="n">instance</span><span class="o">=</span> <span class="kc">null</span><span class="p">;</span><span class="c1">//不实例化</span>
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span><span class="c1">//list属性</span>
+    <span class="kd">private</span> <span class="nf">Singleton</span><span class="p">(){</span>
+      <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="p">();</span>
+    <span class="p">}</span><span class="c1">//构造函数</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="p">(){</span><span class="c1">//加同步锁，通过该函数向整个系统提供实例</span>
+        <span class="k">if</span><span class="p">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">instance</span><span class="p">){</span><span class="c1">//第一次判断，当instance为null时，则实例化对象，否则直接返回对象</span>
+          <span class="kd">synchronized</span> <span class="p">(</span><span class="n">Singleton</span><span class="p">.</span><span class="na">class</span><span class="p">){</span><span class="c1">//同步锁</span>
+             <span class="k">if</span><span class="p">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">instance</span><span class="p">){</span><span class="c1">//第二次判断</span>
+                <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="p">();</span><span class="c1">//实例化对象</span>
+             <span class="p">}</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="p">;</span><span class="c1">//返回已存在的对象</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//懒汉模式 静态内部类实现</span>
+<span class="c1">// 第一次加载Singleton类时并不会初始化sInstance，只有第一次调用getInstance方法时虚拟机加载SingletonHolder 并初始化sInstance ，这样不仅能确保线程安全也能保证Singleton类的唯一性，所以推荐使用静态内部类单例模式。</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="p">{</span> 
+    <span class="kd">private</span> <span class="nf">Singleton</span><span class="p">(){</span>
+    <span class="p">}</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="p">(){</span>  
+        <span class="k">return</span> <span class="n">SingletonHolder</span><span class="p">.</span><span class="na">sInstance</span><span class="p">;</span>  
+    <span class="p">}</span>  
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">SingletonHolder</span> <span class="p">{</span>  
+        <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Singleton</span> <span class="n">sInstance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="p">();</span>  
+    <span class="p">}</span>  
+<span class="p">}</span> 
+
+<span class="c1">//懒汉模式 枚举实现</span>
+<span class="c1">// 推荐使用</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="kd">enum</span> <span class="n">EnumSingleton</span> <span class="p">{</span>
+        <span class="cm">/**</span>
+<span class="cm">         * 懒汉枚举单例</span>
+<span class="cm">         */</span>
+        <span class="n">INSTANCE</span><span class="p">;</span>
+        <span class="kd">private</span> <span class="n">Singleton</span> <span class="n">instance</span><span class="p">;</span>
+
+        <span class="n">EnumSingleton</span><span class="p">(){</span>
+            <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="kd">public</span> <span class="n">Singleton</span> <span class="nf">getSingleton</span><span class="p">(){</span>
+            <span class="k">return</span> <span class="n">instance</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="p">(){</span>
+        <span class="k">return</span> <span class="n">EnumSingleton</span><span class="p">.</span><span class="na">INSTANCE</span><span class="p">.</span><span class="na">getSingleton</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_6">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://juejin.im/post/6844903925783461896">
+        为什么用枚举类来实现单例模式越来越流行？
+       </a>
+      </li>
+      <li>
+       <a href="https://zhuanlan.zhihu.com/p/150004430">
+        Java单例模式怎么用？看这篇就够了
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/itachi85/article/details/50510124">
+        设计模式（二）单例模式的七种写法
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
