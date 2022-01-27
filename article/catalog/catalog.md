@@ -92,6 +92,7 @@
     - 进阶知识路径
         - nio
             - [关于Netty NIO的一些思考.md](./article/article/+关于Netty NIO的一些思考.html)
+    - [Java单例模式写法大全.md](./article/article/+Java单例模式写法大全.html)
     - [java性能调优概览.md](./article/article/+java性能调优概览.html)
 - openCV
     - [轮廓检测.md](./article/article/+轮廓检测.html)
