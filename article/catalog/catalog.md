@@ -112,6 +112,9 @@
 - 开源
     - minetest
         - [minetestWindows编译运行.md](./article/article/+minetestWindows编译运行.html)
+    - Mybatis3
+        - [MyBatis3源码解析(1)探索准备.md](./article/article/+MyBatis3源码解析(1)探索准备.html)
+        - [Mybatis3源码解析系列.md](./article/article/+Mybatis3源码解析系列.html)
     - shardingsphere
         - 实践
             - [ShardingsphereJDBC分库实现多数据库源.md](./article/article/+ShardingsphereJDBC分库实现多数据库源.html)
