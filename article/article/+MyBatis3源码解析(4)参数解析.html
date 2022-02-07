@@ -1,0 +1,394 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="mybatis34">
+      MyBatis3源码解析(4)参数解析
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第9天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      上篇文章中探索了查询语句的执行过程，下面我们接着来看看其中的查询参数的解析细节，是如何工作的
+     </p>
+     <h2 id="_2">
+      参数的解析
+     </h2>
+     <p>
+      在日常的开发中，常见的参数有如下几种：
+     </p>
+     <ul>
+      <li>
+       1.直接传入： func(Object param1, Object param2, ...)
+      </li>
+      <li>
+       2.放入Map中进行传入：func(Map
+       <string, object="">
+        param)
+       </string,>
+      </li>
+      <li>
+       3.类传入： func(Object param)
+      </li>
+     </ul>
+     <p>
+      上面的请求是如何对应的呢，下面让我们带着疑问跟着源码走一走
+     </p>
+     <h3 id="_3">
+      参数解析前的相关准备工作
+     </h3>
+     <p>
+      在上篇中，在ParamNameResolver有获取参数列表的代码，大体上从names中遍历获取的，这里就涉及到names的初始化的相关代码，如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ParamNameResolver</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">GENERIC_NAME_PREFIX</span> <span class="o">=</span> <span class="s">"param"</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">useActualParamName</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">SortedMap</span><span class="o">&lt;</span><span class="n">Integer</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">names</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">hasParamAnnotation</span><span class="p">;</span>
+
+    <span class="c1">// 初始化话的时候，将相关的name已初始化好</span>
+    <span class="kd">public</span> <span class="nf">ParamNameResolver</span><span class="p">(</span><span class="n">Configuration</span> <span class="n">config</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">useActualParamName</span> <span class="o">=</span> <span class="n">config</span><span class="p">.</span><span class="na">isUseActualParamName</span><span class="p">();</span>
+        <span class="n">Class</span><span class="o">&lt;?&gt;[]</span> <span class="n">paramTypes</span> <span class="o">=</span> <span class="n">method</span><span class="p">.</span><span class="na">getParameterTypes</span><span class="p">();</span>
+        <span class="n">Annotation</span><span class="o">[][]</span> <span class="n">paramAnnotations</span> <span class="o">=</span> <span class="n">method</span><span class="p">.</span><span class="na">getParameterAnnotations</span><span class="p">();</span>
+        <span class="n">SortedMap</span><span class="o">&lt;</span><span class="n">Integer</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TreeMap</span><span class="p">();</span>
+        <span class="kt">int</span> <span class="n">paramCount</span> <span class="o">=</span> <span class="n">paramAnnotations</span><span class="p">.</span><span class="na">length</span><span class="p">;</span>
+
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">paramIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">paramIndex</span> <span class="o">&lt;</span> <span class="n">paramCount</span><span class="p">;</span> <span class="o">++</span><span class="n">paramIndex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isSpecialParameter</span><span class="p">(</span><span class="n">paramTypes</span><span class="o">[</span><span class="n">paramIndex</span><span class="o">]</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                <span class="n">Annotation</span><span class="o">[]</span> <span class="n">var9</span> <span class="o">=</span> <span class="n">paramAnnotations</span><span class="o">[</span><span class="n">paramIndex</span><span class="o">]</span><span class="p">;</span>
+                <span class="kt">int</span> <span class="n">var10</span> <span class="o">=</span> <span class="n">var9</span><span class="p">.</span><span class="na">length</span><span class="p">;</span>
+
+                <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">var11</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">var11</span> <span class="o">&lt;</span> <span class="n">var10</span><span class="p">;</span> <span class="o">++</span><span class="n">var11</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">Annotation</span> <span class="n">annotation</span> <span class="o">=</span> <span class="n">var9</span><span class="o">[</span><span class="n">var11</span><span class="o">]</span><span class="p">;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">annotation</span> <span class="k">instanceof</span> <span class="n">Param</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">this</span><span class="p">.</span><span class="na">hasParamAnnotation</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="p">((</span><span class="n">Param</span><span class="p">)</span><span class="n">annotation</span><span class="p">).</span><span class="na">value</span><span class="p">();</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">useActualParamName</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getActualParamName</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">paramIndex</span><span class="p">);</span>
+                    <span class="p">}</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="n">String</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">map</span><span class="p">.</span><span class="na">size</span><span class="p">());</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+
+                <span class="n">map</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">paramIndex</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="na">names</span> <span class="o">=</span> <span class="n">Collections</span><span class="p">.</span><span class="na">unmodifiableSortedMap</span><span class="p">(</span><span class="n">map</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在上面的代码中，names在类构造函数中已经生成好了，后面获取值的时候直接用即可
+     </p>
+     <p>
+      而在ParamNameResolver的构造函数中，通过初步跟踪代码，是直接读取的接口函数参数获取得到的参数，也就是在情况3中传入类，是当做一个参数，后面这个类会一直传递下去
+     </p>
+     <p>
+      ParamNameResolver在MapperMethod中就已经初始化好了
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MapperProxy</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">implements</span> <span class="n">InvocationHandler</span><span class="p">,</span> <span class="n">Serializable</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="n">MapperProxy</span><span class="p">.</span><span class="na">MapperMethodInvoker</span> <span class="nf">cachedInvoker</span><span class="p">(</span><span class="n">Method</span> <span class="n">method</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Throwable</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">MapperProxy</span><span class="p">.</span><span class="na">MapperMethodInvoker</span><span class="p">)</span><span class="n">MapUtil</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">methodCache</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="na">isDefault</span><span class="p">())</span> <span class="p">{</span>
+             <span class="p">......</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="k">new</span> <span class="n">MapperProxy</span><span class="p">.</span><span class="na">PlainMethodInvoker</span><span class="p">(</span><span class="k">new</span> <span class="n">MapperMethod</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">mapperInterface</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">sqlSession</span><span class="p">.</span><span class="na">getConfiguration</span><span class="p">()));</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">RuntimeException</span> <span class="n">var4</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">Throwable</span> <span class="n">cause</span> <span class="o">=</span> <span class="n">var4</span><span class="p">.</span><span class="na">getCause</span><span class="p">();</span>
+            <span class="k">throw</span> <span class="p">(</span><span class="n">Throwable</span><span class="p">)(</span><span class="n">cause</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">var4</span> <span class="p">:</span> <span class="n">cause</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MapperMethod</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">MethodSignature</span> <span class="p">{</span>
+    <span class="p">......</span>
+        <span class="kd">public</span> <span class="nf">MethodSignature</span><span class="p">(</span><span class="n">Configuration</span> <span class="n">configuration</span><span class="p">,</span> <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">mapperInterface</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">)</span> <span class="p">{</span>
+        <span class="p">......</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">paramNameResolver</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ParamNameResolver</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span> <span class="n">method</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      跟踪代码下来，首先进行相关的初始化工作，而后在进行参数的解析获取
+     </p>
+     <h3 id="_4">
+      参数值初步获取
+     </h3>
+     <p>
+      初始化完成后，在代码语句执行前，会获取参数值列表，下面是具体的处理逻辑：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ParamNameResolver</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">getNamedParams</span><span class="p">(</span><span class="n">Object</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 获取参数的数量</span>
+        <span class="kt">int</span> <span class="n">paramCount</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">names</span><span class="p">.</span><span class="na">size</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">args</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">paramCount</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 没有参数声明并且参数数量为1</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="na">hasParamAnnotation</span> <span class="o">&amp;&amp;</span> <span class="n">paramCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">Object</span> <span class="n">value</span> <span class="o">=</span> <span class="n">args</span><span class="o">[</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span><span class="k">this</span><span class="p">.</span><span class="na">names</span><span class="p">.</span><span class="na">firstKey</span><span class="p">()</span><span class="o">]</span><span class="p">;</span>
+                <span class="k">return</span> <span class="n">wrapToMapIfCollection</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">useActualParamName</span> <span class="o">?</span> <span class="p">(</span><span class="n">String</span><span class="p">)</span><span class="k">this</span><span class="p">.</span><span class="na">names</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span> <span class="kc">null</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">param</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ParamMap</span><span class="p">();</span>
+                <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+                <span class="c1">// 遍历name获得参数列表</span>
+                <span class="k">for</span><span class="p">(</span><span class="n">Iterator</span> <span class="n">var5</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">names</span><span class="p">.</span><span class="na">entrySet</span><span class="p">().</span><span class="na">iterator</span><span class="p">();</span> <span class="n">var5</span><span class="p">.</span><span class="na">hasNext</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">Entry</span><span class="o">&lt;</span><span class="n">Integer</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">entry</span> <span class="o">=</span> <span class="p">(</span><span class="n">Entry</span><span class="p">)</span><span class="n">var5</span><span class="p">.</span><span class="na">next</span><span class="p">();</span>
+                    <span class="n">param</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">entry</span><span class="p">.</span><span class="na">getValue</span><span class="p">(),</span> <span class="n">args</span><span class="o">[</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span><span class="n">entry</span><span class="p">.</span><span class="na">getKey</span><span class="p">()</span><span class="o">]</span><span class="p">);</span>
+                    <span class="n">String</span> <span class="n">genericParamName</span> <span class="o">=</span> <span class="s">"param"</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="na">names</span><span class="p">.</span><span class="na">containsValue</span><span class="p">(</span><span class="n">genericParamName</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="n">param</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">genericParamName</span><span class="p">,</span> <span class="n">args</span><span class="o">[</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span><span class="n">entry</span><span class="p">.</span><span class="na">getKey</span><span class="p">()</span><span class="o">]</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+
+                <span class="k">return</span> <span class="n">param</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在上面处理中，如果参数列表中唯一只有一个类参数，那这个参数也算是一个参数，会直接返回类，比如在示例中会直接返回：Person（id=1，name=1），后面获取参数值填充时，会使用类get方法获取值，这个在下面会接着分析
+     </p>
+     <p>
+      而且注意在param中，会存入两个东西，一个argx，一个是paramx，感觉是和${}和#{}有关，这个后面再分析，param在示例中会如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>#如果不加@Param注解
+param:
+- arg0: 1
+- arg1: 1
+- param0: 1
+- param1: 1
+
+#如果加@Param注解
+param:
+- id: 1
+- name: 1
+- param0: 1
+- param1: 1
+</code></pre>
+     </div>
+     <p>
+      在这里就得到后面要用的参数了，这里需要注意了，如果是单个参数，那就是直接返回对应的值；如果是多个参数，那就会放到一个map中，这个map中的key是非常关键的，因为构造preStatement是根据名称从里面取值的，后面会有相关代码
+     </p>
+     <h3 id="prestatement">
+      PreStatement的生成
+     </h3>
+     <p>
+      咋上面得到参数后，并不是直接使用，而在在PreStatement生成的时候用于传入的，关键的代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SimpleExecutor</span> <span class="kd">extends</span> <span class="n">BaseExecutor</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="n">Statement</span> <span class="nf">prepareStatement</span><span class="p">(</span><span class="n">StatementHandler</span> <span class="n">handler</span><span class="p">,</span> <span class="n">Log</span> <span class="n">statementLog</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">Connection</span> <span class="n">connection</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getConnection</span><span class="p">(</span><span class="n">statementLog</span><span class="p">);</span>
+        <span class="n">Statement</span> <span class="n">stmt</span> <span class="o">=</span> <span class="n">handler</span><span class="p">.</span><span class="na">prepare</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">transaction</span><span class="p">.</span><span class="na">getTimeout</span><span class="p">());</span>
+    <span class="c1">// 这里会进行参数的传入</span>
+        <span class="n">handler</span><span class="p">.</span><span class="na">parameterize</span><span class="p">(</span><span class="n">stmt</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">stmt</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DefaultParameterHandler</span> <span class="kd">implements</span> <span class="n">ParameterHandler</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setParameters</span><span class="p">(</span><span class="n">PreparedStatement</span> <span class="n">ps</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">ErrorContext</span><span class="p">.</span><span class="na">instance</span><span class="p">().</span><span class="na">activity</span><span class="p">(</span><span class="s">"setting parameters"</span><span class="p">).</span><span class="na">object</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">mappedStatement</span><span class="p">.</span><span class="na">getParameterMap</span><span class="p">().</span><span class="na">getId</span><span class="p">());</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">ParameterMapping</span><span class="o">&gt;</span> <span class="n">parameterMappings</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">boundSql</span><span class="p">.</span><span class="na">getParameterMappings</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">parameterMappings</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">parameterMappings</span><span class="p">.</span><span class="na">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">ParameterMapping</span> <span class="n">parameterMapping</span> <span class="o">=</span> <span class="p">(</span><span class="n">ParameterMapping</span><span class="p">)</span><span class="n">parameterMappings</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">parameterMapping</span><span class="p">.</span><span class="na">getMode</span><span class="p">()</span> <span class="o">!=</span> <span class="n">ParameterMode</span><span class="p">.</span><span class="na">OUT</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">String</span> <span class="n">propertyName</span> <span class="o">=</span> <span class="n">parameterMapping</span><span class="p">.</span><span class="na">getProperty</span><span class="p">();</span>
+                    <span class="n">Object</span> <span class="n">value</span><span class="p">;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">boundSql</span><span class="p">.</span><span class="na">hasAdditionalParameter</span><span class="p">(</span><span class="n">propertyName</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">boundSql</span><span class="p">.</span><span class="na">getAdditionalParameter</span><span class="p">(</span><span class="n">propertyName</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">parameterObject</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">typeHandlerRegistry</span><span class="p">.</span><span class="na">hasTypeHandler</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">parameterObject</span><span class="p">.</span><span class="na">getClass</span><span class="p">()))</span> <span class="p">{</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">parameterObject</span><span class="p">;</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// 上面的三个先不管，下面就是获取参数的具体的逻辑</span>
+            <span class="c1">// 如果是类，会通过一些处理调用对应的get方法</span>
+            <span class="c1">// 如果多个之间传递的参数，在上面会放入一个map，之间从map中获取即可</span>
+                        <span class="n">MetaObject</span> <span class="n">metaObject</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">configuration</span><span class="p">.</span><span class="na">newMetaObject</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">parameterObject</span><span class="p">);</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">metaObject</span><span class="p">.</span><span class="na">getValue</span><span class="p">(</span><span class="n">propertyName</span><span class="p">);</span>
+                    <span class="p">}</span>
+
+                    <span class="c1">// 和参数拦截器相关的，后面再解析，先放过</span>
+                    <span class="n">TypeHandler</span> <span class="n">typeHandler</span> <span class="o">=</span> <span class="n">parameterMapping</span><span class="p">.</span><span class="na">getTypeHandler</span><span class="p">();</span>
+                    <span class="n">JdbcType</span> <span class="n">jdbcType</span> <span class="o">=</span> <span class="n">parameterMapping</span><span class="p">.</span><span class="na">getJdbcType</span><span class="p">();</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">jdbcType</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="n">jdbcType</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">configuration</span><span class="p">.</span><span class="na">getJdbcTypeForNull</span><span class="p">();</span>
+                    <span class="p">}</span>
+
+                    <span class="k">try</span> <span class="p">{</span>
+            <span class="c1">// 设置相关的值</span>
+                        <span class="n">typeHandler</span><span class="p">.</span><span class="na">setParameter</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">jdbcType</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">SQLException</span> <span class="o">|</span> <span class="n">TypeException</span> <span class="n">var10</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">throw</span> <span class="k">new</span> <span class="n">TypeException</span><span class="p">(</span><span class="s">"Could not set parameters for mapping: "</span> <span class="o">+</span> <span class="n">parameterMapping</span> <span class="o">+</span> <span class="s">". Cause: "</span> <span class="o">+</span> <span class="n">var10</span><span class="p">,</span> <span class="n">var10</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      从上面大致代码可以看到，在正常情况下，参数的设置都是通过名称取获取的，之间传入或者单个传入的情况比较简单
+     </p>
+     <ul>
+      <li>
+       多个参数的情况下，会将所有的参数放入map中，后面根据名称去获取
+      </li>
+      <li>
+       单个参数类的情况下，会调用类的get方法对应获取
+      </li>
+     </ul>
+     <p>
+      那如果混合类型，比如下面的情况：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">PersonMapper</span> <span class="p">{</span>
+    <span class="nd">@Select</span><span class="p">(</span><span class="s">"Select id, name from Person where id=#{id} and name=#{person.name}"</span><span class="p">)</span>
+    <span class="nd">@Results</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nd">@Result</span><span class="p">(</span><span class="n">property</span> <span class="o">=</span> <span class="s">"id"</span><span class="p">,</span> <span class="n">column</span> <span class="o">=</span> <span class="s">"id"</span><span class="p">),</span>
+            <span class="nd">@Result</span><span class="p">(</span><span class="n">property</span><span class="o">=</span><span class="s">"name"</span><span class="p">,</span> <span class="n">column</span> <span class="o">=</span> <span class="s">"name"</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="n">Person</span> <span class="nf">getPersonByMul</span><span class="p">(</span><span class="nd">@Param</span><span class="p">(</span><span class="s">"person"</span><span class="p">)</span> <span class="n">Person</span> <span class="n">person</span><span class="p">,</span> <span class="nd">@Param</span><span class="p">(</span><span class="s">"id"</span><span class="p">)</span> <span class="n">Integer</span> <span class="n">id</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      我们一直根据下，从下面的代码中得到，如果是类，会递归去获取
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MetaObject</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">getValue</span><span class="p">(</span><span class="n">String</span> <span class="n">name</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">PropertyTokenizer</span> <span class="n">prop</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PropertyTokenizer</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">prop</span><span class="p">.</span><span class="na">hasNext</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">MetaObject</span> <span class="n">metaValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">metaObjectForProperty</span><span class="p">(</span><span class="n">prop</span><span class="p">.</span><span class="na">getIndexedName</span><span class="p">());</span>
+        <span class="c1">// 如果是类，后面会再次调用getVale获取</span>
+            <span class="k">return</span> <span class="n">metaValue</span> <span class="o">==</span> <span class="n">SystemMetaObject</span><span class="p">.</span><span class="na">NULL_META_OBJECT</span> <span class="o">?</span> <span class="kc">null</span> <span class="p">:</span> <span class="n">metaValue</span><span class="p">.</span><span class="na">getValue</span><span class="p">(</span><span class="n">prop</span><span class="p">.</span><span class="na">getChildren</span><span class="p">());</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">objectWrapper</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">prop</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_5">
+      总结
+     </h2>
+     <p>
+      通过本篇的探索，我们大致了解了MyBatis3的参数获取解析原理
+     </p>
+     <ul>
+      <li>
+       1.在初始化阶段，获取接口函数的参数列表，初始化names，用于后面获取参数值
+      </li>
+      <li>
+       2.获取参数值，分单个或者多个参数的情况，而且根据参数的类型，有不同的处理方法
+      </li>
+      <li>
+       单个参数：直接返回
+      </li>
+      <li>
+       多个参数：放入Map中返回，后面根据key进行获取
+      </li>
+      <li>
+       参数类型是类：后面调用类的get防护获取对应的值
+      </li>
+      <li>
+       参数类型是Map：后面直接调用get方法
+      </li>
+      <li>
+       3.PreStatement生成，生成的时候对应的值从上面得到的参数值获取
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
