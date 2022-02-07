@@ -1,0 +1,532 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="mybatis33">
+      MyBatis3源码解析(3)查询语句执行
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第8天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      上篇探索了MyBatis中如何获取数据库连接，本篇继续探索，来看看MyBatis中如何执行一条查询语句
+     </p>
+     <h2 id="_2">
+      测试代码
+     </h2>
+     <p>
+      本篇文中用于调试的测试代码请参考：
+      <a href="https://juejin.cn/post/7058354949209456653">
+       MyBatis3源码解析（1）探索准备
+      </a>
+     </p>
+     <p>
+      完整的工程已放到GitHub上：https://github.com/lw1243925457/MybatisDemo/tree/master/example
+     </p>
+     <h2 id="_3">
+      源码解析
+     </h2>
+     <p>
+      在我们的日常开发中，Mapper类我们往往就是定义了一个接口，在其中写方法和对应的语句，然后我们就能直接使用了，很方便，而这背后的原理就是JDK代理
+     </p>
+     <p>
+      如下所示，当我们执行语句：Person person = personMapper.getPersonById(1);
+     </p>
+     <h3 id="mapperproxy">
+      MapperProxy
+     </h3>
+     <p>
+      就来到了Mapper的代理类：MapperProxy，具体的执行逻辑就在invoke函数中
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MapperProxy</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">implements</span> <span class="n">InvocationHandler</span><span class="p">,</span> <span class="n">Serializable</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="nf">MapperProxy</span><span class="p">(</span><span class="n">SqlSession</span> <span class="n">sqlSession</span><span class="p">,</span> <span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">mapperInterface</span><span class="p">,</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">Method</span><span class="p">,</span> <span class="n">MapperProxy</span><span class="p">.</span><span class="na">MapperMethodInvoker</span><span class="o">&gt;</span> <span class="n">methodCache</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">sqlSession</span> <span class="o">=</span> <span class="n">sqlSession</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">mapperInterface</span> <span class="o">=</span> <span class="n">mapperInterface</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">methodCache</span> <span class="o">=</span> <span class="n">methodCache</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">invoke</span><span class="p">(</span><span class="n">Object</span> <span class="n">proxy</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">,</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Throwable</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Object</span><span class="p">.</span><span class="na">class</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">method</span><span class="p">.</span><span class="na">getDeclaringClass</span><span class="p">())</span> <span class="o">?</span> <span class="n">method</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="p">:</span> <span class="k">this</span><span class="p">.</span><span class="na">cachedInvoker</span><span class="p">(</span><span class="n">method</span><span class="p">).</span><span class="na">invoke</span><span class="p">(</span><span class="n">proxy</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">sqlSession</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Throwable</span> <span class="n">var5</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="n">ExceptionUtil</span><span class="p">.</span><span class="na">unwrapThrowable</span><span class="p">(</span><span class="n">var5</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">MapperProxy</span><span class="p">.</span><span class="na">MapperMethodInvoker</span> <span class="nf">cachedInvoker</span><span class="p">(</span><span class="n">Method</span> <span class="n">method</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Throwable</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">MapperProxy</span><span class="p">.</span><span class="na">MapperMethodInvoker</span><span class="p">)</span><span class="n">MapUtil</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">methodCache</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="na">isDefault</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="k">try</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="n">privateLookupInMethod</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">new</span> <span class="n">MapperProxy</span><span class="p">.</span><span class="na">DefaultMethodInvoker</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">getMethodHandleJava8</span><span class="p">(</span><span class="n">method</span><span class="p">))</span> <span class="p">:</span> <span class="k">new</span> <span class="n">MapperProxy</span><span class="p">.</span><span class="na">DefaultMethodInvoker</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">getMethodHandleJava9</span><span class="p">(</span><span class="n">method</span><span class="p">));</span>
+                    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">InstantiationException</span> <span class="o">|</span> <span class="n">InvocationTargetException</span> <span class="o">|</span> <span class="n">NoSuchMethodException</span> <span class="o">|</span> <span class="n">IllegalAccessException</span> <span class="n">var4</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">throw</span> <span class="k">new</span> <span class="n">RuntimeException</span><span class="p">(</span><span class="n">var4</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// 本地调试第一次执行，走这里的逻辑</span>
+                    <span class="k">return</span> <span class="k">new</span> <span class="n">MapperProxy</span><span class="p">.</span><span class="na">PlainMethodInvoker</span><span class="p">(</span><span class="k">new</span> <span class="n">MapperMethod</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">mapperInterface</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">sqlSession</span><span class="p">.</span><span class="na">getConfiguration</span><span class="p">()));</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">RuntimeException</span> <span class="n">var4</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">Throwable</span> <span class="n">cause</span> <span class="o">=</span> <span class="n">var4</span><span class="p">.</span><span class="na">getCause</span><span class="p">();</span>
+            <span class="k">throw</span> <span class="p">(</span><span class="n">Throwable</span><span class="p">)(</span><span class="n">cause</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">var4</span> <span class="p">:</span> <span class="n">cause</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      值得注意的一点是，SQLSession包含数据库的连接信息，也就是数据库的相关东西是提前初始化的
+     </p>
+     <h3 id="mappermethod">
+      MapperMethod
+     </h3>
+     <p>
+      接着来到MapperMethod中，其中我们可以看到：
+     </p>
+     <p>
+      根据不同的SQL类型，走不同的类型
+     </p>
+     <p>
+      在其中的SELECT中，根据不同的数据返回类型，走不同的逻辑
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MapperMethod</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="nf">MapperMethod</span><span class="p">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">mapperInterface</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">,</span> <span class="n">Configuration</span> <span class="n">config</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">command</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MapperMethod</span><span class="p">.</span><span class="na">SqlCommand</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">mapperInterface</span><span class="p">,</span> <span class="n">method</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">method</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MapperMethod</span><span class="p">.</span><span class="na">MethodSignature</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">mapperInterface</span><span class="p">,</span> <span class="n">method</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">execute</span><span class="p">(</span><span class="n">SqlSession</span> <span class="n">sqlSession</span><span class="p">,</span> <span class="n">Object</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Object</span> <span class="n">result</span><span class="p">;</span>
+        <span class="n">Object</span> <span class="n">param</span><span class="p">;</span>
+        <span class="k">switch</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">command</span><span class="p">.</span><span class="na">getType</span><span class="p">())</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">INSERT</span><span class="p">:</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">convertArgsToSqlCommandParam</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">rowCountResult</span><span class="p">(</span><span class="n">sqlSession</span><span class="p">.</span><span class="na">insert</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">command</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">param</span><span class="p">));</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="n">UPDATE</span><span class="p">:</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">convertArgsToSqlCommandParam</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">rowCountResult</span><span class="p">(</span><span class="n">sqlSession</span><span class="p">.</span><span class="na">update</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">command</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">param</span><span class="p">));</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="n">DELETE</span><span class="p">:</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">convertArgsToSqlCommandParam</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">rowCountResult</span><span class="p">(</span><span class="n">sqlSession</span><span class="p">.</span><span class="na">delete</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">command</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">param</span><span class="p">));</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="n">SELECT</span><span class="p">:</span>
+        <span class="c1">// 根据不同的返回类型，走不同的逻辑</span>
+        <span class="c1">// 但其中调用的解析参数的方法是一样的</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">returnsVoid</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">hasResultHandler</span><span class="p">())</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">executeWithResultHandler</span><span class="p">(</span><span class="n">sqlSession</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">returnsMany</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">executeForMany</span><span class="p">(</span><span class="n">sqlSession</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">returnsMap</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">executeForMap</span><span class="p">(</span><span class="n">sqlSession</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">returnsCursor</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">executeForCursor</span><span class="p">(</span><span class="n">sqlSession</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// 解析参数的方法，上面的查询处理逻辑中也调用了此方法</span>
+        <span class="c1">// 也就是这个就是通用的参数处理逻辑</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">convertArgsToSqlCommandParam</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">sqlSession</span><span class="p">.</span><span class="na">selectOne</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">command</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span> <span class="n">param</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">returnsOptional</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">result</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">getReturnType</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">getClass</span><span class="p">())))</span> <span class="p">{</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">case</span> <span class="n">FLUSH</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">sqlSession</span><span class="p">.</span><span class="na">flushStatements</span><span class="p">();</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="k">default</span><span class="p">:</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">BindingException</span><span class="p">(</span><span class="s">"Unknown execution method for: "</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="na">command</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">result</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">getReturnType</span><span class="p">().</span><span class="na">isPrimitive</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">returnsVoid</span><span class="p">())</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">BindingException</span><span class="p">(</span><span class="s">"Mapper method '"</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="na">command</span><span class="p">.</span><span class="na">getName</span><span class="p">()</span> <span class="o">+</span> <span class="s">" attempted to return null from a method with a primitive return type ("</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="na">method</span><span class="p">.</span><span class="na">getReturnType</span><span class="p">()</span> <span class="o">+</span> <span class="s">")."</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      其中包含了两个重要的变量，我们来看看其中的内容：
+     </p>
+     <p>
+      method:
+     </p>
+     <ul>
+      <li>
+       returnsMany=false
+      </li>
+      <li>
+       returnsMap=false
+      </li>
+      <li>
+       returnsVoid=false
+      </li>
+      <li>
+       returnsCursor=false
+      </li>
+      <li>
+       returnsOptional=false
+      </li>
+      <li>
+       returnsType=Person
+      </li>
+      <li>
+       mapKey=null
+      </li>
+      <li>
+       resultHandlerIndex=null
+      </li>
+      <li>
+       rowBoundsIndex=null
+      </li>
+      <li>
+       paramNameResolver
+      </li>
+     </ul>
+     <p>
+      可以看到其中包含的查询参数相关的，还有很多与返回结果相关的，返回结果相关的大部分都是可设置的，这个后面我们尝试探索探索
+     </p>
+     <p>
+      command：
+     </p>
+     <ul>
+      <li>
+       name=mapper.PersonMapper.getPersonById
+      </li>
+      <li>
+       type=SELECT
+      </li>
+     </ul>
+     <p>
+      command中就name是调用方法的具体名称，可以说是唯一标识，而Type是语句类型
+     </p>
+     <p>
+      command是提前就生成好的，这部分涉及到Mapper的初始化内容，后面再进行探索
+     </p>
+     <p>
+      上面的关键逻辑有参数的解析，这部分在日常的开发接触也较多，后面将用一篇文章来详细探索下
+     </p>
+     <p>
+      这里获得的Param就是：1
+     </p>
+     <h3 id="sqlsession">
+      SQLSession
+     </h3>
+     <p>
+      接下来就到了MyBatis语句执行相关的
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DefaultSqlSession</span> <span class="kd">implements</span> <span class="n">SqlSession</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T</span> <span class="nf">selectOne</span><span class="p">(</span><span class="n">String</span> <span class="n">statement</span><span class="p">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">selectList</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">parameter</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">list</span><span class="p">.</span><span class="na">size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">list</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">list</span><span class="p">.</span><span class="na">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">TooManyResultsException</span><span class="p">(</span><span class="s">"Expected one result (or null) to be returned by selectOne(), but found: "</span> <span class="o">+</span> <span class="n">list</span><span class="p">.</span><span class="na">size</span><span class="p">());</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="nf">selectList</span><span class="p">(</span><span class="n">String</span> <span class="n">statement</span><span class="p">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">selectList</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">RowBounds</span><span class="p">.</span><span class="na">DEFAULT</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="nf">selectList</span><span class="p">(</span><span class="n">String</span> <span class="n">statement</span><span class="p">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">RowBounds</span> <span class="n">rowBounds</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">selectList</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">Executor</span><span class="p">.</span><span class="na">NO_RESULT_HANDLER</span><span class="p">);</span>
+    <span class="p">}</span>
+
+
+    <span class="kd">private</span> <span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="nf">selectList</span><span class="p">(</span><span class="n">String</span> <span class="n">statement</span><span class="p">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">RowBounds</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">ResultHandler</span> <span class="n">handler</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">List</span> <span class="n">var6</span><span class="p">;</span>
+        <span class="k">try</span> <span class="p">{</span>
+        <span class="c1">// 已初始化好的</span>
+            <span class="n">MappedStatement</span> <span class="n">ms</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">configuration</span><span class="p">.</span><span class="na">getMappedStatement</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+        <span class="c1">// 执行SQL语句</span>
+            <span class="n">var6</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">executor</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">wrapCollection</span><span class="p">(</span><span class="n">parameter</span><span class="p">),</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">handler</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">var10</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="n">ExceptionFactory</span><span class="p">.</span><span class="na">wrapException</span><span class="p">(</span><span class="s">"Error querying database.  Cause: "</span> <span class="o">+</span> <span class="n">var10</span><span class="p">,</span> <span class="n">var10</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+            <span class="n">ErrorContext</span><span class="p">.</span><span class="na">instance</span><span class="p">().</span><span class="na">reset</span><span class="p">();</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">var6</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="executor">
+      Executor
+     </h3>
+     <p>
+      然后来到Executor，之类首先来到Cache，然后到Simple，Cache的作用后面我们再进行分析
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CachingExecutor</span> <span class="kd">implements</span> <span class="n">Executor</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="nf">query</span><span class="p">(</span><span class="n">MappedStatement</span> <span class="n">ms</span><span class="p">,</span> <span class="n">Object</span> <span class="n">parameterObject</span><span class="p">,</span> <span class="n">RowBounds</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">ResultHandler</span> <span class="n">resultHandler</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">BoundSql</span> <span class="n">boundSql</span> <span class="o">=</span> <span class="n">ms</span><span class="p">.</span><span class="na">getBoundSql</span><span class="p">(</span><span class="n">parameterObject</span><span class="p">);</span>
+        <span class="n">CacheKey</span> <span class="n">key</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">createCacheKey</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">parameterObject</span><span class="p">,</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">boundSql</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">parameterObject</span><span class="p">,</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">resultHandler</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">boundSql</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="nf">query</span><span class="p">(</span><span class="n">MappedStatement</span> <span class="n">ms</span><span class="p">,</span> <span class="n">Object</span> <span class="n">parameterObject</span><span class="p">,</span> <span class="n">RowBounds</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">ResultHandler</span> <span class="n">resultHandler</span><span class="p">,</span> <span class="n">CacheKey</span> <span class="n">key</span><span class="p">,</span> <span class="n">BoundSql</span> <span class="n">boundSql</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">Cache</span> <span class="n">cache</span> <span class="o">=</span> <span class="n">ms</span><span class="p">.</span><span class="na">getCache</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">cache</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">flushCacheIfRequired</span><span class="p">(</span><span class="n">ms</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="na">isUseCache</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">resultHandler</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">ensureNoOutParams</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">boundSql</span><span class="p">);</span>
+                <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="p">(</span><span class="n">List</span><span class="p">)</span><span class="k">this</span><span class="p">.</span><span class="na">tcm</span><span class="p">.</span><span class="na">getObject</span><span class="p">(</span><span class="n">cache</span><span class="p">,</span> <span class="n">key</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">list</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">list</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">delegate</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">parameterObject</span><span class="p">,</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">resultHandler</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">boundSql</span><span class="p">);</span>
+                    <span class="k">this</span><span class="p">.</span><span class="na">tcm</span><span class="p">.</span><span class="na">putObject</span><span class="p">(</span><span class="n">cache</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">list</span><span class="p">);</span>
+                <span class="p">}</span>
+
+                <span class="k">return</span> <span class="n">list</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">delegate</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">parameterObject</span><span class="p">,</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">resultHandler</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">boundSql</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="nf">query</span><span class="p">(</span><span class="n">MappedStatement</span> <span class="n">ms</span><span class="p">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">RowBounds</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">ResultHandler</span> <span class="n">resultHandler</span><span class="p">,</span> <span class="n">CacheKey</span> <span class="n">key</span><span class="p">,</span> <span class="n">BoundSql</span> <span class="n">boundSql</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">ErrorContext</span><span class="p">.</span><span class="na">instance</span><span class="p">().</span><span class="na">resource</span><span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="na">getResource</span><span class="p">()).</span><span class="na">activity</span><span class="p">(</span><span class="s">"executing a query"</span><span class="p">).</span><span class="na">object</span><span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">closed</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">ExecutorException</span><span class="p">(</span><span class="s">"Executor was closed."</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">queryStack</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">ms</span><span class="p">.</span><span class="na">isFlushCacheRequired</span><span class="p">())</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">clearLocalCache</span><span class="p">();</span>
+            <span class="p">}</span>
+
+            <span class="n">List</span> <span class="n">list</span><span class="p">;</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="o">++</span><span class="k">this</span><span class="p">.</span><span class="na">queryStack</span><span class="p">;</span>
+        <span class="c1">// 从local中获取缓存结果，但作用域是多少呢？这个后面我们探索下</span>
+                <span class="n">list</span> <span class="o">=</span> <span class="n">resultHandler</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="p">(</span><span class="n">List</span><span class="p">)</span><span class="k">this</span><span class="p">.</span><span class="na">localCache</span><span class="p">.</span><span class="na">getObject</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="p">:</span> <span class="kc">null</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">list</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">this</span><span class="p">.</span><span class="na">handleLocallyCachedOutputParameters</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">boundSql</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// 查询</span>
+                    <span class="n">list</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">queryFromDatabase</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">resultHandler</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">boundSql</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+                <span class="o">--</span><span class="k">this</span><span class="p">.</span><span class="na">queryStack</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">.......</span>
+
+            <span class="k">return</span> <span class="n">list</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="nf">queryFromDatabase</span><span class="p">(</span><span class="n">MappedStatement</span> <span class="n">ms</span><span class="p">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">RowBounds</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">ResultHandler</span> <span class="n">resultHandler</span><span class="p">,</span> <span class="n">CacheKey</span> <span class="n">key</span><span class="p">,</span> <span class="n">BoundSql</span> <span class="n">boundSql</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">localCache</span><span class="p">.</span><span class="na">putObject</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">ExecutionPlaceholder</span><span class="p">.</span><span class="na">EXECUTION_PLACEHOLDER</span><span class="p">);</span>
+
+        <span class="n">List</span> <span class="n">list</span><span class="p">;</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">list</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">doQuery</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">resultHandler</span><span class="p">,</span> <span class="n">boundSql</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">localCache</span><span class="p">.</span><span class="na">removeObject</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 取得结果后，放入缓存</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">localCache</span><span class="p">.</span><span class="na">putObject</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">list</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="na">getStatementType</span><span class="p">()</span> <span class="o">==</span> <span class="n">StatementType</span><span class="p">.</span><span class="na">CALLABLE</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">localOutputParameterCache</span><span class="p">.</span><span class="na">putObject</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">parameter</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">list</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SimpleExecutor</span> <span class="kd">extends</span> <span class="n">BaseExecutor</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="nf">doQuery</span><span class="p">(</span><span class="n">MappedStatement</span> <span class="n">ms</span><span class="p">,</span> <span class="n">Object</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">RowBounds</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">ResultHandler</span> <span class="n">resultHandler</span><span class="p">,</span> <span class="n">BoundSql</span> <span class="n">boundSql</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">Statement</span> <span class="n">stmt</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+        <span class="n">List</span> <span class="n">var9</span><span class="p">;</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">Configuration</span> <span class="n">configuration</span> <span class="o">=</span> <span class="n">ms</span><span class="p">.</span><span class="na">getConfiguration</span><span class="p">();</span>
+            <span class="n">StatementHandler</span> <span class="n">handler</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">.</span><span class="na">newStatementHandler</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">wrapper</span><span class="p">,</span> <span class="n">ms</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">resultHandler</span><span class="p">,</span> <span class="n">boundSql</span><span class="p">);</span>
+        <span class="c1">// 到这里就得到已经能够执行的stmt：</span>
+        <span class="c1">// prep2: select id,name from person where id=?{1: 1}</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">prepareStatement</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">ms</span><span class="p">.</span><span class="na">getStatementLog</span><span class="p">());</span>
+            <span class="n">var9</span> <span class="o">=</span> <span class="n">handler</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="n">stmt</span><span class="p">,</span> <span class="n">resultHandler</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">closeStatement</span><span class="p">(</span><span class="n">stmt</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">var9</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">Statement</span> <span class="nf">prepareStatement</span><span class="p">(</span><span class="n">StatementHandler</span> <span class="n">handler</span><span class="p">,</span> <span class="n">Log</span> <span class="n">statementLog</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">Connection</span> <span class="n">connection</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getConnection</span><span class="p">(</span><span class="n">statementLog</span><span class="p">);</span>
+        <span class="n">Statement</span> <span class="n">stmt</span> <span class="o">=</span> <span class="n">handler</span><span class="p">.</span><span class="na">prepare</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">transaction</span><span class="p">.</span><span class="na">getTimeout</span><span class="p">());</span>
+        <span class="n">handler</span><span class="p">.</span><span class="na">parameterize</span><span class="p">(</span><span class="n">stmt</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">stmt</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="statementhandler">
+      StatementHandler
+     </h3>
+     <p>
+      这里是MyBatis的StatementHandler，直接拿到我们的stmt执行，得到结果
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PreparedStatementHandler</span> <span class="kd">extends</span> <span class="n">BaseStatementHandler</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="nf">query</span><span class="p">(</span><span class="n">Statement</span> <span class="n">statement</span><span class="p">,</span> <span class="n">ResultHandler</span> <span class="n">resultHandler</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">PreparedStatement</span> <span class="n">ps</span> <span class="o">=</span> <span class="p">(</span><span class="n">PreparedStatement</span><span class="p">)</span><span class="n">statement</span><span class="p">;</span>
+        <span class="n">ps</span><span class="p">.</span><span class="na">execute</span><span class="p">();</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">resultSetHandler</span><span class="p">.</span><span class="na">handleResultSets</span><span class="p">(</span><span class="n">ps</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="resulthandler">
+      ResultHandler
+     </h3>
+     <p>
+      得到结果后，获取结果，并处理转换成我们想要的结果，比如我们这里的是Person类
+     </p>
+     <p>
+      获取结果并处理转换，这个也是我们日常开发中经常打交道的，自己前期也遇到不少的问题
+     </p>
+     <p>
+      这部分后面也会用单独的篇章进行详细的分析
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DefaultResultSetHandler</span> <span class="kd">implements</span> <span class="n">ResultSetHandler</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="nf">handleResultSets</span><span class="p">(</span><span class="n">Statement</span> <span class="n">stmt</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">ErrorContext</span><span class="p">.</span><span class="na">instance</span><span class="p">().</span><span class="na">activity</span><span class="p">(</span><span class="s">"handling results"</span><span class="p">).</span><span class="na">object</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">mappedStatement</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">multipleResults</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="p">();</span>
+        <span class="kt">int</span> <span class="n">resultSetCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ResultSetWrapper</span> <span class="n">rsw</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getFirstResultSet</span><span class="p">(</span><span class="n">stmt</span><span class="p">);</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">ResultMap</span><span class="o">&gt;</span> <span class="n">resultMaps</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">mappedStatement</span><span class="p">.</span><span class="na">getResultMaps</span><span class="p">();</span>
+        <span class="kt">int</span> <span class="n">resultMapCount</span> <span class="o">=</span> <span class="n">resultMaps</span><span class="p">.</span><span class="na">size</span><span class="p">();</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">validateResultMapsCount</span><span class="p">(</span><span class="n">rsw</span><span class="p">,</span> <span class="n">resultMapCount</span><span class="p">);</span>
+
+        <span class="k">while</span><span class="p">(</span><span class="n">rsw</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">resultMapCount</span> <span class="o">&gt;</span> <span class="n">resultSetCount</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">ResultMap</span> <span class="n">resultMap</span> <span class="o">=</span> <span class="p">(</span><span class="n">ResultMap</span><span class="p">)</span><span class="n">resultMaps</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">resultSetCount</span><span class="p">);</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">handleResultSet</span><span class="p">(</span><span class="n">rsw</span><span class="p">,</span> <span class="n">resultMap</span><span class="p">,</span> <span class="n">multipleResults</span><span class="p">,</span> <span class="p">(</span><span class="n">ResultMapping</span><span class="p">)</span><span class="kc">null</span><span class="p">);</span>
+            <span class="n">rsw</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getNextResultSet</span><span class="p">(</span><span class="n">stmt</span><span class="p">);</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">cleanUpAfterHandlingResultSet</span><span class="p">();</span>
+            <span class="o">++</span><span class="n">resultSetCount</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">String</span><span class="o">[]</span> <span class="n">resultSets</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">mappedStatement</span><span class="p">.</span><span class="na">getResultSets</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">resultSets</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">while</span><span class="p">(</span><span class="n">rsw</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">resultSetCount</span> <span class="o">&lt;</span> <span class="n">resultSets</span><span class="p">.</span><span class="na">length</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">ResultMapping</span> <span class="n">parentMapping</span> <span class="o">=</span> <span class="p">(</span><span class="n">ResultMapping</span><span class="p">)</span><span class="k">this</span><span class="p">.</span><span class="na">nextResultMaps</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">resultSets</span><span class="o">[</span><span class="n">resultSetCount</span><span class="o">]</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">parentMapping</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">String</span> <span class="n">nestedResultMapId</span> <span class="o">=</span> <span class="n">parentMapping</span><span class="p">.</span><span class="na">getNestedResultMapId</span><span class="p">();</span>
+                    <span class="n">ResultMap</span> <span class="n">resultMap</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">configuration</span><span class="p">.</span><span class="na">getResultMap</span><span class="p">(</span><span class="n">nestedResultMapId</span><span class="p">);</span>
+                    <span class="k">this</span><span class="p">.</span><span class="na">handleResultSet</span><span class="p">(</span><span class="n">rsw</span><span class="p">,</span> <span class="n">resultMap</span><span class="p">,</span> <span class="p">(</span><span class="n">List</span><span class="p">)</span><span class="kc">null</span><span class="p">,</span> <span class="n">parentMapping</span><span class="p">);</span>
+                <span class="p">}</span>
+
+                <span class="n">rsw</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getNextResultSet</span><span class="p">(</span><span class="n">stmt</span><span class="p">);</span>
+                <span class="k">this</span><span class="p">.</span><span class="na">cleanUpAfterHandlingResultSet</span><span class="p">();</span>
+                <span class="o">++</span><span class="n">resultSetCount</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">collapseSingleResultList</span><span class="p">(</span><span class="n">multipleResults</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_4">
+      总结
+     </h2>
+     <p>
+      本篇文章，根据了一个查询语句执行的大致的流程：
+     </p>
+     <ul>
+      <li>
+       MapperProxy：Mapper接口代理类，相关数据是提前初始化的
+      </li>
+      <li>
+       MapperMethod：具体接口方法的执行
+      </li>
+      <li>
+       SqlSession:SQL入口
+      </li>
+      <li>
+       Executor：具体执行逻辑入口
+      </li>
+      <li>
+       StatementHandler：对Statement的封装
+      </li>
+      <li>
+       ResultHandler：结果获取与处理转换
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
