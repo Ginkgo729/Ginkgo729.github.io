@@ -1,0 +1,309 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="mybatis35">
+      MyBatis3源码解析(5)查询结果处理
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第10天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      上篇中解析了MyBatis3中参数是如何传递处理的，本篇接着看看在获取到查询结果后，MyBatis3是如何将SQL查询结果与我们接口函数定义的返回结果对应的
+     </p>
+     <h2 id="_2">
+      源码
+     </h2>
+     <h3 id="_3">
+      获取结果后处理的入口
+     </h3>
+     <p>
+      在：
+      <a href="https://juejin.cn/post/7061427063793647647/">
+       MyBatis3源码解析(3)查询语句执行
+      </a>
+      中，我们大致知道了查询结果处理的想代码位置，如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PreparedStatementHandler</span> <span class="kd">extends</span> <span class="n">BaseStatementHandler</span> <span class="p">{</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="nf">query</span><span class="p">(</span><span class="n">Statement</span> <span class="n">statement</span><span class="p">,</span> <span class="n">ResultHandler</span> <span class="n">resultHandler</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+    <span class="n">PreparedStatement</span> <span class="n">ps</span> <span class="o">=</span> <span class="p">(</span><span class="n">PreparedStatement</span><span class="p">)</span> <span class="n">statement</span><span class="p">;</span>
+    <span class="n">ps</span><span class="p">.</span><span class="na">execute</span><span class="p">();</span>
+    <span class="c1">// 前面的语句已经执行，处理结果返回</span>
+    <span class="k">return</span> <span class="n">resultSetHandler</span><span class="p">.</span><span class="na">handleResultSets</span><span class="p">(</span><span class="n">ps</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="sql">
+      SQL结果处理
+     </h3>
+     <p>
+      下面是具体的处理逻辑，先获取结果集和Mapper中定义的返回结果的相关信息，然后对应进行处理
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DefaultResultSetHandler</span> <span class="kd">implements</span> <span class="n">ResultSetHandler</span> <span class="p">{</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="nf">handleResultSets</span><span class="p">(</span><span class="n">Statement</span> <span class="n">stmt</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+    <span class="n">ErrorContext</span><span class="p">.</span><span class="na">instance</span><span class="p">().</span><span class="na">activity</span><span class="p">(</span><span class="s">"handling results"</span><span class="p">).</span><span class="na">object</span><span class="p">(</span><span class="n">mappedStatement</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span>
+
+    <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">multipleResults</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+    <span class="kt">int</span> <span class="n">resultSetCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="c1">// 获取结果集，并用自定义包装起来</span>
+    <span class="n">ResultSetWrapper</span> <span class="n">rsw</span> <span class="o">=</span> <span class="n">getFirstResultSet</span><span class="p">(</span><span class="n">stmt</span><span class="p">);</span>
+
+    <span class="c1">// 获取ResultMap对象，一般只有一个，其实就是需要返回的类信息之类的</span>
+    <span class="n">List</span><span class="o">&lt;</span><span class="n">ResultMap</span><span class="o">&gt;</span> <span class="n">resultMaps</span> <span class="o">=</span> <span class="n">mappedStatement</span><span class="p">.</span><span class="na">getResultMaps</span><span class="p">();</span>
+    <span class="kt">int</span> <span class="n">resultMapCount</span> <span class="o">=</span> <span class="n">resultMaps</span><span class="p">.</span><span class="na">size</span><span class="p">();</span>
+    <span class="n">validateResultMapsCount</span><span class="p">(</span><span class="n">rsw</span><span class="p">,</span> <span class="n">resultMapCount</span><span class="p">);</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">rsw</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">resultMapCount</span> <span class="o">&gt;</span> <span class="n">resultSetCount</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">ResultMap</span> <span class="n">resultMap</span> <span class="o">=</span> <span class="n">resultMaps</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">resultSetCount</span><span class="p">);</span>
+      <span class="c1">// 在这里会循环获取SQL结果集并进行转换</span>
+      <span class="n">handleResultSet</span><span class="p">(</span><span class="n">rsw</span><span class="p">,</span> <span class="n">resultMap</span><span class="p">,</span> <span class="n">multipleResults</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
+      <span class="n">rsw</span> <span class="o">=</span> <span class="n">getNextResultSet</span><span class="p">(</span><span class="n">stmt</span><span class="p">);</span>
+      <span class="n">cleanUpAfterHandlingResultSet</span><span class="p">();</span>
+      <span class="n">resultSetCount</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 这个不太请求，资料上说一般不会指定这个，暂时放过</span>
+    <span class="n">String</span><span class="o">[]</span> <span class="n">resultSets</span> <span class="o">=</span> <span class="n">mappedStatement</span><span class="p">.</span><span class="na">getResultSets</span><span class="p">();</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">resultSets</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">while</span> <span class="p">(</span><span class="n">rsw</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">resultSetCount</span> <span class="o">&lt;</span> <span class="n">resultSets</span><span class="p">.</span><span class="na">length</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">ResultMapping</span> <span class="n">parentMapping</span> <span class="o">=</span> <span class="n">nextResultMaps</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">resultSets</span><span class="o">[</span><span class="n">resultSetCount</span><span class="o">]</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">parentMapping</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">String</span> <span class="n">nestedResultMapId</span> <span class="o">=</span> <span class="n">parentMapping</span><span class="p">.</span><span class="na">getNestedResultMapId</span><span class="p">();</span>
+          <span class="n">ResultMap</span> <span class="n">resultMap</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">.</span><span class="na">getResultMap</span><span class="p">(</span><span class="n">nestedResultMapId</span><span class="p">);</span>
+          <span class="n">handleResultSet</span><span class="p">(</span><span class="n">rsw</span><span class="p">,</span> <span class="n">resultMap</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="n">parentMapping</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">rsw</span> <span class="o">=</span> <span class="n">getNextResultSet</span><span class="p">(</span><span class="n">stmt</span><span class="p">);</span>
+        <span class="n">cleanUpAfterHandlingResultSet</span><span class="p">();</span>
+        <span class="n">resultSetCount</span><span class="o">++</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">collapseSingleResultList</span><span class="p">(</span><span class="n">multipleResults</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="n">ResultSetWrapper</span> <span class="nf">getFirstResultSet</span><span class="p">(</span><span class="n">Statement</span> <span class="n">stmt</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+    <span class="n">ResultSet</span> <span class="n">rs</span> <span class="o">=</span> <span class="n">stmt</span><span class="p">.</span><span class="na">getResultSet</span><span class="p">();</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">rs</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// move forward to get the first resultset in case the driver</span>
+      <span class="c1">// doesn't return the resultset as the first result (HSQLDB 2.1)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">stmt</span><span class="p">.</span><span class="na">getMoreResults</span><span class="p">())</span> <span class="p">{</span>
+        <span class="n">rs</span> <span class="o">=</span> <span class="n">stmt</span><span class="p">.</span><span class="na">getResultSet</span><span class="p">();</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">stmt</span><span class="p">.</span><span class="na">getUpdateCount</span><span class="p">()</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+          <span class="c1">// no more results. Must be no resultset</span>
+          <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">rs</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">new</span> <span class="n">ResultSetWrapper</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">configuration</span><span class="p">)</span> <span class="p">:</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      我们一直跟下去，中间步骤不是太关键，下发是SQL Result遍历和结果转换的相关代码
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DefaultResultSetHandler</span> <span class="kd">implements</span> <span class="n">ResultSetHandler</span> <span class="p">{</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">handleRowValuesForSimpleResultMap</span><span class="p">(</span><span class="n">ResultSetWrapper</span> <span class="n">rsw</span><span class="p">,</span> <span class="n">ResultMap</span> <span class="n">resultMap</span><span class="p">,</span> <span class="n">ResultHandler</span><span class="o">&lt;?&gt;</span> <span class="n">resultHandler</span><span class="p">,</span> <span class="n">RowBounds</span> <span class="n">rowBounds</span><span class="p">,</span> <span class="n">ResultMapping</span> <span class="n">parentMapping</span><span class="p">)</span>
+      <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+    <span class="n">DefaultResultContext</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">resultContext</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DefaultResultContext</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+    <span class="n">ResultSet</span> <span class="n">resultSet</span> <span class="o">=</span> <span class="n">rsw</span><span class="p">.</span><span class="na">getResultSet</span><span class="p">();</span>
+    <span class="n">skipRows</span><span class="p">(</span><span class="n">resultSet</span><span class="p">,</span> <span class="n">rowBounds</span><span class="p">);</span>
+    <span class="c1">// SQLresult遍历</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">shouldProcessMoreRows</span><span class="p">(</span><span class="n">resultContext</span><span class="p">,</span> <span class="n">rowBounds</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">resultSet</span><span class="p">.</span><span class="na">isClosed</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">resultSet</span><span class="p">.</span><span class="na">next</span><span class="p">())</span> <span class="p">{</span>
+      <span class="n">ResultMap</span> <span class="n">discriminatedResultMap</span> <span class="o">=</span> <span class="n">resolveDiscriminatedResultMap</span><span class="p">(</span><span class="n">resultSet</span><span class="p">,</span> <span class="n">resultMap</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
+      <span class="c1">// 将单条SQL结果转成对象</span>
+      <span class="n">Object</span> <span class="n">rowValue</span> <span class="o">=</span> <span class="n">getRowValue</span><span class="p">(</span><span class="n">rsw</span><span class="p">,</span> <span class="n">discriminatedResultMap</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
+      <span class="c1">// 存储</span>
+      <span class="n">storeObject</span><span class="p">(</span><span class="n">resultHandler</span><span class="p">,</span> <span class="n">resultContext</span><span class="p">,</span> <span class="n">rowValue</span><span class="p">,</span> <span class="n">parentMapping</span><span class="p">,</span> <span class="n">resultSet</span><span class="p">);</span>
+    <span class="p">}</span>
+   <span class="p">}</span>
+
+   <span class="kd">private</span> <span class="n">Object</span> <span class="nf">getRowValue</span><span class="p">(</span><span class="n">ResultSetWrapper</span> <span class="n">rsw</span><span class="p">,</span> <span class="n">ResultMap</span> <span class="n">resultMap</span><span class="p">,</span> <span class="n">String</span> <span class="n">columnPrefix</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+    <span class="kd">final</span> <span class="n">ResultLoaderMap</span> <span class="n">lazyLoader</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ResultLoaderMap</span><span class="p">();</span>
+    <span class="c1">// 根据返回的类型生成对象</span>
+    <span class="n">Object</span> <span class="n">rowValue</span> <span class="o">=</span> <span class="n">createResultObject</span><span class="p">(</span><span class="n">rsw</span><span class="p">,</span> <span class="n">resultMap</span><span class="p">,</span> <span class="n">lazyLoader</span><span class="p">,</span> <span class="n">columnPrefix</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">rowValue</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">hasTypeHandlerForResultObject</span><span class="p">(</span><span class="n">rsw</span><span class="p">,</span> <span class="n">resultMap</span><span class="p">.</span><span class="na">getType</span><span class="p">()))</span> <span class="p">{</span>
+      <span class="kd">final</span> <span class="n">MetaObject</span> <span class="n">metaObject</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">.</span><span class="na">newMetaObject</span><span class="p">(</span><span class="n">rowValue</span><span class="p">);</span>
+      <span class="kt">boolean</span> <span class="n">foundValues</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">useConstructorMappings</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">shouldApplyAutomaticMappings</span><span class="p">(</span><span class="n">resultMap</span><span class="p">,</span> <span class="kc">false</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">foundValues</span> <span class="o">=</span> <span class="n">applyAutomaticMappings</span><span class="p">(</span><span class="n">rsw</span><span class="p">,</span> <span class="n">resultMap</span><span class="p">,</span> <span class="n">metaObject</span><span class="p">,</span> <span class="n">columnPrefix</span><span class="p">)</span> <span class="o">||</span> <span class="n">foundValues</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="c1">// 结果转换</span>
+      <span class="n">foundValues</span> <span class="o">=</span> <span class="n">applyPropertyMappings</span><span class="p">(</span><span class="n">rsw</span><span class="p">,</span> <span class="n">resultMap</span><span class="p">,</span> <span class="n">metaObject</span><span class="p">,</span> <span class="n">lazyLoader</span><span class="p">,</span> <span class="n">columnPrefix</span><span class="p">)</span> <span class="o">||</span> <span class="n">foundValues</span><span class="p">;</span>
+      <span class="n">foundValues</span> <span class="o">=</span> <span class="n">lazyLoader</span><span class="p">.</span><span class="na">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">foundValues</span><span class="p">;</span>
+      <span class="n">rowValue</span> <span class="o">=</span> <span class="n">foundValues</span> <span class="o">||</span> <span class="n">configuration</span><span class="p">.</span><span class="na">isReturnInstanceForEmptyRow</span><span class="p">()</span> <span class="o">?</span> <span class="n">rowValue</span> <span class="p">:</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">rowValue</span><span class="p">;</span>
+  <span class="p">}</span>
+
+
+  <span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">applyPropertyMappings</span><span class="p">(</span><span class="n">ResultSetWrapper</span> <span class="n">rsw</span><span class="p">,</span> <span class="n">ResultMap</span> <span class="n">resultMap</span><span class="p">,</span> <span class="n">MetaObject</span> <span class="n">metaObject</span><span class="p">,</span> <span class="n">ResultLoaderMap</span> <span class="n">lazyLoader</span><span class="p">,</span> <span class="n">String</span> <span class="n">columnPrefix</span><span class="p">)</span>
+      <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+    <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">mappedColumnNames</span> <span class="o">=</span> <span class="n">rsw</span><span class="p">.</span><span class="na">getMappedColumnNames</span><span class="p">(</span><span class="n">resultMap</span><span class="p">,</span> <span class="n">columnPrefix</span><span class="p">);</span>
+    <span class="kt">boolean</span> <span class="n">foundValues</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="c1">// 结果相关的属性</span>
+    <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">ResultMapping</span><span class="o">&gt;</span> <span class="n">propertyMappings</span> <span class="o">=</span> <span class="n">resultMap</span><span class="p">.</span><span class="na">getPropertyResultMappings</span><span class="p">();</span>
+    <span class="c1">// 遍历，结果对应对应的值</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">ResultMapping</span> <span class="n">propertyMapping</span> <span class="p">:</span> <span class="n">propertyMappings</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// 列名称</span>
+      <span class="n">String</span> <span class="n">column</span> <span class="o">=</span> <span class="n">prependPrefix</span><span class="p">(</span><span class="n">propertyMapping</span><span class="p">.</span><span class="na">getColumn</span><span class="p">(),</span> <span class="n">columnPrefix</span><span class="p">);</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">propertyMapping</span><span class="p">.</span><span class="na">getNestedResultMapId</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// the user added a column attribute to a nested result map, ignore it</span>
+        <span class="n">column</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">propertyMapping</span><span class="p">.</span><span class="na">isCompositeResult</span><span class="p">()</span>
+          <span class="o">||</span> <span class="p">(</span><span class="n">column</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">mappedColumnNames</span><span class="p">.</span><span class="na">contains</span><span class="p">(</span><span class="n">column</span><span class="p">.</span><span class="na">toUpperCase</span><span class="p">(</span><span class="n">Locale</span><span class="p">.</span><span class="na">ENGLISH</span><span class="p">)))</span>
+          <span class="o">||</span> <span class="n">propertyMapping</span><span class="p">.</span><span class="na">getResultSet</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 转换，获取值</span>
+        <span class="n">Object</span> <span class="n">value</span> <span class="o">=</span> <span class="n">getPropertyMappingValue</span><span class="p">(</span><span class="n">rsw</span><span class="p">.</span><span class="na">getResultSet</span><span class="p">(),</span> <span class="n">metaObject</span><span class="p">,</span> <span class="n">propertyMapping</span><span class="p">,</span> <span class="n">lazyLoader</span><span class="p">,</span> <span class="n">columnPrefix</span><span class="p">);</span>
+        <span class="c1">// issue #541 make property optional</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">property</span> <span class="o">=</span> <span class="n">propertyMapping</span><span class="p">.</span><span class="na">getProperty</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">property</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">continue</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="n">DEFERRED</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">foundValues</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+          <span class="k">continue</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">foundValues</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">||</span> <span class="p">(</span><span class="n">configuration</span><span class="p">.</span><span class="na">isCallSettersOnNulls</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">metaObject</span><span class="p">.</span><span class="na">getSetterType</span><span class="p">(</span><span class="n">property</span><span class="p">).</span><span class="na">isPrimitive</span><span class="p">()))</span> <span class="p">{</span>
+      <span class="c1">// 更新结果</span>
+          <span class="c1">// gcode issue #377, call setter on nulls (value is not 'found')</span>
+          <span class="n">metaObject</span><span class="p">.</span><span class="na">setValue</span><span class="p">(</span><span class="n">property</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">foundValues</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">private</span> <span class="n">Object</span> <span class="nf">getPropertyMappingValue</span><span class="p">(</span><span class="n">ResultSet</span> <span class="n">rs</span><span class="p">,</span> <span class="n">MetaObject</span> <span class="n">metaResultObject</span><span class="p">,</span> <span class="n">ResultMapping</span> <span class="n">propertyMapping</span><span class="p">,</span> <span class="n">ResultLoaderMap</span> <span class="n">lazyLoader</span><span class="p">,</span> <span class="n">String</span> <span class="n">columnPrefix</span><span class="p">)</span>
+      <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">propertyMapping</span><span class="p">.</span><span class="na">getNestedQueryId</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="n">getNestedQueryMappingValue</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">metaResultObject</span><span class="p">,</span> <span class="n">propertyMapping</span><span class="p">,</span> <span class="n">lazyLoader</span><span class="p">,</span> <span class="n">columnPrefix</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">propertyMapping</span><span class="p">.</span><span class="na">getResultSet</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">addPendingChildRelation</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">metaResultObject</span><span class="p">,</span> <span class="n">propertyMapping</span><span class="p">);</span>   <span class="c1">// TODO is that OK?</span>
+      <span class="k">return</span> <span class="n">DEFERRED</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="c1">// 将SQL值转成对应java对象值，MyBatis3已内容Int Str等转换器</span>
+      <span class="kd">final</span> <span class="n">TypeHandler</span><span class="o">&lt;?&gt;</span> <span class="n">typeHandler</span> <span class="o">=</span> <span class="n">propertyMapping</span><span class="p">.</span><span class="na">getTypeHandler</span><span class="p">();</span>
+      <span class="kd">final</span> <span class="n">String</span> <span class="n">column</span> <span class="o">=</span> <span class="n">prependPrefix</span><span class="p">(</span><span class="n">propertyMapping</span><span class="p">.</span><span class="na">getColumn</span><span class="p">(),</span> <span class="n">columnPrefix</span><span class="p">);</span>
+      <span class="k">return</span> <span class="n">typeHandler</span><span class="p">.</span><span class="na">getResult</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">column</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在上面代码中，我们看到了：
+     </p>
+     <ul>
+      <li>
+       循环遍历SQL结果：ResultSet
+      </li>
+      <li>
+       遍历SQL列，转成Java类型
+      </li>
+     </ul>
+     <p>
+      MyBatis中已经内置很多的类型转换器，也可以自己自定义，比如内容Long如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LongTypeHandler</span> <span class="kd">extends</span> <span class="n">BaseTypeHandler</span><span class="o">&lt;</span><span class="n">Long</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="n">Long</span> <span class="nf">getNullableResult</span><span class="p">(</span><span class="n">ResultSet</span> <span class="n">rs</span><span class="p">,</span> <span class="n">String</span> <span class="n">columnName</span><span class="p">)</span>
+      <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+    <span class="kt">long</span> <span class="n">result</span> <span class="o">=</span> <span class="n">rs</span><span class="p">.</span><span class="na">getLong</span><span class="p">(</span><span class="n">columnName</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">rs</span><span class="p">.</span><span class="na">wasNull</span><span class="p">()</span> <span class="o">?</span> <span class="kc">null</span> <span class="p">:</span> <span class="n">result</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_4">
+      总结
+     </h2>
+     <p>
+      本篇文章中探索的MyBatis中如何将查询结果转换成我们想要的Java对象
+     </p>
+     <ul>
+      <li>
+       SQL执行
+      </li>
+      <li>
+       遍历ResultSet
+      </li>
+      <li>
+       遍历数据库Column，根据列名称，获取对应的值，转成Java对象
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
