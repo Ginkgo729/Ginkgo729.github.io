@@ -1,0 +1,328 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="mybatis36typehandler">
+      MyBatis3源码解析(6)TypeHandler使用
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第12天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在上几篇中，介绍了MyBatis3对参数和结果的解析转换，对于常规数据类型，默认的处理已经足够应付了，但日常开发中会有一些特殊的类型，就可以通过TypeHandler来进行处理
+     </p>
+     <h2 id="_2">
+      示例准备
+     </h2>
+     <p>
+      本篇文中用于调试的测试代码请参考：
+      <a href="https://juejin.cn/post/7058354949209456653">
+       MyBatis3源码解析（1）探索准备
+      </a>
+     </p>
+     <p>
+      完整的工程已放到GitHub上：https://github.com/lw1243925457/MybatisDemo/tree/master/example
+     </p>
+     <p>
+      熟悉使用的可以跳过该部分，直接到源码解析部分
+     </p>
+     <h3 id="_3">
+      数据模型修改
+     </h3>
+     <p>
+      我们先将原来的String类型变成String数组,存入数据库时，使用逗号进行分割，取出时转成String数组，即
+     </p>
+     <ul>
+      <li>
+       Java数据结构：
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Builder</span>
+<span class="nd">@Data</span>
+<span class="nd">@AllArgsConstructor</span>
+<span class="nd">@NoArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Person</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="n">String</span><span class="o">[]</span> <span class="n">name</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <ul>
+      <li>
+       存入数据库，已Varchar的方式：1,2,3
+      </li>
+     </ul>
+     <h3 id="typehandler">
+      自定义TypeHandler编写
+     </h3>
+     <p>
+      我们修改完数据结构后，需要编写一个自定义的TypeHandler，如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">StringArrayTypeHandler</span> <span class="kd">extends</span> <span class="n">BaseTypeHandler</span><span class="o">&lt;</span><span class="n">String</span><span class="o">[]&gt;</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setNonNullParameter</span><span class="p">(</span><span class="n">PreparedStatement</span> <span class="n">preparedStatement</span><span class="p">,</span> <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">String</span><span class="o">[]</span> <span class="n">strings</span><span class="p">,</span> <span class="n">JdbcType</span> <span class="n">jdbcType</span><span class="p">)</span>
+            <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="n">preparedStatement</span><span class="p">.</span><span class="na">setString</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">join</span><span class="p">(</span><span class="n">strings</span><span class="p">,</span> <span class="s">","</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span><span class="o">[]</span> <span class="nf">getNullableResult</span><span class="p">(</span><span class="n">ResultSet</span> <span class="n">resultSet</span><span class="p">,</span> <span class="n">String</span> <span class="n">s</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">convert</span><span class="p">(</span><span class="n">resultSet</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="n">s</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span><span class="o">[]</span> <span class="nf">getNullableResult</span><span class="p">(</span><span class="n">ResultSet</span> <span class="n">resultSet</span><span class="p">,</span> <span class="kt">int</span> <span class="n">i</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">convert</span><span class="p">(</span><span class="n">resultSet</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span><span class="o">[]</span> <span class="nf">getNullableResult</span><span class="p">(</span><span class="n">CallableStatement</span> <span class="n">callableStatement</span><span class="p">,</span> <span class="kt">int</span> <span class="n">i</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">convert</span><span class="p">(</span><span class="n">callableStatement</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 将查询值转换为数组</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param value 查询值, String</span>
+<span class="cm">     * @return 转换结果, String[]</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="n">String</span><span class="o">[]</span> <span class="nf">convert</span><span class="p">(</span><span class="n">String</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">?</span> <span class="k">new</span> <span class="n">String</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="p">:</span> <span class="n">value</span><span class="p">.</span><span class="na">split</span><span class="p">(</span><span class="s">","</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="typehandler_1">
+      TypeHandler注册
+     </h3>
+     <p>
+      将我们自定义的TypeHandler进行注册，MyBatis后将对应String【】和Varchar使用此TypeHandler
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MybatisTest</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">SqlSessionFactory</span> <span class="nf">buildSqlSessionFactory</span><span class="p">()</span> <span class="p">{</span>
+    <span class="p">......</span>
+        <span class="n">Configuration</span> <span class="n">configuration</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Configuration</span><span class="p">(</span><span class="n">environment</span><span class="p">);</span>
+    <span class="c1">// 注册TypeHandler，注意需要在添加Mapper之前，因为添加Mapper操作的时候就需要TypeHandler了</span>
+        <span class="n">configuration</span><span class="p">.</span><span class="na">getTypeHandlerRegistry</span><span class="p">().</span><span class="na">register</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="p">.</span><span class="na">class</span><span class="p">,</span> <span class="n">JdbcType</span><span class="p">.</span><span class="na">VARCHAR</span><span class="p">,</span> <span class="n">StringArrayTypeHandler</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="n">configuration</span><span class="p">.</span><span class="na">addMapper</span><span class="p">(</span><span class="n">PersonMapper</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="n">SqlSessionFactoryBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SqlSessionFactoryBuilder</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">(</span><span class="n">configuration</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="_4">
+      运行
+     </h3>
+     <p>
+      测试结果如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>Connected to the target VM, address: '127.0.0.1:53557', transport: 'socket'
+[Person(id=1, name=[1, 2]), Person(id=2, name=[1, 2])]
+Disconnected from the target VM, address: '127.0.0.1:53557', transport: 'socket'
+</code></pre>
+     </div>
+     <h2 id="_5">
+      源码解析
+     </h2>
+     <h3 id="_6">
+      参数解析设置
+     </h3>
+     <p>
+      通过前面几篇文章的分析，我们得到设置参数的相关源码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DefaultParameterHandler</span> <span class="kd">implements</span> <span class="n">ParameterHandler</span> <span class="p">{</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setParameters</span><span class="p">(</span><span class="n">PreparedStatement</span> <span class="n">ps</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">ErrorContext</span><span class="p">.</span><span class="na">instance</span><span class="p">().</span><span class="na">activity</span><span class="p">(</span><span class="s">"setting parameters"</span><span class="p">).</span><span class="na">object</span><span class="p">(</span><span class="n">mappedStatement</span><span class="p">.</span><span class="na">getParameterMap</span><span class="p">().</span><span class="na">getId</span><span class="p">());</span>
+    <span class="n">List</span><span class="o">&lt;</span><span class="n">ParameterMapping</span><span class="o">&gt;</span> <span class="n">parameterMappings</span> <span class="o">=</span> <span class="n">boundSql</span><span class="p">.</span><span class="na">getParameterMappings</span><span class="p">();</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">parameterMappings</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">parameterMappings</span><span class="p">.</span><span class="na">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">ParameterMapping</span> <span class="n">parameterMapping</span> <span class="o">=</span> <span class="n">parameterMappings</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">parameterMapping</span><span class="p">.</span><span class="na">getMode</span><span class="p">()</span> <span class="o">!=</span> <span class="n">ParameterMode</span><span class="p">.</span><span class="na">OUT</span><span class="p">)</span> <span class="p">{</span>
+          <span class="n">Object</span> <span class="n">value</span><span class="p">;</span>
+          <span class="n">String</span> <span class="n">propertyName</span> <span class="o">=</span> <span class="n">parameterMapping</span><span class="p">.</span><span class="na">getProperty</span><span class="p">();</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">boundSql</span><span class="p">.</span><span class="na">hasAdditionalParameter</span><span class="p">(</span><span class="n">propertyName</span><span class="p">))</span> <span class="p">{</span> <span class="c1">// issue #448 ask first for additional params</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">boundSql</span><span class="p">.</span><span class="na">getAdditionalParameter</span><span class="p">(</span><span class="n">propertyName</span><span class="p">);</span>
+          <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">parameterObject</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+          <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">typeHandlerRegistry</span><span class="p">.</span><span class="na">hasTypeHandler</span><span class="p">(</span><span class="n">parameterObject</span><span class="p">.</span><span class="na">getClass</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">parameterObject</span><span class="p">;</span>
+          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">MetaObject</span> <span class="n">metaObject</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">.</span><span class="na">newMetaObject</span><span class="p">(</span><span class="n">parameterObject</span><span class="p">);</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">metaObject</span><span class="p">.</span><span class="na">getValue</span><span class="p">(</span><span class="n">propertyName</span><span class="p">);</span>
+          <span class="p">}</span>
+      <span class="c1">// 获取对应的TypeHandler</span>
+          <span class="n">TypeHandler</span> <span class="n">typeHandler</span> <span class="o">=</span> <span class="n">parameterMapping</span><span class="p">.</span><span class="na">getTypeHandler</span><span class="p">();</span>
+          <span class="n">JdbcType</span> <span class="n">jdbcType</span> <span class="o">=</span> <span class="n">parameterMapping</span><span class="p">.</span><span class="na">getJdbcType</span><span class="p">();</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">jdbcType</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">jdbcType</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">.</span><span class="na">getJdbcTypeForNull</span><span class="p">();</span>
+          <span class="p">}</span>
+          <span class="k">try</span> <span class="p">{</span>
+        <span class="c1">// 调动对应的方法，设置值</span>
+            <span class="n">typeHandler</span><span class="p">.</span><span class="na">setParameter</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">jdbcType</span><span class="p">);</span>
+          <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">TypeException</span> <span class="o">|</span> <span class="n">SQLException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">TypeException</span><span class="p">(</span><span class="s">"Could not set parameters for mapping: "</span> <span class="o">+</span> <span class="n">parameterMapping</span> <span class="o">+</span> <span class="s">". Cause: "</span> <span class="o">+</span> <span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      设置值，函数如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">BaseTypeHandler</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">TypeReference</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">implements</span> <span class="n">TypeHandler</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setParameter</span><span class="p">(</span><span class="n">PreparedStatement</span> <span class="n">ps</span><span class="p">,</span> <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">JdbcType</span> <span class="n">jdbcType</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">parameter</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">jdbcType</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="n">TypeException</span><span class="p">(</span><span class="s">"JDBC requires that the JdbcType must be specified for all nullable parameters."</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">try</span> <span class="p">{</span>
+        <span class="n">ps</span><span class="p">.</span><span class="na">setNull</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">jdbcType</span><span class="p">.</span><span class="na">TYPE_CODE</span><span class="p">);</span>
+      <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">SQLException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="n">TypeException</span><span class="p">(</span><span class="s">"Error setting null for parameter #"</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="s">" with JdbcType "</span> <span class="o">+</span> <span class="n">jdbcType</span> <span class="o">+</span> <span class="s">" . "</span>
+              <span class="o">+</span> <span class="s">"Try setting a different JdbcType for this parameter or a different jdbcTypeForNull configuration property. "</span>
+              <span class="o">+</span> <span class="s">"Cause: "</span> <span class="o">+</span> <span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="k">try</span> <span class="p">{</span>
+    <span class="c1">// 调用我们自定义的TypeHandler函数</span>
+        <span class="n">setNonNullParameter</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">jdbcType</span><span class="p">);</span>
+      <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="n">TypeException</span><span class="p">(</span><span class="s">"Error setting non null for parameter #"</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="s">" with JdbcType "</span> <span class="o">+</span> <span class="n">jdbcType</span> <span class="o">+</span> <span class="s">" . "</span>
+              <span class="o">+</span> <span class="s">"Try setting a different JdbcType for this parameter or a different configuration property. "</span>
+              <span class="o">+</span> <span class="s">"Cause: "</span> <span class="o">+</span> <span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      如上所示，我们看到TypeHandler调用的大致流程
+     </p>
+     <p>
+      其中MyBatis3是根据Java Type 和 JDBC Type 来对应调用不同的TypeHandler的，在示例代码中我们也显式的注册了 String数组和Varchar
+     </p>
+     <p>
+      这里使用的是一个全局的，也可以单独在查询中使用，可以自行搜索
+     </p>
+     <h3 id="_7">
+      结果解析返回
+     </h3>
+     <p>
+      通过之前的文章，我们知道代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>  <span class="kd">private</span> <span class="n">Object</span> <span class="nf">getPropertyMappingValue</span><span class="p">(</span><span class="n">ResultSet</span> <span class="n">rs</span><span class="p">,</span> <span class="n">MetaObject</span> <span class="n">metaResultObject</span><span class="p">,</span> <span class="n">ResultMapping</span> <span class="n">propertyMapping</span><span class="p">,</span> <span class="n">ResultLoaderMap</span> <span class="n">lazyLoader</span><span class="p">,</span> <span class="n">String</span> <span class="n">columnPrefix</span><span class="p">)</span>
+      <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">propertyMapping</span><span class="p">.</span><span class="na">getNestedQueryId</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="n">getNestedQueryMappingValue</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">metaResultObject</span><span class="p">,</span> <span class="n">propertyMapping</span><span class="p">,</span> <span class="n">lazyLoader</span><span class="p">,</span> <span class="n">columnPrefix</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">propertyMapping</span><span class="p">.</span><span class="na">getResultSet</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">addPendingChildRelation</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">metaResultObject</span><span class="p">,</span> <span class="n">propertyMapping</span><span class="p">);</span>   <span class="c1">// TODO is that OK?</span>
+      <span class="k">return</span> <span class="n">DEFERRED</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="c1">// 得到对应的TypeHandler，直接返回处理结果</span>
+      <span class="kd">final</span> <span class="n">TypeHandler</span><span class="o">&lt;?&gt;</span> <span class="n">typeHandler</span> <span class="o">=</span> <span class="n">propertyMapping</span><span class="p">.</span><span class="na">getTypeHandler</span><span class="p">();</span>
+      <span class="kd">final</span> <span class="n">String</span> <span class="n">column</span> <span class="o">=</span> <span class="n">prependPrefix</span><span class="p">(</span><span class="n">propertyMapping</span><span class="p">.</span><span class="na">getColumn</span><span class="p">(),</span> <span class="n">columnPrefix</span><span class="p">);</span>
+      <span class="k">return</span> <span class="n">typeHandler</span><span class="p">.</span><span class="na">getResult</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">column</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      GetResult函数如下，后面调用我们自定义的TypeHandler方法
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="n">T</span> <span class="nf">getResult</span><span class="p">(</span><span class="n">ResultSet</span> <span class="n">rs</span><span class="p">,</span> <span class="n">String</span> <span class="n">columnName</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+    <span class="k">try</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="n">getNullableResult</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">columnName</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="n">ResultMapException</span><span class="p">(</span><span class="s">"Error attempting to get column '"</span> <span class="o">+</span> <span class="n">columnName</span> <span class="o">+</span> <span class="s">"' from result set.  Cause: "</span> <span class="o">+</span> <span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_8">
+      总结
+     </h2>
+     <p>
+      本篇文章，展示了如何定义TypeHandler和使用TypeHandler，并展示了源码部分，TypeHandler是如何对应生效的，了解该部分，在日常开发中，使用TypeHandler也能做到心中有数
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
