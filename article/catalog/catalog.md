@@ -120,6 +120,7 @@
         - [MyBatis3源码解析(5)查询结果处理.md](./article/article/+MyBatis3源码解析(5)查询结果处理.html)
         - [MyBatis3源码解析(6)TypeHandler使用.md](./article/article/+MyBatis3源码解析(6)TypeHandler使用.html)
         - [MyBatis3源码解析(7)TypeHandler注册与获取.md](./article/article/+MyBatis3源码解析(7)TypeHandler注册与获取.html)
+        - [MyBatis3源码解析(8)MyBatis与Spring的结合.md](./article/article/+MyBatis3源码解析(8)MyBatis与Spring的结合.html)
         - [Mybatis3源码解析系列.md](./article/article/+Mybatis3源码解析系列.html)
     - shardingsphere
         - 实践
