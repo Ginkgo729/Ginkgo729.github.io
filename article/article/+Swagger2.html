@@ -1,0 +1,387 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="swagger2">
+      Swagger2的使用
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第15天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在日常开发中，自动API接口文档能大大简化我们的操作，本篇将介绍Swagger的常规用法和可以按照版本进行分组的配置用法
+     </p>
+     <h2 id="swagger">
+      Swagger使用
+     </h2>
+     <h3 id="maven">
+      maven依赖
+     </h3>
+     <p>
+      在新版本中，直接使用knife4j即可，非常的好用，依赖如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code> <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>com.github.xiaoymin<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>knife4j-spring-boot-starter<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="c">&lt;!--在引用时请在maven中央仓库搜索最新版本号--&gt;</span>
+            <span class="nt">&lt;version&gt;</span>2.0.2<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+</code></pre>
+     </div>
+     <h3 id="_2">
+      常规用法
+     </h3>
+     <p>
+      通过下面的简单配置即可使用，在Controller方法中加上注解即可，生成全量的API文档
+     </p>
+     <p>
+      有个缺点是没有版本划分，如果需要做接口测试，没有办法快速定位当前版本新发布了哪些接口和修改了哪些接口
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Value</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.info.BuildProperties</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Bean</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Configuration</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.builders.ApiInfoBuilder</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.builders.PathSelectors</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.builders.RequestHandlerSelectors</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.service.ApiInfo</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.spi.DocumentationType</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.spring.web.plugins.Docket</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.swagger2.annotations.EnableSwagger2</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Configuration class for Swagger API document.</span>
+<span class="cm"> **/</span>
+<span class="nd">@Slf4j</span>
+<span class="nd">@Configuration</span>
+<span class="nd">@EnableSwagger2</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SwaggerConfiguration</span> <span class="p">{</span>
+
+    <span class="nd">@Value</span><span class="p">(</span><span class="s">"${rpa.swagger.enable:true}"</span><span class="p">)</span>
+    <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">enable</span><span class="p">;</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">BuildProperties</span> <span class="n">buildProperties</span><span class="p">;</span>
+
+    <span class="kd">public</span> <span class="nf">SwaggerConfiguration</span><span class="p">(</span><span class="nd">@Autowired</span><span class="p">(</span><span class="n">required</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span> <span class="kd">final</span> <span class="n">BuildProperties</span> <span class="n">buildProperties</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">buildProperties</span> <span class="o">=</span> <span class="n">buildProperties</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * Configure The Docket with Swagger.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @return Docket {@linkplain Docket}</span>
+<span class="cm">     */</span>
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">Docket</span> <span class="nf">createRestApi</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">Docket</span><span class="p">(</span><span class="n">DocumentationType</span><span class="p">.</span><span class="na">SWAGGER_2</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">apiInfo</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">apiInfo</span><span class="p">())</span>
+                <span class="p">.</span><span class="na">enable</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">select</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">apis</span><span class="p">(</span><span class="n">RequestHandlerSelectors</span><span class="p">.</span><span class="na">basePackage</span><span class="p">(</span><span class="s">""</span><span class="p">))</span>
+                <span class="p">.</span><span class="na">paths</span><span class="p">(</span><span class="n">PathSelectors</span><span class="p">.</span><span class="na">any</span><span class="p">())</span>
+                <span class="p">.</span><span class="na">build</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * Fetch version information from pom.xml and set title, version, description,</span>
+<span class="cm">     * contact for Swagger API document.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @return Api info</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="n">ApiInfo</span> <span class="nf">apiInfo</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">version</span> <span class="o">=</span> <span class="s">"1.0.0"</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">buildProperties</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">buildProperties</span><span class="p">.</span><span class="na">getVersion</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"http://localhost:8080/swagger-ui.html"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">ApiInfoBuilder</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">title</span><span class="p">(</span><span class="s">"API"</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">description</span><span class="p">(</span><span class="s">""</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">build</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="_3">
+      能按照版本进行筛选
+     </h3>
+     <p>
+      首先自定义一个版本注解，开发新版本的时候，增加对应的版本即可
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">import</span> <span class="nn">java.lang.annotation.ElementType</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.annotation.Retention</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.annotation.RetentionPolicy</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.annotation.Target</span><span class="p">;</span>
+
+<span class="nd">@Retention</span><span class="p">(</span><span class="n">RetentionPolicy</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">)</span>
+<span class="nd">@Target</span><span class="p">(</span><span class="n">ElementType</span><span class="p">.</span><span class="na">METHOD</span><span class="p">)</span>
+<span class="kd">public</span> <span class="nd">@interface</span> <span class="n">ApiVersion</span> <span class="p">{</span>
+
+    <span class="n">Version</span><span class="o">[]</span> <span class="nf">value</span><span class="p">();</span>
+
+    <span class="kd">enum</span> <span class="n">Version</span> <span class="p">{</span>
+        <span class="n">MASTER</span><span class="p">(</span><span class="s">"master"</span><span class="p">),</span>
+        <span class="n">V3_3_0128</span><span class="p">(</span><span class="s">"V3.3.0128"</span><span class="p">)</span>
+        <span class="p">;</span>
+
+        <span class="kd">private</span> <span class="n">String</span> <span class="n">display</span><span class="p">;</span>
+
+        <span class="n">Version</span><span class="p">(</span><span class="n">String</span> <span class="n">display</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">display</span> <span class="o">=</span> <span class="n">display</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="kd">public</span> <span class="n">String</span> <span class="nf">getDisplay</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">display</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      然后定义Swagger配置：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">import</span> <span class="nn">com.google.common.base.Function</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.base.Joiner</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.base.Optional</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.base.Predicate</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.FluentIterable</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Iterables</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Multimap</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">com.google.common.collect.Multimaps</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.autoconfigure.condition.ConditionalOnProperty</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Primary</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.core.annotation.AnnotationAwareOrderComparator</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Component</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.builders.ApiInfoBuilder</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.builders.PathSelectors</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.service.*</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.spi.DocumentationType</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.spi.service.DocumentationPlugin</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.spi.service.contexts.SecurityContext</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.spring.web.plugins.Docket</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.spring.web.plugins.DocumentationPluginsManager</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">springfox.documentation.swagger2.annotations.EnableSwagger2</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">swagger.ApiVersion</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">swagger.SwaggerPluginRegistry</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="p">;</span>
+
+<span class="nd">@Slf4j</span>
+<span class="nd">@Component</span>
+<span class="nd">@Primary</span>
+<span class="nd">@ConditionalOnProperty</span><span class="p">(</span><span class="n">prefix</span> <span class="o">=</span> <span class="s">"swagger"</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="p">{</span><span class="s">"enable"</span><span class="p">},</span> <span class="n">havingValue</span> <span class="o">=</span> <span class="s">"true"</span><span class="p">)</span>
+<span class="nd">@EnableSwagger2</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SwaggerDocumentationPluginsManager</span> <span class="kd">extends</span> <span class="n">DocumentationPluginsManager</span> <span class="p">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">DocumentationPlugin</span><span class="o">&gt;</span> <span class="nf">documentationPlugins</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">IllegalStateException</span> <span class="p">{</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">DocumentationPlugin</span><span class="o">&gt;</span> <span class="n">plugins</span> <span class="o">=</span> <span class="n">registry</span><span class="p">().</span><span class="na">getPlugins</span><span class="p">();</span>
+        <span class="n">ensureNoDuplicateGroups</span><span class="p">(</span><span class="n">plugins</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">plugins</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="p">(</span><span class="n">Collections</span><span class="p">.</span><span class="na">singleton</span><span class="p">(</span><span class="n">defaultDocumentationPlugin</span><span class="p">()));</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">plugins</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">ensureNoDuplicateGroups</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">DocumentationPlugin</span><span class="o">&gt;</span> <span class="n">allPlugins</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">IllegalStateException</span> <span class="p">{</span>
+        <span class="n">Multimap</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">DocumentationPlugin</span><span class="o">&gt;</span> <span class="n">plugins</span> <span class="o">=</span> <span class="n">Multimaps</span><span class="p">.</span><span class="na">index</span><span class="p">(</span><span class="n">allPlugins</span><span class="p">,</span> <span class="n">byGroupName</span><span class="p">());</span>
+        <span class="n">Iterable</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">duplicateGroups</span> <span class="o">=</span> <span class="n">FluentIterable</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">plugins</span><span class="p">.</span><span class="na">asMap</span><span class="p">().</span><span class="na">entrySet</span><span class="p">()).</span><span class="na">filter</span><span class="p">(</span><span class="n">duplicates</span><span class="p">()).</span><span class="na">transform</span><span class="p">(</span><span class="n">toGroupNames</span><span class="p">());</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Iterables</span><span class="p">.</span><span class="na">size</span><span class="p">(</span><span class="n">duplicateGroups</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalStateException</span><span class="p">(</span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">"Multiple Dockets with the same group name are not supported. "</span>
+                    <span class="o">+</span> <span class="s">"The following duplicate groups were discovered. %s"</span><span class="p">,</span> <span class="n">Joiner</span><span class="p">.</span><span class="na">on</span><span class="p">(</span><span class="sc">','</span><span class="p">).</span><span class="na">join</span><span class="p">(</span><span class="n">duplicateGroups</span><span class="p">)));</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">Function</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">DocumentationPlugin</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="nf">byGroupName</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">Function</span><span class="o">&lt;</span><span class="n">DocumentationPlugin</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span><span class="p">)</span> <span class="n">input</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">.</span><span class="na">fromNullable</span><span class="p">(</span><span class="n">input</span><span class="p">.</span><span class="na">getGroupName</span><span class="p">()).</span><span class="na">or</span><span class="p">(</span><span class="s">"default"</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">Function</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">Map</span><span class="p">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">DocumentationPlugin</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="nf">toGroupNames</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">Function</span><span class="o">&lt;</span><span class="n">Map</span><span class="p">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">DocumentationPlugin</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span><span class="p">)</span> <span class="n">input</span> <span class="o">-&gt;</span> <span class="n">input</span><span class="p">.</span><span class="na">getKey</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Predicate</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">Map</span><span class="p">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">DocumentationPlugin</span><span class="o">&gt;&gt;&gt;</span> <span class="nf">duplicates</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">Predicate</span><span class="o">&lt;</span><span class="n">Map</span><span class="p">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">DocumentationPlugin</span><span class="o">&gt;&gt;&gt;</span><span class="p">)</span> <span class="n">input</span> <span class="o">-&gt;</span> <span class="n">input</span><span class="p">.</span><span class="na">getValue</span><span class="p">().</span><span class="na">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">DocumentationPlugin</span> <span class="nf">defaultDocumentationPlugin</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">Docket</span><span class="p">(</span><span class="n">DocumentationType</span><span class="p">.</span><span class="na">SWAGGER_2</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">SwaggerPluginRegistry</span> <span class="nf">registry</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">Docket</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">ApiVersion</span><span class="p">.</span><span class="na">Version</span> <span class="n">version</span> <span class="p">:</span> <span class="n">ApiVersion</span><span class="p">.</span><span class="na">Version</span><span class="p">.</span><span class="na">values</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">Docket</span> <span class="n">docket</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Docket</span><span class="p">(</span><span class="n">DocumentationType</span><span class="p">.</span><span class="na">SWAGGER_2</span><span class="p">)</span>
+                    <span class="p">.</span><span class="na">apiInfo</span><span class="p">(</span><span class="n">apiInfo</span><span class="p">())</span>
+                    <span class="p">.</span><span class="na">groupName</span><span class="p">(</span><span class="n">version</span><span class="p">.</span><span class="na">getDisplay</span><span class="p">())</span>
+                    <span class="p">.</span><span class="na">select</span><span class="p">()</span>
+                    <span class="p">.</span><span class="na">apis</span><span class="p">(</span><span class="n">input</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="n">input</span><span class="p">.</span><span class="na">toString</span><span class="p">());</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">ApiVersion</span><span class="p">.</span><span class="na">Version</span><span class="p">.</span><span class="na">MASTER</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">version</span><span class="p">))</span> <span class="p">{</span>
+                            <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+                        <span class="p">}</span>
+                        <span class="n">ApiVersion</span> <span class="n">apiVersion</span> <span class="o">=</span> <span class="n">input</span><span class="p">.</span><span class="na">getHandlerMethod</span><span class="p">().</span><span class="na">getMethodAnnotation</span><span class="p">(</span><span class="n">ApiVersion</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">apiVersion</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">Arrays</span><span class="p">.</span><span class="na">asList</span><span class="p">(</span><span class="n">apiVersion</span><span class="p">.</span><span class="na">value</span><span class="p">()).</span><span class="na">contains</span><span class="p">(</span><span class="n">version</span><span class="p">))</span> <span class="p">{</span>
+                            <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+                        <span class="p">}</span>
+                        <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+                    <span class="p">})</span>
+                    <span class="p">.</span><span class="na">paths</span><span class="p">(</span><span class="n">PathSelectors</span><span class="p">.</span><span class="na">any</span><span class="p">())</span>
+                    <span class="p">.</span><span class="na">build</span><span class="p">()</span>
+                    <span class="p">.</span><span class="na">securityContexts</span><span class="p">(</span><span class="n">securityContexts</span><span class="p">());</span>
+
+            <span class="n">list</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">docket</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="k">new</span> <span class="n">SwaggerPluginRegistry</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="k">new</span> <span class="n">AnnotationAwareOrderComparator</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">ApiInfo</span> <span class="nf">apiInfo</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">Contact</span> <span class="n">contact</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Contact</span><span class="p">(</span><span class="s">"技术部"</span><span class="p">,</span> <span class="s">""</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">ApiInfoBuilder</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">title</span><span class="p">(</span><span class="s">"ofcoder接口文档"</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">description</span><span class="p">(</span><span class="s">"ofcoder接口文档"</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">version</span><span class="p">(</span><span class="s">"1.0.0"</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">contact</span><span class="p">(</span><span class="n">contact</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">build</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">SecurityContext</span><span class="o">&gt;</span> <span class="nf">securityContexts</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">SecurityContext</span><span class="o">&gt;</span> <span class="n">arrayList</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+        <span class="n">arrayList</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">SecurityContext</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">securityReferences</span><span class="p">(</span><span class="n">defaultAuth</span><span class="p">())</span>
+                <span class="p">.</span><span class="na">build</span><span class="p">());</span>
+        <span class="k">return</span> <span class="n">arrayList</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">SecurityReference</span><span class="o">&gt;</span> <span class="nf">defaultAuth</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">AuthorizationScope</span> <span class="n">authorizationScope</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AuthorizationScope</span><span class="p">(</span><span class="s">"global"</span><span class="p">,</span> <span class="s">"accessEverything"</span><span class="p">);</span>
+        <span class="n">AuthorizationScope</span><span class="o">[]</span> <span class="n">authorizationScopes</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AuthorizationScope</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">;</span>
+        <span class="n">authorizationScopes</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">=</span> <span class="n">authorizationScope</span><span class="p">;</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">SecurityReference</span><span class="o">&gt;</span> <span class="n">arrayList</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+        <span class="n">arrayList</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">new</span> <span class="n">SecurityReference</span><span class="p">(</span><span class="s">"Authorization"</span><span class="p">,</span> <span class="n">authorizationScopes</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">arrayList</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      使用示例如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Api</span><span class="p">(</span><span class="n">tags</span> <span class="o">=</span> <span class="s">"接口"</span><span class="p">)</span>
+<span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span>
+<span class="nd">@RestController</span>
+<span class="nd">@AllArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Controller</span> <span class="p">{</span>
+
+    <span class="nd">@ApiVersion</span><span class="p">({</span><span class="n">ApiVersion</span><span class="p">.</span><span class="na">Version</span><span class="p">.</span><span class="na">V3_3_0128</span><span class="p">})</span>
+    <span class="nd">@ApiOperation</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"删除"</span><span class="p">)</span>
+    <span class="nd">@ApiImplicitParams</span><span class="p">({</span>
+            <span class="nd">@ApiImplicitParam</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"id"</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="s">"ID"</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="nd">@DeleteMapping</span><span class="p">(</span><span class="s">"/delete/{id}"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="n">RespResult</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="nf">delete</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"id"</span><span class="p">)</span> <span class="kt">long</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">RespResult</span><span class="p">.</span><span class="na">buildSuccessResult</span><span class="p">(</span><span class="s">"success"</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_4">
+      文档访问地址
+     </h2>
+     <p>
+      在线接口文档：http://{ip}:{port}/doc.html#/home, 例如：http://127.0.0.1:8000/doc.html#/home
+     </p>
+     <h2 id="_5">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://blog.csdn.net/AlbertFly/article/details/80859684">
+        swagger默认访问地址
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/java_zhangshuai/article/details/107580703">
+        spring boot controller 增加指定前缀的两种方法
+       </a>
+      </li>
+      <li>
+       <a href="https://doc.xiaominfo.com/knife4j/documentation/get_start.html">
+        knife4j
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
