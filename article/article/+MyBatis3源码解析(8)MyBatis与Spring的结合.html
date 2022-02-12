@@ -1,0 +1,355 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="mybatis38mybatisspring">
+      MyBatis3源码解析(8)MyBatis与Spring的结合
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第14天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在上几篇文章中，解析了MyBatis的核心原理部分，我们大致对其有了一定的了解，接下来我们看看在日常的开发中MyBatis是如何与Spring框架结合的
+     </p>
+     <h2 id="_2">
+      源码解析
+     </h2>
+     <p>
+      在我们的日常开发中，使用Spring框架结合MyBatis，只需简单的进行相关的配置，在代码中使用注解即可轻松使用，而不用像下面示例中的，需要很多的代码：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MybatisTest</span> <span class="p">{</span>
+
+    <span class="c1">// 从SqlSessionFactory中获取Mapper进行使用</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">try</span><span class="p">(</span><span class="n">SqlSession</span> <span class="n">session</span> <span class="o">=</span> <span class="n">buildSqlSessionFactory</span><span class="p">().</span><span class="na">openSession</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">PersonMapper</span> <span class="n">personMapper</span> <span class="o">=</span> <span class="n">session</span><span class="p">.</span><span class="na">getMapper</span><span class="p">(</span><span class="n">PersonMapper</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+            <span class="n">personMapper</span><span class="p">.</span><span class="na">createTable</span><span class="p">();</span>
+            <span class="n">personMapper</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">Person</span><span class="p">.</span><span class="na">builder</span><span class="p">().</span><span class="na">id</span><span class="p">(</span><span class="mi">1L</span><span class="p">).</span><span class="na">name</span><span class="p">(</span><span class="k">new</span> <span class="n">String</span><span class="o">[]</span><span class="p">{</span><span class="s">"1"</span><span class="p">,</span> <span class="s">"2"</span><span class="p">}).</span><span class="na">build</span><span class="p">());</span>
+            <span class="n">personMapper</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">Person</span><span class="p">.</span><span class="na">builder</span><span class="p">().</span><span class="na">id</span><span class="p">(</span><span class="mi">2L</span><span class="p">).</span><span class="na">name</span><span class="p">(</span><span class="k">new</span> <span class="n">String</span><span class="o">[]</span><span class="p">{</span><span class="s">"1"</span><span class="p">,</span> <span class="s">"2"</span><span class="p">}).</span><span class="na">build</span><span class="p">());</span>
+
+            <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">query</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+            <span class="n">query</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"id"</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+            <span class="n">query</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"name"</span><span class="p">,</span> <span class="k">new</span> <span class="n">String</span><span class="o">[]</span><span class="p">{</span><span class="s">"1"</span><span class="p">,</span> <span class="s">"2"</span><span class="p">});</span>
+            <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">personMapper</span><span class="p">.</span><span class="na">getPersonByMap</span><span class="p">(</span><span class="n">query</span><span class="p">));</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 初始化SqlSessionFactory</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">SqlSessionFactory</span> <span class="nf">buildSqlSessionFactory</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">JDBC_DRIVER</span> <span class="o">=</span> <span class="s">"org.h2.Driver"</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">DB_URL</span> <span class="o">=</span> <span class="s">"jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">USER</span> <span class="o">=</span> <span class="s">"sa"</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">PASS</span> <span class="o">=</span> <span class="s">""</span><span class="p">;</span>
+        <span class="n">DataSource</span> <span class="n">dataSource</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PooledDataSource</span><span class="p">(</span><span class="n">JDBC_DRIVER</span><span class="p">,</span> <span class="n">DB_URL</span><span class="p">,</span> <span class="n">USER</span><span class="p">,</span> <span class="n">PASS</span><span class="p">);</span>
+        <span class="n">Environment</span> <span class="n">environment</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Environment</span><span class="p">(</span><span class="s">"Development"</span><span class="p">,</span> <span class="k">new</span> <span class="n">JdbcTransactionFactory</span><span class="p">(),</span> <span class="n">dataSource</span><span class="p">);</span>
+        <span class="n">Configuration</span> <span class="n">configuration</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Configuration</span><span class="p">(</span><span class="n">environment</span><span class="p">);</span>
+        <span class="n">configuration</span><span class="p">.</span><span class="na">getTypeHandlerRegistry</span><span class="p">().</span><span class="na">register</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="p">.</span><span class="na">class</span><span class="p">,</span> <span class="n">JdbcType</span><span class="p">.</span><span class="na">VARCHAR</span><span class="p">,</span> <span class="n">StringArrayTypeHandler</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="n">configuration</span><span class="p">.</span><span class="na">addMapper</span><span class="p">(</span><span class="n">PersonMapper</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="n">SqlSessionFactoryBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SqlSessionFactoryBuilder</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">(</span><span class="n">configuration</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在上面的代码中，我们可以明显的看到大段的SqlSessionFactory初始化和Mapper的获取的繁琐代码，但我们在Spring中没有这些繁琐的操作，如下变可以使用：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@AllArgsConstructor</span>
+<span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">PersonService</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">PersonMapper</span> <span class="n">personMapper</span><span class="p">;</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">select</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">personMapper</span><span class="p">.</span><span class="na">getPersonById</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      可以说非常省心和简单了
+     </p>
+     <p>
+      以前自己也不知道其原理，通过这段时间的学习，了解了MyBatis的原始使用和Spring的相关原理，知道了其背后的原理，在开发中使用起来感觉心中比以前有数了，希望通过这些源码解析的文章，也能对大家有所帮助
+     </p>
+     <h3 id="sqlsessionfactory">
+      SqlSessionFactory的初始化
+     </h3>
+     <p>
+      这部分涉及到Spring的Bean和Spring Boot自动配置
+     </p>
+     <p>
+      可以尝试去自己写一个Spring Boot Starter，这样会有比较大帮助（以前好像写过一篇，但找不到了，可以参考下下面其他人的链接）:
+     </p>
+     <ul>
+      <li>
+       <a href="https://juejin.im/post/6844903988958232583">
+        SpringBoot自定义starter及自动配置
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/xujian_2001/article/details/79027026">
+        spring boot 自定义配置属性的各种方式
+       </a>
+      </li>
+     </ul>
+     <p>
+      这里我们直接去看包：org.mybatis.spring.boot.autoconfigure
+     </p>
+     <p>
+      可以看到下面一段我们熟悉的内容：
+     </p>
+     <p>
+      可以看到Spring 在启动时便自动初始化了SqlSessionFactory,其中的细节这里就不赘述了
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="nd">@Bean</span>
+    <span class="nd">@ConditionalOnMissingBean</span>
+    <span class="kd">public</span> <span class="n">SqlSessionFactory</span> <span class="nf">sqlSessionFactory</span><span class="p">(</span><span class="n">DataSource</span> <span class="n">dataSource</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="n">SqlSessionFactoryBean</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SqlSessionFactoryBean</span><span class="p">();</span>
+        <span class="n">factory</span><span class="p">.</span><span class="na">setDataSource</span><span class="p">(</span><span class="n">dataSource</span><span class="p">);</span>
+        <span class="n">factory</span><span class="p">.</span><span class="na">setVfs</span><span class="p">(</span><span class="n">SpringBootVFS</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">hasText</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">getConfigLocation</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="n">factory</span><span class="p">.</span><span class="na">setConfigLocation</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">resourceLoader</span><span class="p">.</span><span class="na">getResource</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">getConfigLocation</span><span class="p">()));</span>
+        <span class="p">}</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="na">applyConfiguration</span><span class="p">(</span><span class="n">factory</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">getConfigurationProperties</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">factory</span><span class="p">.</span><span class="na">setConfigurationProperties</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">getConfigurationProperties</span><span class="p">());</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ObjectUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">interceptors</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">factory</span><span class="p">.</span><span class="na">setPlugins</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">interceptors</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">databaseIdProvider</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">factory</span><span class="p">.</span><span class="na">setDatabaseIdProvider</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">databaseIdProvider</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">hasLength</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">getTypeAliasesPackage</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="n">factory</span><span class="p">.</span><span class="na">setTypeAliasesPackage</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">getTypeAliasesPackage</span><span class="p">());</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">getTypeAliasesSuperType</span><span class="p">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">factory</span><span class="p">.</span><span class="na">setTypeAliasesSuperType</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">getTypeAliasesSuperType</span><span class="p">());</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">hasLength</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">getTypeHandlersPackage</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="n">factory</span><span class="p">.</span><span class="na">setTypeHandlersPackage</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">getTypeHandlersPackage</span><span class="p">());</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ObjectUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">typeHandlers</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">factory</span><span class="p">.</span><span class="na">setTypeHandlers</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">typeHandlers</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ObjectUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">resolveMapperLocations</span><span class="p">()))</span> <span class="p">{</span>
+            <span class="n">factory</span><span class="p">.</span><span class="na">setMapperLocations</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">resolveMapperLocations</span><span class="p">());</span>
+        <span class="p">}</span>
+
+        <span class="n">Set</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">factoryPropertyNames</span> <span class="o">=</span> <span class="p">(</span><span class="n">Set</span><span class="p">)</span><span class="n">Stream</span><span class="p">.</span><span class="na">of</span><span class="p">((</span><span class="k">new</span> <span class="n">BeanWrapperImpl</span><span class="p">(</span><span class="n">SqlSessionFactoryBean</span><span class="p">.</span><span class="na">class</span><span class="p">)).</span><span class="na">getPropertyDescriptors</span><span class="p">()).</span><span class="na">map</span><span class="p">(</span><span class="n">FeatureDescriptor</span><span class="p">::</span><span class="n">getName</span><span class="p">).</span><span class="na">collect</span><span class="p">(</span><span class="n">Collectors</span><span class="p">.</span><span class="na">toSet</span><span class="p">());</span>
+        <span class="n">Class</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">LanguageDriver</span><span class="o">&gt;</span> <span class="n">defaultLanguageDriver</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="p">.</span><span class="na">getDefaultScriptingLanguageDriver</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">factoryPropertyNames</span><span class="p">.</span><span class="na">contains</span><span class="p">(</span><span class="s">"scriptingLanguageDrivers"</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">ObjectUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">languageDrivers</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">factory</span><span class="p">.</span><span class="na">setScriptingLanguageDrivers</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">languageDrivers</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">defaultLanguageDriver</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="na">languageDrivers</span><span class="p">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">defaultLanguageDriver</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">languageDrivers</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">.</span><span class="na">getClass</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">factoryPropertyNames</span><span class="p">.</span><span class="na">contains</span><span class="p">(</span><span class="s">"defaultScriptingLanguageDriver"</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">factory</span><span class="p">.</span><span class="na">setDefaultScriptingLanguageDriver</span><span class="p">(</span><span class="n">defaultLanguageDriver</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="na">applySqlSessionFactoryBeanCustomizers</span><span class="p">(</span><span class="n">factory</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">factory</span><span class="p">.</span><span class="na">getObject</span><span class="p">();</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="mapper">
+      Mapper的生成使用
+     </h3>
+     <p>
+      这部分涉及到Spring的依赖注入相关的原理了，自己以前写过一个demo，但文章还没完善，后面抽空完善后，再发出来
+     </p>
+     <p>
+      简答来说，核心是：
+     </p>
+     <ul>
+      <li>
+       1.应用启动时，自动生成需要的类实例放入容器中， 比如加了Service注解的类
+      </li>
+      <li>
+       2.对类实例进行初始化，在构造函数中，将其需要的类实例给传递进去
+      </li>
+     </ul>
+     <p>
+      比如下面的：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@AllArgsConstructor</span>
+<span class="nd">@Service</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">PersonService</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">PersonMapper</span> <span class="n">personMapper</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      在Spring容器中已经有了类 PersonService 和 PersonMapper 的实例
+     </p>
+     <p>
+      在初始化阶段，调用 PersonService 构造函数时，发现需要 PersonMapper，由于从容器中取PersonMapper给其传递进去
+     </p>
+     <p>
+      大体的意思应该是这样，可能细节上会有些出入
+     </p>
+     <p>
+      下面是大致一些Debug的信息，通过调试就会发现，SqlSessionFactory 和 Mapper 初始化和获取等代码都是在应用程序其中就会执行触发
+     </p>
+     <p>
+      这个是PersonService这个bean初始化的相关栈函数：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>   <span class="nd">@Nullable</span>
+    <span class="kd">protected</span> <span class="n">Object</span> <span class="nf">resolveAutowiredArgument</span><span class="p">(</span><span class="n">MethodParameter</span> <span class="n">param</span><span class="p">,</span> <span class="n">String</span> <span class="n">beanName</span><span class="p">,</span> <span class="nd">@Nullable</span> <span class="n">Set</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">autowiredBeanNames</span><span class="p">,</span> <span class="n">TypeConverter</span> <span class="n">typeConverter</span><span class="p">,</span> <span class="kt">boolean</span> <span class="n">fallback</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">paramType</span> <span class="o">=</span> <span class="n">param</span><span class="p">.</span><span class="na">getParameterType</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">InjectionPoint</span><span class="p">.</span><span class="na">class</span><span class="p">.</span><span class="na">isAssignableFrom</span><span class="p">(</span><span class="n">paramType</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">InjectionPoint</span> <span class="n">injectionPoint</span> <span class="o">=</span> <span class="p">(</span><span class="n">InjectionPoint</span><span class="p">)</span><span class="n">currentInjectionPoint</span><span class="p">.</span><span class="na">get</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">injectionPoint</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="n">IllegalStateException</span><span class="p">(</span><span class="s">"No current InjectionPoint available for "</span> <span class="o">+</span> <span class="n">param</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="n">injectionPoint</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">beanFactory</span><span class="p">.</span><span class="na">resolveDependency</span><span class="p">(</span><span class="k">new</span> <span class="n">DependencyDescriptor</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span> <span class="n">beanName</span><span class="p">,</span> <span class="n">autowiredBeanNames</span><span class="p">,</span> <span class="n">typeConverter</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">NoUniqueBeanDefinitionException</span> <span class="n">var8</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">throw</span> <span class="n">var8</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">NoSuchBeanDefinitionException</span> <span class="n">var9</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">fallback</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">paramType</span><span class="p">.</span><span class="na">isArray</span><span class="p">())</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="n">Array</span><span class="p">.</span><span class="na">newInstance</span><span class="p">(</span><span class="n">paramType</span><span class="p">.</span><span class="na">getComponentType</span><span class="p">(),</span> <span class="mi">0</span><span class="p">);</span>
+                    <span class="p">}</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">CollectionFactory</span><span class="p">.</span><span class="na">isApproximableCollectionType</span><span class="p">(</span><span class="n">paramType</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="n">CollectionFactory</span><span class="p">.</span><span class="na">createCollection</span><span class="p">(</span><span class="n">paramType</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+                    <span class="p">}</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">CollectionFactory</span><span class="p">.</span><span class="na">isApproximableMapType</span><span class="p">(</span><span class="n">paramType</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="n">CollectionFactory</span><span class="p">.</span><span class="na">createMap</span><span class="p">(</span><span class="n">paramType</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+
+                <span class="k">throw</span> <span class="n">var9</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      调试的相关信息如下：
+     </p>
+     <p>
+      <img alt="image.png" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b8d709a4bee94795b0e2b8710815e3c9~tplv-k3u1fbpfcp-watermark.image?"/>
+     </p>
+     <p>
+      这个beanName是PersonService，需要的构造函数参数是 PersonMapper
+     </p>
+     <p>
+      一直跟着下面，它会从SqlSessionTemplate中取
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T</span> <span class="nf">getMapper</span><span class="p">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">type</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="na">getConfiguration</span><span class="p">().</span><span class="na">getMapper</span><span class="p">(</span><span class="n">type</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+    <span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      然后就跳到我们熟悉的 Mybatis类中 Configuration：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>  <span class="kd">public</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">T</span> <span class="nf">getMapper</span><span class="p">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">type</span><span class="p">,</span> <span class="n">SqlSession</span> <span class="n">sqlSession</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">mapperRegistry</span><span class="p">.</span><span class="na">getMapper</span><span class="p">(</span><span class="n">type</span><span class="p">,</span> <span class="n">sqlSession</span><span class="p">);</span>
+  <span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_3">
+      总结
+     </h2>
+     <p>
+      本篇中大致探索了：
+     </p>
+     <ul>
+      <li>
+       MyBatis初始化 SqlSessionFactory:Spring boot 自动配置
+      </li>
+      <li>
+       Mapper初始化和使用：基于依赖注入，方便快捷的使用
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
