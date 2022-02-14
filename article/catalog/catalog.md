@@ -115,6 +115,8 @@
     - minetest
         - [minetestWindows编译运行.md](./article/article/+minetestWindows编译运行.html)
     - Mybatis3
+        - demo
+            - [MyBatisDemo编写(1)基础功能搭建.md](./article/article/+MyBatisDemo编写(1)基础功能搭建.html)
         - [MyBatis3源码解析(1)探索准备.md](./article/article/+MyBatis3源码解析(1)探索准备.html)
         - [MyBatis3源码解析(2)数据库连接.md](./article/article/+MyBatis3源码解析(2)数据库连接.html)
         - [MyBatis3源码解析(3)查询语句执行.md](./article/article/+MyBatis3源码解析(3)查询语句执行.html)
