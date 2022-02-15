@@ -1,0 +1,465 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="mybatis-demo-2">
+      MyBatis Demo 编写（2）结果映射转换处理
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第17天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在上篇中，我们完成了MyBatis一部分功能的搭建，已经能通过Mapper接口类的编写，自动执行相关的语句了，接下来完善结果处理部分
+     </p>
+     <h2 id="_2">
+      最终效果展示
+     </h2>
+     <p>
+      修改下我们的Mapper
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">PersonMapper</span> <span class="p">{</span>
+
+    <span class="nd">@Select</span><span class="p">(</span><span class="s">"select * from person"</span><span class="p">)</span>
+    <span class="n">List</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="nf">list</span><span class="p">();</span>
+
+    <span class="nd">@Insert</span><span class="p">(</span><span class="s">"insert into person (id, name) values ('1', '1')"</span><span class="p">)</span>
+    <span class="kt">void</span> <span class="nf">save</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      测试代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SelfMybatisTest</span> <span class="p">{</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">try</span><span class="p">(</span><span class="n">SelfSqlSession</span> <span class="n">session</span> <span class="o">=</span> <span class="n">buildSqlSessionFactory</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">PersonMapper</span> <span class="n">personMapper</span> <span class="o">=</span> <span class="n">session</span><span class="p">.</span><span class="na">getMapper</span><span class="p">(</span><span class="n">PersonMapper</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+            <span class="n">personMapper</span><span class="p">.</span><span class="na">save</span><span class="p">();</span>
+            <span class="n">List</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span> <span class="n">personList</span> <span class="o">=</span> <span class="n">personMapper</span><span class="p">.</span><span class="na">list</span><span class="p">();</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">Object</span> <span class="n">person</span><span class="p">:</span> <span class="n">personList</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">person</span><span class="p">.</span><span class="na">toString</span><span class="p">());</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">SelfSqlSession</span> <span class="nf">buildSqlSessionFactory</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">JDBC_DRIVER</span> <span class="o">=</span> <span class="s">"org.h2.Driver"</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">DB_URL</span> <span class="o">=</span> <span class="s">"jdbc:h2:file:./testDb"</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">USER</span> <span class="o">=</span> <span class="s">"sa"</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">PASS</span> <span class="o">=</span> <span class="s">""</span><span class="p">;</span>
+
+        <span class="n">HikariConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HikariConfig</span><span class="p">();</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setJdbcUrl</span><span class="p">(</span><span class="n">DB_URL</span><span class="p">);</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setUsername</span><span class="p">(</span><span class="n">USER</span><span class="p">);</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setPassword</span><span class="p">(</span><span class="n">PASS</span><span class="p">);</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">setDriverClassName</span><span class="p">(</span><span class="n">JDBC_DRIVER</span><span class="p">);</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">addDataSourceProperty</span><span class="p">(</span><span class="s">"cachePrepStmts"</span><span class="p">,</span> <span class="s">"true"</span><span class="p">);</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">addDataSourceProperty</span><span class="p">(</span><span class="s">"prepStmtCacheSize"</span><span class="p">,</span> <span class="s">"250"</span><span class="p">);</span>
+        <span class="n">config</span><span class="p">.</span><span class="na">addDataSourceProperty</span><span class="p">(</span><span class="s">"prepStmtCacheSqlLimit"</span><span class="p">,</span> <span class="s">"2048"</span><span class="p">);</span>
+        <span class="n">DataSource</span> <span class="n">dataSource</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HikariDataSource</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+
+        <span class="n">SelfConfiguration</span> <span class="n">configuration</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SelfConfiguration</span><span class="p">(</span><span class="n">dataSource</span><span class="p">);</span>
+        <span class="n">configuration</span><span class="p">.</span><span class="na">addMapper</span><span class="p">(</span><span class="n">PersonMapper</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">SelfSqlSession</span><span class="p">(</span><span class="n">configuration</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      输出如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>add sql source: mapper.mapper.PersonMapper.list
+add sql source: mapper.mapper.PersonMapper.save
+executor
+executor
+Person(id=1, name=1)
+</code></pre>
+     </div>
+     <p>
+      成功的返回我们自定义的Person对象，这个Demo已经有一点样子，算是达成了目标
+     </p>
+     <p>
+      下面是实现的相关细节
+     </p>
+     <h2 id="demo">
+      Demo编写
+     </h2>
+     <p>
+      完整的工程已放到GitHub上：https://github.com/lw1243925457/MybatisDemo/tree/master/
+     </p>
+     <p>
+      本篇文章的代码对应的Tag是: V2
+     </p>
+     <h3 id="_3">
+      思路梳理
+     </h3>
+     <p>
+      要实现SQL查询结果到Java对象的转换，我们需要下面的东西：
+     </p>
+     <ul>
+      <li>
+       1.返回的Java对象信息
+      </li>
+      <li>
+       2.对应的SQL表字段信息
+      </li>
+      <li>
+       3.SQL字段值到Java对象字段的转换处理
+      </li>
+      <li>
+       4.读取SQL结果，转换成Java对象
+      </li>
+     </ul>
+     <h3 id="1java">
+      1.返回的Java对象信息
+     </h3>
+     <p>
+      我们需要知道当前接口方法返回的Java对象信息，方便后面的读取SQL查询结果，转换成Java对象
+     </p>
+     <p>
+      借鉴MyBatis，我们定义下面一个类，来保存接口方法返回的对象和SQL查询结果字段与Java对象字段的TypeHandler处理器
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Builder</span>
+<span class="nd">@Data</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ResultMap</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="n">Object</span> <span class="n">returnType</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="n">TypeHandler</span><span class="o">&gt;</span> <span class="n">typeHandlerMaps</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="2sql">
+      2.对应的SQL表字段信息
+     </h3>
+     <p>
+      在以前的MyBatis源码解析中，我们大致知道获取TypeHandler是根据JavaType和JdbcType，我们就需要知道数据库表中各个字段的类型，方便后面去匹配对应的TypeHandler
+     </p>
+     <p>
+      我们在程序初始化的时候，读取数据库中所有的表，保存下其各个字段对应的jdbcType
+     </p>
+     <p>
+      可能不同表中有相关的字段，但是不同的类型，所以第一层是表名，第二层是字段名称，最后对应其jdbcType
+     </p>
+     <p>
+      代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SelfConfiguration</span> <span class="p">{</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 读取数据库中的所有表</span>
+<span class="cm">     * 获取其字段对应的类型</span>
+<span class="cm">     * @throws SQLException e</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">initJdbcTypeCache</span><span class="p">()</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">(</span><span class="n">Connection</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">dataSource</span><span class="p">.</span><span class="na">getConnection</span><span class="p">()){</span>
+            <span class="kd">final</span> <span class="n">DatabaseMetaData</span> <span class="n">dbMetaData</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="na">getMetaData</span><span class="p">();</span>
+            <span class="n">ResultSet</span> <span class="n">tableNameRes</span> <span class="o">=</span> <span class="n">dbMetaData</span><span class="p">.</span><span class="na">getTables</span><span class="p">(</span><span class="n">conn</span><span class="p">.</span><span class="na">getCatalog</span><span class="p">(),</span><span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span><span class="k">new</span> <span class="n">String</span><span class="o">[]</span> <span class="p">{</span> <span class="s">"TABLE"</span> <span class="p">});</span>
+            <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">tableNames</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">tableNameRes</span><span class="p">.</span><span class="na">getFetchSize</span><span class="p">());</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">tableNameRes</span><span class="p">.</span><span class="na">next</span><span class="p">())</span> <span class="p">{</span>
+                <span class="n">tableNames</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">tableNameRes</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">"TABLE_NAME"</span><span class="p">));</span>
+            <span class="p">}</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="n">String</span> <span class="n">tableName</span> <span class="p">:</span> <span class="n">tableNames</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">try</span> <span class="p">{</span>
+                    <span class="n">String</span> <span class="n">sql</span> <span class="o">=</span> <span class="s">"select * from "</span> <span class="o">+</span> <span class="n">tableName</span><span class="p">;</span>
+                    <span class="n">PreparedStatement</span> <span class="n">ps</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="na">prepareStatement</span><span class="p">(</span><span class="n">sql</span><span class="p">);</span>
+                    <span class="n">ResultSet</span> <span class="n">rs</span> <span class="o">=</span> <span class="n">ps</span><span class="p">.</span><span class="na">executeQuery</span><span class="p">();</span>
+                    <span class="n">ResultSetMetaData</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">rs</span><span class="p">.</span><span class="na">getMetaData</span><span class="p">();</span>
+                    <span class="kt">int</span> <span class="n">columnCount</span> <span class="o">=</span> <span class="n">meta</span><span class="p">.</span><span class="na">getColumnCount</span><span class="p">();</span>
+                    <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">Integer</span><span class="o">&gt;</span> <span class="n">jdbcTypeMap</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">columnCount</span><span class="p">);</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">columnCount</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="n">jdbcTypeMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">meta</span><span class="p">.</span><span class="na">getColumnName</span><span class="p">(</span><span class="n">i</span><span class="p">).</span><span class="na">toLowerCase</span><span class="p">(),</span> <span class="n">meta</span><span class="p">.</span><span class="na">getColumnType</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+                    <span class="p">}</span>
+                    <span class="n">jdbcTypeCache</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">tableName</span><span class="p">.</span><span class="na">toLowerCase</span><span class="p">(),</span> <span class="n">jdbcTypeMap</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">ignored</span><span class="p">)</span> <span class="p">{</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="3sqljava">
+      3.SQL字段值到Java对象字段的转换处理
+     </h3>
+     <p>
+      接下来我们要定义JavaType与jdbcType相互转换的TypeHandler
+     </p>
+     <p>
+      简化点，我们内置定义String和Long类型的处理，并在初始化的时候进行注册（还没涉及到参数转换处理，所以暂时定义jdbcType到JavaType的处理）
+     </p>
+     <p>
+      TypeHandler代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">TypeHandler</span> <span class="p">{</span>
+
+    <span class="n">Object</span> <span class="nf">getResult</span><span class="p">(</span><span class="n">ResultSet</span> <span class="n">res</span><span class="p">,</span> <span class="n">String</span> <span class="n">cluName</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">StringTypeHandler</span> <span class="kd">implements</span> <span class="n">TypeHandler</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">StringTypeHandler</span> <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringTypeHandler</span><span class="p">();</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">StringTypeHandler</span> <span class="nf">getInstance</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">getResult</span><span class="p">(</span><span class="n">ResultSet</span> <span class="n">res</span><span class="p">,</span> <span class="n">String</span> <span class="n">cluName</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">res</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="n">cluName</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">LongTypeHandler</span> <span class="kd">implements</span> <span class="n">TypeHandler</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="n">LongTypeHandler</span> <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LongTypeHandler</span><span class="p">();</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">LongTypeHandler</span> <span class="nf">getInstance</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">getResult</span><span class="p">(</span><span class="n">ResultSet</span> <span class="n">res</span><span class="p">,</span> <span class="n">String</span> <span class="n">cluName</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">res</span><span class="p">.</span><span class="na">getLong</span><span class="p">(</span><span class="n">cluName</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      默认初始化注册：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SelfConfiguration</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">initTypeHandlers</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">Integer</span><span class="p">,</span> <span class="n">TypeHandler</span><span class="o">&gt;</span> <span class="n">varchar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+        <span class="n">varchar</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">JDBCType</span><span class="p">.</span><span class="na">VARCHAR</span><span class="p">.</span><span class="na">getVendorTypeNumber</span><span class="p">(),</span> <span class="n">StringTypeHandler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span>
+        <span class="n">typeHandlerMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">String</span><span class="p">.</span><span class="na">class</span><span class="p">,</span> <span class="n">varchar</span><span class="p">);</span>
+
+        <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">Integer</span><span class="p">,</span> <span class="n">TypeHandler</span><span class="o">&gt;</span> <span class="n">intType</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+        <span class="n">intType</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">JDBCType</span><span class="p">.</span><span class="na">INTEGER</span><span class="p">.</span><span class="na">getVendorTypeNumber</span><span class="p">(),</span> <span class="n">LongTypeHandler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span>
+        <span class="n">typeHandlerMap</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">Long</span><span class="p">.</span><span class="na">class</span><span class="p">,</span> <span class="n">intType</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      接着重要的一步是构建接口函数方法返回的结果处理了，具体的细节如下，关键的都进行了相关的注释：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SelfConfiguration</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">DataSource</span> <span class="n">dataSource</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">SqlSource</span><span class="o">&gt;</span> <span class="n">sqlCache</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">ResultMap</span><span class="o">&gt;</span> <span class="n">resultMapCache</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">Integer</span><span class="o">&gt;&gt;</span> <span class="n">jdbcTypeCache</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="p">,</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">Integer</span><span class="p">,</span> <span class="n">TypeHandler</span><span class="o">&gt;&gt;</span> <span class="n">typeHandlerMap</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+        <span class="cm">/**</span>
+<span class="cm">     * Mapper添加</span>
+<span class="cm">     * 方法路径作为唯一的id</span>
+<span class="cm">     * 保存接口方法的SQL类型和方法</span>
+<span class="cm">     * 保存接口方法返回类型</span>
+<span class="cm">     * @param mapperClass mapper</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">addMapper</span><span class="p">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">mapperClass</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">classPath</span> <span class="o">=</span> <span class="n">mapperClass</span><span class="p">.</span><span class="na">getPackageName</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">className</span> <span class="o">=</span> <span class="n">mapperClass</span><span class="p">.</span><span class="na">getName</span><span class="p">();</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">Method</span> <span class="n">method</span><span class="p">:</span> <span class="n">mapperClass</span><span class="p">.</span><span class="na">getMethods</span><span class="p">())</span> <span class="p">{</span>
+            <span class="kd">final</span> <span class="n">String</span> <span class="n">id</span> <span class="o">=</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">joinWith</span><span class="p">(</span><span class="s">"."</span> <span class="p">,</span><span class="n">classPath</span><span class="p">,</span> <span class="n">className</span><span class="p">,</span> <span class="n">method</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">Annotation</span> <span class="n">annotation</span><span class="p">:</span> <span class="n">method</span><span class="p">.</span><span class="na">getAnnotations</span><span class="p">())</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">annotation</span> <span class="k">instanceof</span> <span class="n">Select</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">addSqlSource</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="p">((</span><span class="n">Select</span><span class="p">)</span> <span class="n">annotation</span><span class="p">).</span><span class="na">value</span><span class="p">(),</span> <span class="n">SqlType</span><span class="p">.</span><span class="na">SELECT</span><span class="p">);</span>
+                    <span class="k">continue</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">annotation</span> <span class="k">instanceof</span> <span class="n">Insert</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">addSqlSource</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="p">((</span><span class="n">Insert</span><span class="p">)</span> <span class="n">annotation</span><span class="p">).</span><span class="na">value</span><span class="p">(),</span> <span class="n">SqlType</span><span class="p">.</span><span class="na">INSERT</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+
+            <span class="c1">// 构建接口函数方法返回值处理</span>
+            <span class="n">addResultMap</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="n">method</span><span class="p">);</span>
+        <span class="p">}</span>
+
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 构建接口函数方法返回值处理</span>
+<span class="cm">     * @param id 接口函数 id</span>
+<span class="cm">     * @param method 接口函数方法</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">addResultMap</span><span class="p">(</span><span class="n">String</span> <span class="n">id</span><span class="p">,</span> <span class="n">Method</span> <span class="n">method</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 空直接发返回</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">method</span><span class="p">.</span><span class="na">getReturnType</span><span class="p">().</span><span class="na">getName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="s">"void"</span><span class="p">))</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 获取返回对象类型</span>
+        <span class="c1">// 这里需要特殊处理下，如果是List的话，需要特殊处理得到List里面的对象</span>
+        <span class="n">Type</span> <span class="n">type</span> <span class="o">=</span> <span class="n">method</span><span class="p">.</span><span class="na">getGenericReturnType</span><span class="p">();</span>
+        <span class="n">Type</span> <span class="n">returnType</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">type</span> <span class="k">instanceof</span> <span class="n">ParameterizedType</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">returnType</span> <span class="o">=</span> <span class="p">((</span><span class="n">ParameterizedType</span><span class="p">)</span> <span class="n">type</span><span class="p">).</span><span class="na">getActualTypeArguments</span><span class="p">()</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">returnType</span> <span class="o">=</span> <span class="n">method</span><span class="p">.</span><span class="na">getReturnType</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="c1">// 接口方法id作为key，值为 接口方法返回对象类型和其中每个字段对应处理的TypeHandler映射</span>
+        <span class="n">resultMapCache</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="n">ResultMap</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">returnType</span><span class="p">(</span><span class="n">returnType</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">typeHandlerMaps</span><span class="p">(</span><span class="n">buildTypeHandlerMaps</span><span class="p">((</span><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="p">)</span> <span class="n">returnType</span><span class="p">))</span>
+                <span class="p">.</span><span class="na">build</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 构建实体类的每个字段对应处理的TypeHandler映射</span>
+<span class="cm">     * @param returnType 接口函数返回对象类型</span>
+<span class="cm">     * @return TypeHandler映射</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">TypeHandler</span><span class="o">&gt;</span> <span class="nf">buildTypeHandlerMaps</span><span class="p">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">returnType</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 这里默认取类名的小写为对应的数据库表名，当然也可以使用@TableName之类的注解</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">tableName</span> <span class="o">=</span> <span class="n">StringUtils</span><span class="p">.</span><span class="na">substringAfterLast</span><span class="p">(</span><span class="n">returnType</span><span class="p">.</span><span class="na">getTypeName</span><span class="p">(),</span> <span class="s">"."</span><span class="p">).</span><span class="na">toLowerCase</span><span class="p">();</span>
+        <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">TypeHandler</span><span class="o">&gt;</span> <span class="n">typeHandler</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">returnType</span><span class="p">.</span><span class="na">getDeclaredFields</span><span class="p">().</span><span class="na">length</span><span class="p">);</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">Field</span> <span class="n">field</span> <span class="p">:</span> <span class="n">returnType</span><span class="p">.</span><span class="na">getDeclaredFields</span><span class="p">())</span> <span class="p">{</span>
+            <span class="kd">final</span> <span class="n">String</span> <span class="n">javaType</span> <span class="o">=</span> <span class="n">field</span><span class="p">.</span><span class="na">getType</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span>
+            <span class="kd">final</span> <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">field</span><span class="p">.</span><span class="na">getName</span><span class="p">();</span>
+            <span class="kd">final</span> <span class="n">Integer</span> <span class="n">jdbcType</span> <span class="o">=</span> <span class="n">jdbcTypeCache</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">tableName</span><span class="p">).</span><span class="na">get</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+            <span class="c1">// 根据JavaType和jdbcType得到对应的TypeHandler</span>
+            <span class="n">typeHandler</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">javaType</span><span class="p">,</span> <span class="n">typeHandlerMap</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">field</span><span class="p">.</span><span class="na">getType</span><span class="p">()).</span><span class="na">get</span><span class="p">(</span><span class="n">jdbcType</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">typeHandler</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="4sqljava">
+      4.读取SQL结果，转换成Java对象
+     </h3>
+     <p>
+      接下来就是SQL查询结果的处理了，主要是根据在初始化阶段构建好的针对每个返回类型ResultMap
+     </p>
+     <ul>
+      <li>
+       根据ResultMap中的返回对象类型，生成对象实例
+      </li>
+      <li>
+       根据ResultMap中的TypeHandler映射，得到各个字段对应的TypeHandler，得到处理结果
+      </li>
+      <li>
+       反射调用对象的Set方法
+      </li>
+     </ul>
+     <p>
+      代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ResultHandler</span> <span class="p">{</span>
+
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="nf">parse</span><span class="p">(</span><span class="n">String</span> <span class="n">id</span><span class="p">,</span> <span class="n">ResultSet</span> <span class="n">res</span><span class="p">,</span> <span class="n">SelfConfiguration</span> <span class="n">config</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">SQLException</span><span class="p">,</span> <span class="n">NoSuchMethodException</span><span class="p">,</span> <span class="n">InvocationTargetException</span><span class="p">,</span> <span class="n">InstantiationException</span><span class="p">,</span> <span class="n">IllegalAccessException</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">res</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">// 根据接口函数Id得到初始化时国家队ResultMap</span>
+        <span class="n">ResultMap</span> <span class="n">resultMap</span> <span class="o">=</span> <span class="n">config</span><span class="p">.</span><span class="na">getResultType</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+
+        <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">res</span><span class="p">.</span><span class="na">getFetchSize</span><span class="p">());</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">res</span><span class="p">.</span><span class="na">next</span><span class="p">())</span> <span class="p">{</span>
+            <span class="c1">// 根据接口函数返回类型，生成一个实例</span>
+            <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">returnType</span> <span class="o">=</span> <span class="p">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="p">)</span> <span class="n">resultMap</span><span class="p">.</span><span class="na">getReturnType</span><span class="p">();</span>
+            <span class="n">Object</span> <span class="n">val</span> <span class="o">=</span> <span class="n">returnType</span><span class="p">.</span><span class="na">getDeclaredConstructor</span><span class="p">().</span><span class="na">newInstance</span><span class="p">();</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="n">Field</span> <span class="n">field</span><span class="p">:</span> <span class="n">returnType</span><span class="p">.</span><span class="na">getDeclaredFields</span><span class="p">())</span> <span class="p">{</span>
+                <span class="kd">final</span> <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">field</span><span class="p">.</span><span class="na">getName</span><span class="p">();</span>
+                <span class="c1">// 根据返回对象的字段类型，得到对应的TypeHandler,调用TypeHandler处理得到结果</span>
+                <span class="n">TypeHandler</span> <span class="n">typeHandler</span> <span class="o">=</span> <span class="n">resultMap</span><span class="p">.</span><span class="na">getTypeHandlerMaps</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="n">field</span><span class="p">.</span><span class="na">getType</span><span class="p">().</span><span class="na">getName</span><span class="p">());</span>
+                <span class="n">Object</span> <span class="n">value</span> <span class="o">=</span> <span class="n">typeHandler</span><span class="p">.</span><span class="na">getResult</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+                <span class="c1">// 调用对象的Set方法</span>
+                <span class="n">String</span> <span class="n">methodEnd</span> <span class="o">=</span> <span class="n">name</span><span class="p">.</span><span class="na">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">).</span><span class="na">toUpperCase</span><span class="p">()</span> <span class="o">+</span> <span class="n">name</span><span class="p">.</span><span class="na">substring</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+                <span class="n">Method</span> <span class="n">setMethod</span> <span class="o">=</span> <span class="n">val</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getDeclaredMethod</span><span class="p">(</span><span class="s">"set"</span> <span class="o">+</span> <span class="n">methodEnd</span><span class="p">,</span> <span class="n">field</span><span class="p">.</span><span class="na">getType</span><span class="p">());</span>
+                <span class="n">setMethod</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="n">list</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">val</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">list</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_4">
+      总结
+     </h2>
+     <p>
+      本篇中完善了Demo中对查询结果集的自动处理转换部分，完成后，核心的功能就算已经完成了，基本达到了目标
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
