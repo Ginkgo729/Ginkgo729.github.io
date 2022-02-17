@@ -1,0 +1,391 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="android">
+      Android 监控手机应用使用情况
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第19天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      本篇文章中通过Android获取手机顶部的Activity的方式，来达到监控手机应用使用情况的目的
+     </p>
+     <h2 id="_2">
+      技术背景
+     </h2>
+     <p>
+      在自己的日常学习中，想要自动收集手机软件各个应用的使用时间，比如得到、极客时间、Keep、微信读书等
+     </p>
+     <p>
+      但在查找下，没有找到他们有对应的API开发接口，没有办法去获取
+     </p>
+     <p>
+      小米手机里面有手机应用使用情况，屏幕使用时间里面，数据看着挺好，挺合适的，但也不知道怎么获取
+     </p>
+     <p>
+      最后只能自己写一个原生的Android应用，通过获取手机顶层Activity的方式，每隔10秒上报服务器，并设置好Activity与应用名称的映射，来达到自己的手机应用使用统计目的
+     </p>
+     <h2 id="_3">
+      代码细节
+     </h2>
+     <p>
+      完整代码GitHub上有：
+      <a href="https://github.com/lw1243925457/self_growth_android">
+       https://github.com/lw1243925457/self_growth_android
+      </a>
+     </p>
+     <p>
+      仅做代码参考，目前数据监控上传是有了，但界面这些还很粗糙，没有完善
+     </p>
+     <p>
+      使用这个功能需要注意下面的几点：
+     </p>
+     <ul>
+      <li>
+       1.需要将监听设置为后台服务，避免切换成其他应用后频繁被kill掉
+      </li>
+      <li>
+       2.需要调用相关的权限设置，让用户开启相关的应用情况获取权限
+      </li>
+      <li>
+       3.剩下的就是应用监听代码的编写了
+      </li>
+     </ul>
+     <p>
+      具体的代码如下：
+     </p>
+     <h3 id="-activity">
+      应用监听-获取手机顶层Activity
+     </h3>
+     <p>
+      我们需要新建一个后台服务，继承Service即可，然后开启一个定时器，每十秒获取一次顶层Activity，数据上传部分可忽略
+     </p>
+     <p>
+      代码如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MonitorActivityService</span> <span class="kd">extends</span> <span class="n">Service</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">beforeActivity</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">ActivityRequest</span> <span class="n">activityRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ActivityRequest</span><span class="p">();</span>
+
+    <span class="cm">/*</span>
+<span class="cm">     * @param intent</span>
+<span class="cm">     * @param flags</span>
+<span class="cm">     * @param startId</span>
+<span class="cm">     * @return</span>
+<span class="cm">     */</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">onStartCommand</span><span class="p">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">int</span> <span class="n">startId</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">//处理任务</span>
+        <span class="k">return</span> <span class="n">START_STICKY</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Nullable</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">IBinder</span> <span class="nf">onBind</span><span class="p">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@SuppressLint</span><span class="p">(</span><span class="s">"CommitPrefEdits"</span><span class="p">)</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">super</span><span class="p">.</span><span class="na">onCreate</span><span class="p">();</span>
+        <span class="n">Log</span><span class="p">.</span><span class="na">d</span><span class="p">(</span><span class="s">"foreground"</span><span class="p">,</span> <span class="s">"onCreate"</span><span class="p">);</span>
+        <span class="c1">//如果API在26以上即版本为O则调用startForefround()方法启动服务</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">android</span><span class="p">.</span><span class="na">os</span><span class="p">.</span><span class="na">Build</span><span class="p">.</span><span class="na">VERSION</span><span class="p">.</span><span class="na">SDK_INT</span> <span class="o">&gt;=</span> <span class="n">android</span><span class="p">.</span><span class="na">os</span><span class="p">.</span><span class="na">Build</span><span class="p">.</span><span class="na">VERSION_CODES</span><span class="p">.</span><span class="na">O</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">setForegroundService</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 通过通知启动服务</span>
+<span class="cm">     * </span>
+<span class="cm">     * 10秒获取一次</span>
+<span class="cm">     */</span>
+    <span class="nd">@androidx.annotation.RequiresApi</span><span class="p">(</span><span class="n">api</span> <span class="o">=</span> <span class="n">Build</span><span class="p">.</span><span class="na">VERSION_CODES</span><span class="p">.</span><span class="na">O</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="kt">void</span>  <span class="nf">setForegroundService</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="c1">//设定的通知渠道名称</span>
+        <span class="n">String</span> <span class="n">channelName</span> <span class="o">=</span> <span class="s">"test"</span><span class="p">;</span>
+        <span class="c1">//设置通知的重要程度</span>
+        <span class="kt">int</span> <span class="n">importance</span> <span class="o">=</span> <span class="n">NotificationManager</span><span class="p">.</span><span class="na">IMPORTANCE_LOW</span><span class="p">;</span>
+        <span class="c1">//构建通知渠道</span>
+        <span class="n">NotificationChannel</span> <span class="n">channel</span> <span class="o">=</span> <span class="k">new</span> <span class="n">NotificationChannel</span><span class="p">(</span><span class="s">"232"</span><span class="p">,</span> <span class="n">channelName</span><span class="p">,</span> <span class="n">importance</span><span class="p">);</span>
+        <span class="n">channel</span><span class="p">.</span><span class="na">setDescription</span><span class="p">(</span><span class="s">"test"</span><span class="p">);</span>
+        <span class="c1">//在创建的通知渠道上发送通知</span>
+        <span class="n">NotificationCompat</span><span class="p">.</span><span class="na">Builder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">NotificationCompat</span><span class="p">.</span><span class="na">Builder</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s">"232"</span><span class="p">);</span>
+        <span class="n">builder</span><span class="p">.</span><span class="na">setSmallIcon</span><span class="p">(</span><span class="n">R</span><span class="p">.</span><span class="na">drawable</span><span class="p">.</span><span class="na">ic_launcher_foreground</span><span class="p">)</span> <span class="c1">//设置通知图标</span>
+                <span class="p">.</span><span class="na">setContentTitle</span><span class="p">(</span><span class="s">"正在监控手机活动并上报"</span><span class="p">)</span><span class="c1">//设置通知标题</span>
+                <span class="p">.</span><span class="na">setContentText</span><span class="p">(</span><span class="s">"正在监控手机活动并上报"</span><span class="p">)</span><span class="c1">//设置通知内容</span>
+                <span class="p">.</span><span class="na">setAutoCancel</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="c1">//用户触摸时，自动关闭</span>
+                <span class="p">.</span><span class="na">setOngoing</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span><span class="c1">//设置处于运行状态</span>
+        <span class="c1">//向系统注册通知渠道，注册后不能改变重要性以及其他通知行为</span>
+        <span class="n">NotificationManager</span> <span class="n">notificationManager</span> <span class="o">=</span> <span class="p">(</span><span class="n">NotificationManager</span><span class="p">)</span> <span class="n">getSystemService</span><span class="p">(</span><span class="n">Context</span><span class="p">.</span><span class="na">NOTIFICATION_SERVICE</span><span class="p">);</span>
+        <span class="n">notificationManager</span><span class="p">.</span><span class="na">createNotificationChannel</span><span class="p">(</span><span class="n">channel</span><span class="p">);</span>
+        <span class="c1">//将服务置于启动状态 NOTIFICATION_ID指的是创建的通知的ID</span>
+        <span class="n">startForeground</span><span class="p">(</span><span class="mi">232</span><span class="p">,</span><span class="n">builder</span><span class="p">.</span><span class="na">build</span><span class="p">());</span>
+
+        <span class="n">Handler</span> <span class="n">handler</span><span class="o">=</span><span class="k">new</span> <span class="n">Handler</span><span class="p">();</span>
+        <span class="n">Runnable</span> <span class="n">runnable</span><span class="o">=</span><span class="k">new</span> <span class="n">Runnable</span><span class="p">(){</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="p">()</span> <span class="p">{</span>
+                <span class="n">Log</span><span class="p">.</span><span class="na">d</span><span class="p">(</span><span class="s">"Monitor Detect"</span><span class="p">,</span> <span class="s">"定时检测顶层应用"</span><span class="p">);</span>
+                <span class="n">getTopActivity</span><span class="p">();</span>
+                <span class="n">handler</span><span class="p">.</span><span class="na">postDelayed</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="mi">10000</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+        <span class="n">handler</span><span class="p">.</span><span class="na">postDelayed</span><span class="p">(</span><span class="n">runnable</span><span class="p">,</span> <span class="mi">10000</span><span class="p">);</span><span class="c1">//每两秒执行一次runnable.</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 获取手机顶层Activity</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">getTopActivity</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="kt">long</span> <span class="n">endTime</span> <span class="o">=</span> <span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">();</span>
+        <span class="kt">long</span> <span class="n">beginTime</span> <span class="o">=</span> <span class="n">endTime</span> <span class="o">-</span> <span class="mi">10000</span><span class="p">;</span>
+        <span class="n">UsageStatsManager</span> <span class="n">sUsageStatsManager</span> <span class="o">=</span> <span class="p">(</span><span class="n">UsageStatsManager</span><span class="p">)</span> <span class="k">this</span><span class="p">.</span><span class="na">getSystemService</span><span class="p">(</span><span class="n">Context</span><span class="p">.</span><span class="na">USAGE_STATS_SERVICE</span><span class="p">);</span>
+        <span class="n">String</span> <span class="n">result</span> <span class="o">=</span> <span class="s">""</span><span class="p">;</span>
+        <span class="n">UsageEvents</span><span class="p">.</span><span class="na">Event</span> <span class="n">event</span> <span class="o">=</span> <span class="k">new</span> <span class="n">UsageEvents</span><span class="p">.</span><span class="na">Event</span><span class="p">();</span>
+        <span class="n">UsageEvents</span> <span class="n">usageEvents</span> <span class="o">=</span> <span class="n">sUsageStatsManager</span><span class="p">.</span><span class="na">queryEvents</span><span class="p">(</span><span class="n">beginTime</span><span class="p">,</span> <span class="n">endTime</span><span class="p">);</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">usageEvents</span><span class="p">.</span><span class="na">hasNextEvent</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">usageEvents</span><span class="p">.</span><span class="na">getNextEvent</span><span class="p">(</span><span class="n">event</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="na">getEventType</span><span class="p">()</span> <span class="o">==</span> <span class="n">UsageEvents</span><span class="p">.</span><span class="na">Event</span><span class="p">.</span><span class="na">MOVE_TO_FOREGROUND</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="na">getPackageName</span><span class="p">()</span><span class="o">+</span><span class="s">"/"</span><span class="o">+</span><span class="n">event</span><span class="p">.</span><span class="na">getClassName</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">android</span><span class="p">.</span><span class="na">text</span><span class="p">.</span><span class="na">TextUtils</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">(</span><span class="n">result</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">Log</span><span class="p">.</span><span class="na">d</span><span class="p">(</span><span class="s">"Service"</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+            <span class="n">beforeActivity</span> <span class="o">=</span> <span class="n">result</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">Log</span><span class="p">.</span><span class="na">d</span><span class="p">(</span><span class="s">"Before Service"</span><span class="p">,</span> <span class="n">beforeActivity</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="s">"null"</span> <span class="p">:</span> <span class="n">beforeActivity</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">beforeActivity</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">Toast</span><span class="p">.</span><span class="na">makeText</span><span class="p">(</span><span class="n">MonitorActivityService</span><span class="p">.</span><span class="na">this</span><span class="p">.</span><span class="na">getApplicationContext</span><span class="p">(),</span><span class="s">"活动为空"</span><span class="p">,</span><span class="n">Toast</span><span class="p">.</span><span class="na">LENGTH_SHORT</span><span class="p">).</span><span class="na">show</span><span class="p">();</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">activityRequest</span><span class="p">.</span><span class="na">uploadRecord</span><span class="p">(</span><span class="n">beforeActivity</span><span class="p">,</span> <span class="n">success</span> <span class="o">-&gt;</span> <span class="p">{</span>
+
+        <span class="p">},</span> <span class="n">failed</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="n">Toast</span><span class="p">.</span><span class="na">makeText</span><span class="p">(</span><span class="n">MonitorActivityService</span><span class="p">.</span><span class="na">this</span><span class="p">.</span><span class="na">getApplicationContext</span><span class="p">(),</span><span class="s">"上传失败"</span><span class="p">,</span><span class="n">Toast</span><span class="p">.</span><span class="na">LENGTH_SHORT</span><span class="p">).</span><span class="na">show</span><span class="p">();</span>
+            <span class="n">Log</span><span class="p">.</span><span class="na">w</span><span class="p">(</span><span class="s">"Activity"</span><span class="p">,</span> <span class="s">"上传失败:"</span> <span class="o">+</span> <span class="n">failed</span><span class="p">);</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="_4">
+      相关权限设置
+     </h3>
+     <p>
+      需要在配置中开启相关的权限
+     </p>
+     <p>
+      在AndroidManifest.xml文件中加上：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;manifest</span> <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span>
+    <span class="na">package=</span><span class="s">"com.example.selfgrowth"</span><span class="nt">&gt;</span>
+
+    // 应用使用情况权限
+    <span class="nt">&lt;permission</span> <span class="na">android:name=</span><span class="s">"android.permission.PACKAGE_USAGE_STATS"</span><span class="nt">/&gt;</span>
+    ......
+
+    <span class="nt">&lt;queries&gt;</span>
+    .......
+    <span class="nt">&lt;/queries&gt;</span>
+
+    <span class="nt">&lt;application</span>
+    <span class="err">.......</span>
+        <span class="err">&lt;!--</span> <span class="err">Declare</span> <span class="err">foreground</span> <span class="err">service</span> <span class="err">--</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;service</span>
+            <span class="na">android:name=</span><span class="s">".server.foreground.MonitorActivityService"</span>
+            <span class="na">android:enabled=</span><span class="s">"true"</span>
+            <span class="na">android:exported=</span><span class="s">"true"</span> <span class="nt">/&gt;</span>
+        <span class="c">&lt;!-- Declare activity --&gt;</span>
+    <span class="nt">&lt;/application&gt;</span>
+
+<span class="nt">&lt;/manifest&gt;</span>
+</code></pre>
+     </div>
+     <h3 id="_5">
+      应用启动
+     </h3>
+     <p>
+      在MainActivity中加上启动逻辑
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainActivity</span> <span class="kd">extends</span> <span class="n">AppCompatActivity</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="n">AppBarConfiguration</span> <span class="n">mAppBarConfiguration</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="n">ActivityMainBinding</span> <span class="n">binding</span><span class="p">;</span>
+
+    <span class="nd">@RequiresApi</span><span class="p">(</span><span class="n">api</span> <span class="o">=</span> <span class="n">Build</span><span class="p">.</span><span class="na">VERSION_CODES</span><span class="p">.</span><span class="na">O</span><span class="p">)</span>
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="p">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">......</span>
+
+        <span class="c1">// 获取手机使用情况权限</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isStatAccessPermissionSet</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="p">(</span><span class="n">Settings</span><span class="p">.</span><span class="na">ACTION_USAGE_ACCESS_SETTINGS</span><span class="p">);</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">startActivity</span><span class="p">(</span><span class="n">intent</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// Android 8.0使用startForegroundService在前台启动新服务</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">Build</span><span class="p">.</span><span class="na">VERSION</span><span class="p">.</span><span class="na">SDK_INT</span> <span class="o">&gt;=</span> <span class="n">Build</span><span class="p">.</span><span class="na">VERSION_CODES</span><span class="p">.</span><span class="na">O</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">startForegroundService</span><span class="p">(</span><span class="k">new</span> <span class="n">Intent</span><span class="p">(</span><span class="n">MainActivity</span><span class="p">.</span><span class="na">this</span><span class="p">,</span> <span class="n">MonitorActivityService</span><span class="p">.</span><span class="na">class</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="k">else</span><span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">startService</span><span class="p">(</span><span class="k">new</span> <span class="n">Intent</span><span class="p">(</span><span class="n">MainActivity</span><span class="p">.</span><span class="na">this</span><span class="p">,</span> <span class="n">MonitorActivityService</span><span class="p">.</span><span class="na">class</span><span class="p">));</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isNotificationEnabled</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">goToNotificationSetting</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 判断允许通知，是否已经授权</span>
+<span class="cm">     * 返回值为true时，通知栏打开，false未打开。</span>
+<span class="cm">     */</span>
+    <span class="nd">@RequiresApi</span><span class="p">(</span><span class="n">api</span> <span class="o">=</span> <span class="n">Build</span><span class="p">.</span><span class="na">VERSION_CODES</span><span class="p">.</span><span class="na">KITKAT</span><span class="p">)</span>
+    <span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">isNotificationEnabled</span><span class="p">()</span> <span class="p">{</span>
+
+        <span class="n">String</span> <span class="n">CHECK_OP_NO_THROW</span> <span class="o">=</span> <span class="s">"checkOpNoThrow"</span><span class="p">;</span>
+        <span class="n">String</span> <span class="n">OP_POST_NOTIFICATION</span> <span class="o">=</span> <span class="s">"OP_POST_NOTIFICATION"</span><span class="p">;</span>
+
+        <span class="n">AppOpsManager</span> <span class="n">mAppOps</span> <span class="o">=</span> <span class="p">(</span><span class="n">AppOpsManager</span><span class="p">)</span> <span class="k">this</span><span class="p">.</span><span class="na">getSystemService</span><span class="p">(</span><span class="n">Context</span><span class="p">.</span><span class="na">APP_OPS_SERVICE</span><span class="p">);</span>
+        <span class="n">ApplicationInfo</span> <span class="n">appInfo</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getApplicationInfo</span><span class="p">();</span>
+        <span class="n">String</span> <span class="n">pkg</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getApplicationContext</span><span class="p">().</span><span class="na">getPackageName</span><span class="p">();</span>
+        <span class="kt">int</span> <span class="n">uid</span> <span class="o">=</span> <span class="n">appInfo</span><span class="p">.</span><span class="na">uid</span><span class="p">;</span>
+
+        <span class="n">Class</span> <span class="n">appOpsClass</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="cm">/* Context.APP_OPS_MANAGER */</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">appOpsClass</span> <span class="o">=</span> <span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="n">AppOpsManager</span><span class="p">.</span><span class="na">class</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+            <span class="n">Method</span> <span class="n">checkOpNoThrowMethod</span> <span class="o">=</span> <span class="n">appOpsClass</span><span class="p">.</span><span class="na">getMethod</span><span class="p">(</span><span class="n">CHECK_OP_NO_THROW</span><span class="p">,</span> <span class="n">Integer</span><span class="p">.</span><span class="na">TYPE</span><span class="p">,</span> <span class="n">Integer</span><span class="p">.</span><span class="na">TYPE</span><span class="p">,</span>
+                    <span class="n">String</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+            <span class="n">Field</span> <span class="n">opPostNotificationValue</span> <span class="o">=</span> <span class="n">appOpsClass</span><span class="p">.</span><span class="na">getDeclaredField</span><span class="p">(</span><span class="n">OP_POST_NOTIFICATION</span><span class="p">);</span>
+
+            <span class="kt">int</span> <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">Integer</span><span class="p">)</span> <span class="n">opPostNotificationValue</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">Integer</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+            <span class="k">return</span> <span class="p">((</span><span class="n">Integer</span><span class="p">)</span> <span class="n">checkOpNoThrowMethod</span><span class="p">.</span><span class="na">invoke</span><span class="p">(</span><span class="n">mAppOps</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">pkg</span><span class="p">)</span> <span class="o">==</span> <span class="n">AppOpsManager</span><span class="p">.</span><span class="na">MODE_ALLOWED</span><span class="p">);</span>
+
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">ClassNotFoundException</span> <span class="o">|</span> <span class="n">NoSuchMethodException</span> <span class="o">|</span> <span class="n">NoSuchFieldException</span> <span class="o">|</span> <span class="n">InvocationTargetException</span> <span class="o">|</span> <span class="n">IllegalAccessException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">e</span><span class="p">.</span><span class="na">printStackTrace</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 跳转到app的设置界面--开启通知</span>
+<span class="cm">     */</span>
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">goToNotificationSetting</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="p">();</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">Build</span><span class="p">.</span><span class="na">VERSION</span><span class="p">.</span><span class="na">SDK_INT</span> <span class="o">&gt;=</span> <span class="mi">26</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// android 8.0引导</span>
+            <span class="n">intent</span><span class="p">.</span><span class="na">setAction</span><span class="p">(</span><span class="s">"android.settings.APP_NOTIFICATION_SETTINGS"</span><span class="p">);</span>
+            <span class="n">intent</span><span class="p">.</span><span class="na">putExtra</span><span class="p">(</span><span class="s">"android.provider.extra.APP_PACKAGE"</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">getPackageName</span><span class="p">());</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">Build</span><span class="p">.</span><span class="na">VERSION</span><span class="p">.</span><span class="na">SDK_INT</span> <span class="o">&gt;=</span> <span class="mi">21</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// android 5.0-7.0</span>
+            <span class="n">intent</span><span class="p">.</span><span class="na">setAction</span><span class="p">(</span><span class="s">"android.settings.APP_NOTIFICATION_SETTINGS"</span><span class="p">);</span>
+            <span class="n">intent</span><span class="p">.</span><span class="na">putExtra</span><span class="p">(</span><span class="s">"app_package"</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">getPackageName</span><span class="p">());</span>
+            <span class="n">intent</span><span class="p">.</span><span class="na">putExtra</span><span class="p">(</span><span class="s">"app_uid"</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">getApplicationInfo</span><span class="p">().</span><span class="na">uid</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="c1">// 其他</span>
+            <span class="n">intent</span><span class="p">.</span><span class="na">setAction</span><span class="p">(</span><span class="s">"android.settings.APPLICATION_DETAILS_SETTINGS"</span><span class="p">);</span>
+            <span class="n">intent</span><span class="p">.</span><span class="na">setData</span><span class="p">(</span><span class="n">Uri</span><span class="p">.</span><span class="na">fromParts</span><span class="p">(</span><span class="s">"package"</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="na">getPackageName</span><span class="p">(),</span> <span class="kc">null</span><span class="p">));</span>
+        <span class="p">}</span>
+        <span class="n">intent</span><span class="p">.</span><span class="na">setFlags</span><span class="p">(</span><span class="n">Intent</span><span class="p">.</span><span class="na">FLAG_ACTIVITY_NEW_TASK</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">startActivity</span><span class="p">(</span><span class="n">intent</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * Determine whether the application permission with permission to view usage has been obtained</span>
+<span class="cm">     */</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isStatAccessPermissionSet</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">PackageManager</span> <span class="n">packageManager</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="na">getPackageManager</span><span class="p">();</span>
+            <span class="n">ApplicationInfo</span> <span class="n">info</span> <span class="o">=</span> <span class="n">packageManager</span><span class="p">.</span><span class="na">getApplicationInfo</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">getPackageName</span><span class="p">(),</span> <span class="mi">0</span><span class="p">);</span>
+            <span class="n">AppOpsManager</span> <span class="n">appOpsManager</span> <span class="o">=</span> <span class="p">(</span><span class="n">AppOpsManager</span><span class="p">)</span> <span class="k">this</span><span class="p">.</span><span class="na">getSystemService</span><span class="p">(</span><span class="n">APP_OPS_SERVICE</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">appOpsManager</span><span class="p">.</span><span class="na">checkOpNoThrow</span><span class="p">(</span><span class="n">AppOpsManager</span><span class="p">.</span><span class="na">OPSTR_GET_USAGE_STATS</span><span class="p">,</span> <span class="n">info</span><span class="p">.</span><span class="na">uid</span><span class="p">,</span> <span class="n">info</span><span class="p">.</span><span class="na">packageName</span><span class="p">)</span> <span class="o">==</span> <span class="n">AppOpsManager</span><span class="p">.</span><span class="na">MODE_ALLOWED</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="n">Exception</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">e</span><span class="p">.</span><span class="na">printStackTrace</span><span class="p">();</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      使用Android Studio启动后就可以看到相关的输出日志了
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
