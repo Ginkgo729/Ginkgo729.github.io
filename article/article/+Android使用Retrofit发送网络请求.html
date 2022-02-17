@@ -1,0 +1,329 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="android-retrofit">
+      Android 使用 Retrofit 发送网络请求
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第20天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在Android应用中，如果不是单机的话，应该都有请求后端接口API的情况，本篇文章就介绍下Retrofit在Android中如何进行使用的
+     </p>
+     <h2 id="_2">
+      相关代码
+     </h2>
+     <p>
+      我们以一个简单的登录接口为例
+     </p>
+     <p>
+      完整代码GitHub上有：
+      <a href="https://github.com/lw1243925457/self_growth_android">
+       https://github.com/lw1243925457/self_growth_android
+      </a>
+     </p>
+     <p>
+      仅做代码参考，目前数据监控上传是有了，但界面这些还很粗糙，没有完善
+     </p>
+     <h3 id="_3">
+      相关的依赖引入
+     </h3>
+     <p>
+      首先我们在工程中引入相关的依赖：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>    implementation 'com.squareup.okhttp3:okhttp:4.5.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+</code></pre>
+     </div>
+     <h3 id="_4">
+      相关的手机权限开启
+     </h3>
+     <p>
+      需要在文件中开启网络权限：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;manifest</span> <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span>
+    <span class="na">package=</span><span class="s">"com.example.selfgrowth"</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">"android.permission.INTERNET"</span><span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;application</span>
+    <span class="err">......</span>
+    <span class="err">&lt;/application</span><span class="nt">&gt;</span>
+
+<span class="nt">&lt;/manifest&gt;</span>
+</code></pre>
+     </div>
+     <h3 id="retrofit-client">
+      配置Retrofit Client
+     </h3>
+     <p>
+      Client的相关配置：单例，配置基于OKHTTP，Gson序列化;OKHTTP中添加了请求拦截器
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Data</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RetrofitClient</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">RetrofitClient</span> <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">RetrofitClient</span><span class="p">();</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Retrofit</span> <span class="n">retrofit</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Retrofit</span><span class="p">.</span><span class="na">Builder</span><span class="p">()</span>
+            <span class="p">.</span><span class="na">baseUrl</span><span class="p">(</span><span class="n">HttpConfig</span><span class="p">.</span><span class="na">ADDRESS</span><span class="p">)</span> <span class="c1">//基础url,其他部分在GetRequestInterface里</span>
+            <span class="p">.</span><span class="na">client</span><span class="p">(</span><span class="n">httpClient</span><span class="p">())</span>
+            <span class="p">.</span><span class="na">addConverterFactory</span><span class="p">(</span><span class="n">GsonConverterFactory</span><span class="p">.</span><span class="na">create</span><span class="p">())</span> <span class="c1">//Gson数据转换器</span>
+            <span class="p">.</span><span class="na">build</span><span class="p">();</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">RetrofitClient</span> <span class="nf">getInstance</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">private</span> <span class="n">OkHttpClient</span> <span class="nf">httpClient</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">OkHttpClient</span><span class="p">.</span><span class="na">Builder</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">addInterceptor</span><span class="p">(</span><span class="k">new</span> <span class="n">AccessTokenInterceptor</span><span class="p">())</span>
+                <span class="p">.</span><span class="na">connectTimeout</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">)</span>
+                <span class="p">.</span><span class="na">build</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="_5">
+      配置通用的请求拦截器
+     </h3>
+     <p>
+      比如在请求中，带上Authorization等
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">AccessTokenInterceptor</span> <span class="kd">implements</span> <span class="n">Interceptor</span> <span class="p">{</span>
+
+    <span class="nd">@NonNull</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Response</span> <span class="nf">intercept</span><span class="p">(</span><span class="nd">@NonNull</span> <span class="n">Chain</span> <span class="n">chain</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">UserCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">getToken</span><span class="p">()</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">proceed</span><span class="p">(</span><span class="n">chain</span><span class="p">.</span><span class="na">request</span><span class="p">());</span>
+        <span class="p">}</span>
+
+        <span class="n">Request</span> <span class="n">original</span> <span class="o">=</span> <span class="n">chain</span><span class="p">.</span><span class="na">request</span><span class="p">();</span>
+        <span class="n">Request</span><span class="p">.</span><span class="na">Builder</span> <span class="n">requestBuilder</span> <span class="o">=</span> <span class="n">original</span><span class="p">.</span><span class="na">newBuilder</span><span class="p">()</span>
+                <span class="p">.</span><span class="na">addHeader</span><span class="p">(</span><span class="s">"Authorization"</span><span class="p">,</span> <span class="n">UserCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">getToken</span><span class="p">());</span>
+        <span class="n">Request</span> <span class="n">request</span> <span class="o">=</span> <span class="n">requestBuilder</span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">.</span><span class="na">proceed</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="retrofit">
+      Retrofit接口定义
+     </h3>
+     <p>
+      登录请求的接口定义：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">UserApi</span> <span class="p">{</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 用户登录</span>
+<span class="cm">     **/</span>
+    <span class="nd">@POST</span><span class="p">(</span><span class="s">"auth/user/login"</span><span class="p">)</span>
+    <span class="n">Call</span><span class="o">&lt;</span><span class="n">ApiResponse</span><span class="o">&gt;</span> <span class="nf">login</span><span class="p">(</span><span class="nd">@Body</span> <span class="n">LoginUser</span> <span class="n">user</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="retrofit-request">
+      Retrofit Request具体请求编写
+     </h3>
+     <p>
+      我们首先定义一个抽象类，在其中持有我们的RetrofitClient全局类，在其中发起请求，由于Android UI的形式，请求是异步的
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">Request</span> <span class="p">{</span>
+
+    <span class="kd">final</span> <span class="n">Retrofit</span> <span class="n">retrofit</span><span class="p">;</span>
+
+    <span class="kd">public</span> <span class="nf">Request</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">retrofit</span> <span class="o">=</span> <span class="n">RetrofitClient</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">getRetrofit</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="cm">/**</span>
+<span class="cm">     * 发送网络请求(异步)</span>
+<span class="cm">     * @param call call</span>
+<span class="cm">     */</span>
+    <span class="kt">void</span> <span class="nf">sendRequest</span><span class="p">(</span><span class="n">Call</span><span class="o">&lt;</span><span class="n">ApiResponse</span><span class="o">&gt;</span> <span class="n">call</span><span class="p">,</span> <span class="n">Consumer</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">success</span><span class="p">,</span> <span class="n">Consumer</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">failed</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">call</span><span class="p">.</span><span class="na">enqueue</span><span class="p">(</span><span class="k">new</span> <span class="n">Callback</span><span class="o">&lt;</span><span class="n">ApiResponse</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onResponse</span><span class="p">(</span><span class="n">Call</span><span class="o">&lt;</span><span class="n">ApiResponse</span><span class="o">&gt;</span> <span class="n">call</span><span class="p">,</span> <span class="n">Response</span><span class="o">&lt;</span><span class="n">ApiResponse</span><span class="o">&gt;</span> <span class="n">response</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="na">code</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">Log</span><span class="p">.</span><span class="na">w</span><span class="p">(</span><span class="s">"Http Response"</span><span class="p">,</span> <span class="s">"请求响应错误"</span><span class="p">);</span>
+                    <span class="n">failed</span><span class="p">.</span><span class="na">accept</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="na">raw</span><span class="p">().</span><span class="na">message</span><span class="p">());</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="na">body</span><span class="p">()</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">response</span><span class="p">.</span><span class="na">body</span><span class="p">().</span><span class="na">getData</span><span class="p">()</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">success</span><span class="p">.</span><span class="na">accept</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="n">Object</span> <span class="n">res</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="na">body</span><span class="p">().</span><span class="na">getData</span><span class="p">();</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">String</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">res</span><span class="p">).</span><span class="na">isEmpty</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="n">success</span><span class="p">.</span><span class="na">accept</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="n">success</span><span class="p">.</span><span class="na">accept</span><span class="p">(</span><span class="n">res</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onFailure</span><span class="p">(</span><span class="n">Call</span><span class="o">&lt;</span><span class="n">ApiResponse</span><span class="o">&gt;</span> <span class="n">call</span><span class="p">,</span> <span class="n">Throwable</span> <span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"GetOutWarehouseList-&gt;onFailure(MainActivity.java): "</span><span class="o">+</span><span class="n">t</span><span class="p">.</span><span class="na">toString</span><span class="p">()</span> <span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <p>
+      如上所示，请求成功就执行success相关的逻辑，失败则执行failed相关的逻辑
+     </p>
+     <p>
+      登录请求的具体逻辑如下：构造Retrofit Interface，发起请求
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserRequest</span> <span class="kd">extends</span> <span class="n">Request</span> <span class="p">{</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">login</span><span class="p">(</span><span class="n">LoginUser</span> <span class="n">user</span><span class="p">,</span> <span class="n">Consumer</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">success</span><span class="p">,</span> <span class="n">Consumer</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">failed</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UserApi</span> <span class="n">request</span> <span class="o">=</span> <span class="n">retrofit</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">UserApi</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="n">Call</span><span class="o">&lt;</span><span class="n">ApiResponse</span><span class="o">&gt;</span> <span class="n">call</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="na">login</span><span class="p">(</span><span class="n">user</span><span class="p">);</span>
+        <span class="n">sendRequest</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">failed</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="android-ui">
+      Android UI中进行调动
+     </h3>
+     <p>
+      使用示例如下，点击一个登录按钮后触发
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LoginFragment</span> <span class="kd">extends</span> <span class="n">Fragment</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">UserRequest</span> <span class="n">userRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="n">UserRequest</span><span class="p">();</span>
+
+    <span class="nd">@Nullable</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">View</span> <span class="nf">onCreateView</span><span class="p">(</span><span class="nd">@NonNull</span> <span class="n">LayoutInflater</span> <span class="n">inflater</span><span class="p">,</span> <span class="nd">@Nullable</span> <span class="n">ViewGroup</span> <span class="n">container</span><span class="p">,</span> <span class="nd">@Nullable</span> <span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">View</span> <span class="n">rootView</span> <span class="o">=</span> <span class="n">inflater</span><span class="p">.</span><span class="na">inflate</span><span class="p">(</span><span class="n">R</span><span class="p">.</span><span class="na">layout</span><span class="p">.</span><span class="na">fragment_login</span><span class="p">,</span> <span class="n">container</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+        <span class="n">Button</span> <span class="n">loginButton</span> <span class="o">=</span> <span class="n">rootView</span><span class="p">.</span><span class="na">findViewById</span><span class="p">(</span><span class="n">R</span><span class="p">.</span><span class="na">id</span><span class="p">.</span><span class="na">login_button</span><span class="p">);</span>
+        <span class="n">loginButton</span><span class="p">.</span><span class="na">setOnClickListener</span><span class="p">(</span><span class="n">view</span> <span class="o">-&gt;</span> <span class="p">{</span>
+            <span class="n">EditText</span> <span class="n">email</span> <span class="o">=</span> <span class="n">rootView</span><span class="p">.</span><span class="na">findViewById</span><span class="p">(</span><span class="n">R</span><span class="p">.</span><span class="na">id</span><span class="p">.</span><span class="na">login_email_edit</span><span class="p">);</span>
+            <span class="n">EditText</span> <span class="n">password</span> <span class="o">=</span> <span class="n">rootView</span><span class="p">.</span><span class="na">findViewById</span><span class="p">(</span><span class="n">R</span><span class="p">.</span><span class="na">id</span><span class="p">.</span><span class="na">login_password_edit</span><span class="p">);</span>
+
+            <span class="kd">final</span> <span class="n">LoginUser</span> <span class="n">user</span> <span class="o">=</span> <span class="n">LoginUser</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+                    <span class="p">.</span><span class="na">email</span><span class="p">(</span><span class="n">email</span><span class="p">.</span><span class="na">getText</span><span class="p">().</span><span class="na">toString</span><span class="p">())</span>
+                    <span class="p">.</span><span class="na">password</span><span class="p">(</span><span class="n">password</span><span class="p">.</span><span class="na">getText</span><span class="p">().</span><span class="na">toString</span><span class="p">())</span>
+                    <span class="p">.</span><span class="na">build</span><span class="p">();</span>
+
+            <span class="c1">// 获取相关的用户名和密码后，调用登录接口</span>
+            <span class="n">userRequest</span><span class="p">.</span><span class="na">login</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">UserCache</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">initUser</span><span class="p">(</span><span class="n">email</span><span class="p">.</span><span class="na">getText</span><span class="p">().</span><span class="na">toString</span><span class="p">(),</span> <span class="n">token</span><span class="p">.</span><span class="na">toString</span><span class="p">());</span>
+                <span class="kd">final</span> <span class="n">SharedPreferences</span> <span class="n">preferences</span> <span class="o">=</span> <span class="n">requireContext</span><span class="p">().</span><span class="na">getSharedPreferences</span><span class="p">(</span><span class="s">"userInfo"</span><span class="p">,</span> <span class="n">Context</span><span class="p">.</span><span class="na">MODE_PRIVATE</span><span class="p">);</span>
+                <span class="kd">final</span> <span class="n">SharedPreferences</span><span class="p">.</span><span class="na">Editor</span> <span class="n">edit</span> <span class="o">=</span> <span class="n">preferences</span><span class="p">.</span><span class="na">edit</span><span class="p">();</span>
+                <span class="n">edit</span><span class="p">.</span><span class="na">putString</span><span class="p">(</span><span class="s">"username"</span><span class="p">,</span> <span class="n">email</span><span class="p">.</span><span class="na">getText</span><span class="p">().</span><span class="na">toString</span><span class="p">());</span>
+                <span class="n">edit</span><span class="p">.</span><span class="na">putString</span><span class="p">(</span><span class="s">"password"</span><span class="p">,</span> <span class="n">password</span><span class="p">.</span><span class="na">getText</span><span class="p">().</span><span class="na">toString</span><span class="p">());</span>
+                <span class="n">edit</span><span class="p">.</span><span class="na">apply</span><span class="p">();</span>
+                <span class="n">Snackbar</span><span class="p">.</span><span class="na">make</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="s">"登录成功:"</span> <span class="o">+</span> <span class="n">token</span><span class="p">.</span><span class="na">toString</span><span class="p">(),</span> <span class="n">Snackbar</span><span class="p">.</span><span class="na">LENGTH_LONG</span><span class="p">)</span>
+                        <span class="p">.</span><span class="na">setAction</span><span class="p">(</span><span class="s">"Action"</span><span class="p">,</span> <span class="kc">null</span><span class="p">).</span><span class="na">show</span><span class="p">();</span>
+            <span class="p">},</span> <span class="n">failedMessage</span> <span class="o">-&gt;</span> <span class="p">{</span>
+                <span class="n">Snackbar</span><span class="p">.</span><span class="na">make</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="s">"登录失败:"</span> <span class="o">+</span> <span class="n">failedMessage</span><span class="p">,</span> <span class="n">Snackbar</span><span class="p">.</span><span class="na">LENGTH_LONG</span><span class="p">)</span>
+                        <span class="p">.</span><span class="na">setAction</span><span class="p">(</span><span class="s">"Action"</span><span class="p">,</span> <span class="kc">null</span><span class="p">).</span><span class="na">show</span><span class="p">();</span>
+            <span class="p">});</span>
+        <span class="p">});</span>
+        <span class="k">return</span> <span class="n">rootView</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onActivityCreated</span><span class="p">(</span><span class="nd">@Nullable</span> <span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">super</span><span class="p">.</span><span class="na">onActivityCreated</span><span class="p">(</span><span class="n">savedInstanceState</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">SharedPreferences</span> <span class="n">preferences</span> <span class="o">=</span> <span class="n">getActivity</span><span class="p">().</span><span class="na">getSharedPreferences</span><span class="p">(</span><span class="s">"userInfo"</span><span class="p">,</span> <span class="n">Activity</span><span class="p">.</span><span class="na">MODE_PRIVATE</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">userName</span> <span class="o">=</span> <span class="n">preferences</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">"username"</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">String</span> <span class="n">password</span> <span class="o">=</span> <span class="n">preferences</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">"password"</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">EditText</span> <span class="n">emailEdit</span> <span class="o">=</span> <span class="n">getView</span><span class="p">().</span><span class="na">findViewById</span><span class="p">(</span><span class="n">R</span><span class="p">.</span><span class="na">id</span><span class="p">.</span><span class="na">login_email_edit</span><span class="p">);</span>
+        <span class="kd">final</span> <span class="n">EditText</span> <span class="n">passwordEdit</span> <span class="o">=</span> <span class="n">getView</span><span class="p">().</span><span class="na">findViewById</span><span class="p">(</span><span class="n">R</span><span class="p">.</span><span class="na">id</span><span class="p">.</span><span class="na">login_password_edit</span><span class="p">);</span>
+        <span class="n">emailEdit</span><span class="p">.</span><span class="na">setText</span><span class="p">(</span><span class="n">userName</span><span class="p">);</span>
+        <span class="n">passwordEdit</span><span class="p">.</span><span class="na">setText</span><span class="p">(</span><span class="n">password</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_6">
+      总结
+     </h2>
+     <p>
+      本篇文章中介绍了如Android学习中如何使用Retrofit发起网络请求
+     </p>
+     <p>
+      但由于吃初学，虽然感觉能用，但有点繁琐，不知道在实际的Android开发中，网络请求的最近实践是怎么样的，如果有的话，大佬可以在评论区告知下，感谢
+     </p>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
