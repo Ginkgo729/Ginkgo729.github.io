@@ -22,6 +22,8 @@
     - jetbranins
         - [idea.md](./article/article/+idea.html)
         - [Pycharm使用记录.md](./article/article/+Pycharm使用记录.html)
+    - k8s
+        - [k8s之MiniKube初步体验.md](./article/article/+k8s之MiniKube初步体验.html)
     - kafka
         - [Java-Kafka.md](./article/article/+Java-Kafka.html)
         - [Kafka-SASL.md](./article/article/+Kafka-SASL.html)
