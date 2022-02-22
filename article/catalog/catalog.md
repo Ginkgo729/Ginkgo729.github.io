@@ -43,6 +43,7 @@
     - neo4j
         - [neo4j使用记录.md](./article/article/+neo4j使用记录.html)
     - nginx
+        - [Nginxc跨域解决设置.md](./article/article/+Nginxc跨域解决设置.html)
         - [nginx使用记录.md](./article/article/+nginx使用记录.html)
         - [nginx负载均衡.md](./article/article/+nginx负载均衡.html)
     - Redis
