@@ -1,0 +1,255 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="activemq-jms">
+      Activemq Jms 简单示例
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      简单的 Activemp JMS 示例代码
+     </p>
+     <h3 id="activemq">
+      activemq 运行
+     </h3>
+     <p>
+      简单使用docker启动一个：
+     </p>
+     <p>
+      ```shell script
+docker run -dit --name mq -p 11616:61616 -p 8161:8161 rmohr/activemq
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>### maven依赖配置
+<span class="ni">&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;</span>依赖大致如下：
+
+```xml
+<span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+         <span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+    <span class="nt">&lt;parent&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-parent<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>2.4.1<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;relativePath/&gt;</span> <span class="c">&lt;!-- lookup parent from repository --&gt;</span>
+    <span class="nt">&lt;/parent&gt;</span>
+    <span class="nt">&lt;groupId&gt;</span>com.example.jms.activemq<span class="nt">&lt;/groupId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>jms-activemp<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;name&gt;</span>jms-activemp<span class="nt">&lt;/name&gt;</span>
+    <span class="nt">&lt;description&gt;</span>Demo project for Spring Boot<span class="nt">&lt;/description&gt;</span>
+
+    <span class="nt">&lt;properties&gt;</span>
+        <span class="nt">&lt;java.version&gt;</span>1.8<span class="nt">&lt;/java.version&gt;</span>
+    <span class="nt">&lt;/properties&gt;</span>
+
+    <span class="nt">&lt;dependencies&gt;</span>
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+
+        <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-activemq<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;/dependencies&gt;</span>
+
+    <span class="nt">&lt;build&gt;</span>
+        <span class="nt">&lt;plugins&gt;</span>
+            <span class="nt">&lt;plugin&gt;</span>
+                <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+                <span class="nt">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+                <span class="nt">&lt;configuration&gt;</span>
+                    <span class="nt">&lt;excludes&gt;</span>
+                        <span class="nt">&lt;exclude&gt;</span>
+                            <span class="nt">&lt;groupId&gt;</span>org.projectlombok<span class="nt">&lt;/groupId&gt;</span>
+                            <span class="nt">&lt;artifactId&gt;</span>lombok<span class="nt">&lt;/artifactId&gt;</span>
+                        <span class="nt">&lt;/exclude&gt;</span>
+                    <span class="nt">&lt;/excludes&gt;</span>
+                <span class="nt">&lt;/configuration&gt;</span>
+            <span class="nt">&lt;/plugin&gt;</span>
+        <span class="nt">&lt;/plugins&gt;</span>
+    <span class="nt">&lt;/build&gt;</span>
+
+<span class="nt">&lt;/project&gt;</span>
+</code></pre>
+     </div>
+     <h3 id="_2">
+      配置类编写
+     </h3>
+     <p>
+      配置activemq相关连接，大致如下：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">JmsConfig</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">BROKER_URL</span> <span class="o">=</span> <span class="s">"tcp://localhost:11616"</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">broker_username</span> <span class="o">=</span> <span class="s">"admin"</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">broker_password</span> <span class="o">=</span> <span class="s">"admin"</span><span class="p">;</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">ActiveMQConnectionFactory</span> <span class="nf">connectionFactory</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">ActiveMQConnectionFactory</span> <span class="n">connectionFactory</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ActiveMQConnectionFactory</span><span class="p">();</span>
+        <span class="n">connectionFactory</span><span class="p">.</span><span class="na">setBrokerURL</span><span class="p">(</span><span class="n">BROKER_URL</span><span class="p">);</span>
+        <span class="n">connectionFactory</span><span class="p">.</span><span class="na">setUserName</span><span class="p">(</span><span class="n">broker_username</span><span class="p">);</span>
+        <span class="n">connectionFactory</span><span class="p">.</span><span class="na">setPassword</span><span class="p">(</span><span class="n">broker_password</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">connectionFactory</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">JmsTemplate</span> <span class="nf">jmsTemplate</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">JmsTemplate</span> <span class="n">template</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JmsTemplate</span><span class="p">();</span>
+        <span class="n">template</span><span class="p">.</span><span class="na">setConnectionFactory</span><span class="p">(</span><span class="n">connectionFactory</span><span class="p">());</span>
+        <span class="k">return</span> <span class="n">template</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="n">DefaultJmsListenerContainerFactory</span> <span class="nf">jmsListenerContainerFactory</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">DefaultJmsListenerContainerFactory</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DefaultJmsListenerContainerFactory</span><span class="p">();</span>
+        <span class="n">factory</span><span class="p">.</span><span class="na">setConnectionFactory</span><span class="p">(</span><span class="n">connectionFactory</span><span class="p">());</span>
+        <span class="n">factory</span><span class="p">.</span><span class="na">setConcurrency</span><span class="p">(</span><span class="s">"1-1"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">factory</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="_3">
+      消费监听
+     </h3>
+     <p>
+      配置Activemq的监听消费,监听函数有返回值的请参考后面的链接
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">JmsConsumer</span> <span class="p">{</span>
+
+    <span class="nd">@JmsListener</span><span class="p">(</span><span class="n">destination</span> <span class="o">=</span> <span class="s">"activeTest"</span><span class="p">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">receiveMessage</span><span class="p">(</span><span class="kd">final</span> <span class="n">Map</span> <span class="n">message</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="na">toString</span><span class="p">());</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="_4">
+      生产者
+     </h3>
+     <p>
+      发送消息到activemq
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">JmsProducer</span> <span class="p">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="n">JmsTemplate</span> <span class="n">jmsTemplate</span><span class="p">;</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">sendMessage</span><span class="p">(</span><span class="kd">final</span> <span class="n">String</span> <span class="n">topic</span><span class="p">,</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">message</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">Map</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Gson</span><span class="p">().</span><span class="na">fromJson</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">Map</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+        <span class="n">jmsTemplate</span><span class="p">.</span><span class="na">convertAndSend</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">map</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h3 id="_5">
+      测试运行
+     </h3>
+     <p>
+      在主函数发送
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code><span class="nd">@SpringBootApplication</span>
+<span class="nd">@EnableJms</span>
+<span class="nd">@Slf4j</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">JmsActivempApplication</span> <span class="kd">implements</span> <span class="n">ApplicationRunner</span> <span class="p">{</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="n">JmsProducer</span> <span class="n">producer</span><span class="p">;</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">SpringApplication</span><span class="p">.</span><span class="na">run</span><span class="p">(</span><span class="n">JmsActivempApplication</span><span class="p">.</span><span class="na">class</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="p">(</span><span class="n">ApplicationArguments</span> <span class="n">args</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">String</span> <span class="n">topic</span> <span class="o">=</span> <span class="s">"activeTest"</span><span class="p">;</span>
+        <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">message</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+        <span class="n">message</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">"test"</span><span class="p">,</span> <span class="s">"test"</span><span class="p">);</span>
+        <span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">"send message to topic "</span> <span class="o">+</span> <span class="n">topic</span> <span class="o">+</span> <span class="s">" :: "</span> <span class="o">+</span> <span class="n">message</span><span class="p">);</span>
+        <span class="n">producer</span><span class="p">.</span><span class="na">sendMessage</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">message</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+     </div>
+     <h2 id="_6">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://www.devglan.com/spring-boot/spring-boot-jms-activemq-example">
+        Spring Boot ActiveMQ Support
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
