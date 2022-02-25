@@ -1,0 +1,235 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="jvm">
+      JVM内存模型
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      内存区域
+     </h2>
+     <p>
+      JVM分为下面5个方面：
+     </p>
+     <ul>
+      <li>
+       程序计数器：用于存储当前正在执行的Java方法的JVM指令地址
+      </li>
+      <li>
+       Java虚拟机栈：线程创建时会创建对应的虚拟机栈，用于保存栈帧，对应Java方法调用
+      </li>
+      <li>
+       堆：用于放置Java对象
+       <ul>
+        <li>
+         新生代：Eden、survivor（from、to）
+        </li>
+        <li>
+         老生代
+        </li>
+       </ul>
+      </li>
+      <li>
+       方法区：用于存储元数据、如类结构信息以及对应的运行时常量池、字段，方法代码等
+      </li>
+      <li>
+       本地方法栈：支持对本地方法的调用
+      </li>
+     </ul>
+     <h2 id="_2">
+      内存管理
+     </h2>
+     <p>
+      Java是自动内存管理的，JVM单独起了一个线程进行垃圾回收
+     </p>
+     <h3 id="_3">
+      发生内存回收的区域
+     </h3>
+     <ul>
+      <li>
+       确定性分配和回收
+       <ul>
+        <li>
+         程序计数器、虚拟机栈、本地方法栈线程私有，随着线程的创建而创建、销毁而销毁
+        </li>
+        <li>
+         栈中的栈幁随着方法的进出操作，内存一致
+        </li>
+       </ul>
+      </li>
+      <li>
+       不确定分配和回收
+       <ul>
+        <li>
+         堆中对象的回收
+        </li>
+        <li>
+         方法区中废弃常量和无用类的回收
+        </li>
+       </ul>
+      </li>
+     </ul>
+     <h3 id="_4">
+      回收判断依据
+     </h3>
+     <p>
+      当一个对象不再被引用（Java四种引用：强、软、弱、虚）时，可以进行回收。有下面两种方法进行判断，目前采用的第二种：
+     </p>
+     <ul>
+      <li>
+       <p>
+        引用计数算法：这种算法是通过一个对象的引用计数器来判断该对象是否被引用了。每当对象被引用，引用计数器就会加 1；每当引用失效，计数器就会减 1。当对象的引用计数器的值为 0 时，就说明该对象不再被引用，可以被回收了。这里强调一点，虽然引用计数算法的实现简单，判断效率也很高，但它存在着对象之间相互循环引用的问题。
+       </p>
+      </li>
+      <li>
+       <p>
+        可达性分析算法：GC Roots 是该算法的基础，GC Roots 是所有对象的根对象，在 JVM 加载时，会创建一些普通对象引用正常对象。这些对象作为正常对象的起始点，在垃圾回收时，会从这些 GC Roots 开始向下搜索，当一个对象到 GC Roots 没有任何引用链相连时，就证明此对象是不可用的。目前 HotSpot 虚拟机采用的就是这种算法。
+       </p>
+      </li>
+     </ul>
+     <h3 id="_5">
+      垃圾回收的方式
+     </h3>
+     <p>
+      主流的基础回收方式可以分为三种：清除、压缩、复制
+     </p>
+     <ul>
+      <li>
+       清除：死亡对象标记为空闲内存，记录在空闲列表中，创建对象时，从该空闲列表中寻找空闲空间进行分配
+      </li>
+      <li>
+       优点：简单
+      </li>
+      <li>
+       缺点：造成内存碎片，出现总空闲空间足够，但分配失败的极端情况；每次都需要查找导致分配效率低
+      </li>
+      <li>
+       压缩：把存活的对象聚集到内存区域的起始位置，从而留下一段连续的内存空间
+      </li>
+      <li>
+       优点：解决了碎片化
+      </li>
+      <li>
+       缺点：压缩算法的性能开销
+      </li>
+      <li>
+       复制：将内存分为from和to两部分，from部分用于新对象分配，当发生垃圾回收是，将from中存活的对象复制到to中，并交换from和to指针的内容；Minor GC使用的就是标记复制算法
+      </li>
+      <li>
+       优点：解决碎片化
+      </li>
+      <li>
+       缺点：堆空间使用效率低
+      </li>
+     </ul>
+     <h3 id="_6">
+      垃圾回收器
+     </h3>
+     <ul>
+      <li>
+       新生代：Serial，Parallel Scavenge 和 Parallel New，都是标记复制算法
+      </li>
+      <li>
+       老生代：Serial Old 和 Parallel Old，以及 CMS，前两个是标记-压缩算法，后一个是标记清除算法，可以并发
+      </li>
+      <li>
+       新老可用的：
+      </li>
+      <li>
+       G1：Java9，标记-压缩，并发，打乱了前面所说的堆结构，直接将堆分成极其多个区域。每个区域都可以充当 Eden 区、Survivor 区或者老年代中的一个
+      </li>
+      <li>
+       ZGC：Java11
+      </li>
+     </ul>
+     <h2 id="_7">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://time.geekbang.org/column/article/13137">
+        12 | 垃圾回收（下）
+       </a>
+      </li>
+      <li>
+       <a href="https://time.geekbang.org/column/article/13091">
+        11 | 垃圾回收（上）
+       </a>
+      </li>
+      <li>
+       <a href="https://time.geekbang.org/column/article/10192">
+        第25讲 | 谈谈JVM内存区域的划分，哪些区域可能发生OutOfMemoryError?
+       </a>
+      </li>
+      <li>
+       <a href="https://time.geekbang.org/column/article/10513">
+        第27讲 | Java常见的垃圾收集器有哪些？
+       </a>
+      </li>
+      <li>
+       <a href="https://time.geekbang.org/column/article/10651">
+        第28讲 | 谈谈你的GC调优思路?
+       </a>
+      </li>
+      <li>
+       《深入理解Java虚拟机》 周志明 第三版
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
