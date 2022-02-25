@@ -96,8 +96,19 @@
         - [Java IP相关.md](./article/article/+Java IP相关.html)
         - [JDK动态代理.md](./article/article/+JDK动态代理.html)
     - 工具类
+        - [Crontab表达式中文解析.md](./article/article/+Crontab表达式中文解析.html)
         - [Swagger2.md](./article/article/+Swagger2.html)
+        - [阿里云仓库使用小技巧.md](./article/article/+阿里云仓库使用小技巧.html)
+    - 序列化
+        - [Gson中默认int转double修改.md](./article/article/+Gson中默认int转double修改.html)
+    - 消息队列
+        - [ActivemqJms简单示例.md](./article/article/+ActivemqJms简单示例.html)
     - 进阶知识路径
+        - jvm
+            - [Java类加载器.md](./article/article/+Java类加载器.html)
+            - [Java类的生命周期.md](./article/article/+Java类的生命周期.html)
+            - [Java自动内存管理GC.md](./article/article/+Java自动内存管理GC.html)
+            - [JVM内存模型.md](./article/article/+JVM内存模型.html)
         - nio
             - [关于Netty NIO的一些思考.md](./article/article/+关于Netty NIO的一些思考.html)
     - [Java单例模式写法大全.md](./article/article/+Java单例模式写法大全.html)
