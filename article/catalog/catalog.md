@@ -91,6 +91,7 @@
     - spring
         - [Spring-boot-Gradle项目搭建.md](./article/article/+Spring-boot-Gradle项目搭建.html)
         - [spring-boot-lombok配置.md](./article/article/+spring-boot-lombok配置.html)
+        - [spring-boot-websocket.md](./article/article/+spring-boot-websocket.html)
         - [SpringBoot-Mybatis-MySQL主从分离读写.md](./article/article/+SpringBoot-Mybatis-MySQL主从分离读写.html)
     - 基础
         - [Java IP相关.md](./article/article/+Java IP相关.html)
