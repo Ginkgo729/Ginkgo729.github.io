@@ -117,6 +117,8 @@
 - openCV
     - [轮廓检测.md](./article/article/+轮廓检测.html)
 - python
+    - 基础
+        - [系统调用.md](./article/article/+系统调用.html)
     - [Python3常用记录.md](./article/article/+Python3常用记录.html)
 - SFML
     - [SFML与VS2015配置.md](./article/article/+SFML与VS2015配置.html)
