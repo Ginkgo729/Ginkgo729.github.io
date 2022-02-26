@@ -1,0 +1,199 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="python">
+      python 与系统调用
+     </h1>
+     <hr/>
+     <p>
+      这是我参与2022首次更文挑战的第29天，活动详情查看：
+      <a href="https://juejin.cn/post/7052884569032392740">
+       2022首次更文挑战
+      </a>
+     </p>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      本篇文章中来接收如何在Python程序中调用系统的相关指令，将介绍system、popen、subprocess这三种方式的用法
+     </p>
+     <h2 id="linux-shell">
+      linux shell 命令
+     </h2>
+     <h4 id="system">
+      方法一：system调用
+     </h4>
+     <div class="codehilite">
+      <pre><span></span><code><span class="c1">#仅仅在一个子终端运行系统命令，而不能获取命令执行后的返回信息</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">'ls'</span><span class="p">)</span>
+</code></pre>
+     </div>
+     <h4 id="popen">
+      方法二：popen()函数
+     </h4>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="s1">'ls'</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span> <span class="c1">#这个返回值是一个list</span>
+</code></pre>
+     </div>
+     <h4 id="subprocess">
+      方法三.使用模块 subprocess
+     </h4>
+     <ul>
+      <li>
+       subprocess.call:父进程会等待子进程的结束，并获得call函数的返回值
+      </li>
+      <li>
+       subprocess.check_all:check_all()与call()唯一的区别在于返回值。如果args执行之后的返回值为0，那么check_all返回0；如果返回值不为0，那么将raise出来一个CalledProcessError
+      </li>
+      <li>
+       subprocess.check_output:子进程执行args中的命令，并将其输出形成字符串返回
+      </li>
+      <li>
+       Popen.poll()：检查子进程的状态，查看子进程是否结束
+      </li>
+      <li>
+       Popen.wait()：等待子进程的结束
+      </li>
+      <li>
+       Popen.communicate(input=None)：与子进程进行交互
+      </li>
+      <li>
+       Popen.send_signal(signal)：向子进程发送信号
+      </li>
+      <li>
+       Popen.terminate()：停止(stop)子进程
+      </li>
+      <li>
+       Popen.kill()：杀死子进程
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s1">'ls'</span><span class="p">)</span> <span class="c1">#可以直接call()调用</span>
+
+<span class="sd">'''</span>
+<span class="sd">#也可以使用subprocess.Popen</span>
+<span class="sd">p = subprocess.Popen('ls', shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)</span>
+<span class="sd">for line in p.stdout.readlines():</span>
+<span class="sd">    print(line)</span>
+
+<span class="sd">'''</span>
+</code></pre>
+     </div>
+     <ul>
+      <li>
+       os.chdir("目标目录")   #修改当前工作目录
+      </li>
+      <li>
+       os.getcwd()    #获取当前工作目录
+      </li>
+      <li>
+       os.listdir(dir) : 获取指定目录下的所有子目录和文件名
+      </li>
+      <li>
+       os.rename(原文件名，新文件名） : 对文件或目录改名
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">path</span><span class="o">=</span><span class="nb">input</span><span class="p">(</span><span class="s1">'请输入文件路径(结尾加上/)：'</span><span class="p">)</span>       
+
+<span class="c1">#获取该目录下所有文件，存入列表中</span>
+<span class="n">f</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+<span class="n">n</span><span class="o">=</span><span class="mi">0</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+
+    <span class="c1">#设置旧文件名（就是路径+文件名）</span>
+    <span class="n">oldname</span><span class="o">=</span><span class="n">path</span><span class="o">+</span><span class="n">f</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+    <span class="c1">#设置新文件名</span>
+    <span class="n">newname</span><span class="o">=</span><span class="n">path</span><span class="o">+</span><span class="s1">'a'</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="s1">'.JPG'</span>
+
+    <span class="c1">#用os模块中的rename方法对文件改名</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">oldname</span><span class="p">,</span><span class="n">newname</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">oldname</span><span class="p">,</span><span class="s1">'======&gt;'</span><span class="p">,</span><span class="n">newname</span><span class="p">)</span>
+
+    <span class="n">n</span><span class="o">+=</span><span class="mi">1</span>
+</code></pre>
+     </div>
+     <h2 id="_2">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://blog.csdn.net/Al_assad/article/details/79157259">
+        Python 3（11）调用系统命令行
+       </a>
+      </li>
+      <li>
+       <a href="https://www.cnblogs.com/yyds/p/7288916.html">
+        Python之系统交互（subprocess）
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/yuchen1986/article/details/22059873">
+        [python]subprocess模块学习-call, checkall, check_output, Popen
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
