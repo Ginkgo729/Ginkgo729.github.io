@@ -252,14 +252,14 @@ setup_shell<span class="o">()</span> <span class="o">{</span>
   <span class="nb">printf</span> <span class="s1">'%sDo you want to change your default shell to zsh? [Y/n]%s '</span> <span class="se">\</span>
     <span class="s2">"</span><span class="nv">$YELLOW</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$RESET</span><span class="s2">"</span>
   <span class="nb">read</span> -r opt
-  <span class="k">case</span> <span class="nv">$opt</span> <span class="k">in</span>
+  <span class="k">case</span> <span class="nv">$opt</span> in
     y*<span class="p">|</span>Y*<span class="p">|</span><span class="s2">""</span><span class="o">)</span> <span class="nb">echo</span> <span class="s2">"Changing the shell..."</span> <span class="p">;;</span>
     n*<span class="p">|</span>N*<span class="o">)</span> <span class="nb">echo</span> <span class="s2">"Shell change skipped."</span><span class="p">;</span> <span class="k">return</span> <span class="p">;;</span>
     *<span class="o">)</span> <span class="nb">echo</span> <span class="s2">"Invalid choice. Shell change skipped."</span><span class="p">;</span> <span class="k">return</span> <span class="p">;;</span>
   <span class="k">esac</span>
 
   <span class="c1"># Check if we're running on Termux</span>
-  <span class="k">case</span> <span class="s2">"</span><span class="nv">$PREFIX</span><span class="s2">"</span> <span class="k">in</span>
+  <span class="k">case</span> <span class="s2">"</span><span class="nv">$PREFIX</span><span class="s2">"</span> in
     *com.termux*<span class="o">)</span> <span class="nv">termux</span><span class="o">=</span>true<span class="p">;</span> <span class="nv">zsh</span><span class="o">=</span>zsh <span class="p">;;</span>
     *<span class="o">)</span> <span class="nv">termux</span><span class="o">=</span><span class="nb">false</span> <span class="p">;;</span>
   <span class="k">esac</span>
@@ -314,7 +314,7 @@ main<span class="o">()</span> <span class="o">{</span>
 
   <span class="c1"># Parse arguments</span>
   <span class="k">while</span> <span class="o">[</span> <span class="nv">$#</span> -gt <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">do</span>
-    <span class="k">case</span> <span class="nv">$1</span> <span class="k">in</span>
+    <span class="k">case</span> <span class="nv">$1</span> in
       --unattended<span class="o">)</span> <span class="nv">RUNZSH</span><span class="o">=</span>no<span class="p">;</span> <span class="nv">CHSH</span><span class="o">=</span>no <span class="p">;;</span>
       --skip-chsh<span class="o">)</span> <span class="nv">CHSH</span><span class="o">=</span>no <span class="p">;;</span>
       --keep-zshrc<span class="o">)</span> <span class="nv">KEEP_ZSHRC</span><span class="o">=</span>yes <span class="p">;;</span>
