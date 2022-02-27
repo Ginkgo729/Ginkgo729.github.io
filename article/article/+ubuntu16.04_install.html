@@ -72,9 +72,9 @@
       通过命令行进行安装，这样比较方便,其默认安装在/opt/下面：
      </p>
      <div class="codehilite">
-      <pre><span></span><code>sudo add-apt-repository ppa:webupd8team/sublime-text-2
-sudo apt-get update
-sudo apt-get install sublime-text
+      <pre><span></span><code><span class="err">sudo add-apt-repository ppa:webupd8team/sublime-text-2</span>
+<span class="err">sudo apt-get update</span>
+<span class="err">sudo apt-get install sublime-text</span>
 </code></pre>
      </div>
      <p>
@@ -101,7 +101,7 @@ sudo apt-get install sublime-text
 <span class="cp">#include</span> <span class="cpf">&lt;gdk/gdkx.h&gt;</span><span class="cp"></span>
 <span class="k">typedef</span> <span class="n">GdkSegment</span> <span class="n">GdkRegionBox</span><span class="p">;</span>
 
-<span class="k">struct</span> <span class="nc">_GdkRegion</span>
+<span class="k">struct</span> <span class="n">_GdkRegion</span>
 <span class="p">{</span>
   <span class="kt">long</span> <span class="n">size</span><span class="p">;</span>
   <span class="kt">long</span> <span class="n">numRects</span><span class="p">;</span>
@@ -137,7 +137,7 @@ sudo apt-get install sublime-text
 <span class="c1">//this is needed, for example, if you input something in file dialog and return back the edit area</span>
 <span class="c1">//context will lost, so here we set it again.</span>
 
-<span class="k">static</span> <span class="n">GdkFilterReturn</span> <span class="n">event_filter</span> <span class="p">(</span><span class="n">GdkXEvent</span> <span class="o">*</span><span class="n">xevent</span><span class="p">,</span> <span class="n">GdkEvent</span> <span class="o">*</span><span class="n">event</span><span class="p">,</span> <span class="n">gpointer</span> <span class="n">im_context</span><span class="p">)</span>
+<span class="k">static</span> <span class="n">GdkFilterReturn</span> <span class="nf">event_filter</span> <span class="p">(</span><span class="n">GdkXEvent</span> <span class="o">*</span><span class="n">xevent</span><span class="p">,</span> <span class="n">GdkEvent</span> <span class="o">*</span><span class="n">event</span><span class="p">,</span> <span class="n">gpointer</span> <span class="n">im_context</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="n">XEvent</span> <span class="o">*</span><span class="n">xev</span> <span class="o">=</span> <span class="p">(</span><span class="n">XEvent</span> <span class="o">*</span><span class="p">)</span><span class="n">xevent</span><span class="p">;</span>
     <span class="k">if</span><span class="p">(</span><span class="n">xev</span><span class="o">-&gt;</span><span class="n">type</span> <span class="o">==</span> <span class="n">KeyRelease</span> <span class="o">&amp;&amp;</span> <span class="n">GTK_IS_IM_CONTEXT</span><span class="p">(</span><span class="n">im_context</span><span class="p">))</span> <span class="p">{</span>
@@ -148,7 +148,7 @@ sudo apt-get install sublime-text
     <span class="k">return</span> <span class="n">GDK_FILTER_CONTINUE</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="kt">void</span> <span class="n">gtk_im_context_set_client_window</span> <span class="p">(</span><span class="n">GtkIMContext</span> <span class="o">*</span><span class="n">context</span><span class="p">,</span>
+<span class="kt">void</span> <span class="nf">gtk_im_context_set_client_window</span> <span class="p">(</span><span class="n">GtkIMContext</span> <span class="o">*</span><span class="n">context</span><span class="p">,</span>
           <span class="n">GdkWindow</span>    <span class="o">*</span><span class="n">window</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="n">GtkIMContextClass</span> <span class="o">*</span><span class="n">klass</span><span class="p">;</span>
@@ -176,8 +176,8 @@ sudo apt-get install sublime-text
       </li>
      </ul>
      <div class="codehilite">
-      <pre><span></span><code>sudo apt-get install build-essential
-sudo apt-get install libgtk2.0-dev
+      <pre><span></span><code><span class="err">sudo apt-get install build-essential</span>
+<span class="err">sudo apt-get install libgtk2.0-dev</span>
 </code></pre>
      </div>
      <ul>
@@ -186,7 +186,7 @@ sudo apt-get install libgtk2.0-dev
       </li>
      </ul>
      <div class="codehilite">
-      <pre><span></span><code>gcc -shared -o libsublime-imfix.so sublime_imfix.c  `pkg-config --libs --cflags gtk+-2.0` -fPIC
+      <pre><span></span><code><span class="err">gcc -shared -o libsublime-imfix.so sublime_imfix.c  `pkg-config --libs --cflags gtk+-2.0` -fPIC</span>
 </code></pre>
      </div>
      <ul>
@@ -195,7 +195,7 @@ sudo apt-get install libgtk2.0-dev
       </li>
      </ul>
      <div class="codehilite">
-      <pre><span></span><code>LD_PRELOAD=./libsublime-imfix.so subl
+      <pre><span></span><code><span class="err">LD_PRELOAD=./libsublime-imfix.so subl</span>
 </code></pre>
      </div>
      <p>
