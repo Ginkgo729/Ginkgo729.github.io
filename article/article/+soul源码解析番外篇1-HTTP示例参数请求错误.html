@@ -71,17 +71,17 @@
 git checkout 2.2.1
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="o">&amp;</span><span class="nt">ensp</span><span class="o">;&amp;</span><span class="nt">ensp</span><span class="o">;&amp;</span><span class="nt">ensp</span><span class="o">;&amp;</span><span class="nt">ensp</span><span class="o">;</span><span class="nt">如果之前运行过Soul网关的</span><span class="err">，</span><span class="nt">需要清理下数据库</span><span class="err">，</span><span class="nt">这里删除原来的soul数据库</span><span class="err">，</span><span class="nt">让2</span><span class="p">.</span><span class="nc">2</span><span class="p">.</span><span class="nc">1版本自己重新建立一个</span>
+      <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">如果之前运行过</span><span class="n">Soul网关的</span><span class="err">，需要清理下数据库，这里删除原来的</span><span class="n">soul数据库</span><span class="err">，让</span><span class="mi">2</span><span class="p">.</span><span class="mi">2</span><span class="p">.</span><span class="mi">1</span><span class="err">版本自己重新建立一个</span>
 
-<span class="err">```</span><span class="nt">shell</span> <span class="nt">script</span>
-<span class="err">#</span> <span class="nt">使用docker启动mysql</span>
-<span class="nt">docker</span> <span class="nt">run</span> <span class="nt">--name</span> <span class="nt">mysql</span> <span class="nt">-p</span> <span class="nt">3306</span><span class="p">:</span><span class="nd">3306</span> <span class="nt">-e</span> <span class="nt">MYSQL_ROOT_PASSWORD</span><span class="o">=</span><span class="nt">root</span> <span class="nt">-d</span> <span class="nt">mysql</span><span class="p">:</span><span class="nd">latest</span>
+<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="o">#</span> <span class="err">使用</span><span class="n">docker启动mysql</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="c1">--name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:latest</span>
 
-<span class="err">#</span> <span class="nt">重启</span><span class="err">，</span><span class="nt">需要删除soul数据库</span><span class="err">，</span><span class="nt">然后让程序自己重建</span>
-<span class="nt">docker</span> <span class="nt">restart</span> <span class="nt">mysql</span>
-<span class="err">#</span> <span class="nt">使用命令登录</span><span class="err">，</span><span class="nt">删除原来的数据库</span>
-<span class="nt">docker</span> <span class="nt">exec</span> <span class="nt">-ti</span> <span class="nt">mysql</span> <span class="nt">mysql</span> <span class="nt">-u</span> <span class="nt">root</span> <span class="nt">-p</span>
-<span class="o">&gt;</span> <span class="nt">drop</span> <span class="nt">database</span> <span class="nt">soul</span><span class="o">;</span>
+<span class="o">#</span> <span class="err">重启，需要删除</span><span class="n">soul数据库</span><span class="err">，然后让程序自己重建</span>
+<span class="n">docker</span> <span class="k">restart</span> <span class="n">mysql</span>
+<span class="o">#</span> <span class="err">使用命令登录，删除原来的数据库</span>
+<span class="n">docker</span> <span class="k">exec</span> <span class="o">-</span><span class="n">ti</span> <span class="n">mysql</span> <span class="n">mysql</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="o">-</span><span class="n">p</span>
+<span class="o">&gt;</span> <span class="k">drop</span> <span class="k">database</span> <span class="n">soul</span><span class="p">;</span>
 </code></pre>
      </div>
      <h3 id="souladmin">
