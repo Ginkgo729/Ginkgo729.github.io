@@ -101,8 +101,8 @@ cd vcpkg
 ./vcpkg install zlib curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp jsoncpp --triplet x64-windows
      </p>
      <div class="codehilite">
-      <pre><span></span><code>### Cmake
-在如视频中使用cmake gui的时候，遇到了下面的问题：
+      <pre><span></span><code><span class="err">### Cmake</span>
+<span class="err">在如视频中使用cmake gui的时候，遇到了下面的问题：</span>
 </code></pre>
      </div>
      <p>
@@ -110,9 +110,9 @@ cd vcpkg
   VCPKG_MANIFEST_MODE.
      </p>
      <div class="codehilite">
-      <pre><span></span><code>这个错误的解决方式就是把：VCPKG_MANIFEST_MODE 勾选去掉
+      <pre><span></span><code><span class="err">这个错误的解决方式就是把：</span><span class="n">VCPKG_MANIFEST_MODE</span> <span class="err">勾选去掉</span>
 
-还有下面一个错误：
+<span class="err">还有下面一个错误：</span>
 </code></pre>
      </div>
      <p>
