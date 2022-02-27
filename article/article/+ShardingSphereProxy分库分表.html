@@ -74,74 +74,74 @@ create database demo_ds_0;
 create database demo_ds_1;
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="p">####</span> <span class="n">ShardingSphere</span><span class="o">-</span><span class="n">Proxy</span> <span class="mf">5.0.0</span> <span class="n">alpha</span> <span class="err">设置</span>
+      <pre><span></span><code><span class="o">####</span> <span class="n">ShardingSphere</span><span class="o">-</span><span class="n">Proxy</span> <span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span> <span class="n">alpha</span> <span class="err">设置</span>
 <span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">docker一直不能设置成功</span><span class="err">，有点奇怪，这里就直接下载使用了</span>
 
-<span class="o">-</span> <span class="mf">1.</span><span class="err">下载</span><span class="p">[</span><span class="n">ShardingSphere</span><span class="o">-</span><span class="n">Proxy</span><span class="p">](</span><span class="nl">https:</span><span class="c1">//www.apache.org/dyn/closer.cgi/shardingsphere/5.0.0-alpha/apache-shardingsphere-5.0.0-alpha-shardingsphere-proxy-bin.tar.gz)，下载完成后放到自己相应的目录下</span>
-<span class="o">-</span> <span class="mf">2.</span><span class="err">下载</span><span class="p">[</span><span class="n">MySQL</span><span class="o">-</span><span class="n">connect</span><span class="p">.</span><span class="n">jar</span><span class="p">](</span><span class="nl">https:</span><span class="c1">//repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.47/mysql-connector-java-5.1.47.jar),下载完成后将jar文件放到Sharding根目录的lib目录下</span>
+<span class="o">-</span> <span class="mi">1</span><span class="p">.</span><span class="err">下载</span><span class="p">[</span><span class="n">ShardingSphere</span><span class="o">-</span><span class="n">Proxy</span><span class="p">](</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="p">.</span><span class="n">apache</span><span class="p">.</span><span class="n">org</span><span class="o">/</span><span class="n">dyn</span><span class="o">/</span><span class="n">closer</span><span class="p">.</span><span class="n">cgi</span><span class="o">/</span><span class="n">shardingsphere</span><span class="o">/</span><span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="o">-</span><span class="n">alpha</span><span class="o">/</span><span class="n">apache</span><span class="o">-</span><span class="n">shardingsphere</span><span class="o">-</span><span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="o">-</span><span class="n">alpha</span><span class="o">-</span><span class="n">shardingsphere</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">bin</span><span class="p">.</span><span class="n">tar</span><span class="p">.</span><span class="n">gz</span><span class="p">)</span><span class="err">，下载完成后放到自己相应的目录下</span>
+<span class="o">-</span> <span class="mi">2</span><span class="p">.</span><span class="err">下载</span><span class="p">[</span><span class="n">MySQL</span><span class="o">-</span><span class="k">connect</span><span class="p">.</span><span class="n">jar</span><span class="p">](</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">repo1</span><span class="p">.</span><span class="n">maven</span><span class="p">.</span><span class="n">org</span><span class="o">/</span><span class="n">maven2</span><span class="o">/</span><span class="n">mysql</span><span class="o">/</span><span class="n">mysql</span><span class="o">-</span><span class="n">connector</span><span class="o">-</span><span class="n">java</span><span class="o">/</span><span class="mi">5</span><span class="p">.</span><span class="mi">1</span><span class="p">.</span><span class="mi">47</span><span class="o">/</span><span class="n">mysql</span><span class="o">-</span><span class="n">connector</span><span class="o">-</span><span class="n">java</span><span class="o">-</span><span class="mi">5</span><span class="p">.</span><span class="mi">1</span><span class="p">.</span><span class="mi">47</span><span class="p">.</span><span class="n">jar</span><span class="p">),</span><span class="err">下载完成后将</span><span class="n">jar文件放到Sharding根目录的lib目录下</span>
 
 <span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">下面需要配置两个文件：</span><span class="n">server</span><span class="p">.</span><span class="n">yaml</span><span class="err">、</span><span class="n">config</span><span class="o">-</span><span class="n">sharding</span><span class="p">.</span><span class="n">yaml</span><span class="p">,</span><span class="err">示例如下（配置都有默认示例说明的，相应进行修改即可）</span>
 
 <span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">server</span><span class="p">.</span><span class="n">yaml</span>
 
-<span class="err">``</span><span class="no">`yaml</span>
-<span class="p">#</span>
-<span class="p">#</span> <span class="n">Licensed</span> <span class="n">to</span> <span class="n">the</span> <span class="n">Apache</span> <span class="n">Software</span> <span class="n">Foundation</span> <span class="p">(</span><span class="n">ASF</span><span class="p">)</span> <span class="n">under</span> <span class="n">one</span> <span class="k">or</span> <span class="n">more</span>
-<span class="p">#</span> <span class="n">contributor</span> <span class="n">license</span> <span class="n">agreements</span><span class="p">.</span>  <span class="n">See</span> <span class="n">the</span> <span class="n">NOTICE</span> <span class="n">file</span> <span class="n">distributed</span> <span class="n">with</span>
-<span class="p">#</span> <span class="n">this</span> <span class="n">work</span> <span class="k">for</span> <span class="n">additional</span> <span class="n">information</span> <span class="n">regarding</span> <span class="n">copyright</span> <span class="n">ownership</span><span class="p">.</span>
-<span class="p">#</span> <span class="n">The</span> <span class="n">ASF</span> <span class="n">licenses</span> <span class="n">this</span> <span class="n">file</span> <span class="n">to</span> <span class="n">You</span> <span class="n">under</span> <span class="n">the</span> <span class="n">Apache</span> <span class="n">License</span><span class="p">,</span> <span class="n">Version</span> <span class="mf">2.0</span>
-<span class="p">#</span> <span class="p">(</span><span class="n">the</span> <span class="s">"License"</span><span class="p">);</span> <span class="n">you</span> <span class="n">may</span> <span class="k">not</span> <span class="n">use</span> <span class="n">this</span> <span class="n">file</span> <span class="n">except</span> <span class="n">in</span> <span class="n">compliance</span> <span class="n">with</span>
-<span class="p">#</span> <span class="n">the</span> <span class="n">License</span><span class="p">.</span>  <span class="n">You</span> <span class="n">may</span> <span class="n">obtain</span> <span class="n">a</span> <span class="n">copy</span> <span class="n">of</span> <span class="n">the</span> <span class="n">License</span> <span class="n">at</span>
-<span class="p">#</span>
-<span class="p">#</span>     <span class="nl">http:</span><span class="c1">//www.apache.org/licenses/LICENSE-2.0</span>
-<span class="p">#</span>
-<span class="p">#</span> <span class="n">Unless</span> <span class="n">required</span> <span class="n">by</span> <span class="n">applicable</span> <span class="n">law</span> <span class="k">or</span> <span class="n">agreed</span> <span class="n">to</span> <span class="n">in</span> <span class="n">writing</span><span class="p">,</span> <span class="n">software</span>
-<span class="p">#</span> <span class="n">distributed</span> <span class="n">under</span> <span class="n">the</span> <span class="n">License</span> <span class="n">is</span> <span class="n">distributed</span> <span class="n">on</span> <span class="n">an</span> <span class="s">"AS IS"</span> <span class="n">BASIS</span><span class="p">,</span>
-<span class="p">#</span> <span class="n">WITHOUT</span> <span class="n">WARRANTIES</span> <span class="n">OR</span> <span class="n">CONDITIONS</span> <span class="n">OF</span> <span class="n">ANY</span> <span class="n">KIND</span><span class="p">,</span> <span class="n">either</span> <span class="n">express</span> <span class="k">or</span> <span class="n">implied</span><span class="p">.</span>
-<span class="p">#</span> <span class="n">See</span> <span class="n">the</span> <span class="n">License</span> <span class="k">for</span> <span class="n">the</span> <span class="n">specific</span> <span class="n">language</span> <span class="n">governing</span> <span class="n">permissions</span> <span class="k">and</span>
-<span class="p">#</span> <span class="n">limitations</span> <span class="n">under</span> <span class="n">the</span> <span class="n">License</span><span class="p">.</span>
-<span class="p">#</span>
+<span class="o">```</span><span class="n">yaml</span>
+<span class="o">#</span>
+<span class="o">#</span> <span class="n">Licensed</span> <span class="k">to</span> <span class="n">the</span> <span class="n">Apache</span> <span class="n">Software</span> <span class="n">Foundation</span> <span class="p">(</span><span class="n">ASF</span><span class="p">)</span> <span class="k">under</span> <span class="n">one</span> <span class="k">or</span> <span class="k">more</span>
+<span class="o">#</span> <span class="n">contributor</span> <span class="n">license</span> <span class="n">agreements</span><span class="p">.</span>  <span class="n">See</span> <span class="n">the</span> <span class="n">NOTICE</span> <span class="n">file</span> <span class="n">distributed</span> <span class="k">with</span>
+<span class="o">#</span> <span class="n">this</span> <span class="k">work</span> <span class="k">for</span> <span class="n">additional</span> <span class="n">information</span> <span class="n">regarding</span> <span class="n">copyright</span> <span class="n">ownership</span><span class="p">.</span>
+<span class="o">#</span> <span class="n">The</span> <span class="n">ASF</span> <span class="n">licenses</span> <span class="n">this</span> <span class="n">file</span> <span class="k">to</span> <span class="n">You</span> <span class="k">under</span> <span class="n">the</span> <span class="n">Apache</span> <span class="n">License</span><span class="p">,</span> <span class="k">Version</span> <span class="mi">2</span><span class="p">.</span><span class="mi">0</span>
+<span class="o">#</span> <span class="p">(</span><span class="n">the</span> <span class="ss">"License"</span><span class="p">);</span> <span class="n">you</span> <span class="n">may</span> <span class="k">not</span> <span class="n">use</span> <span class="n">this</span> <span class="n">file</span> <span class="k">except</span> <span class="k">in</span> <span class="n">compliance</span> <span class="k">with</span>
+<span class="o">#</span> <span class="n">the</span> <span class="n">License</span><span class="p">.</span>  <span class="n">You</span> <span class="n">may</span> <span class="n">obtain</span> <span class="n">a</span> <span class="k">copy</span> <span class="k">of</span> <span class="n">the</span> <span class="n">License</span> <span class="k">at</span>
+<span class="o">#</span>
+<span class="o">#</span>     <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="p">.</span><span class="n">apache</span><span class="p">.</span><span class="n">org</span><span class="o">/</span><span class="n">licenses</span><span class="o">/</span><span class="n">LICENSE</span><span class="o">-</span><span class="mi">2</span><span class="p">.</span><span class="mi">0</span>
+<span class="o">#</span>
+<span class="o">#</span> <span class="n">Unless</span> <span class="n">required</span> <span class="k">by</span> <span class="n">applicable</span> <span class="n">law</span> <span class="k">or</span> <span class="n">agreed</span> <span class="k">to</span> <span class="k">in</span> <span class="n">writing</span><span class="p">,</span> <span class="n">software</span>
+<span class="o">#</span> <span class="n">distributed</span> <span class="k">under</span> <span class="n">the</span> <span class="n">License</span> <span class="k">is</span> <span class="n">distributed</span> <span class="k">on</span> <span class="n">an</span> <span class="ss">"AS IS"</span> <span class="n">BASIS</span><span class="p">,</span>
+<span class="o">#</span> <span class="k">WITHOUT</span> <span class="n">WARRANTIES</span> <span class="k">OR</span> <span class="n">CONDITIONS</span> <span class="k">OF</span> <span class="k">ANY</span> <span class="n">KIND</span><span class="p">,</span> <span class="n">either</span> <span class="n">express</span> <span class="k">or</span> <span class="n">implied</span><span class="p">.</span>
+<span class="o">#</span> <span class="n">See</span> <span class="n">the</span> <span class="n">License</span> <span class="k">for</span> <span class="n">the</span> <span class="k">specific</span> <span class="k">language</span> <span class="n">governing</span> <span class="n">permissions</span> <span class="k">and</span>
+<span class="o">#</span> <span class="n">limitations</span> <span class="k">under</span> <span class="n">the</span> <span class="n">License</span><span class="p">.</span>
+<span class="o">#</span>
 
-<span class="p">######################################################################################################</span>
-<span class="p">#</span> 
-<span class="p">#</span> <span class="n">If</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">configure</span> <span class="n">governance</span><span class="p">,</span> <span class="n">authorization</span> <span class="k">and</span> <span class="n">proxy</span> <span class="n">properties</span><span class="p">,</span> <span class="n">please</span> <span class="n">refer</span> <span class="n">to</span> <span class="n">this</span> <span class="n">file</span><span class="p">.</span>
-<span class="p">#</span> 
-<span class="p">######################################################################################################</span>
-<span class="p">#</span>
-<span class="p">#</span><span class="nl">governance:</span>
-<span class="p">#</span>  <span class="nl">name:</span> <span class="n">governance_ds</span>
-<span class="p">#</span>  <span class="nl">registryCenter:</span>
-<span class="p">#</span>    <span class="k">type</span><span class="o">:</span> <span class="n">ZooKeeper</span>
-<span class="p">#</span>    <span class="nl">serverLists:</span> <span class="nl">localhost:</span><span class="mh">2181</span>
-<span class="p">#</span>    <span class="nl">props:</span>
-<span class="p">#</span>      <span class="nl">retryIntervalMilliseconds:</span> <span class="mh">500</span>
-<span class="p">#</span>      <span class="nl">timeToLiveSeconds:</span> <span class="mh">60</span>
-<span class="p">#</span>      <span class="nl">maxRetries:</span> <span class="mh">3</span>
-<span class="p">#</span>      <span class="nl">operationTimeoutMilliseconds:</span> <span class="mh">500</span>
-<span class="p">#</span>  <span class="nl">overwrite:</span> <span class="n">false</span>
+<span class="o">######################################################################################################</span>
+<span class="o">#</span> 
+<span class="o">#</span> <span class="k">If</span> <span class="n">you</span> <span class="n">want</span> <span class="k">to</span> <span class="n">configure</span> <span class="n">governance</span><span class="p">,</span> <span class="k">authorization</span> <span class="k">and</span> <span class="n">proxy</span> <span class="n">properties</span><span class="p">,</span> <span class="n">please</span> <span class="n">refer</span> <span class="k">to</span> <span class="n">this</span> <span class="n">file</span><span class="p">.</span>
+<span class="o">#</span> 
+<span class="o">######################################################################################################</span>
+<span class="o">#</span>
+<span class="o">#</span><span class="n">governance</span><span class="p">:</span>
+<span class="o">#</span>  <span class="n">name</span><span class="p">:</span> <span class="n">governance_ds</span>
+<span class="o">#</span>  <span class="n">registryCenter</span><span class="p">:</span>
+<span class="o">#</span>    <span class="k">type</span><span class="p">:</span> <span class="n">ZooKeeper</span>
+<span class="o">#</span>    <span class="n">serverLists</span><span class="p">:</span> <span class="n">localhost</span><span class="p">:</span><span class="mi">2181</span>
+<span class="o">#</span>    <span class="n">props</span><span class="p">:</span>
+<span class="o">#</span>      <span class="n">retryIntervalMilliseconds</span><span class="p">:</span> <span class="mi">500</span>
+<span class="o">#</span>      <span class="n">timeToLiveSeconds</span><span class="p">:</span> <span class="mi">60</span>
+<span class="o">#</span>      <span class="n">maxRetries</span><span class="p">:</span> <span class="mi">3</span>
+<span class="o">#</span>      <span class="n">operationTimeoutMilliseconds</span><span class="p">:</span> <span class="mi">500</span>
+<span class="o">#</span>  <span class="n">overwrite</span><span class="p">:</span> <span class="k">false</span>
 
-<span class="nl">authentication:</span>
-  <span class="nl">users:</span>
-    <span class="nl">root:</span>
-      <span class="nl">password:</span> <span class="n">root</span>
-    <span class="nl">sharding:</span>
-      <span class="nl">password:</span> <span class="n">sharding</span>
-      <span class="nl">authorizedSchemas:</span> <span class="n">sharding_db</span>
+<span class="n">authentication</span><span class="p">:</span>
+  <span class="n">users</span><span class="p">:</span>
+    <span class="n">root</span><span class="p">:</span>
+      <span class="n">password</span><span class="p">:</span> <span class="n">root</span>
+    <span class="n">sharding</span><span class="p">:</span>
+      <span class="n">password</span><span class="p">:</span> <span class="n">sharding</span>
+      <span class="n">authorizedSchemas</span><span class="p">:</span> <span class="n">sharding_db</span>
 
-<span class="nl">props:</span>
-  <span class="n">max</span><span class="o">-</span><span class="n">connections</span><span class="o">-</span><span class="n">size</span><span class="o">-</span><span class="n">per</span><span class="o">-</span><span class="nl">query:</span> <span class="mh">1</span>
-  <span class="n">acceptor</span><span class="o">-</span><span class="nl">size:</span> <span class="mh">16</span>  <span class="p">#</span> <span class="n">The</span> <span class="k">default</span> <span class="n">value</span> <span class="n">is</span> <span class="n">available</span> <span class="n">processors</span> <span class="n">count</span> <span class="o">*</span> <span class="mf">2.</span>
-  <span class="n">executor</span><span class="o">-</span><span class="nl">size:</span> <span class="mh">16</span>  <span class="p">#</span> <span class="n">Infinite</span> <span class="n">by</span> <span class="k">default</span><span class="p">.</span>
-  <span class="n">proxy</span><span class="o">-</span><span class="n">frontend</span><span class="o">-</span><span class="n">flush</span><span class="o">-</span><span class="nl">threshold:</span> <span class="mh">128</span>  <span class="p">#</span> <span class="n">The</span> <span class="k">default</span> <span class="n">value</span> <span class="n">is</span> <span class="mf">128.</span>
-    <span class="p">#</span> <span class="nl">LOCAL:</span> <span class="n">Proxy</span> <span class="n">will</span> <span class="n">run</span> <span class="n">with</span> <span class="n">LOCAL</span> <span class="n">transaction</span><span class="p">.</span>
-    <span class="p">#</span> <span class="nl">XA:</span> <span class="n">Proxy</span> <span class="n">will</span> <span class="n">run</span> <span class="n">with</span> <span class="n">XA</span> <span class="n">transaction</span><span class="p">.</span>
-    <span class="p">#</span> <span class="nl">BASE:</span> <span class="n">Proxy</span> <span class="n">will</span> <span class="n">run</span> <span class="n">with</span> <span class="n">B</span><span class="p">.</span><span class="n">A</span><span class="p">.</span><span class="n">S</span><span class="p">.</span><span class="n">E</span> <span class="n">transaction</span><span class="p">.</span>
-  <span class="n">proxy</span><span class="o">-</span><span class="n">transaction</span><span class="o">-</span><span class="k">type</span><span class="o">:</span> <span class="n">LOCAL</span>
-  <span class="n">proxy</span><span class="o">-</span><span class="n">opentracing</span><span class="o">-</span><span class="nl">enabled:</span> <span class="n">false</span>
-  <span class="n">proxy</span><span class="o">-</span><span class="n">hint</span><span class="o">-</span><span class="nl">enabled:</span> <span class="n">false</span>
-  <span class="n">query</span><span class="o">-</span><span class="n">with</span><span class="o">-</span><span class="n">cipher</span><span class="o">-</span><span class="nl">column:</span> <span class="n">true</span>
-  <span class="n">sql</span><span class="o">-</span><span class="nl">show:</span> <span class="n">true</span>
-  <span class="n">check</span><span class="o">-</span><span class="k">table</span><span class="o">-</span><span class="n">metadata</span><span class="o">-</span><span class="nl">enabled:</span> <span class="n">false</span>
+<span class="n">props</span><span class="p">:</span>
+  <span class="k">max</span><span class="o">-</span><span class="n">connections</span><span class="o">-</span><span class="k">size</span><span class="o">-</span><span class="n">per</span><span class="o">-</span><span class="n">query</span><span class="p">:</span> <span class="mi">1</span>
+  <span class="n">acceptor</span><span class="o">-</span><span class="k">size</span><span class="p">:</span> <span class="mi">16</span>  <span class="o">#</span> <span class="n">The</span> <span class="k">default</span> <span class="n">value</span> <span class="k">is</span> <span class="n">available</span> <span class="n">processors</span> <span class="k">count</span> <span class="o">*</span> <span class="mi">2</span><span class="p">.</span>
+  <span class="n">executor</span><span class="o">-</span><span class="k">size</span><span class="p">:</span> <span class="mi">16</span>  <span class="o">#</span> <span class="n">Infinite</span> <span class="k">by</span> <span class="k">default</span><span class="p">.</span>
+  <span class="n">proxy</span><span class="o">-</span><span class="n">frontend</span><span class="o">-</span><span class="n">flush</span><span class="o">-</span><span class="n">threshold</span><span class="p">:</span> <span class="mi">128</span>  <span class="o">#</span> <span class="n">The</span> <span class="k">default</span> <span class="n">value</span> <span class="k">is</span> <span class="mi">128</span><span class="p">.</span>
+    <span class="o">#</span> <span class="k">LOCAL</span><span class="p">:</span> <span class="n">Proxy</span> <span class="n">will</span> <span class="n">run</span> <span class="k">with</span> <span class="k">LOCAL</span> <span class="n">transaction</span><span class="p">.</span>
+    <span class="o">#</span> <span class="n">XA</span><span class="p">:</span> <span class="n">Proxy</span> <span class="n">will</span> <span class="n">run</span> <span class="k">with</span> <span class="n">XA</span> <span class="n">transaction</span><span class="p">.</span>
+    <span class="o">#</span> <span class="n">BASE</span><span class="p">:</span> <span class="n">Proxy</span> <span class="n">will</span> <span class="n">run</span> <span class="k">with</span> <span class="n">B</span><span class="p">.</span><span class="n">A</span><span class="p">.</span><span class="n">S</span><span class="p">.</span><span class="n">E</span> <span class="n">transaction</span><span class="p">.</span>
+  <span class="n">proxy</span><span class="o">-</span><span class="n">transaction</span><span class="o">-</span><span class="k">type</span><span class="p">:</span> <span class="k">LOCAL</span>
+  <span class="n">proxy</span><span class="o">-</span><span class="n">opentracing</span><span class="o">-</span><span class="n">enabled</span><span class="p">:</span> <span class="k">false</span>
+  <span class="n">proxy</span><span class="o">-</span><span class="n">hint</span><span class="o">-</span><span class="n">enabled</span><span class="p">:</span> <span class="k">false</span>
+  <span class="n">query</span><span class="o">-</span><span class="k">with</span><span class="o">-</span><span class="n">cipher</span><span class="o">-</span><span class="k">column</span><span class="p">:</span> <span class="k">true</span>
+  <span class="k">sql</span><span class="o">-</span><span class="k">show</span><span class="p">:</span> <span class="k">true</span>
+  <span class="k">check</span><span class="o">-</span><span class="k">table</span><span class="o">-</span><span class="n">metadata</span><span class="o">-</span><span class="n">enabled</span><span class="p">:</span> <span class="k">false</span>
 </code></pre>
      </div>
      <p>
@@ -236,16 +236,16 @@ create database demo_ds_1;
       ./start.bat 13306
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">成功以后刷刷刷的一排日志打出，没有错误就说明可以运行了</span>
+      <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">成功以后刷刷刷的一排日志打出，没有错误就说明可以运行了</span>
 
-<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">使用mysql命令或者mysqlworkbench连接上sharding，运行下面的SQL语句生成测试的表，运行成功看到日志中一大批SQL语句，</span>
+<span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="err">使用</span><span class="n">mysql命令或者mysqlworkbench连接上sharding</span><span class="err">，运行下面的</span><span class="n">SQL语句生成测试的表</span><span class="err">，运行成功看到日志中一大批</span><span class="n">SQL语句</span><span class="err">，</span>
 
-<span class="n n-Quoted">`</span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">sql</span>
-<span class="n n-Quoted">CREATE TABLE IF NOT EXISTS `</span><span class="n">t_order</span><span class="n n-Quoted">` (</span>
-<span class="n n-Quoted">    `</span><span class="n">order_id</span><span class="n n-Quoted">` int(11) NOT NULL,</span>
-<span class="n n-Quoted">    `</span><span class="n">user_id</span><span class="n n-Quoted">` int(11) NOT NULL,</span>
-<span class="n n-Quoted">    PRIMARY KEY (`</span><span class="n">order_id</span><span class="n n-Quoted">`)</span>
-<span class="n n-Quoted">) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;</span>
+<span class="ss">```sql</span>
+<span class="ss">CREATE TABLE IF NOT EXISTS `</span><span class="n">t_order</span><span class="ss">` (</span>
+<span class="ss">    `</span><span class="n">order_id</span><span class="ss">` int(11) NOT NULL,</span>
+<span class="ss">    `</span><span class="n">user_id</span><span class="ss">` int(11) NOT NULL,</span>
+<span class="ss">    PRIMARY KEY (`</span><span class="n">order_id</span><span class="o">`</span><span class="p">)</span>
+<span class="p">)</span> <span class="kp">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span> <span class="kp">AUTO_INCREMENT</span><span class="o">=</span><span class="mi">1</span> <span class="k">DEFAULT</span> <span class="kp">CHARSET</span><span class="o">=</span><span class="n">latin1</span><span class="p">;</span>
 </code></pre>
      </div>
      <h3 id="springboot-mybatis">
