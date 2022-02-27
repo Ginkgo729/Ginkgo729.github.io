@@ -150,22 +150,22 @@ bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis
 docker restart es
      </p>
      <div class="codehilite">
-      <pre><span></span><code>- [2.4-docker es安装插件](https://www.jianshu.com/p/275e629535f6)
-- [ES - 基于Golang的简单使用ElasticSearch](tkstorm.com/posts-list/software-engineering/elastic/es-docker/)
-- [Elasticsearch —— docker部署+ik分词器](https://www.jianshu.com/p/d8b0c736070f)
+      <pre><span></span><code><span class="o">-</span> <span class="p">[</span><span class="mi">2</span><span class="p">.</span><span class="mi">4</span><span class="o">-</span><span class="n">docker</span> <span class="n">es安装插件</span><span class="p">](</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="p">.</span><span class="n">jianshu</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">p</span><span class="o">/</span><span class="mi">275</span><span class="n">e629535f6</span><span class="p">)</span>
+<span class="o">-</span> <span class="p">[</span><span class="n">ES</span> <span class="o">-</span> <span class="err">基于</span><span class="n">Golang的简单使用ElasticSearch</span><span class="p">](</span><span class="n">tkstorm</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">posts</span><span class="o">-</span><span class="n">list</span><span class="o">/</span><span class="n">software</span><span class="o">-</span><span class="n">engineering</span><span class="o">/</span><span class="n">elastic</span><span class="o">/</span><span class="n">es</span><span class="o">-</span><span class="n">docker</span><span class="o">/</span><span class="p">)</span>
+<span class="o">-</span> <span class="p">[</span><span class="n">Elasticsearch</span> <span class="err">——</span> <span class="n">docker部署</span><span class="o">+</span><span class="n">ik分词器</span><span class="p">](</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="p">.</span><span class="n">jianshu</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">p</span><span class="o">/</span><span class="n">d8b0c736070f</span><span class="p">)</span>
 
-## 服务发现
-### Nacos
-```shell
-git clone https://github.com/nacos-group/nacos-docker.git
-cd nacos-docker
-docker-compose -f example/standalone-derby.yaml up
+<span class="o">##</span> <span class="err">服务发现</span>
+<span class="o">###</span> <span class="n">Nacos</span>
+<span class="o">```</span><span class="n">shell</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">nacos</span><span class="o">-</span><span class="k">group</span><span class="o">/</span><span class="n">nacos</span><span class="o">-</span><span class="n">docker</span><span class="p">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">nacos</span><span class="o">-</span><span class="n">docker</span>
+<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">-</span><span class="n">f</span> <span class="n">example</span><span class="o">/</span><span class="n">standalone</span><span class="o">-</span><span class="n">derby</span><span class="p">.</span><span class="n">yaml</span> <span class="n">up</span>
 
-http://localhost:8848/nacos/#/login
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">8848</span><span class="o">/</span><span class="n">nacos</span><span class="o">/#/</span><span class="n">login</span>
 
-用户名和密码
-nacos
-nacos
+<span class="err">用户名和密码</span>
+<span class="n">nacos</span>
+<span class="n">nacos</span>
 </code></pre>
      </div>
      <h3 id="etcd">
@@ -201,9 +201,9 @@ DATA_DIR="etcd-data"
       docker run -dit --name etcd_web -p 8081:8080 evildecay/etcdkeeper
      </p>
      <div class="codehilite">
-      <pre><span></span><code>### zookeeper
-```shell script
-docker run -dit --name zk -p 2181:2181 zookeeper
+      <pre><span></span><code><span class="err">### zookeeper</span>
+<span class="err">```shell script</span>
+<span class="err">docker run -dit --name zk -p 2181:2181 zookeeper</span>
 </code></pre>
      </div>
      <h3 id="consul">
@@ -284,10 +284,10 @@ acl {
 }
      </p>
      <div class="codehilite">
-      <pre><span></span><code>## 消息队列
-### docker-activemq
-```shell script
-docker run -dit --name activemq -p 11616:61616 -p 8161:8161 -p 1883:1883 rmohr/activemq
+      <pre><span></span><code><span class="err">## 消息队列</span>
+<span class="err">### docker-activemq</span>
+<span class="err">```shell script</span>
+<span class="err">docker run -dit --name activemq -p 11616:61616 -p 8161:8161 -p 1883:1883 rmohr/activemq</span>
 </code></pre>
      </div>
      <p>
@@ -314,12 +314,12 @@ guest
 guest
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="c1">## 其他</span>
-<span class="c1">### Nginx</span>
-<span class="err">```</span><span class="n">shell</span> <span class="n">script</span>
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="o">--</span><span class="n">name</span> <span class="n">nginx</span> <span class="o">--</span><span class="n">restart</span><span class="o">=</span><span class="n">always</span> <span class="o">-</span><span class="n">p</span> <span class="mi">80</span><span class="p">:</span><span class="mi">80</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">Docker</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">Docker</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">download</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">download</span><span class="o">/</span> <span class="n">nginx</span>
+      <pre><span></span><code><span class="o">##</span> <span class="err">其他</span>
+<span class="o">###</span> <span class="n">Nginx</span>
+<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="c1">--name nginx --restart=always -p 80:80 -v D:/Docker/images/nginx/:/etc/nginx/ -v D:/Docker/images/nginx/download:/home/download/ nginx</span>
 
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="o">--</span><span class="n">name</span> <span class="n">nginx</span> <span class="o">-</span><span class="n">p</span> <span class="mi">80</span><span class="p">:</span><span class="mi">80</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">Docker</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">config</span><span class="o">/</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">Docker</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">download</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">download</span><span class="o">/</span> <span class="n">nginx</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="c1">--name nginx -p 80:80 -v D:/Docker/images/nginx/config/:/etc/nginx/ -v D:/Docker/images/nginx/download:/home/download/ nginx</span>
 </code></pre>
      </div>
      <h3 id="yapi">
@@ -411,38 +411,38 @@ docker-compose up -d
       Portainer - Docker的可视化管理工具使用详解
      </h3>
      <div class="codehilite">
-      <pre><span></span><code><span class="c1"># linux</span>
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9000</span><span class="p">:</span><span class="mi">9000</span> <span class="o">--</span><span class="n">name</span> <span class="n">portainer</span> <span class="o">--</span><span class="n">restart</span> <span class="n">always</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span> <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="n">data</span> <span class="n">portainer</span><span class="o">/</span><span class="n">portainer</span>
+      <pre><span></span><code><span class="o">#</span> <span class="n">linux</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9000</span><span class="p">:</span><span class="mi">9000</span> <span class="c1">--name portainer --restart always -v /var/run/docker.sock:/var/run/docker.sock -v /home/docker/portainer/data:/data portainer/portainer</span>
 
-<span class="c1"># windows</span>
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9000</span><span class="p">:</span><span class="mi">9000</span> <span class="o">--</span><span class="n">name</span> <span class="n">portainer</span> <span class="o">--</span><span class="n">restart</span> <span class="n">always</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">temp</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">docker_engine</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">pipe</span><span class="o">/</span><span class="n">docker_engine</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">temp</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">portainer</span><span class="o">/</span><span class="n">data</span><span class="p">:</span><span class="o">/</span><span class="n">data</span> <span class="n">portainer</span><span class="o">/</span><span class="n">portainer</span>
+<span class="o">#</span> <span class="n">windows</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9000</span><span class="p">:</span><span class="mi">9000</span> <span class="c1">--name portainer --restart always -v -v D:/temp/docker/portainer/docker_engine:/var/run/pipe/docker_engine -v D:/temp/docker/portainer/data:/data portainer/portainer</span>
 
 <span class="err">用户和密码：</span>
-<span class="n">admin</span> <span class="n">password</span>
+<span class="k">admin</span> <span class="n">password</span>
 </code></pre>
      </div>
      <h3 id="centos">
       Centos
      </h3>
      <div class="codehilite">
-      <pre><span></span><code>docker run -tid --name centos8 -p 82:80 -v D:/temp/centos/:/root/ centos
-docker run -tid --name centos8 --net=host -v D:/temp/centos/:/root/ centos
+      <pre><span></span><code><span class="err">docker run -tid --name centos8 -p 82:80 -v D:/temp/centos/:/root/ centos</span>
+<span class="err">docker run -tid --name centos8 --net=host -v D:/temp/centos/:/root/ centos</span>
 </code></pre>
      </div>
      <h3 id="_3">
       本地镜像仓库
      </h3>
      <div class="codehilite">
-      <pre><span></span><code><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">5000</span><span class="p">:</span><span class="mi">5000</span> <span class="o">--</span><span class="n">name</span> <span class="n">registry</span> <span class="o">--</span><span class="n">restart</span><span class="o">=</span><span class="n">always</span> <span class="o">-</span><span class="n">v</span> <span class="n">D</span><span class="p">:</span><span class="o">/</span><span class="n">Docker</span><span class="o">/</span><span class="n">registry</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">registry</span> <span class="n">registry</span><span class="p">:</span><span class="n">latest</span>
+      <pre><span></span><code><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">5000</span><span class="p">:</span><span class="mi">5000</span> <span class="c1">--name registry --restart=always -v D:/Docker/registry:/var/lib/registry registry:latest</span>
 
-<span class="c1"># 在docker deamon 中加入 127.0.0.1:5000</span>
+<span class="o">#</span> <span class="err">在</span><span class="n">docker</span> <span class="n">deamon</span> <span class="err">中加入</span> <span class="mi">127</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="p">:</span><span class="mi">5000</span>
 
-<span class="c1"># 上传</span>
-<span class="n">docker</span> <span class="n">tag</span> <span class="n">xxxx</span><span class="p">:</span><span class="n">test</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">110.196</span><span class="p">:</span><span class="mi">5000</span><span class="o">/</span><span class="n">xxxx</span><span class="p">:</span><span class="n">test</span>
-<span class="n">docker</span> <span class="n">push</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">110.196</span><span class="p">:</span><span class="mi">5000</span><span class="o">/</span><span class="n">xxxx</span><span class="p">:</span><span class="n">test</span>
+<span class="o">#</span> <span class="err">上传</span>
+<span class="n">docker</span> <span class="n">tag</span> <span class="n">xxxx</span><span class="p">:</span><span class="n">test</span> <span class="mi">192</span><span class="p">.</span><span class="mi">168</span><span class="p">.</span><span class="mi">110</span><span class="p">.</span><span class="mi">196</span><span class="p">:</span><span class="mi">5000</span><span class="o">/</span><span class="n">xxxx</span><span class="p">:</span><span class="n">test</span>
+<span class="n">docker</span> <span class="n">push</span> <span class="mi">192</span><span class="p">.</span><span class="mi">168</span><span class="p">.</span><span class="mi">110</span><span class="p">.</span><span class="mi">196</span><span class="p">:</span><span class="mi">5000</span><span class="o">/</span><span class="n">xxxx</span><span class="p">:</span><span class="n">test</span>
 
-<span class="c1"># 下载</span>
-<span class="n">docker</span> <span class="n">pull</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">110.196</span><span class="p">:</span><span class="mi">5000</span><span class="o">/</span><span class="n">xxxx</span><span class="p">:</span><span class="n">test</span>
+<span class="o">#</span> <span class="err">下载</span>
+<span class="n">docker</span> <span class="n">pull</span> <span class="mi">192</span><span class="p">.</span><span class="mi">168</span><span class="p">.</span><span class="mi">110</span><span class="p">.</span><span class="mi">196</span><span class="p">:</span><span class="mi">5000</span><span class="o">/</span><span class="n">xxxx</span><span class="p">:</span><span class="n">test</span>
 </code></pre>
      </div>
      <ul>
