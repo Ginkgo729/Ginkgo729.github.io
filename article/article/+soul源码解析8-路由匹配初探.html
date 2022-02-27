@@ -172,8 +172,8 @@ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:late
       下面Debug来看下GlobalPlugin的解析结果，如下，明显不是我们想要的，所有这里初步猜测不能选择器不能使用两级前缀，不然可能会出问题
      </p>
      <div class="codehilite">
-      <pre><span></span><code>contextPath = /more
-realURL = /prefix/baidu
+      <pre><span></span><code><span class="err">contextPath = /more</span>
+<span class="err">realURL = /prefix/baidu</span>
 </code></pre>
      </div>
      <p>
