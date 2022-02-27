@@ -86,12 +86,12 @@
       =true
      </p>
      <div class="codehilite">
-      <pre><span></span><code>&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;Soul Admin 需要数据，我们简单使用docker 启动一个
+      <pre><span></span><code><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">ensp</span><span class="p">;</span><span class="n">Soul</span> <span class="k">Admin</span> <span class="err">需要数据，我们简单使用</span><span class="n">docker</span> <span class="err">启动一个</span>
 
-```shell script
-# docker 启动一个mysql数据库,密码123456
-# 如果之前运行过soul，重新删除数据库，让其重建，因为后面有改动数据库
-docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
+<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="o">#</span> <span class="n">docker</span> <span class="err">启动一个</span><span class="n">mysql数据库</span><span class="p">,</span><span class="err">密码</span><span class="mi">123456</span>
+<span class="o">#</span> <span class="err">如果之前运行过</span><span class="n">soul</span><span class="err">，重新删除数据库，让其重建，因为后面有改动数据库</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="c1">--name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest</span>
 </code></pre>
      </div>
      <p>
