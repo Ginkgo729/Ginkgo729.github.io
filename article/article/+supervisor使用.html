@@ -84,43 +84,43 @@ http://服务器地址:9001
       配置说明
      </h2>
      <div class="codehilite">
-      <pre><span></span><code><span class="c1"># 如果找不到配置文件，可以使用下面的命令进行生成</span>
-<span class="n">echo_supervisord_conf</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">supervisord</span><span class="o">.</span><span class="n">conf</span>
+      <pre><span></span><code><span class="o">#</span> <span class="err">如果找不到配置文件，可以使用下面的命令进行生成</span>
+<span class="n">echo_supervisord_conf</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">supervisord</span><span class="p">.</span><span class="n">conf</span>
 
-<span class="c1"># 配置文件 /etc/supervisord.conf，更多详细使用文件中有说明</span>
+<span class="o">#</span> <span class="err">配置文件</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">supervisord</span><span class="p">.</span><span class="n">conf</span><span class="err">，更多详细使用文件中有说明</span>
 
-<span class="c1"># 在文件的末尾或任意位置，写入下面的配置内容即可命名，以关联分析代码为例</span>
-<span class="c1"># 给程序命名</span>
+<span class="o">#</span> <span class="err">在文件的末尾或任意位置，写入下面的配置内容即可命名，以关联分析代码为例</span>
+<span class="o">#</span> <span class="err">给程序命名</span>
 <span class="p">[</span><span class="n">program</span><span class="p">:</span><span class="n">corelationAnalysis</span><span class="p">]</span>
-<span class="c1"># 执行程序所需要的命令</span>
-<span class="n">command</span><span class="o">=/</span><span class="n">opt</span><span class="o">/</span><span class="n">anaconda34</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">pcl_match</span><span class="o">/</span><span class="n">pcl_match_ae_classify_dog</span><span class="o">.</span><span class="n">py</span>
-<span class="c1"># 是否自动启动（当supervisor运行时自动运行）</span>
-<span class="n">autostart</span><span class="o">=</span><span class="bp">true</span>
-<span class="c1"># 日志文件写入位置</span>
-<span class="n">stdout_logfile</span><span class="o">=/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">nssas</span><span class="o">/</span><span class="n">pcl_match_ae_classify_dog</span><span class="o">.</span><span class="n">log</span>
-<span class="c1"># 日志文件最大设置</span>
+<span class="o">#</span> <span class="err">执行程序所需要的命令</span>
+<span class="n">command</span><span class="o">=/</span><span class="n">opt</span><span class="o">/</span><span class="n">anaconda34</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">python3</span><span class="p">.</span><span class="mi">6</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">pcl_match</span><span class="o">/</span><span class="n">pcl_match_ae_classify_dog</span><span class="p">.</span><span class="n">py</span>
+<span class="o">#</span> <span class="err">是否自动启动（当</span><span class="n">supervisor运行时自动运行</span><span class="err">）</span>
+<span class="n">autostart</span><span class="o">=</span><span class="k">true</span>
+<span class="o">#</span> <span class="err">日志文件写入位置</span>
+<span class="n">stdout_logfile</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">nssas</span><span class="o">/</span><span class="n">pcl_match_ae_classify_dog</span><span class="p">.</span><span class="n">log</span>
+<span class="o">#</span> <span class="err">日志文件最大设置</span>
 <span class="n">stdout_logfile_maxbytes</span><span class="o">=</span><span class="mi">10</span><span class="n">MB</span>
-<span class="c1"># 日志文件备份文件数量设置</span>
-<span class="n">stdout_logfile_backups</span><span class="o">=</span><span class="mi">1</span>     <span class="p">;</span> <span class="c1"># of stdout logfile backups (0 means none, default 10)</span>
-<span class="n">redirect_stderr</span><span class="o">=</span><span class="bp">true</span>          <span class="p">;</span> <span class="n">redirect</span> <span class="n">proc</span> <span class="n">stderr</span> <span class="n">to</span> <span class="n">stdout</span> <span class="p">(</span><span class="n">default</span> <span class="bp">false</span><span class="p">)</span>
-<span class="c1"># 定义错误输出</span>
-<span class="p">;</span><span class="n">stderr_logfile</span><span class="o">=/</span><span class="n">a</span><span class="o">/</span><span class="n">path</span>        <span class="p">;</span> <span class="n">stderr</span> <span class="nb">log</span> <span class="n">path</span><span class="p">,</span> <span class="n">NONE</span> <span class="k">for</span> <span class="n">none</span><span class="p">;</span> <span class="n">default</span> <span class="n">AUTO</span>
-<span class="p">;</span><span class="n">stderr_logfile_maxbytes</span><span class="o">=</span><span class="mi">1</span><span class="n">MB</span>   <span class="p">;</span> <span class="nb">max</span> <span class="c1"># logfile bytes b4 rotation (default 50MB)</span>
-<span class="p">;</span><span class="n">stderr_logfile_backups</span><span class="o">=</span><span class="mi">10</span>     <span class="p">;</span> <span class="c1"># of stderr logfile backups (0 means none, default 10)</span>
-<span class="c1"># 设置运行上面的command命令之前需要进入的文件夹目录</span>
-<span class="p">;</span><span class="n">directory</span><span class="o">=/</span><span class="n">tmp</span>                <span class="p">;</span> <span class="n">directory</span> <span class="n">to</span> <span class="n">cwd</span> <span class="n">to</span> <span class="n">before</span> <span class="n">exec</span> <span class="p">(</span><span class="n">def</span> <span class="n">no</span> <span class="n">cwd</span><span class="p">)</span>
+<span class="o">#</span> <span class="err">日志文件备份文件数量设置</span>
+<span class="n">stdout_logfile_backups</span><span class="o">=</span><span class="mi">1</span>     <span class="p">;</span> <span class="o">#</span> <span class="k">of</span> <span class="k">stdout</span> <span class="n">logfile</span> <span class="n">backups</span> <span class="p">(</span><span class="mi">0</span> <span class="n">means</span> <span class="k">none</span><span class="p">,</span> <span class="k">default</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">redirect_stderr</span><span class="o">=</span><span class="k">true</span>          <span class="p">;</span> <span class="n">redirect</span> <span class="n">proc</span> <span class="n">stderr</span> <span class="k">to</span> <span class="k">stdout</span> <span class="p">(</span><span class="k">default</span> <span class="k">false</span><span class="p">)</span>
+<span class="o">#</span> <span class="err">定义错误输出</span>
+<span class="p">;</span><span class="n">stderr_logfile</span><span class="o">=/</span><span class="n">a</span><span class="o">/</span><span class="n">path</span>        <span class="p">;</span> <span class="n">stderr</span> <span class="n">log</span> <span class="n">path</span><span class="p">,</span> <span class="k">NONE</span> <span class="k">for</span> <span class="k">none</span><span class="p">;</span> <span class="k">default</span> <span class="n">AUTO</span>
+<span class="p">;</span><span class="n">stderr_logfile_maxbytes</span><span class="o">=</span><span class="mi">1</span><span class="n">MB</span>   <span class="p">;</span> <span class="k">max</span> <span class="o">#</span> <span class="n">logfile</span> <span class="n">bytes</span> <span class="n">b4</span> <span class="n">rotation</span> <span class="p">(</span><span class="k">default</span> <span class="mi">50</span><span class="n">MB</span><span class="p">)</span>
+<span class="p">;</span><span class="n">stderr_logfile_backups</span><span class="o">=</span><span class="mi">10</span>     <span class="p">;</span> <span class="o">#</span> <span class="k">of</span> <span class="n">stderr</span> <span class="n">logfile</span> <span class="n">backups</span> <span class="p">(</span><span class="mi">0</span> <span class="n">means</span> <span class="k">none</span><span class="p">,</span> <span class="k">default</span> <span class="mi">10</span><span class="p">)</span>
+<span class="o">#</span> <span class="err">设置运行上面的</span><span class="n">command命令之前需要进入的文件夹目录</span>
+<span class="p">;</span><span class="n">directory</span><span class="o">=/</span><span class="n">tmp</span>                <span class="p">;</span> <span class="n">directory</span> <span class="k">to</span> <span class="n">cwd</span> <span class="k">to</span> <span class="k">before</span> <span class="k">exec</span> <span class="p">(</span><span class="n">def</span> <span class="k">no</span> <span class="n">cwd</span><span class="p">)</span>
 </code></pre>
      </div>
      <h2 id="_4">
       开机自动重启设置
      </h2>
      <div class="codehilite">
-      <pre><span></span><code># 编辑 /etc/rc.local 文件
+      <pre><span></span><code><span class="o">#</span> <span class="err">编辑</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">rc</span><span class="p">.</span><span class="k">local</span> <span class="err">文件</span>
 
-chmod a+x /etc/rc.local
+<span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">rc</span><span class="p">.</span><span class="k">local</span>
 
-# 在文件中加入下面的内容
-/usr/bin/supervisord -c /etc/supervisord.conf
+<span class="o">#</span> <span class="err">在文件中加入下面的内容</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">supervisord</span> <span class="o">-</span><span class="k">c</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">supervisord</span><span class="p">.</span><span class="n">conf</span>
 </code></pre>
      </div>
      <h2 id="_5">
