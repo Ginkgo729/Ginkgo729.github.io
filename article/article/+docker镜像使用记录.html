@@ -71,11 +71,11 @@
 docker run -dit --name neo4j -p 7474:7474 -p 7687:7687 --env=NEO4J_AUTH=none neo4j:3.5.13
      </p>
      <div class="codehilite">
-      <pre><span></span><code>## Redis
-```shell script
-docker run -dit --name redis -p 6379:6379 redis
+      <pre><span></span><code><span class="o">##</span> <span class="n">Redis</span>
+<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="c1">--name redis -p 6379:6379 redis</span>
 
-docker run -d --name redis -p 6379:6379 redis --requirepass "password"
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="c1">--name redis -p 6379:6379 redis --requirepass "password"</span>
 </code></pre>
      </div>
      <h2 id="mongodb">
@@ -86,9 +86,9 @@ docker run -d --name redis -p 6379:6379 redis --requirepass "password"
 docker run -dit --name mongo -p 27017:27017 mongo
      </p>
      <div class="codehilite">
-      <pre><span></span><code>## Nginx
-```shell script
-docker run -dit --name nginx -p 80:80 -v D:/temp/nginx.conf:/etc/nginx/nginx.conf nginx
+      <pre><span></span><code><span class="err">## Nginx</span>
+<span class="err">```shell script</span>
+<span class="err">docker run -dit --name nginx -p 80:80 -v D:/temp/nginx.conf:/etc/nginx/nginx.conf nginx</span>
 </code></pre>
      </div>
      <h2 id="docker-activemq">
@@ -99,13 +99,13 @@ docker run -dit --name nginx -p 80:80 -v D:/temp/nginx.conf:/etc/nginx/nginx.con
 docker run -dit --name activemq -p 11616:61616 -p 8161:8161 -p 1883:1883 rmohr/activemq
      </p>
      <div class="codehilite">
-      <pre><span></span><code>初始账号：
-admin admin
-user user
+      <pre><span></span><code><span class="err">初始账号：</span>
+<span class="k">admin</span> <span class="k">admin</span>
+<span class="k">user</span> <span class="k">user</span>
 
-## docker rabbitmq
-```shell script
-docker run -dit --name rabbitmq -p 5672:5672 rabbitmq
+<span class="o">##</span> <span class="n">docker</span> <span class="n">rabbitmq</span>
+<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> <span class="c1">--name rabbitmq -p 5672:5672 rabbitmq</span>
 </code></pre>
      </div>
      <h3 id="zookeeper">
