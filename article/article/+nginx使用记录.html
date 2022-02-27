@@ -58,9 +58,9 @@ yum install -y nginx
       访问权限问题
      </h3>
      <div class="codehilite">
-      <pre><span></span><code>user root
+      <pre><span></span><code><span class="k">user</span> <span class="n">root</span>
 
-chmod a+x xxxx
+<span class="n">chmod</span> <span class="n">a</span><span class="o">+</span><span class="n">x</span> <span class="n">xxxx</span>
 </code></pre>
      </div>
      <h3 id="_3">
@@ -70,20 +70,20 @@ chmod a+x xxxx
       好像只能存在一个roo，另一个需要使用alias，例子如下：
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="nv">server</span> {
-        <span class="nv">listen</span>       <span class="mi">80</span> <span class="nv">default_server</span><span class="c1">;</span>
-        <span class="nv">listen</span>       [::]:<span class="mi">80</span> <span class="nv">default_server</span><span class="c1">;</span>
-        <span class="nv">server_name</span>  <span class="nv">_</span><span class="c1">;</span>
-        #<span class="nv">root</span>         <span class="o">/</span><span class="nv">usr</span><span class="o">/</span><span class="nv">share</span><span class="o">/</span><span class="nv">nginx</span><span class="o">/</span><span class="nv">html</span><span class="c1">;</span>
+      <pre><span></span><code><span class="n">server</span> <span class="err">{</span>
+        <span class="k">listen</span>       <span class="mi">80</span> <span class="n">default_server</span><span class="p">;</span>
+        <span class="k">listen</span>       <span class="p">[::]:</span><span class="mi">80</span> <span class="n">default_server</span><span class="p">;</span>
+        <span class="k">server_name</span>  <span class="n">_</span><span class="p">;</span>
+        <span class="o">#</span><span class="n">root</span>         <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="k">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span><span class="p">;</span>
 
-        #<span class="nv">websocket</span>
-        <span class="nv">map</span> $<span class="nv">http_upgrade</span> <span class="mh">$c</span><span class="nv">onnection_upgrade</span> {
-            <span class="nv">default</span> <span class="nv">upgrade</span><span class="c1">;</span>
-            <span class="s1">''</span> <span class="nv">close</span><span class="c1">;</span>
-        }
+        <span class="o">#</span><span class="n">websocket</span>
+        <span class="k">map</span> <span class="err">$</span><span class="n">http_upgrade</span> <span class="err">$</span><span class="n">connection_upgrade</span> <span class="err">{</span>
+            <span class="k">default</span> <span class="n">upgrade</span><span class="p">;</span>
+            <span class="s1">''</span> <span class="k">close</span><span class="p">;</span>
+        <span class="err">}</span>
 
-        # <span class="nv">Load</span> <span class="nv">configuration</span> <span class="nv">files</span> <span class="k">for</span> <span class="nv">the</span> <span class="nv">default</span> <span class="nv">server</span> <span class="nv">block</span>.
-        <span class="k">include</span> <span class="o">/</span><span class="nv">etc</span><span class="o">/</span><span class="nv">nginx</span><span class="o">/</span><span class="nv">default</span>.<span class="nv">d</span><span class="cm">/*.conf;</span>
+        <span class="o">#</span> <span class="k">Load</span> <span class="n">configuration</span> <span class="n">files</span> <span class="k">for</span> <span class="n">the</span> <span class="k">default</span> <span class="n">server</span> <span class="n">block</span><span class="p">.</span>
+        <span class="n">include</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="k">default</span><span class="p">.</span><span class="n">d</span><span class="cm">/*.conf;</span>
 
 <span class="cm">        root /root/projects/dist;</span>
 <span class="cm">        #index  index.html index.htm index.php;</span>
