@@ -171,22 +171,22 @@ cat C:<span class="se">\W</span>indows<span class="se">\S</span>ystem32<span cla
       导出镜像到本地
      </h3>
      <div class="codehilite">
-      <pre><span></span><code># linux
-docker save co &gt; file
+      <pre><span></span><code><span class="o">#</span> <span class="n">linux</span>
+<span class="n">docker</span> <span class="n">save</span> <span class="n">co</span> <span class="o">&gt;</span> <span class="n">file</span>
 
-# windows
-docker save --output test.tar test:test
+<span class="o">#</span> <span class="n">windows</span>
+<span class="n">docker</span> <span class="n">save</span> <span class="c1">--output test.tar test:test</span>
 </code></pre>
      </div>
      <h3 id="tardocker">
       导入tar包到本地docker镜像
      </h3>
      <div class="codehilite">
-      <pre><span></span><code><span class="c1"># linux</span>
-<span class="n">docker</span> <span class="nb">load</span> <span class="o">&lt;</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">new</span><span class="o">-</span><span class="n">image</span><span class="o">.</span><span class="n">tar</span>
+      <pre><span></span><code><span class="o">#</span> <span class="n">linux</span>
+<span class="n">docker</span> <span class="k">load</span> <span class="o">&lt;</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="k">new</span><span class="o">-</span><span class="n">image</span><span class="p">.</span><span class="n">tar</span>
 
-<span class="c1"># windows </span>
-<span class="n">docker</span> <span class="nb">load</span> <span class="o">--</span><span class="n">input</span> <span class="o">.</span>\<span class="n">test</span><span class="o">.</span><span class="n">tar</span>
+<span class="o">#</span> <span class="n">windows</span> 
+<span class="n">docker</span> <span class="k">load</span> <span class="c1">--input .\test.tar</span>
 </code></pre>
      </div>
      <h3 id="ip">
@@ -258,11 +258,11 @@ docker info
       自动启动
      </h4>
      <div class="codehilite">
-      <pre><span></span><code># –restart参数有三个可选值：no,on-failure,always
+      <pre><span></span><code><span class="o">#</span> <span class="err">–</span><span class="n">restart参数有三个可选值</span><span class="err">：</span><span class="k">no</span><span class="p">,</span><span class="k">on</span><span class="o">-</span><span class="n">failure</span><span class="p">,</span><span class="n">always</span>
 
-docker run ****** --restart=always
+<span class="n">docker</span> <span class="n">run</span> <span class="o">******</span> <span class="c1">--restart=always</span>
 
-docker update --restart=on-failure:3 [容器名]
+<span class="n">docker</span> <span class="k">update</span> <span class="c1">--restart=on-failure:3 [容器名]</span>
 </code></pre>
      </div>
      <h4 id="_10">
@@ -297,7 +297,7 @@ wsl --export docker-desktop-data <span class="s2">"D:\Docker\wsl\data\docker-des
 Unregister docker-desktop-data from wsl, note that after this, your ext4.vhdx file would automatically be removed
 
 wsl --unregister docker-desktop-data
-Import the docker-desktop-data back to wsl, but now the ext4.vhdx would reside <span class="k">in</span> different drive/directory:
+Import the docker-desktop-data back to wsl, but now the ext4.vhdx would reside in different drive/directory:
 
 wsl --import docker-desktop-data <span class="s2">"D:\Docker\wsl\data"</span> <span class="s2">"D:\Docker\wsl\data\docker-desktop-data.tar"</span> --version <span class="m">2</span>
 Start the Docker Desktop again and it should work
@@ -315,10 +315,10 @@ You may delete the <span class="s2">"D:\Docker\wsl\data\docker-desktop-data.tar"
       清理为None的镜像
      </h3>
      <div class="codehilite">
-      <pre><span></span><code># linux
-docker rmi -f $(docker images | grep "none" | awk '{print $3}')
+      <pre><span></span><code><span class="o">#</span> <span class="n">linux</span>
+<span class="n">docker</span> <span class="n">rmi</span> <span class="o">-</span><span class="n">f</span> <span class="err">$</span><span class="p">(</span><span class="n">docker</span> <span class="n">images</span> <span class="o">|</span> <span class="n">grep</span> <span class="ss">"none"</span> <span class="o">|</span> <span class="n">awk</span> <span class="s1">'{print $3}'</span><span class="p">)</span>
 
-# linux
+<span class="o">#</span> <span class="n">linux</span>
 </code></pre>
      </div>
      <h3 id="_13">
@@ -339,7 +339,7 @@ docker rmi -f $(docker images | grep "none" | awk '{print $3}')
       docker重新打tag并删除原tag的镜像
      </h3>
      <div class="codehilite">
-      <pre><span></span><code>docker tag repository:tag repository:newTag
+      <pre><span></span><code><span class="err">docker tag repository:tag repository:newTag</span>
 </code></pre>
      </div>
      <h3 id="2375">
