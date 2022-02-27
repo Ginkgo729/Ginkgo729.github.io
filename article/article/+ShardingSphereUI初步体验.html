@@ -67,18 +67,18 @@
 git clone https://github.com.cnpmjs.org/apache/shardingsphere-ui.git
      </p>
      <div class="codehilite">
-      <pre><span></span><code><span class="c1">### 2.编译</span>
+      <pre><span></span><code><span class="o">###</span> <span class="mi">2</span><span class="p">.</span><span class="err">编译</span>
 <span class="err">直接运行命令，好像一直报错，那只能手动去安装了</span>
 
-<span class="err">下面</span><span class="n">Nodejs</span><span class="err">：</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">nodejs</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">en</span><span class="o">/</span><span class="n">download</span><span class="o">/</span> <span class="err">，并进行相应的安装</span>
+<span class="err">下面</span><span class="n">Nodejs</span><span class="err">：</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">nodejs</span><span class="p">.</span><span class="n">org</span><span class="o">/</span><span class="n">en</span><span class="o">/</span><span class="n">download</span><span class="o">/</span> <span class="err">，并进行相应的安装</span>
 
 <span class="err">配置一下源</span><span class="p">(</span><span class="err">安装完成后，重新打开命令行终端，命令是生效的），然后进行相关依赖的安装：</span>
 
-<span class="err">```</span><span class="n">shell</span> <span class="n">script</span>
-<span class="n">npm</span> <span class="n">config</span> <span class="n">set</span> <span class="n">registry</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">registry</span><span class="o">.</span><span class="n">npm</span><span class="o">.</span><span class="n">taobao</span><span class="o">.</span><span class="n">org</span>
+<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="n">npm</span> <span class="n">config</span> <span class="k">set</span> <span class="n">registry</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">registry</span><span class="p">.</span><span class="n">npm</span><span class="p">.</span><span class="n">taobao</span><span class="p">.</span><span class="n">org</span>
 <span class="n">npm</span> <span class="n">install</span>
 <span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>
-<span class="c1"># 运行过程中可能会报错，运行下面的命令，再次运行即可</span>
+<span class="o">#</span> <span class="err">运行过程中可能会报错，运行下面的命令，再次运行即可</span>
 <span class="n">npm</span> <span class="n">rebuild</span> <span class="n">node</span><span class="o">-</span><span class="n">sass</span>
 <span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>
 </code></pre>
@@ -127,11 +127,11 @@ git clone https://github.com.cnpmjs.org/apache/shardingsphere-ui.git
 docker run -dit --name zk -p 2181:2181 zookeeper
      </p>
      <div class="codehilite">
-      <pre><span></span><code>#### 将源码版本切换到5.0.0-alpha
-5.0.0-beta的Proxy注册会有问题，数据匹配不上，我们这里使用5.0.0-alpha版本的，使用命令行，将代码重置到相关版本即可，命令如下：
+      <pre><span></span><code><span class="o">####</span> <span class="err">将源码版本切换到</span><span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="o">-</span><span class="n">alpha</span>
+<span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="o">-</span><span class="n">beta的Proxy注册会有问题</span><span class="err">，数据匹配不上，我们这里使用</span><span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="o">-</span><span class="n">alpha版本的</span><span class="err">，使用命令行，将代码重置到相关版本即可，命令如下：</span>
 
-```shell script
-git checkout 5dc690c2227571e83beada277dbb2dfb43c29427
+<span class="o">```</span><span class="n">shell</span> <span class="n">script</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="mi">5</span><span class="n">dc690c2227571e83beada277dbb2dfb43c29427</span>
 </code></pre>
      </div>
      <p>
