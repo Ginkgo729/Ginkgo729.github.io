@@ -79,13 +79,13 @@
       </a>
      </p>
      <div class="codehilite">
-      <pre><span></span><code>在IOC的容器的启动过程，当所有的bean都已经处理完成之后，spring ioc容器会有一个发布事件的动作。从 AbstractApplicationContext 的源码中就可以看出
-当ioc容器加载处理完相应的bean之后，也给我们提供了一个机会（先有InitializingBean，后有ApplicationListener&lt;ContextRefreshedEvent&gt;），可以去做一些自己想做的事。其实这也就是spring ioc容器给提供的一个扩展的地方。我们可以这样使用这个扩展机制。
+      <pre><span></span><code><span class="err">在</span><span class="n">IOC的容器的启动过程</span><span class="err">，当所有的</span><span class="n">bean都已经处理完成之后</span><span class="err">，</span><span class="n">spring</span> <span class="n">ioc容器会有一个发布事件的动作</span><span class="err">。从</span> <span class="n">AbstractApplicationContext</span> <span class="err">的源码中就可以看出</span>
+<span class="err">当</span><span class="n">ioc容器加载处理完相应的bean之后</span><span class="err">，也给我们提供了一个机会（先有</span><span class="n">InitializingBean</span><span class="err">，后有</span><span class="n">ApplicationListener</span><span class="o">&lt;</span><span class="n">ContextRefreshedEvent</span><span class="o">&gt;</span><span class="err">），可以去做一些自己想做的事。其实这也就是</span><span class="n">spring</span> <span class="n">ioc容器给提供的一个扩展的地方</span><span class="err">。我们可以这样使用这个扩展机制。</span>
 
-作者：AmeeLove
-链接：https://www.jianshu.com/p/4bd3f68cb179
-来源：简书
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+<span class="err">作者：</span><span class="n">AmeeLove</span>
+<span class="err">链接：</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="p">.</span><span class="n">jianshu</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">p</span><span class="o">/</span><span class="mi">4</span><span class="n">bd3f68cb179</span>
+<span class="err">来源：简书</span>
+<span class="err">著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</span>
 </code></pre>
      </div>
      <p>
