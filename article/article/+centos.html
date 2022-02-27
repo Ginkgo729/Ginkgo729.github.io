@@ -134,10 +134,10 @@ yum install -y make
       VMware相关
      </h2>
      <div class="codehilite">
-      <pre><span></span><code><span class="c1"># 挂载共享文件夹</span>
-<span class="n">systemctl</span> <span class="n">enable</span> <span class="n">vmtoolsd</span>
-<span class="n">systemctl</span> <span class="n">start</span> <span class="n">vmtoolsd</span>
-<span class="n">vmhgfs</span><span class="o">-</span><span class="n">fuse</span> <span class="o">.</span><span class="n">host</span><span class="p">:</span><span class="o">/</span> <span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">hgfs</span>
+      <pre><span></span><code><span class="err"># 挂载共享文件夹</span>
+<span class="err">systemctl enable vmtoolsd</span>
+<span class="err">systemctl start vmtoolsd</span>
+<span class="err">vmhgfs-fuse .host:/ /mnt/hgfs</span>
 </code></pre>
      </div>
      <h2 id="_5">
