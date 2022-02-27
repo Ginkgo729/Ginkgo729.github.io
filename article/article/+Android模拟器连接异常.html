@@ -1,0 +1,154 @@
+<!DOCTYPE HTML>
+<!--
+	Dimension by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+ <head>
+  <title>
+   Dimension by HTML5 UP
+  </title>
+  <!-- <meta charset="utf-8" /> -->
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <link href="../../assets/css/article.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/highlight.js/9.15.8/styles/github.min.css" rel="stylesheet"/>
+  <noscript>
+   <link href="../../assets/css/noscript.css" rel="stylesheet"/>
+  </noscript>
+ </head>
+ <body>
+  <div id="app">
+  </div>
+  <!-- built files will be auto injected -->
+ </body>
+ <body class="is-preload">
+  <!-- Wrapper -->
+  <div id="wrapper">
+   <!-- Main -->
+   <div id="main">
+    <article id="article">
+     <h1 id="android-unable-to-connect-to-adb-server">
+      Android 模拟器连接异常：Unable to connect to ADB server
+     </h1>
+     <hr/>
+     <h2 id="_1">
+      简介
+     </h2>
+     <p>
+      在使用Android Studio开始的过程是，偶尔会突然出现一只在检测设备，导致无法进行运行的调试的情况，本文记录下解决方法
+     </p>
+     <h2 id="_2">
+      现象描述
+     </h2>
+     <p>
+      在启动Android Studio后，在设备状态栏中一直显示检测设备，没有版本点击运行和调试按钮
+     </p>
+     <p>
+      并且在日志提示中一直在显示下面的：
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>远程主机强迫关闭了一个现有的链接
+
+* daemon not running; starting now at tcp:5037
+
+* daemon started successfully
+</code></pre>
+     </div>
+     <p>
+      按照网上大多数的解决办法，去杀死任务管理器中的adb进程，发现并没有，完全没有效果
+     </p>
+     <p>
+      而且按照上面的日志，感觉abd一直不断地重启之中
+     </p>
+     <p>
+      折腾了一个小时左右，使用下面的方法得到了解决
+     </p>
+     <h2 id="_3">
+      解决方法
+     </h2>
+     <ul>
+      <li>
+       <p>
+        1.首先关闭Android Studio
+       </p>
+      </li>
+      <li>
+       <p>
+        2.查看任务管理器，看看有没有adb的进程在运行（点击排序后，看看首字母A开头的即可），有则将其杀掉
+       </p>
+      </li>
+      <li>
+       <p>
+        3.进入adb工具目录，根据自己Android SDK的安装路径来，比如博主的是：D:\Software\Android\SDK\platform-tools，还可以通过点击Android Studio的setting，搜索sdb进行查看，如下：
+       </p>
+      </li>
+     </ul>
+     <p>
+      <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/27b0c8a2496440f79bcfdecb98ff13a7.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAX-iQp18=,size_20,color_FFFFFF,t_70,g_se,x_16"/>
+     </p>
+     <ul>
+      <li>
+       4.进入相应的目录后，运行下面的命令：
+      </li>
+     </ul>
+     <div class="codehilite">
+      <pre><span></span><code>PS D:<span class="se">\S</span>oftware<span class="se">\A</span>ndroid<span class="se">\S</span>DK<span class="se">\p</span>latform-tools&gt; .<span class="se">\a</span>db.exe start-server
+* daemon not running<span class="p">;</span> starting now at tcp:5037
+* daemon started successfully
+</code></pre>
+     </div>
+     <p>
+      如果输出和上面一致，那说明可以了，接着重启Android Studio后，发现恢复正常
+     </p>
+     <h2 id="_4">
+      参考链接
+     </h2>
+     <ul>
+      <li>
+       <a href="https://stackoverflow.com/questions/31282816/unable-to-connect-to-adb-server">
+        Unable to connect to ADB server
+       </a>
+      </li>
+      <li>
+       <a href="https://blog.csdn.net/weiyongle1996/article/details/71267311">
+        Android studio中关于真机调试时远程主机强迫关闭了一个现有连接的解决方法
+       </a>
+      </li>
+      <li>
+       <a href="https://www.reddit.com/r/AndroidStudio/comments/syo3vx/how_to_solve_cannot_reach_adb_server_attempting/">
+        How to solve Cannot reach ADB server, attempting to reconnect.
+       </a>
+      </li>
+     </ul>
+    </article>
+   </div>
+   <!-- Footer -->
+   <footer id="footer">
+    <p class="copyright">
+     © Untitled. Design:
+     <a href="https://html5up.net">
+      HTML5 UP
+     </a>
+     .
+    </p>
+   </footer>
+  </div>
+  <!-- BG -->
+  <div id="bg">
+  </div>
+  <!-- Scripts -->
+  <script src="../assets/js/jquery.min.js">
+  </script>
+  <script src="../assets/js/browser.min.js">
+  </script>
+  <script src="../assets/js/breakpoints.min.js">
+  </script>
+  <script src="../assets/js/util.js">
+  </script>
+  <script src="../assets/js/main.js">
+  </script>
+ </body>
+</html>
