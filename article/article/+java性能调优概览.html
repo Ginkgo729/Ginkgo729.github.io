@@ -269,24 +269,24 @@
       查看 &amp; 分析 GC 日志
      </h3>
      <div class="codehilite">
-      <pre><span></span><code># 首先，我们需要通过 JVM 参数预先设置 GC 日志，通常有以下几种 JVM 参数设置
--XX:+PrintGC 输出GC日志
--XX:+PrintGCDetails 输出GC的详细日志
--XX:+PrintGCTimeStamps 输出GC的时间戳（以基准时间的形式）
--XX:+PrintGCDateStamps 输出GC的时间戳（以日期的形式，如 2013-05-04T21:53:59.234+0800）
--XX:+PrintHeapAtGC 在进行GC的前后打印出堆的信息
--Xloggc:../logs/gc.log 日志文件的输出路径
+      <pre><span></span><code><span class="o">#</span> <span class="err">首先，我们需要通过</span> <span class="n">JVM</span> <span class="err">参数预先设置</span> <span class="n">GC</span> <span class="err">日志，通常有以下几种</span> <span class="n">JVM</span> <span class="err">参数设置</span>
+<span class="o">-</span><span class="n">XX</span><span class="p">:</span><span class="o">+</span><span class="n">PrintGC</span> <span class="err">输出</span><span class="n">GC日志</span>
+<span class="o">-</span><span class="n">XX</span><span class="p">:</span><span class="o">+</span><span class="n">PrintGCDetails</span> <span class="err">输出</span><span class="n">GC的详细日志</span>
+<span class="o">-</span><span class="n">XX</span><span class="p">:</span><span class="o">+</span><span class="n">PrintGCTimeStamps</span> <span class="err">输出</span><span class="n">GC的时间戳</span><span class="err">（以基准时间的形式）</span>
+<span class="o">-</span><span class="n">XX</span><span class="p">:</span><span class="o">+</span><span class="n">PrintGCDateStamps</span> <span class="err">输出</span><span class="n">GC的时间戳</span><span class="err">（以日期的形式，如</span> <span class="mi">2013</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">04</span><span class="n">T21</span><span class="p">:</span><span class="mi">53</span><span class="p">:</span><span class="mi">59</span><span class="p">.</span><span class="mi">234</span><span class="o">+</span><span class="mi">0800</span><span class="err">）</span>
+<span class="o">-</span><span class="n">XX</span><span class="p">:</span><span class="o">+</span><span class="n">PrintHeapAtGC</span> <span class="err">在进行</span><span class="n">GC的前后打印出堆的信息</span>
+<span class="o">-</span><span class="n">Xloggc</span><span class="p">:..</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">gc</span><span class="p">.</span><span class="n">log</span> <span class="err">日志文件的输出路径</span>
 
-# 这里使用如下参数来打印日志：
--XX:+PrintGCDateStamps -XX:+PrintGCDetails -Xloggc:./gclogs
+<span class="o">#</span> <span class="err">这里使用如下参数来打印日志：</span>
+<span class="o">-</span><span class="n">XX</span><span class="p">:</span><span class="o">+</span><span class="n">PrintGCDateStamps</span> <span class="o">-</span><span class="n">XX</span><span class="p">:</span><span class="o">+</span><span class="n">PrintGCDetails</span> <span class="o">-</span><span class="n">Xloggc</span><span class="p">:.</span><span class="o">/</span><span class="n">gclogs</span>
 </code></pre>
      </div>
      <h3 id="jvm_1">
       查看 JVM 堆内存分配
      </h3>
      <div class="codehilite">
-      <pre><span></span><code>java -XX:+PrintFlagsFinal -version | grep HeapSize 
-jmap -heap 17284
+      <pre><span></span><code><span class="err">java -XX:+PrintFlagsFinal -version | grep HeapSize </span>
+<span class="err">jmap -heap 17284</span>
 </code></pre>
      </div>
     </article>
