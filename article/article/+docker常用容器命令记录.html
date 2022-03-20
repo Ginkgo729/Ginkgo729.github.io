@@ -436,6 +436,21 @@ docker-compose up -d
       <pre><span></span><code><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">5000</span><span class="p">:</span><span class="mi">5000</span> <span class="c1">--name registry --restart=always -v D:/Docker/registry:/var/lib/registry registry:latest</span>
 
 <span class="o">#</span> <span class="err">在</span><span class="n">docker</span> <span class="n">deamon</span> <span class="err">中加入</span> <span class="mi">127</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">1</span><span class="p">:</span><span class="mi">5000</span>
+<span class="err">{</span>
+  <span class="ss">"builder"</span><span class="p">:</span> <span class="err">{</span>
+    <span class="ss">"gc"</span><span class="p">:</span> <span class="err">{</span>
+      <span class="ss">"defaultKeepStorage"</span><span class="p">:</span> <span class="ss">"20GB"</span><span class="p">,</span>
+      <span class="ss">"enabled"</span><span class="p">:</span> <span class="k">true</span>
+    <span class="err">}</span>
+  <span class="err">}</span><span class="p">,</span>
+  <span class="ss">"experimental"</span><span class="p">:</span> <span class="k">false</span><span class="p">,</span>
+  <span class="ss">"features"</span><span class="p">:</span> <span class="err">{</span>
+    <span class="ss">"buildkit"</span><span class="p">:</span> <span class="k">true</span>
+  <span class="err">}</span><span class="p">,</span>
+  <span class="ss">"insecure-registries"</span><span class="p">:</span> <span class="p">[</span>
+    <span class="ss">"127.0.0.1:5000"</span>
+  <span class="p">]</span>
+<span class="err">}</span>
 
 <span class="o">#</span> <span class="err">上传</span>
 <span class="n">docker</span> <span class="n">tag</span> <span class="n">xxxx</span><span class="p">:</span><span class="n">test</span> <span class="mi">192</span><span class="p">.</span><span class="mi">168</span><span class="p">.</span><span class="mi">110</span><span class="p">.</span><span class="mi">196</span><span class="p">:</span><span class="mi">5000</span><span class="o">/</span><span class="n">xxxx</span><span class="p">:</span><span class="n">test</span>
