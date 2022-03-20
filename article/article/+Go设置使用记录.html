@@ -57,6 +57,17 @@ go mod init xxxx
 $ go env -w <span class="nv">GOPROXY</span><span class="o">=</span>https://goproxy.cn,direct
 </code></pre>
      </div>
+     <h2 id="jetbrains-gateway-goland">
+      JetBrains Gateway Goland 使用
+     </h2>
+     <p>
+      在服务器上，IDE偶尔不能自动解决依赖，有点麻烦，但可以在终端中使用命令进行解决
+     </p>
+     <div class="codehilite">
+      <pre><span></span><code>go mod init &lt;project name&gt;
+go mod tidy
+</code></pre>
+     </div>
      <h2 id="_3">
       参考链接
      </h2>
