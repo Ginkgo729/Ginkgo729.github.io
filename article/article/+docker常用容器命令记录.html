@@ -74,11 +74,10 @@ docker run -d --name redis -p <span class="m">6379</span>:6379 redis --requirepa
 docker run -dit --name mongo -p <span class="m">27017</span>:27017 mongo
 <span class="c1"># windows</span>
 docker run  -d <span class="sb">`</span>
-  -e <span class="nv">MONGO_INITDB_ROOT_USERNAME</span><span class="o">=</span>mongoadmin<span class="sb">`</span>
-  -e <span class="nv">MONGO_INITDB_ROOT_PASSWORD</span><span class="o">=</span>secret <span class="sb">`</span>
-  -v /ect/localtime:/etc/localtime<span class="sb">`</span>
-  -p <span class="m">3389</span>:27017 <span class="sb">`</span>
-  --name mongodb<span class="sb">`</span>
+  -e <span class="nv">MONGO_INITDB_ROOT_USERNAME</span><span class="o">=</span><span class="nb">local</span> <span class="sb">`</span>
+  -e <span class="nv">MONGO_INITDB_ROOT_PASSWORD</span><span class="o">=</span><span class="nb">local</span> <span class="sb">`</span>
+  -p <span class="m">27017</span>:27017  <span class="sb">`</span>
+  --name mongodb <span class="sb">`</span>
   --restart always mongo:latest
 
 docker run  -d -e <span class="nv">MONGO_INITDB_ROOT_USERNAME</span><span class="o">=</span>mongoadmin -e <span class="nv">MONGO_INITDB_ROOT_PASSWORD</span><span class="o">=</span>secret -v /etc/localtime:/etc/localtime:ro -p <span class="m">3389</span>:27017  --name mongodb --restart always mongo:latest
@@ -425,10 +424,22 @@ docker-compose up -d
       Centos
      </h3>
      <div class="codehilite">
-      <pre><span></span><code><span class="err">docker run -tid --name centos8 -p 82:80 -v D:/temp/centos/:/root/ centos</span>
-<span class="err">docker run -tid --name centos8 --net=host -v D:/temp/centos/:/root/ centos</span>
+      <pre><span></span><code><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">tid</span> <span class="c1">--name centos8 -p 82:80 -v D:/temp/centos/:/root/ centos</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">tid</span> <span class="c1">--name centos8 --net=host -v D:/temp/centos/:/root/ centos</span>
+
+<span class="n">cd</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">yum</span><span class="p">.</span><span class="n">repos</span><span class="p">.</span><span class="n">d</span><span class="o">/</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">'s/mirrorlist/#mirrorlist/g'</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">yum</span><span class="p">.</span><span class="n">repos</span><span class="p">.</span><span class="n">d</span><span class="o">/</span><span class="n">CentOS</span><span class="o">-*</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">'s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g'</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">yum</span><span class="p">.</span><span class="n">repos</span><span class="p">.</span><span class="n">d</span><span class="o">/</span><span class="n">CentOS</span><span class="o">-*</span>
+<span class="n">yum</span> <span class="k">update</span> <span class="o">-</span><span class="n">y</span>
 </code></pre>
      </div>
+     <ul>
+      <li>
+       <a href="https://techglimpse.com/failed-metadata-repo-appstream-centos-8/">
+        Failed to download metadata for repo ‘AppStream’ [CentOS]
+       </a>
+      </li>
+     </ul>
      <h3 id="_3">
       本地镜像仓库
      </h3>
