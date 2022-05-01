@@ -2,14 +2,13 @@
 ***
 *标签*：终生学习者 软件工程师 乐观主义者
 
-## 技能
-### 软件工程师
+## 软件工程师
 - Java ： 较为熟悉，工作中经常使用
-- Python ：较为熟悉，日常和工作中写写小工具
-- JS/C/C++/GO/Dart : 入门程度，能进行相应的简单开发
+- JS/C/C++/GO/Dart/Python : 入门程度，能进行相应的简单开发
 
 下面有一些业余的好玩的小东西：
 
+- [手机应用使用监控统计APP](https://github.com/lw1243925457/self_growth_android)
 - [Dart:日常目标打卡按照软件](https://github.com/lw1243925457/clickApp)
 - [C++:简单的控制台怀旧小游戏](https://github.com/lw1243925457/LearnGameC)
 - [Python:简单的端口转发工具](https://github.com/lw1243925457/PortForward)
