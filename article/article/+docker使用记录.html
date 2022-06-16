@@ -225,6 +225,13 @@ docker-machine ip default
 </code></pre>
      </div>
      <h3 id="_8">
+      查看容器原来的配置
+     </h3>
+     <div class="codehilite">
+      <pre><span></span><code>docker inspect &lt;CONTAINER-NAME&gt; OR &lt;CONTAINER-ID&gt;
+</code></pre>
+     </div>
+     <h3 id="_9">
       添加镜像加速器
      </h3>
      <h4 id="centos">
@@ -254,7 +261,7 @@ docker info
 <span class="c1"># docker安装需要最新的boot2docker.iso，从docker的安装界面复制网址，我安装的日期是20180823，此时的boot2docker.iso地址为boot2docker.iso，这个地址貌似被墙了，需要翻墙下载，将下载好的文件放到对应文件夹下，我的电脑上为C:\Users\lzy\.docker\machine\cache</span>
 </code></pre>
      </div>
-     <h4 id="_9">
+     <h4 id="_10">
       自动启动
      </h4>
      <div class="codehilite">
@@ -265,14 +272,14 @@ docker info
 <span class="n">docker</span> <span class="k">update</span> <span class="c1">--restart=on-failure:3 [容器名]</span>
 </code></pre>
      </div>
-     <h4 id="_10">
+     <h4 id="_11">
       公用宿主机网络
      </h4>
      <div class="codehilite">
       <pre><span></span><code><span class="k">docker</span> <span class="s">run</span> <span class="s">-tid</span> <span class="s">--name</span> <span class="s">centos8</span> <span class="s">--network</span> <span class="s">host</span> <span class="n">centos</span><span class="p">:</span><span class="mi">8</span>
 </code></pre>
      </div>
-     <h2 id="_11">
+     <h2 id="_12">
       一些问题
      </h2>
      <h3 id="win10-docker-wsl">
@@ -305,7 +312,7 @@ Start the Docker Desktop again and it should work
 You may delete the <span class="s2">"D:\Docker\wsl\data\docker-desktop-data.tar"</span> file <span class="o">(</span>NOT the ext4.vhdx file<span class="o">)</span> <span class="k">if</span> everything looks good <span class="k">for</span> you after verifying
 </code></pre>
      </div>
-     <h3 id="_12">
+     <h3 id="_13">
       重新启动镜像
      </h3>
      <p>
@@ -321,7 +328,7 @@ You may delete the <span class="s2">"D:\Docker\wsl\data\docker-desktop-data.tar"
 <span class="o">#</span> <span class="n">linux</span>
 </code></pre>
      </div>
-     <h3 id="_13">
+     <h3 id="_14">
       清理已经停止的容器
      </h3>
      <div class="codehilite">
@@ -374,7 +381,7 @@ You may delete the <span class="s2">"D:\Docker\wsl\data\docker-desktop-data.tar"
        </a>
       </li>
      </ul>
-     <h2 id="_14">
+     <h2 id="_15">
       常用仓库链接
      </h2>
      <ul>
@@ -384,7 +391,7 @@ You may delete the <span class="s2">"D:\Docker\wsl\data\docker-desktop-data.tar"
        </a>
       </li>
      </ul>
-     <h2 id="_15">
+     <h2 id="_16">
       参考链接
      </h2>
      <ul>
