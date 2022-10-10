@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>Task_b</title>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+	attribute vec3 vPosition;
+	attribute vec3 vColor;
+	varying vec4 color;
+
+	void main(){
+		gl_Position = vec4( vPosition, 1.0 );
+		color = vec4( vColor, 1.0 );
+	}
+	</script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+	precision mediump float;
+	varying vec4 color;
+	void main(){
+		gl_FragColor = color;
+	}
+	</script>
+
+    <script type="text/javascript" src="../lab3/webgl-utils.js"></script>
+    <script type="text/javascript" src="../lab3/initShaders.js"></script>
+    <script type="text/javascript" src="../lab3/gl-matrix-min.js"></script>
+
+    <script type="text/javascript" src="../lab3/gasket-3d.js"></script>
+</head>
+
+<body>
+	<div onload="changeL()">
+	<form name="myInput">
+	输入剖分三角形的层次: <br>
+	<input type="text" value="" name="count"> 
+	<input type="button" value="确定" onclick="changeL()"> <br>
+	</form>
+	</div>
+	<div id="Triangle"></div>
+	<div>（刷新页面以再次剖分）</div>
+</body>
+
+</html>

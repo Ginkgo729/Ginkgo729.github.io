@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>Task_e</title>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec4 vPosition;
+    void main(){
+    	gl_Position = vPosition;
+    }
+    </script>
+    
+    <script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    void main(){
+    	gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+    }
+    </script>
+    
+    <script type="text/javascript" src="../lab3/gl-matrix-min.js"></script>
+    <script type="text/javascript" src="../lab3/initShaders.js"></script>
+    <script type="text/javascript" src="../lab3/webgl-utils.js"></script>
+	<script type="text/javascript" src="../lab3/gasket-rotate1.js"></script>
+</head>
+<body>
+	<div onload="changeL()">
+	<form name="myInput">
+	剖分层次: <input type="text" value="" name="count"> <br />
+	旋转角度: <input type="text" value="" name="angle"> <br />
+	<input type="button" value="确定" onclick="changeL()" /> <br />
+	</form>
+	</div>
+	<div id="Triangle"></div>
+</body>
+
+</html>
